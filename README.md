@@ -1,17 +1,19 @@
 visualtestjs
 ==========
 
+Installation
+------------
+
+Start by fetching the development dependencies.
+
+    npm install
+
 Getting Started
 ---------------
 
-Start up a selenium server. By default, the tests expect the selenium server to be running at `http://localhost:4444/wd/hub`.
+Go to locally cloned openui5 and execute
 
-Test suite runs against the included test application. Start that up with
+    npm run visualtestjs --verbose
 
-    npm start
 
-Then run the tests with
 
-    npm test
-
-	

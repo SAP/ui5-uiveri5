@@ -11,7 +11,7 @@ Start by fetching the development dependencies.
 Getting Started
 ---------------
 
-Go to locally cloned openui5 and execute
+Run all visualtests from locally cloned openui5:
 
     npm run visualtestjs --verbose
 

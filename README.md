@@ -14,8 +14,6 @@ Run all tests against automatically started server:
 ```
 grunt visualtest
 ```
-This will start http server at localhost:8000 and execute all visual tests against it.
-Check [openui5/docs/developing.md](https://github.com/SAP/openui5/blob/master/docs/developing.md) for further options.
 
 ### Run from visualtestjs
 Install visualtest globally:

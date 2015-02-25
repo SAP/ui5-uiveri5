@@ -51,7 +51,7 @@ Run tests on Chrome, Firefox and InternetExplorer in parallel
 ```
 --browsers="chrome,firefox,iexplorer" 
 ```
-Run tests on remote sapui5 runtime
+Run tests from remote sapui5 runtime
 ```
 --server="http://veui5infra.dhcp.wdf.sap.corp:8080"  
 ```

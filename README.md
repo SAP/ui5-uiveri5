@@ -44,7 +44,7 @@ visualtestjs
 
 ### Advanced options
 
-By default visualtest will discover all **/visualtes/**.spec.js from localhost:8080 and execute them on local chrome over automatically started selenium server on localhost:4444.
+By default visualtest will discover all `**/visualtes/**.spec.js` from localhost:8080 and execute them on local chrome over automatically started selenium server on localhost:4444.
 All of the above defaults could be modified by providing command-line arguments.
 
 Run tests on Chrome, Firefox and InternetExplorer in parallel 

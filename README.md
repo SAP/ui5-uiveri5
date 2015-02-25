@@ -63,7 +63,7 @@ Run tests on remote selenium grid server that dispatches the test job to particu
 ```
 --browsers="iexplorer:ie9:win8" --remote="ui5testgrid.wdf.sap.corp:4444" 
 ```
-Run tests on remote provider (sauselabs, browsetstack, ..) on a particular platform and brouser
+Run tests on remote provider (sauselabs, browserstack, ..) on a particular platform and browser
 ```
 --browsers="chrome:android4.4" --remote="sause:api.sauselabs.com:443:<user>:<token>" 
 ```

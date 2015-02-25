@@ -31,13 +31,13 @@ Install visualtest globally:
 ```
 npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
 ```
-Create a folder for your integration tests and create a conf.js file that references them:
+Create a folder for your integration tests, place them inside and create a conf.js file:
 ```
 exports.config = {
   specs: ['MMR.spec.js']
 };
 ```
-Run all tests:
+Run all tests from the folder that contains conf.js
 ```
 visualtestjs
 ```

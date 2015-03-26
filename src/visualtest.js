@@ -1,19 +1,35 @@
 'use strict';
 
-var logger = require("./logger");
-var specResolver = require("./specResolver");
+var _ = require('lodash');
+var logger = require('./logger');
 
 var run = function(config) {
+
+  // load config file
+  var configFileName = config.conf || '../conf/default.conf.js';
+  var configFile = require(configFileName).config;
+  config = _.merge(configFile,config);
+
+  // resolve profile
+  if (config.profile){
+    var profileConfigFile = require('../conf/' + config.profile + '.profile.conf.js').config;
+    config = _.merge(profileConfigFile,config);
+  }
 
   // set defaults
   config.verbose = config.verbose || false;
   config.baseUrl = config.baseUrl || 'http://localhost:8080';
 
+  // TODO is this the best place ?
   logger.enableDebug(config.verbose);
 
-  // resolve the specs
-  var specs = specResolver.discover(config.libsFilter,config.specsFilter);
+  // create the configured spec resolver
+  var specResolver = require(config.specResolver)(config);
 
+  // resolve the specs
+  var specs = specResolver.resolve();
+
+  // prepare protractor executor args
   var protractorArgv = {};
 
   // enable debug logs
@@ -37,14 +53,19 @@ var run = function(config) {
       //TODO consider several describe() per spec file
       suiteStarted: function(result){
         try {
-          var specFullName = result.description;
-          var spec = _getSpecByFullName(specFullName);
-          logger.debug('Starting spec with full name: ' + specFullName);
+          var specName = result.description;
+          var spec = _getSpecByName(specName);
+          logger.debug('Starting spec with name: ' + specName);
 
-          logger.debug('Opening: ' + config.baseUrl + '/' + spec.contentUri);
+          // TODO remove when waitForUI5 is ready
           browser.ignoreSynchronization = true;
-          browser.get(spec.contentUri);
-          // TODO check http status, throw error if necessary
+
+          // open content page if required
+          if (spec.contentUrl) {
+            logger.debug('Opening: ' + spec.contentUrl);
+            browser.get(spec.contentUrl);
+            // TODO check http status, throw error if error
+          }
 
           // as failed expectation
           //expect(true).toBe(false);
@@ -90,10 +111,10 @@ var run = function(config) {
   }};
   */
 
-  function _getSpecByFullName(specFullName){
-    var specIndex = specs.map(function(spec){return spec.lib + '.' + spec.name;}).indexOf(specFullName);
+  function _getSpecByName(specName){
+    var specIndex = specs.map(function(spec){return spec.name;}).indexOf(specName);
     if(specIndex==-1){
-      throw new Error('Spec with full name: ' + specFullName + 'not found');
+      throw new Error('Spec with name: ' + specName + 'not found');
     }
 
     return specs[specIndex];

@@ -46,7 +46,7 @@ SpecResolver.prototype.resolve = function(){
   // defaults
   var libsFilter = this.config.libFilter || '*';
   var specsFilter = this.config.specFilter || '*';
-  var specGlob = this.config.localSAPUI5SpecResolver.specsGlob || SPECS_GLOB;
+  var specGlob = this.config.specs || SPECS_GLOB;
   var contentRootUri = this.config.localSAPUI5SpecResolver.contentRootUri || CONTENT_ROOT_URI;
 
   // c:/work/git/openui5/src/sap.m/test/sap/m/visual/ActionSelect.spec.js

@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0833521f-7fed-4181-b31b-26c12b1aca36" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/cli.js" afterPath="$PROJECT_DIR$/src/cli.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/integration.profile.conf.js" afterPath="$PROJECT_DIR$/conf/integration.profile.conf.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" afterPath="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/mmf.spec.js" afterPath="$PROJECT_DIR$/conf/mmf.spec.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" afterPath="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/visual.profile.conf.js" afterPath="$PROJECT_DIR$/conf/visual.profile.conf.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/visualtest.js" afterPath="$PROJECT_DIR$/src/visualtest.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="visualtestjs.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -54,11 +46,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cli.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="cli.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/cli.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.84782606" vertical-offset="0" max-vertical-offset="1012">
-              <caret line="39" column="36" selection-start-line="39" selection-start-column="36" selection-end-line="39" selection-end-column="36" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1012">
+              <caret line="7" column="54" selection-start-line="7" selection-start-column="54" selection-end-line="7" selection-end-column="54" />
               <folding />
             </state>
           </provider>
@@ -94,11 +86,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="localSAPUI5SpecResolver.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="localSAPUI5SpecResolver.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="726" max-vertical-offset="2200">
-              <caret line="55" column="17" selection-start-line="55" selection-start-column="17" selection-end-line="55" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.84782606" vertical-offset="198" max-vertical-offset="2200">
+              <caret line="48" column="14" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -143,10 +135,10 @@
         <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/conf/mmf.spec.js" />
         <option value="$PROJECT_DIR$/conf/integration.profile.conf.js" />
-        <option value="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" />
         <option value="$PROJECT_DIR$/src/visualtest.js" />
         <option value="$PROJECT_DIR$/bin/visualtest" />
         <option value="$PROJECT_DIR$/src/cli.js" />
+        <option value="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" />
       </list>
     </option>
   </component>
@@ -659,6 +651,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="308">
           <caret line="6" column="57" selection-start-line="6" selection-start-column="2" selection-end-line="6" selection-end-column="57" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -680,13 +673,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5217391" vertical-offset="264" max-vertical-offset="3036">
           <caret line="36" column="64" selection-start-line="33" selection-start-column="4" selection-end-line="36" selection-end-column="64" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="726" max-vertical-offset="2200">
-          <caret line="55" column="17" selection-start-line="55" selection-start-column="17" selection-end-line="55" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -760,8 +746,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/cli.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.84782606" vertical-offset="0" max-vertical-offset="1012">
-          <caret line="39" column="36" selection-start-line="39" selection-start-column="36" selection-end-line="39" selection-end-column="36" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1012">
+          <caret line="7" column="54" selection-start-line="7" selection-start-column="54" selection-end-line="7" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.84782606" vertical-offset="198" max-vertical-offset="2200">
+          <caret line="48" column="14" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="14" />
           <folding />
         </state>
       </provider>

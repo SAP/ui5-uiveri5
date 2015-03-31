@@ -28,7 +28,13 @@ SpecResolver.prototype.resolve = function(){
   var specPaths = glob.sync(specPathMask);
   specPaths.forEach(function(specPath){
 
-    var specOwnName = path.basename(specPath,path.extname(specPath));
+    // extract spec file name - no extension, no path
+    var specMatch =  specPath.match(/(?:\w\:)?\/(?:\w+\/)(\w+)\.(?:[\w\.]+)/);
+    if (specMatch===null){
+      throw new Error('Could not parse spec path: ' + specPath);
+    }
+    var specOwnName = specMatch[1];
+    //var specOwnName = path.basename(specPath,path.extname(specPath));
 
     /** @type {SpecType} */
     var spec = {

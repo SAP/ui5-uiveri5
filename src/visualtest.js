@@ -3,10 +3,13 @@
 var _ = require('lodash');
 var logger = require('./logger');
 
+var DEFAULT_CONF = '../conf/default.conf.js';
+var BASE_URL = 'http://localhost:8080';
+
 var run = function(config) {
 
   // load config file
-  var configFileName = config.conf || '../conf/default.conf.js';
+  var configFileName = config.conf || DEFAULT_CONF;
   var configFile = require(configFileName).config;
   config = _.merge(configFile,config);
 
@@ -18,7 +21,7 @@ var run = function(config) {
 
   // set defaults
   config.verbose = config.verbose || false;
-  config.baseUrl = config.baseUrl || 'http://localhost:8080';
+  config.baseUrl = config.baseUrl || BASE_URL;
 
   // TODO is this the best place ?
   logger.enableDebug(config.verbose);

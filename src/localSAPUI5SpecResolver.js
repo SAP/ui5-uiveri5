@@ -5,8 +5,6 @@ var glob = require('glob');
 
 var logger = require("./logger");
 
-//TODO replace with blob patterns
-//var SPEC_ROOT = '../openui5/src/sap.m/test/sap/m/visual/';
 var SPECS_GLOB = '../openui5/src/**/test/**/visual/*.spec.js';
 var CONTENT_ROOT_URI = 'testsuite/test-resources/';
 

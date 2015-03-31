@@ -33,8 +33,7 @@ npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
 Create a folder for your integration tests, place them inside and create a conf.js file:
 ```
 exports.config = {
-  profile: 'integration',
-  specs: ['MMR.spec.js']
+  profile: 'integration'
 };
 ```
 Run all tests from the folder that contains conf.js

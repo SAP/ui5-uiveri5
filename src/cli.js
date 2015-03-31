@@ -30,11 +30,15 @@ config.conf = argv._[0];
 
 // conf file is not provided on command line => try loading conf.js from current dir
 if (!config.conf) {
-  var resolvedLocalConf = path.resolve('./conf.js');
-  if (fs.existsSync(resolvedLocalConf)) {
-    config.conf = resolvedLocalConf;
+  var localConf = './conf.js';
+  if (fs.existsSync(localConf)) {
+    config.conf = localConf;
   }
 }
 
+// provided ot current dir conf is resolved against cwd()
+if (config.conf){
+  config.conf = path.resolve(config.conf);
+}
 // run the visualtest
 require('./visualtest').run(config);

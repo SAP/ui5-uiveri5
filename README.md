@@ -10,22 +10,12 @@ Clone and install dependencies for openui5:
 git clone https://github.com/SAP/openui5.git
 npm install
 ```
-Run all tests against automatically started server:
+Run all tests against automatically started local server:
 ```
 grunt visualtest
 ```
 
-### Run from visualtestjs - NOT implemented
-Install visualtest globally:
-```
-npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
-```
-Run all tests against already running server at localhost:8080:
-```
-visualtestjs
-```
-
-### Integration testing - NOT implemented
+### Integration testing
 Install visualtest globally:
 ```
 npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
@@ -36,14 +26,58 @@ exports.config = {
   profile: 'integration'
 };
 ```
+Make sure that root suite is named as spec file name
 Run all tests from the folder that contains conf.js
 ```
 visualtestjs
 ```
 
+### Run from visualtestjs against locally cloned openui5 - for DEV purposes
+Clone and install dependencies for visualtest:
+```
+git clone git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git
+cd visualtestjs
+npm install
+```
+Run the openui5 local server:
+```
+$openui5>grunt serve
+```
+Run all tests against the local server:
+```
+$visualtestjs> visualtest
+```
+
+### Run visualtests of locally cloned openui5
+Install openui5 locally:
+```
+git clone ssh://i035254@git.wdf.sap.corp:29418/openui5
+cd openui5
+npm install
+```
+Pull sample test from draft commit:
+```
+git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/1
+```
+Install visualtestjs locally:
+```
+git clone git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git
+npm install
+```
+Start openui5 server:
+```
+cd openui5
+grunt serve
+```
+Run all tests against the locally running server:
+```
+cd visualtestjs
+node bin/visualtest --verbose=true conf/nexttoopenui5.conf.js
+```
+
 ### Advanced options - NOT implemented yet
 
-By default visualtest will discover all `**/visualtes/**.spec.js` from localhost:8080 and execute them on local chrome over automatically started selenium server on localhost:4444.
+By default visualtest will discover all `**/visualtest/**.spec.js` from localhost:8080 and execute them on local chrome over automatically started selenium server on localhost:4444.
 All of the above defaults could be modified by providing command-line arguments.
 
 Run tests on Chrome, Firefox and InternetExplorer in parallel
@@ -73,28 +107,4 @@ command-line no conf -> default.conf.js profile=visual -> visualtest.profile.con
 command-line conf=conf.js -> conf.js no profile -> visual.profile.conf.js -> defaults
 command-line conf=conf.js -> conf.js profile=integration -> integration.profile.conf.js -> defaults
 
-### Run visualtests of locally cloned openui5
-Install openui5 locally:
-```
-git clone ssh://i035254@git.wdf.sap.corp:29418/openui5
-cd openui5
-npm install
-```
-Pull sample test from draft commit:
-```
-git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/1
-```
-Install visualtestjs locally:
-```
-git clone git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git
-```
-Start openui5 server:
-```
-cd openui5
-grunt serve
-```
-Run all tests against the locally running server:
-```
-cd visualtestjs
-node bin/visualtest --verbose=true ../conf/nexttoopenui5.conf.js
-```
+

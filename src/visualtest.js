@@ -8,29 +8,37 @@ var BASE_URL = 'http://localhost:8080';
 
 var run = function(config) {
 
+  // configure logger
+  logger.enableDebug(config.verbose);
+
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
   var configFile = require(configFileName).config;
   config = _.merge(configFile,config);
+  logger.debug('Loaded config from: ' + configFileName);
 
   // resolve profile
   if (config.profile){
-    var profileConfigFile = require('../conf/' + config.profile + '.profile.conf.js').config;
+    var profileConfigFileName = '../conf/' + config.profile + '.profile.conf.js';
+    var profileConfigFile = require(profileConfigFileName).config;
     config = _.merge(profileConfigFile,config);
+    logger.debug('Loaded profile config from: ' + profileConfigFileName);
   }
 
-  // set defaults
-  config.verbose = config.verbose || false;
-  config.baseUrl = config.baseUrl || BASE_URL;
-
-  // TODO is this the best place ?
+  // update logger with resolved configs
   logger.enableDebug(config.verbose);
 
-  // create the configured spec resolver
-  var specResolver = require(config.specResolver)(config);
+  // set baseUrl
+  config.baseUrl = config.baseUrl || BASE_URL;
+  logger.debug('Using baseUrl: ' + config.baseUrl);
 
-  // resolve the specs
+  // resolve specs
+  logger.debug('Using spec resolver: ' + config.specResolver);
+  var specResolver = require(config.specResolver)(config);
   var specs = specResolver.resolve();
+  if (specs.length==0){
+    throw new Error("No specs found");
+  }
 
   // prepare protractor executor args
   var protractorArgv = {};
@@ -117,7 +125,7 @@ var run = function(config) {
   function _getSpecByName(specName){
     var specIndex = specs.map(function(spec){return spec.name;}).indexOf(specName);
     if(specIndex==-1){
-      throw new Error('Spec with name: ' + specName + 'not found');
+      throw new Error('Spec with name: ' + specName + ' not found');
     }
 
     return specs[specIndex];

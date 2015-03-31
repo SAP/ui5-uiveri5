@@ -2,7 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0833521f-7fed-4181-b31b-26c12b1aca36" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/localSpecResolver.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/specResolver.js" />
+      <change type="MOVED" beforePath="C:\work\git\visualtestjs\conf\mmf.spec.js" afterPath="$PROJECT_DIR$/conf/mmf.conf.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/cli.js" afterPath="$PROJECT_DIR$/src/cli.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/integration.profile.conf.js" afterPath="$PROJECT_DIR$/conf/integration.profile.conf.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" afterPath="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" afterPath="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/conf/visual.profile.conf.js" afterPath="$PROJECT_DIR$/conf/visual.profile.conf.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/visualtest.js" afterPath="$PROJECT_DIR$/src/visualtest.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="visualtestjs.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -26,31 +36,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="nexttoopenui5.conf.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="nexttoopenui5.conf.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/conf/nexttoopenui5.conf.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="308">
-              <caret line="6" column="53" selection-start-line="6" selection-start-column="53" selection-end-line="6" selection-end-column="53" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="integration.profile.conf.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/conf/integration.profile.conf.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="286">
-              <caret line="1" column="42" selection-start-line="1" selection-start-column="17" selection-end-line="1" selection-end-column="42" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cli.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/cli.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1012">
-              <caret line="7" column="54" selection-start-line="7" selection-start-column="54" selection-end-line="7" selection-end-column="54" />
+            <state vertical-scroll-proportion="0.05378973" vertical-offset="0" max-vertical-offset="818">
+              <caret line="2" column="44" selection-start-line="2" selection-start-column="44" selection-end-line="2" selection-end-column="44" />
               <folding />
             </state>
           </provider>
@@ -59,8 +49,83 @@
       <file leaf-file-name="visualtest.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/visualtest.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3014">
-              <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2376" max-vertical-offset="3190">
+              <caret line="130" column="28" selection-start-line="130" selection-start-column="28" selection-end-line="130" selection-end-column="28" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="visual.profile.conf.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/conf/visual.profile.conf.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="308">
+              <caret line="1" column="25" selection-start-line="1" selection-start-column="25" selection-end-line="1" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="specResolver.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/specResolver.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="46" max-vertical-offset="1034">
+              <caret line="19" column="15" selection-start-line="19" selection-start-column="15" selection-end-line="19" selection-end-column="15" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="localSpecResolver.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/localSpecResolver.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="185" max-vertical-offset="1276">
+              <caret line="30" column="69" selection-start-line="30" selection-start-column="69" selection-end-line="30" selection-end-column="69" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="localSAPUI5SpecResolver.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="66" max-vertical-offset="1628">
+              <caret line="20" column="24" selection-start-line="20" selection-start-column="24" selection-end-line="20" selection-end-column="24" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="mmf.conf.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/conf/mmf.conf.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="242">
+              <caret line="2" column="52" selection-start-line="2" selection-start-column="52" selection-end-line="2" selection-end-column="52" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-18.857143" vertical-offset="1012" max-vertical-offset="2552">
+              <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+          <provider editor-type-id="MarkdownPreviewEditor">
+            <state />
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cli.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/cli.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="504" max-vertical-offset="1100">
+              <caret line="41" column="1" selection-start-line="41" selection-start-column="1" selection-end-line="41" selection-end-column="1" />
               <folding />
             </state>
           </provider>
@@ -70,42 +135,9 @@
         <entry file="file://$PROJECT_DIR$/conf/default.conf.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="264">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+              <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
               <folding />
             </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mmf.spec.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/conf/mmf.spec.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="242">
-              <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="localSAPUI5SpecResolver.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.84782606" vertical-offset="198" max-vertical-offset="2200">
-              <caret line="48" column="14" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="README.md" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/README.md">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-8.8" vertical-offset="154" max-vertical-offset="2332">
-              <caret line="21" column="3" selection-start-line="21" selection-start-column="3" selection-end-line="21" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-          <provider editor-type-id="MarkdownPreviewEditor">
-            <state />
           </provider>
         </entry>
       </file>
@@ -122,23 +154,24 @@
         <option value="$PROJECT_DIR$/.editorconfig" />
         <option value="$PROJECT_DIR$/src/logger.js" />
         <option value="$PROJECT_DIR$/node_modules/protractor/lib/frameworks/jasmine2.js" />
-        <option value="$PROJECT_DIR$/src/specResolver.js" />
         <option value="$PROJECT_DIR$/src/conf.js" />
         <option value="$PROJECT_DIR$/src/default.profile.js" />
         <option value="$PROJECT_DIR$/conf/conf.js" />
         <option value="$PROJECT_DIR$/conf/localspec.conf.js" />
-        <option value="$PROJECT_DIR$/src/localSpecResolver.js" />
         <option value="$PROJECT_DIR$/conf/default.conf.js" />
         <option value="$PROJECT_DIR$/package.json" />
-        <option value="$PROJECT_DIR$/conf/visual.profile.conf.js" />
-        <option value="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/conf/mmf.spec.js" />
-        <option value="$PROJECT_DIR$/conf/integration.profile.conf.js" />
-        <option value="$PROJECT_DIR$/src/visualtest.js" />
         <option value="$PROJECT_DIR$/bin/visualtest" />
-        <option value="$PROJECT_DIR$/src/cli.js" />
+        <option value="$PROJECT_DIR$/src/specResolver.md" />
+        <option value="$PROJECT_DIR$/src/specResolver.js" />
+        <option value="$PROJECT_DIR$/conf/integration.profile.conf.js" />
         <option value="$PROJECT_DIR$/src/localSAPUI5SpecResolver.js" />
+        <option value="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" />
+        <option value="$PROJECT_DIR$/src/cli.js" />
+        <option value="$PROJECT_DIR$/src/visualtest.js" />
+        <option value="$PROJECT_DIR$/src/localSpecResolver.js" />
+        <option value="$PROJECT_DIR$/README.md" />
+        <option value="$PROJECT_DIR$/conf/visual.profile.conf.js" />
       </list>
     </option>
   </component>
@@ -252,6 +285,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\work\git\visualtestjs\src" />
       <recent name="C:\work\git\visualtestjs\bin" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -259,7 +293,7 @@
     </key>
   </component>
   <component name="RunManager" selected="Node.js.cli.js">
-    <configuration default="false" name="cli.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" path-to-node="C:/Program Files/nodejs/node" path-to-js-file="src/cli.js" application-parameters="--verbose=true ../conf/nexttoopenui5.conf" working-dir="$PROJECT_DIR$">
+    <configuration default="false" name="cli.js" type="NodeJSConfigurationType" factoryName="Node.js" temporary="true" path-to-node="C:/Program Files/nodejs/node" path-to-js-file="src/cli.js" application-parameters="--verbose=true conf/mmf.conf.js" working-dir="$PROJECT_DIR$">
       <RunnerSettings RunnerId="Basic" />
       <RunnerSettings RunnerId="debuggableProgram" />
       <ConfigurationWrapper RunnerId="Basic" />
@@ -333,6 +367,8 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18177083" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.18564594" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22392344" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -340,11 +376,9 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33684212" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39808613" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.22392344" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -365,28 +399,18 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="55" />
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/localSpecResolver.js</url>
+          <line>27</line>
+          <option name="timeStamp" value="59" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="60" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/node_modules/protractor/node_modules/glob/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1408" max-vertical-offset="5632">
-          <caret line="64" column="20" selection-start-line="64" selection-start-column="20" selection-end-line="64" selection-end-column="20" />
-        </state>
-      </provider>
-      <provider editor-type-id="MarkdownPreviewEditor">
-        <state />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/glob/glob.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="462" max-vertical-offset="13574">
-          <caret line="74" column="0" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/node_modules/protractor/node_modules/jasmine/lib/examples/jasmine.json">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1012">
@@ -443,13 +467,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-10.1470585" vertical-offset="293" max-vertical-offset="3520">
           <caret line="29" column="37" selection-start-line="29" selection-start-column="37" selection-end-line="29" selection-end-column="37" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/logger.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.077192985" vertical-offset="0" max-vertical-offset="855">
-          <caret line="3" column="25" selection-start-line="3" selection-start-column="25" selection-end-line="3" selection-end-column="25" />
         </state>
       </provider>
     </entry>
@@ -575,6 +592,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.32608697" vertical-offset="330" max-vertical-offset="17116">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -610,6 +628,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.61862916" vertical-offset="0" max-vertical-offset="569">
           <caret line="16" column="33" selection-start-line="16" selection-start-column="33" selection-end-line="16" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -647,14 +666,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conf/visual.profile.conf.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="308">
-          <caret line="6" column="57" selection-start-line="6" selection-start-column="2" selection-end-line="6" selection-end-column="57" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/node_modules/protractor/bin/protractor">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.08695652" vertical-offset="0" max-vertical-offset="1012">
@@ -666,38 +677,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1012">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/protractor/lib/cli.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5217391" vertical-offset="264" max-vertical-offset="3036">
-          <caret line="36" column="64" selection-start-line="33" selection-start-column="4" selection-end-line="36" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/integration.profile.conf.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="286">
-          <caret line="1" column="42" selection-start-line="1" selection-start-column="17" selection-end-line="1" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/mmf.spec.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="242">
-          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/conf/default.conf.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="264">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -717,10 +696,95 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/conf/integration.profile.conf.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.06521739" vertical-offset="0" max-vertical-offset="1012">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/logger.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="550">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cli.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="504" max-vertical-offset="1100">
+          <caret line="41" column="1" selection-start-line="41" selection-start-column="1" selection-end-line="41" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/protractor/lib/cli.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.59395975" vertical-offset="2440" max-vertical-offset="3036">
+          <caret line="127" column="0" selection-start-line="127" selection-start-column="0" selection-end-line="127" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/mmf.conf.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="242">
+          <caret line="2" column="52" selection-start-line="2" selection-start-column="52" selection-end-line="2" selection-end-column="52" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/visualtest.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="2376" max-vertical-offset="3190">
+          <caret line="130" column="28" selection-start-line="130" selection-start-column="28" selection-end-line="130" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/conf/default.conf.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="264">
+          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/specResolver.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="46" max-vertical-offset="1034">
+          <caret line="19" column="15" selection-start-line="19" selection-start-column="15" selection-end-line="19" selection-end-column="15" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+      <provider editor-type-id="MarkdownPreviewEditor">
+        <state />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/localSpecResolver.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="185" max-vertical-offset="1276">
+          <caret line="30" column="69" selection-start-line="30" selection-start-column="69" selection-end-line="30" selection-end-column="69" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="66" max-vertical-offset="1628">
+          <caret line="20" column="24" selection-start-line="20" selection-start-column="24" selection-end-line="20" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-8.8" vertical-offset="154" max-vertical-offset="2332">
-          <caret line="21" column="3" selection-start-line="21" selection-start-column="3" selection-end-line="21" selection-end-column="3" />
+        <state vertical-scroll-proportion="-18.857143" vertical-offset="1012" max-vertical-offset="2552">
+          <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -728,34 +792,18 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conf/nexttoopenui5.conf.js">
+    <entry file="file://$PROJECT_DIR$/conf/visual.profile.conf.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="308">
-          <caret line="6" column="53" selection-start-line="6" selection-start-column="53" selection-end-line="6" selection-end-column="53" />
+          <caret line="1" column="25" selection-start-line="1" selection-start-column="25" selection-end-line="1" selection-end-column="25" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/visualtest.js">
+    <entry file="file://$PROJECT_DIR$/conf/nexttoopenui5.conf.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3014">
-          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cli.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1012">
-          <caret line="7" column="54" selection-start-line="7" selection-start-column="54" selection-end-line="7" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/localSAPUI5SpecResolver.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.84782606" vertical-offset="198" max-vertical-offset="2200">
-          <caret line="48" column="14" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="14" />
+        <state vertical-scroll-proportion="0.05378973" vertical-offset="0" max-vertical-offset="818">
+          <caret line="2" column="44" selection-start-line="2" selection-start-column="44" selection-end-line="2" selection-end-column="44" />
           <folding />
         </state>
       </provider>

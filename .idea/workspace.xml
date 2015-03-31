@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0833521f-7fed-4181-b31b-26c12b1aca36" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/localSpecResolver.js" afterPath="$PROJECT_DIR$/src/localSpecResolver.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
     </list>
     <ignored path="visualtestjs.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -26,10 +26,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="localSpecResolver.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="localSpecResolver.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/localSpecResolver.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5632184" vertical-offset="449" max-vertical-offset="1408">
+            <state vertical-scroll-proportion="0.0" vertical-offset="449" max-vertical-offset="1408">
               <caret line="36" column="68" selection-start-line="36" selection-start-column="68" selection-end-line="36" selection-end-column="68" />
               <folding />
             </state>
@@ -43,6 +43,19 @@
               <caret line="38" column="66" selection-start-line="38" selection-start-column="58" selection-end-line="38" selection-end-column="66" />
               <folding />
             </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="README.md" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/README.md">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-0.50980395" vertical-offset="1012" max-vertical-offset="2200">
+              <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+          <provider editor-type-id="MarkdownPreviewEditor">
+            <state />
           </provider>
         </entry>
       </file>
@@ -74,9 +87,9 @@
         <option value="$PROJECT_DIR$/conf/nexttoopenui5.conf.js" />
         <option value="$PROJECT_DIR$/src/cli.js" />
         <option value="$PROJECT_DIR$/src/visualtest.js" />
-        <option value="$PROJECT_DIR$/README.md" />
         <option value="$PROJECT_DIR$/conf/visual.profile.conf.js" />
         <option value="$PROJECT_DIR$/src/localSpecResolver.js" />
+        <option value="$PROJECT_DIR$/README.md" />
       </list>
     </option>
   </component>
@@ -655,17 +668,6 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.md">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.85714287" vertical-offset="1012" max-vertical-offset="2552">
-          <caret line="76" column="0" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-      <provider editor-type-id="MarkdownPreviewEditor">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/conf/visual.profile.conf.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="308">
@@ -700,10 +702,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/localSpecResolver.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5632184" vertical-offset="449" max-vertical-offset="1408">
+        <state vertical-scroll-proportion="0.0" vertical-offset="449" max-vertical-offset="1408">
           <caret line="36" column="68" selection-start-line="36" selection-start-column="68" selection-end-line="36" selection-end-column="68" />
           <folding />
         </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.md">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.50980395" vertical-offset="1012" max-vertical-offset="2200">
+          <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+      <provider editor-type-id="MarkdownPreviewEditor">
+        <state />
       </provider>
     </entry>
   </component>

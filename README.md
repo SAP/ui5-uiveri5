@@ -32,22 +32,6 @@ Run all tests from the folder that contains conf.js
 visualtestjs
 ```
 
-### Run from visualtestjs against locally cloned openui5 - for DEV purposes
-Clone and install dependencies for visualtest:
-```
-git clone git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git
-cd visualtestjs
-npm install
-```
-Run the openui5 local server:
-```
-$openui5>grunt serve
-```
-Run all tests against the local server:
-```
-$visualtestjs> visualtest
-```
-
 ### Run visualtests of locally cloned openui5
 Install openui5 locally:
 ```

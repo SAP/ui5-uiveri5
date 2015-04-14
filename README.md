@@ -35,7 +35,7 @@ visualtestjs
 ### Run visualtests of locally cloned openui5
 Install openui5 locally:
 ```
-git clone ssh://i035254@git.wdf.sap.corp:29418/openui5
+git clone ssh://<user>@git.wdf.sap.corp:29418/openui5
 cd openui5
 npm install
 ```

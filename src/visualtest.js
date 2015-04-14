@@ -2,6 +2,7 @@
 
 var _ = require('lodash');
 var logger = require('./logger');
+var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
 var BASE_URL = 'http://localhost:8080';
@@ -58,8 +59,18 @@ var run = function(config) {
       protractorArgv.specs.push(spec.path);
   });
 
-  // add spec file startup hook
+  // execute before any setup
+  protractorArgv.beforeLaunch =  function() {
+
+    var mockedClientsidescripts = require('./clientsidescripts');
+    var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
+      {'./clientsidescripts.js':mockedClientsidescripts});
+  }
+
+  // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
+
+    // open test content page
     jasmine.getEnv().addReporter({
       //TODO consider several describe() per spec file
       suiteStarted: function(result){
@@ -69,12 +80,14 @@ var run = function(config) {
           logger.debug('Starting spec with name: ' + specName);
 
           // TODO remove when waitForUI5 is ready
-          browser.ignoreSynchronization = true;
+          //browser.ignoreSynchronization = true;
 
           // open content page if required
           if (spec.contentUrl) {
             logger.debug('Opening: ' + spec.contentUrl);
-            browser.get(spec.contentUrl);
+
+            // bypass browser.get() as it does angular-magic that we do not need to overwride
+            browser.driver.get(spec.contentUrl);
             // TODO check http status, throw error if error
           }
 

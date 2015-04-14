@@ -2,19 +2,22 @@
   "name": "visualtestjs",
   "version": "0.0.1",
   "dependencies": {
-    "protractor": "~1.6.1",
-    "optimist": "~0.6.0",
     "glob": "~4.3.5",
-    "lodash": "~3.6.0"
+    "lodash": "~3.6.0",
+    "optimist": "~0.6.0",
+    "protractor": "~1.6.1",
+    "proxyquire": "^1.4.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git://github.wdf.sap.corp:i035254/visualtestjs.git"
   },
   "bin": {
     "visualtest": "bin/visualtest"
+  },
+  "scripts": {
+    "visualtest": "node bin/visualtest"
   },
   "main": "lib/visualtest.js"
 }

@@ -9,11 +9,11 @@ var request = require('urllib-sync').request;
 var path = require('path');
 
 //constants
-var BASE_URL = 'http://localhost:8080/testsuite';
-var CONTENT_ROOT_URI = '/test-resources/';
-var LIBS_INFO_URI = '/resources/sap-ui-version.json';
+var BASE_URL = 'http://localhost:8080';
+var CONTENT_ROOT_URI = '/testsuite/test-resources/';
+var LIBS_INFO_URI = '/testsuite/resources/sap-ui-version.json';
 var SUITES_FOLDER = 'target/suite/';
-var SPECS_FOLDER = 'target/spec/';
+var SPECS_FOLDER = 'target/specs/';
 
 var ENCODING_UTF8 = 'utf8';
 
@@ -22,7 +22,6 @@ function RemoteSpecResolver(config) {
 }
 
 RemoteSpecResolver.prototype.resolve = function() {
-
   var sBaseUrl = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.baseUrl : false) || BASE_URL;
   var sContentRootUri = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.contentUri : false) || CONTENT_ROOT_URI;
   var sLibsInfoUri = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libsInfoUri : false) || LIBS_INFO_URI;
@@ -81,9 +80,9 @@ RemoteSpecResolver.prototype.resolve = function() {
 	
     //create paths to suite files
     for (var i = 0; i < aLibs.length; i++) {
-      
       oPaths.push({pathUrl: sBaseUrl + sContentRootUri + aLibs[i].replace(/\./g, "/") + "/visual/visual" + ".suite.js", targetFolder: sSpecFolder + aLibs[i] + "/"});
     }
+    
     return oPaths;
   };
 	
@@ -94,7 +93,7 @@ RemoteSpecResolver.prototype.resolve = function() {
 	 * */ 
 	function downloadFiles(oPaths, sTargetFolder) {
 	  
-	  for(var i = 0; i < oPaths.length; i++) {
+	  for (var i = 0; i < oPaths.length; i++) {
 	    var oSuiteData = request(oPaths[i].pathUrl);
 	    var status = parseInt(oSuiteData.status);
 	  
@@ -130,10 +129,12 @@ RemoteSpecResolver.prototype.resolve = function() {
     var specPath;
     var specLibFolderName = '';
     var currentDir = '';
+    
     //fill the aSpecPaths with specName and specUri arrays
     aSpecPaths.forEach(function(sPath) {
       aSuiteFiles.specName.push(require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop()));
-      if(sPath.pathUrl.split("/")[8] == "visual") {        
+      
+      if (sPath.pathUrl.split("/")[8] == "visual") {        
         aSuiteFiles.specUri.push(sPath.pathUrl.split("/").slice(5, 8).join("/"));
       } else {
         aSuiteFiles.specUri.push(sPath.pathUrl.split("/").slice(5, 7).join("/"));
@@ -187,26 +188,26 @@ RemoteSpecResolver.prototype.resolve = function() {
   function writeToFile(sFileData, sFileName) {
     fs.writeFileSync(sFileName, sFileData, ENCODING_UTF8);
   };
-  
-  return aSpecs;
-  
+
   /**
    * Makes directory from given path and root(optional)
    * @param {String} path string of directory path
    * @param {String} root - optional string for directory root
    * */
-  function mkdir(path, root) {
-
+  function mkdir(path, root) {  
     var dirs = path.split('/'), dir = dirs.shift(), root = (root||'')+dir+'/';
     
-    try { fs.mkdirSync(root); }
-    catch (e) {
-        //dir wasn't made, something went wrong
-        if(!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
+    try {
+      fs.mkdirSync(root);
+    } catch (e) {
+      //dir wasn't made, something went wrong
+      if(!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
     }
-
+    
     return !dirs.length||mkdir(dirs.join('/'), root);
   }
+  
+  return aSpecs;
 };
 
 module.exports = function(oConfig) {

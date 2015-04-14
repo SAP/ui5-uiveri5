@@ -26,8 +26,7 @@ exports.config = {
   profile: 'integration'
 };
 ```
-Make sure that root suite is named as spec file name
-Run all tests from the folder that contains conf.js
+Run all *.spec.js tests from the folder that contains conf.js. Make sure that root suite is named as spec file name.
 ```
 visualtestjs
 ```

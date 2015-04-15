@@ -26,8 +26,7 @@ exports.config = {
   profile: 'integration'
 };
 ```
-Make sure that root suite is named as spec file name
-Run all tests from the folder that contains conf.js
+Run all *.spec.js tests from the folder that contains conf.js. Make sure that root suite is named as spec file name.
 ```
 visualtestjs
 ```
@@ -35,7 +34,7 @@ visualtestjs
 ### Run visualtests of locally cloned openui5
 Install openui5 locally:
 ```
-git clone ssh://i035254@git.wdf.sap.corp:29418/openui5
+git clone ssh://<user>@git.wdf.sap.corp:29418/openui5
 cd openui5
 npm install
 ```

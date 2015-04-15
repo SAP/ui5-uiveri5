@@ -20,9 +20,10 @@ var sContentRootUri = "";
 var sLibsInfoUri = "";
 var sSpecFolder = "";
 var sLibsFilter = "";
+var sSpecsFilter = "";
 
 var oAppInfo;
-var oPaths;
+var aPaths;
 var aSpecs;
 var aSpecPaths = [];
 
@@ -31,31 +32,32 @@ function RemoteSpecResolver(config) {
 };
 
 RemoteSpecResolver.prototype.resolve = function() {
-  sBaseUrl = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.baseUrl : false) || BASE_URL;
-  sContentRootUri = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.contentUri : false) || CONTENT_ROOT_URI;
-  sLibsInfoUri = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libsInfoUri : false) || LIBS_INFO_URI;
-  sSpecFolder = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.specsFolder : false) || SPECS_FOLDER;
-  sLibsFilter = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.suitesFolder : false) || "*";
+  sBaseUrl = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.baseUrl : BASE_URL;
+  sContentRootUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.contentUri : CONTENT_ROOT_URI;
+  sLibsInfoUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libsInfoUri : LIBS_INFO_URI;
+  sSpecFolder = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.specsFolder : SPECS_FOLDER;
+  sLibsFilter = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libFilter : "*";
+  sSpecsFilter = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.specFilter : "*";
 
   //get the libs info from sap-ui-version.json - parameter
-  var oAppInfoRequest = request(sBaseUrl + sLibsInfoUri);
-  oAppInfo = JSON.parse(oAppInfoRequest.data);
+  var oAppInfoRaw = request(sBaseUrl + sLibsInfoUri);
+  oAppInfo = JSON.parse(oAppInfoRaw.data);
 
   //get suite files paths, created from the lib name 
-  oPaths = this._getLibNames(oAppInfo);
+  aPaths = this._getLibNames(oAppInfo);
 
   //write the suite files with given paths to given folder
-  this._downloadFiles(oPaths, oPaths.targetFolder);
+  this._downloadFiles(aPaths, aPaths.targetFolder);
 
   //load spec files from all downloaded suite files
   aSpecs = this._loadSpecs();
-
+  
   return aSpecs;
 };
 /**
  * Extracts library names from oAppInfo
  * @param {Object} oAppInfo - object with information about libraries (from sap-ui-version.json)
- * @returns {Array} aPaths - array with paths to suite files of selected libraries
+ * @returns {String[]} aPaths - array with paths to suite files of selected libraries
  * */
 RemoteSpecResolver.prototype._getLibNames = function(oAppInfo) {
   var aLibraries = oAppInfo.libraries;
@@ -63,7 +65,7 @@ RemoteSpecResolver.prototype._getLibNames = function(oAppInfo) {
   var aLibs = [];
   var sLibName;
   var aLibsFilter = [];
-  var oPaths = [];
+  var aSuitePaths = [];
 
   if(sLibsFilter != "*" && sLibsFilter.length > 1) {      
     aLibsFilter = sLibsFilter.split(", ");
@@ -86,105 +88,126 @@ RemoteSpecResolver.prototype._getLibNames = function(oAppInfo) {
 
   //create paths to suite files
   for (var i = 0; i < aLibs.length; i++) {
-    oPaths.push({pathUrl: sBaseUrl + sContentRootUri + aLibs[i].replace(/\./g, "/") + "/visual/visual" + ".suite.js", targetFolder: sSpecFolder + aLibs[i] + "/"});
+    aSuitePaths.push({pathUrl: sBaseUrl + sContentRootUri + aLibs[i].replace(/\./g, "/") + "/visual/visual" + ".suite.js", targetFolder: sSpecFolder + aLibs[i] + "/"});
   }
 
-  return oPaths;
+  return aSuitePaths;
 };
 
 /**
  * Write data from given path to file
- * @param {Array} aPaths array of paths for downloading content
+ * @param {String[]} aPaths array of paths for downloading content
  * @param {String} sTargetFolder string - name of the folder where the files will be written
  * */ 
 RemoteSpecResolver.prototype._downloadFiles = function (oPaths, sTargetFolder) {
   for (var i = 0; i < oPaths.length; i++) {
     var oSuiteData = request(oPaths[i].pathUrl);
-    var status = parseInt(oSuiteData.status);
+    var sStatus = parseInt(oSuiteData.status);
 
     var targetFolder = sTargetFolder ? sTargetFolder : oPaths[i].targetFolder;
 
-    if(status >= 200 && status <= 205) {
+    if(sStatus >= 200 && sStatus <= 205) {
       if(!fs.existsSync(targetFolder)) {      
         RemoteSpecResolver.prototype._mkdir(targetFolder);
       }
 
       RemoteSpecResolver.prototype._writeToFile(oSuiteData.data, targetFolder + oPaths[i].pathUrl.split("/").pop());
       aSpecPaths.push({pathUrl: oPaths[i].pathUrl, targetFolder: oPaths[i].targetFolder});
-    } else if(status == 404) {
+    } else if(sStatus == 404) {
       //throw an error when is needed
-      logger.debug("Cannot find file with path: " + oPaths[i].pathUrl + ". Failed with status code: " + status);
+      logger.debug("Cannot find file with path: " + oPaths[i].pathUrl + ". Failed with status code: " + sStatus);
     } else {
-      throw new Error('Cannot download file with path: ' + oPaths[i].pathUrl + ', status: ' + status);
+      throw new Error('Cannot download file with path: ' + oPaths[i].pathUrl + ', status: ' + sStatus);
     }
   }
 }; 
 
 /**
  * Load all spec files from reuired suites and prepare spec object
- * @return aSpec {Array} array of spec objects
+ * @param {String[]} aPaths array of paths and names of spec files, loaded from suites
+ * @return aSpec {String[]} array of spec objects
  * */
 RemoteSpecResolver.prototype._loadSpecs = function(aPaths) {
-  var aSuiteFiles = {
-      specName: [],
-      specUri: []
+  var oSuiteFiles = {
+      specNames: [],
+      specUris: []
   };
   var aSpecs = [];
-  var specOwnName;
-  var specPath;
-  var specLibFolderName = '';
-  var currentDir = '';
+  var sSpecOwnName;
+  var sSpecPath;
+  var sSpecLibFolderName = '';
+  var sCurrentDir = '';
   var aSpecFilePaths = aSpecPaths.length > 0 ? aSpecPaths : aPaths;
 
-  //fill the aSpecPaths with specName and specUri arrays
+  //fill the aSpecPaths with specNames and specUris arrays
   aSpecFilePaths.forEach(function(sPath) {
-    aSuiteFiles.specName.push(require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop()));
+    oSuiteFiles.specNames.push(require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop()));
 
     if (sPath.pathUrl.split("/")[8] == "visual") {        
-      aSuiteFiles.specUri.push(sPath.pathUrl.split("/").slice(5, 8).join("/"));
+      oSuiteFiles.specUris.push(sPath.pathUrl.split("/").slice(5, 8).join("/"));
     } else {
-      aSuiteFiles.specUri.push(sPath.pathUrl.split("/").slice(5, 7).join("/"));
+      oSuiteFiles.specUris.push(sPath.pathUrl.split("/").slice(5, 7).join("/"));
     }
   });
 
   //create spec objects with paths, names, urls and etc. 
   var oSpec = {};
   //Iterate the required suites
-  for (var i = 0; i < aSuiteFiles.specName.length; i++) {
+  for (var i = 0; i < oSuiteFiles.specNames.length; i++) {
     //iterate the paths in every suite
-    for (var j = 0; j < aSuiteFiles.specName[i].length; j++) {
-      currentDir = process.cwd() + "/";
+
+    for (var j = 0; j < oSuiteFiles.specNames[i].length; j++) {
+
+      sCurrentDir = process.cwd() + "/";
       //get the library and file name
       var sLibUri = '';
-      sLibUri = aSuiteFiles.specUri[i];
+      sLibUri = oSuiteFiles.specUris[i];
 
       //create specOwnName - get the sLibUri and replace \ with .
       //create specLibFolderName - concat sSpecFolder and specOwnName
-      specOwnName = sLibUri.replace(/\//g, ".");
-      specLibFolderName = path.join(sSpecFolder, specOwnName);
+      sSpecOwnName = sLibUri.replace(/\//g, ".");
+      sSpecLibFolderName = path.join(sSpecFolder, sSpecOwnName);
 
       //create the specOwnName - get the last element of aSplitted and remove the .spec.js extension
       //create path to spec - normalized path - concated specs folder and the last element of aSplitted array (the name of the spec)
-      specPath = path.normalize(currentDir + specLibFolderName + "/" + aSuiteFiles.specName[i][j]);
+      sSpecPath = path.normalize(sCurrentDir + sSpecLibFolderName + "/" + oSuiteFiles.specNames[i][j]);
 
       //creating the spec object with name (example sap.m.ActionSelect), path (example target\spec\ActionSelect.spec.js), 
       //content url (example http://localhost:8080/testsuite/test-resources/sap/m/ActionSelect.html) and 
       //spec uri (example http://localhost:8080/testsuite/test-resources/sap/m/visual/ActionSelect.spec.js)
       oSpec = {
-          name: specOwnName + "." + aSuiteFiles.specName[i][j].split(".")[0],//specLibName.split("/").pop() + '.' + specOwnName,
-          path: specPath,
-          contentUrl: sBaseUrl + sContentRootUri + sLibUri + "/" + aSuiteFiles.specName[i][j].replace("visual/", "").replace("spec.js", "html"),
-          specUri: sBaseUrl + sContentRootUri + sLibUri + "/visual/" + aSuiteFiles.specName[i][j]
+          name: sSpecOwnName + "." + oSuiteFiles.specNames[i][j].split(".")[0],
+          path: sSpecPath,
+          contentUrl: sBaseUrl + sContentRootUri + sLibUri + "/" + oSuiteFiles.specNames[i][j].replace("visual/", "").replace("spec.js", "html"),
+          specUris: sBaseUrl + sContentRootUri + sLibUri + "/visual/" + oSuiteFiles.specNames[i][j]
       };
 
-      RemoteSpecResolver.prototype._downloadFiles([{pathUrl: oSpec.specUri}], specLibFolderName + "/");
-      logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
-      aSpecs.push(oSpec);
+      if(sSpecsFilter != "*") {
+        var aSpecsFilter = sSpecsFilter.split(", ");
+
+        if(aSpecsFilter.indexOf(oSuiteFiles.specNames[i][j]) != -1) {
+          RemoteSpecResolver.prototype._fillSpecsArray(oSpec, sSpecLibFolderName, aSpecs);
+        }        
+      } else {
+        RemoteSpecResolver.prototype._fillSpecsArray(oSpec, sSpecLibFolderName, aSpecs);
+      }
     }
   }
 
   return aSpecs;
 };
+
+/**
+ * Fills the aSpecs array with oSpec objects
+ * @param {Object} oSpec object with information about the spec
+ * @param {String} sSpecLibFolderName string of the folder name where the spec will be downloaded
+ * @param {String[]} aSpecs array with info about specs
+ * */
+RemoteSpecResolver.prototype._fillSpecsArray =  function(oSpec, sSpecLibFolderName, aSpecs) {
+  RemoteSpecResolver.prototype._downloadFiles([{pathUrl: oSpec.specUris}], sSpecLibFolderName + "/");
+  logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
+  aSpecs.push(oSpec);
+}
 
 /**
  * Writes data from file to new file in given folder

@@ -28,7 +28,7 @@ var aSpecPaths = [];
 
 function RemoteSpecResolver(config) {
   this.config = config;
-}
+};
 
 RemoteSpecResolver.prototype.resolve = function() {
   sBaseUrl = (this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.baseUrl : false) || BASE_URL;
@@ -98,7 +98,6 @@ RemoteSpecResolver.prototype._getLibNames = function(oAppInfo) {
  * @param {String} sTargetFolder string - name of the folder where the files will be written
  * */ 
 RemoteSpecResolver.prototype._downloadFiles = function (oPaths, sTargetFolder) {
-
   for (var i = 0; i < oPaths.length; i++) {
     var oSuiteData = request(oPaths[i].pathUrl);
     var status = parseInt(oSuiteData.status);
@@ -107,10 +106,10 @@ RemoteSpecResolver.prototype._downloadFiles = function (oPaths, sTargetFolder) {
 
     if(status >= 200 && status <= 205) {
       if(!fs.existsSync(targetFolder)) {      
-        mkdir(targetFolder);
+        RemoteSpecResolver.prototype._mkdir(targetFolder);
       }
 
-      writeToFile(oSuiteData.data, targetFolder + oPaths[i].pathUrl.split("/").pop());
+      RemoteSpecResolver.prototype._writeToFile(oSuiteData.data, targetFolder + oPaths[i].pathUrl.split("/").pop());
       aSpecPaths.push({pathUrl: oPaths[i].pathUrl, targetFolder: oPaths[i].targetFolder});
     } else if(status == 404) {
       //throw an error when is needed
@@ -119,7 +118,7 @@ RemoteSpecResolver.prototype._downloadFiles = function (oPaths, sTargetFolder) {
       throw new Error('Cannot download file with path: ' + oPaths[i].pathUrl + ', status: ' + status);
     }
   }
-} 
+}; 
 
 /**
  * Load all spec files from reuired suites and prepare spec object
@@ -137,7 +136,6 @@ RemoteSpecResolver.prototype._loadSpecs = function(aPaths) {
   var currentDir = '';
   var aSpecFilePaths = aSpecPaths.length > 0 ? aSpecPaths : aPaths;
 
-  console.log(aSpecFilePaths);
   //fill the aSpecPaths with specName and specUri arrays
   aSpecFilePaths.forEach(function(sPath) {
     aSuiteFiles.specName.push(require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop()));
@@ -193,7 +191,7 @@ RemoteSpecResolver.prototype._loadSpecs = function(aPaths) {
  * @param {String} sFileData data from source file
  * @param {String} sFileName name of the file
  * */
-function writeToFile(sFileData, sFileName) {
+RemoteSpecResolver.prototype._writeToFile = function(sFileData, sFileName) {
   fs.writeFileSync(sFileName, sFileData, ENCODING_UTF8);
 };
 
@@ -202,7 +200,7 @@ function writeToFile(sFileData, sFileName) {
  * @param {String} path string of directory path
  * @param {String} root - optional string for directory root
  * */
-function mkdir(path, root) {  
+RemoteSpecResolver.prototype._mkdir =  function(path, root) {  
   var dirs = path.split('/'), dir = dirs.shift(), root = (root||'')+dir+'/';
 
   try {
@@ -212,10 +210,8 @@ function mkdir(path, root) {
     if(!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
   }
 
-  return !dirs.length||mkdir(dirs.join('/'), root);
-}
-
-
+  return !dirs.length||RemoteSpecResolver.prototype._mkdir(dirs.join('/'), root);
+};
 
 module.exports = function(oConfig) {
   return new RemoteSpecResolver(oConfig);

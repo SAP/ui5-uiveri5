@@ -5,7 +5,9 @@ var logger = require('./logger');
 var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
-var BASE_URL = 'http://localhost:8080';
+var DEFAULT_BASE_URL = 'http://localhost:8080';
+var DEFAULT_SPEC_RESOLVER = './remoteSAPUI5SpecResolver';
+var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 
 var run = function(config) {
 
@@ -14,6 +16,7 @@ var run = function(config) {
 
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
+  logger.debug('Loading config from: ' + configFileName);
   var configFile = require(configFileName).config;
   config = _.merge(configFile,config);
   logger.debug('Loaded config from: ' + configFileName);
@@ -21,25 +24,29 @@ var run = function(config) {
   // resolve profile
   if (config.profile){
     var profileConfigFileName = '../conf/' + config.profile + '.profile.conf.js';
+    logger.debug('Loading profile config from: ' + profileConfigFileName);
     var profileConfigFile = require(profileConfigFileName).config;
     config = _.merge(profileConfigFile,config);
-    logger.debug('Loaded profile config from: ' + profileConfigFileName);
   }
 
   // update logger with resolved configs
   logger.enableDebug(config.verbose);
 
   // set baseUrl
-  config.baseUrl = config.baseUrl || BASE_URL;
+  config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
   logger.debug('Using baseUrl: ' + config.baseUrl);
 
   // resolve specs
-  logger.debug('Using spec resolver: ' + config.specResolver);
-  var specResolver = require(config.specResolver)(config);
+  var specResolverName = config.specResolver || DEFAULT_SPEC_RESOLVER;
+  logger.debug('Loading spec resolver module: ' + specResolverName);
+  var specResolver = require(specResolverName)(config);
   var specs = specResolver.resolve();
   if (specs.length==0){
     throw new Error("No specs found");
   }
+
+  // set default clientsidescripts module
+  config.clientsidescripts = config.clientsidescripts || DEFAULT_CLIENTSIDESCRIPTS;
 
   // prepare protractor executor args
   var protractorArgv = {};
@@ -62,9 +69,11 @@ var run = function(config) {
   // execute before any setup
   protractorArgv.beforeLaunch =  function() {
 
-    var mockedClientsidescripts = require('./clientsidescripts');
+    var clientsidesriptsName = config.clientsidescripts;
+    logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
+    var clientsidescripts = require(clientsidesriptsName);
     var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
-      {'./clientsidescripts.js':mockedClientsidescripts});
+      {'./clientsidescripts.js': clientsidescripts});
   }
 
   // execute after complete setup and just before test execution starts
@@ -79,8 +88,10 @@ var run = function(config) {
           var spec = _getSpecByName(specName);
           logger.debug('Starting spec with name: ' + specName);
 
-          // TODO remove when waitForUI5 is ready
-          //browser.ignoreSynchronization = true;
+          // disable waitForUI5() if explicitly requested
+          if(config.ignoreSync) {
+            browser.ignoreSynchronization = true;
+          }
 
           // open content page if required
           if (spec.contentUrl) {

@@ -79,6 +79,10 @@ var run = function(config) {
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
+    // publish visualtest configs on protractor's browser object
+    browser.visualtest = {};
+    browser.visualtest.config = config;
+
     // open test content page
     jasmine.getEnv().addReporter({
       //TODO consider several describe() per spec file
@@ -90,6 +94,7 @@ var run = function(config) {
 
           // disable waitForUI5() if explicitly requested
           if(config.ignoreSync) {
+            logger.debug('Disabling client synchronization');
             browser.ignoreSynchronization = true;
           }
 

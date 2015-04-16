@@ -55,7 +55,7 @@ grunt serve
 Run all tests against the locally running server:
 ```
 cd visualtestjs
-node bin/visualtest --verbose=true conf/nexttoopenui5.conf.js
+node bin/visualtest --verbose=true --ignoreSync=true conf/nexttoopenui5.conf.js
 ```
 
 ### Advanced options - NOT implemented yet

@@ -1,6 +1,9 @@
 describe("RemoteSAPUI5SpecResolver", function() {
 
-  var oAppInfo = { 
+  var proxyquire = require('proxyquire');
+
+  it("Should get suite paths.", function() {
+    var oAppInfo = {
       name: 'demokit',
       version: '1.29.0-SNAPSHOT',
       buildTimestamp: '',
@@ -16,84 +19,126 @@ describe("RemoteSAPUI5SpecResolver", function() {
             version: '1.29.0-SNAPSHOT',
             buildTimestamp: '201504140013',
             scmRevision: '9f6fd63d4a2d0b11e91822af9059eaf2ca63298c',
-            gav: 'com.sap.ui5:mobile:1.29.0-SNAPSHOT:jar' } ] 
-  };
-
-  var specResolver;
-  var fs;
-
-  beforeEach(function() {
-    var config = {
-        profile: 'visual',
-        specResolver: './remoteSAPUI5SpecResolver',
-        baseUrl: 'http://localhost:8080',
-        specs: '../openui5/src/**/test/**/visual/*.spec.js'
+            gav: 'com.sap.ui5:mobile:1.29.0-SNAPSHOT:jar' } ]
     };
 
-    specResolver = require("../src/remoteSAPUI5SpecResolver.js")(config);
-    fs = require('fs');
-  });
-  //do we need this?
-  it("Should create new directory and return true if is done.", function() {
-    var mkDirFinished = false;
-    var targetFolder = "test/target/test-download/";
+    var requestStub = {};
+    var SpecResolverFile = proxyquire("../src/remoteSAPUI5SpecResolver.js", {'urllib-sync' : requestStub});
+    var specResolver = new SpecResolverFile({});
 
-    mkDirFinished = specResolver._mkdir(targetFolder);
-   
-    var deleteFolderRecursive = function(path) {
-      if( fs.existsSync(path) ) {
-        fs.readdirSync(path).forEach(function(file,index){
-          var curPath = path + "/" + file;
-          if(fs.lstatSync(curPath).isDirectory()) { // recurse
-            deleteFolderRecursive(curPath);
-          } else { // delete file
-            fs.unlinkSync(curPath);
-          }
-        });
-        fs.rmdirSync(path);
-      }
-    };
-    
-    expect(mkDirFinished).toBe(true);
-    if(fs.existsSync(targetFolder)) {
-      deleteFolderRecursive(targetFolder);
-    }
-  });
+    var aPaths = specResolver._getSuitePaths(oAppInfo);
 
-  it("Should download json file to test directory, if is success it will return true.", function() {
-    var oPaths = [{ pathUrl: 'http://veui5infra.dhcp.wdf.sap.corp:8080/demokit/resources/sap-ui-version.json',
-      targetFolder: 'test/target/test-download/' }];
-    
-    specResolver._downloadFiles(oPaths, oPaths.targetFolder);
-    var fileIsDownloaded = fs.existsSync("test/target/test-download/sap-ui-version.json");
-
-    expect(fileIsDownloaded).toBe(true);
-  });
-
-  it("Paths should contain sap.ui.core and sap.m libraries and the lenght should be greater than zero.", function() {
-    var aPaths = specResolver._getLibNames(oAppInfo);
-
-    expect(aPaths.length).toBeGreaterThan(0);
+    expect(aPaths.length).toBe(2);
     expect(aPaths[0].pathUrl).toEqual("http://localhost:8080/testsuite/test-resources/sap/ui/core/visual/visual.suite.js");
     expect(aPaths[1].pathUrl).toEqual("http://localhost:8080/testsuite/test-resources/sap/m/visual/visual.suite.js");
   });
 
-  it("Should load given spec and return specs array. Check array's lenght and if the spec name is the same as given.", function() {
-    var aSuites = [{ 
-      pathUrl: 'http://localhost:8080/testsuite/test-resources/sap/m/visual/visual.suite.js',
-      targetFolder: 'target/specs/sap.m/' 
+  it("Should download json file to test directory, and return array.", function() {
+    var oSuitesMockData = {
+      type: 'buffer',
+      status: 200,
+      headers:
+      { 'access-control-allow-origin': '*',
+        vary: 'Origin',
+        'accept-ranges': 'bytes',
+        date: 'Mon, 20 Apr 2015 13:44:53 GMT',
+        'cache-control': 'public, max-age=0',
+        'last-modified': 'Mon, 20 Apr 2015 10:29:52 GMT',
+        etag: 'W/"af-2723698073"',
+        'content-type': 'application/javascript',
+        'content-length': '175',
+        connection: 'keep-alive' },
+      data: 'sap.m.ActionSelect'
+    };
+
+    var requestStub = {
+      request : function(path) {
+        return oSuitesMockData;
+      }
+    };
+
+    var isWritten = false;
+    var isCreatedFolder = false;
+
+    var fsStub = {
+      writeFileSync : function() {
+        isWritten = true;
+      },
+      mkdirSync : function() {
+        isCreatedFolder = true;
+      }
+    };
+
+    var SpecResolverFile = proxyquire("../src/remoteSAPUI5SpecResolver.js", {
+      'urllib-sync' : requestStub,
+      'fs' : fsStub
+    });
+
+    var specResolver = new SpecResolverFile({});
+
+    var oPaths = [{
+      pathUrl: 'http://veui5infra.dhcp.wdf.sap.corp:8080/demokit/resources/sap-ui-version.json',
+      targetFolder: 'test/target/test-download/'
     }];
+
+    var aResultPaths = specResolver._downloadFiles(oPaths, oPaths.targetFolder);
+
+    expect(isWritten).toBe(true);
+    expect(isCreatedFolder).toBe(true);
+    expect(aResultPaths[0].pathUrl.indexOf("sap-ui-version.json") != -1).toBe(true);
+  });
+
+  it("Should load given spec and return specs array. Check array's lenght and if the spec name is the same as given.", function() {
+    var aSuites = [{
+      pathUrl: 'http://localhost:8080/testsuite/test-resources/sap/m/visual/visual.suite.js',
+      targetFolder: 'target/specs/sap.m/'
+    }];
+
+    var oSpecMockData = { type: 'buffer',
+        status: 200,
+        headers:
+        { 'access-control-allow-origin': '*',
+          vary: 'Origin',
+          'accept-ranges': 'bytes',
+          date: 'Mon, 20 Apr 2015 14:10:47 GMT',
+          'cache-control': 'public, max-age=0',
+          'last-modified': 'Wed, 01 Apr 2015 12:56:25 GMT',
+          etag: 'W/"b12-568638981"',
+          'content-type': 'application/javascript',
+          'content-length': '2834',
+          connection: 'keep-alive' },
+        data: 'Spec file mock data' };
+
+    var requestStub = {
+      request : function(path) {
+        return oSpecMockData;
+      }
+    };
+
+    var isWritten = false;
+    var isCreatedFolder = false;
+
+    var fsStub = {
+      writeFileSync : function() {
+        isWritten = true;
+      },
+      mkdirSync : function() {
+        isCreatedFolder = true;
+      }
+    };
+
+    var SpecResolverFile = proxyquire("../src/remoteSAPUI5SpecResolver.js", {
+      'urllib-sync' : requestStub,
+      'fs' : fsStub
+    });
+
+    var specResolver = new SpecResolverFile({});
 
     var aSpecs = specResolver._loadSpecs(aSuites);
 
-    expect(aSpecs.length).toBeGreaterThan(0);
+    expect(isWritten).toBe(true);
+    expect(isCreatedFolder).toBe(true);
+    expect(aSpecs.length).toBe(1);
     expect(aSpecs[0].name).toEqual("sap.m.ActionSelect");
-  });
-  
-  it("Should resolve specs with given config object. Check if contains 'sap'.", function() {
-    var aSpecs = specResolver.resolve();
-    
-    expect(aSpecs.length).toBeGreaterThan(0);
-    expect(aSpecs[0].name.indexOf("sap") != -1).toBe(true);
   });
 });

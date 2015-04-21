@@ -106,7 +106,7 @@ RemoteSpecResolver.prototype._downloadFiles = function (aPaths, sTargetFolder) {
 
     if(sStatus >= 200 && sStatus <= 205) {
       if(!fs.existsSync(aPaths[i].targetFolder)) {
-        RemoteSpecResolver.prototype._mkdirRecursive(targetFolder);
+        this._mkdirs(targetFolder);
       }
 
       fs.writeFileSync(targetFolder + aPaths[i].pathUrl.split("/").pop(), oData.data, ENCODING_UTF8);
@@ -204,7 +204,7 @@ RemoteSpecResolver.prototype._fillSpecsArray =  function(sLibUri, specName, sLib
     _specUrls: this.sBaseUrl + this.sContentRootUri + sLibUri + "/visual/" + specName
   };
 
-  RemoteSpecResolver.prototype._downloadFiles([{pathUrl: oSpec._specUrls}], sSpecLibFolderName + "/");
+  this._downloadFiles([{pathUrl: oSpec._specUrls}], sSpecLibFolderName + "/");
   logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
   aSpecs.push(oSpec);
 
@@ -216,7 +216,7 @@ RemoteSpecResolver.prototype._fillSpecsArray =  function(sLibUri, specName, sLib
  * @param {String} path string of directory path
  * @param {String} root - optional string for directory root
  * */
-RemoteSpecResolver.prototype._mkdirRecursive =  function(path, root) {
+RemoteSpecResolver.prototype._mkdirs =  function(path, root) {
   var dirs = path.split('/'), dir = dirs.shift(), root = (root||'') + dir + '/';
 
   try {
@@ -226,7 +226,7 @@ RemoteSpecResolver.prototype._mkdirRecursive =  function(path, root) {
     if(!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
   }
 
-  return !dirs.length || RemoteSpecResolver.prototype._mkdirRecursive(dirs.join('/'), root);
+  return !dirs.length || this._mkdirs(dirs.join('/'), root);
 };
 
 module.exports = function(oConfig) {

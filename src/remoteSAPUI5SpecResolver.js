@@ -17,7 +17,7 @@ var ENCODING_UTF8 = 'utf8';
 
 function RemoteSpecResolver(config) {
   this.config = config;
-  this.sBaseUrl = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.baseUrl : BASE_URL;
+  this.sBaseUrl = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.baseUrl : BASE_URL;
   this.sContentRootUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.contentUri : CONTENT_ROOT_URI;
   this.sLibsInfoUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libsInfoUri : LIBS_INFO_URI;
   this.sSpecFolder = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.specsFolder : SPECS_FOLDER;
@@ -25,7 +25,7 @@ function RemoteSpecResolver(config) {
   this.sSpecsFilter = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.specFilter : "*";
 };
 
-RemoteSpecResolver.prototype.resolve = function() {
+RemoteSpecResolver.prototype.resolve = function () {
 
   //get the libs info from sap-ui-version.json - parameter
   var oAppInfoRaw = request.request(this.sBaseUrl + this.sLibsInfoUri);
@@ -49,7 +49,7 @@ RemoteSpecResolver.prototype.resolve = function() {
  * @returns {{pathUrl: String, targetFolder: String}} aSuitePaths - array with paths to suite files of selected libraries,
  * pathUrl - url to suite files, targetFolder - where to store the files
  * */
-RemoteSpecResolver.prototype._getSuitePaths = function(oAppInfo) {
+RemoteSpecResolver.prototype._getSuitePaths = function (oAppInfo) {
   var aLibraries = oAppInfo.libraries;
   var len = aLibraries.length;
   var aLibs = [];
@@ -58,15 +58,15 @@ RemoteSpecResolver.prototype._getSuitePaths = function(oAppInfo) {
   var aSuitePaths = [];
 
   //resolve lib filter
-  if(this.sLibsFilter != "*" && this.sLibsFilter.length > 1) {
+  if (this.sLibsFilter != "*" && this.sLibsFilter.length > 1) {
     aLibsFilter = this.sLibsFilter.split(", ");
   }
 
   //get all lib names
   for (var i = 0; i < len; i++) {
     if (aLibsFilter.length > 0) {
-      for(var j = 0; j < aLibsFilter.length; j++) {
-        if(aLibsFilter[j] == aLibraries[i].name) {
+      for (var j = 0; j < aLibsFilter.length; j++) {
+        if (aLibsFilter[j] == aLibraries[i].name) {
           sLibName = aLibraries[i].name;
           aLibs.push(sLibName);
         }
@@ -104,14 +104,14 @@ RemoteSpecResolver.prototype._downloadFiles = function (aPaths, sTargetFolder) {
     var sStatus = parseInt(oData.status);
     var targetFolder = sTargetFolder ? sTargetFolder : aPaths[i].targetFolder;
 
-    if(sStatus >= 200 && sStatus <= 205) {
-      if(!fs.existsSync(aPaths[i].targetFolder)) {
+    if (sStatus >= 200 && sStatus <= 205) {
+      if (!fs.existsSync(aPaths[i].targetFolder)) {
         this._mkdirs(targetFolder);
       }
 
       fs.writeFileSync(targetFolder + aPaths[i].pathUrl.split("/").pop(), oData.data, ENCODING_UTF8);
       aResultPaths.push({pathUrl: aPaths[i].pathUrl, targetFolder: aPaths[i].targetFolder});
-    } else if(sStatus == 404) {
+    } else if (sStatus == 404) {
       //throw an error when is needed
       logger.debug("Cannot find file with path: " + aPaths[i].pathUrl + ". Failed with status code: " + sStatus);
     } else {
@@ -130,25 +130,33 @@ RemoteSpecResolver.prototype._downloadFiles = function (aPaths, sTargetFolder) {
  * name is the spec name, path: is the absolute path to the spec file, contentUrl is the url to content page (html),
  * _specUrls is the url to the spec file on the server
  * */
-RemoteSpecResolver.prototype._loadSpecs = function(aSpecPaths) {
+RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
   var oSuiteFiles = {
-      specNames: [],
-      specUris: []
+    specNames: [],
+    specUris: []
   };
   var aSpecs;
   var sLibName;
 
   //fill the aSpecPaths with specNames and specUris arrays
-  aSpecPaths.forEach(function(sPath) {
-    oSuiteFiles.specNames.push(require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop()));
+  aSpecPaths.forEach(function (sPath) {
+    var requiredSuite = require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop());
+    //check the requiredSuite type
+    if (requiredSuite instanceof Array) {
+      //if is Array - push to oSuiteFiles
+      oSuiteFiles.specNames.push(requiredSuite);
+    } else if (requiredSuite instanceof Function) {
+      //if is Function - first it have to be resolved and then the passed array is pushed to oSuiteFiles
+      var resolvedFunction = requiredSuite(this);
+      oSuiteFiles.specNames.push(resolvedFunction);
+    }
 
     //get the library name from the path
     var sPathMatch = sPath.pathUrl.match(/(sap)(.*)(?=\/visual\/)/);
 
-    if(sPathMatch) {
+    if (sPathMatch) {
       oSuiteFiles.specUris.push(sPathMatch[0]);
     }
-
   });
 
   //Iterate the required suites
@@ -157,16 +165,17 @@ RemoteSpecResolver.prototype._loadSpecs = function(aSpecPaths) {
     for (var j = 0; j < oSuiteFiles.specNames[i].length; j++) {
       //get the library and file name
       var sLibUri = '';
+
       sLibUri = oSuiteFiles.specUris[i];
 
       //create specOwnName - get the sLibUri and replace \ with .
       sLibName = sLibUri.replace(/\//g, ".");
 
       //specFilter implementation
-      if(this.sSpecsFilter && this.sSpecsFilter != "*" ) {
+      if (this.sSpecsFilter && this.sSpecsFilter != "*") {
         var aSpecsFilter = this.sSpecsFilter.split(", ");
 
-        if(aSpecsFilter.indexOf(oSuiteFiles.specNames[i][j]) != -1) {
+        if (aSpecsFilter.indexOf(oSuiteFiles.specNames[i][j]) != -1) {
           //if sSpecFilter is not undefined and not  "*" filter by specs described on it
           aSpecs = this._fillSpecsArray(sLibUri, oSuiteFiles.specNames[i][j], sLibName);
         }
@@ -189,7 +198,7 @@ RemoteSpecResolver.prototype._loadSpecs = function(aSpecPaths) {
  * name is the spec name, path: is the absolute path to the spec file, contentUrl is the url to content page (html),
  * _specUrls is the url to the spec file on the server
  * */
-RemoteSpecResolver.prototype._fillSpecsArray =  function(sLibUri, specName, sLibName) {
+RemoteSpecResolver.prototype._fillSpecsArray = function (sLibUri, specName, sLibName) {
   var sSpecPath;
   var sSpecLibFolderName = path.resolve(this.sSpecFolder, sLibName);
   var aSpecs = [];
@@ -216,19 +225,19 @@ RemoteSpecResolver.prototype._fillSpecsArray =  function(sLibUri, specName, sLib
  * @param {String} path string of directory path
  * @param {String} root - optional string for directory root
  * */
-RemoteSpecResolver.prototype._mkdirs =  function(path, root) {
-  var dirs = path.split('/'), dir = dirs.shift(), root = (root||'') + dir + '/';
+RemoteSpecResolver.prototype._mkdirs = function (path, root) {
+  var dirs = path.split('/'), dir = dirs.shift(), root = (root || '') + dir + '/';
 
   try {
     fs.mkdirSync(root);
   } catch (e) {
     //dir wasn't made, something went wrong
-    if(!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
+    if (!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
   }
 
   return !dirs.length || this._mkdirs(dirs.join('/'), root);
 };
 
-module.exports = function(oConfig) {
+module.exports = function (oConfig) {
   return new RemoteSpecResolver(oConfig);
 };

@@ -1,34 +1,33 @@
-describe("RemoteSAPUI5SpecResolver", function() {
+describe("RemoteSAPUI5SpecResolver", function () {
 
   var proxyquire = require('proxyquire');
 
-  it("Should get suite paths.", function() {
+  it("Should get suite paths.", function () {
     var oAppInfo = {
       name: 'demokit',
       version: '1.29.0-SNAPSHOT',
       buildTimestamp: '',
       scmRevision: '',
       gav: 'com.sap.ui5:demokit:1.29.0-SNAPSHOT:war',
-      libraries:
-        [
-          {
-            name: 'sap.ui.core',
-            version: '1.29.0-SNAPSHOT',
-            buildTimestamp: '201504140013',
-            scmRevision: '9f6fd63d4a2d0b11e91822af9059eaf2ca63298c',
-            gav: 'com.sap.ui5:core:1.29.0-SNAPSHOT:jar'
-          }, {
-            name: 'sap.m',
-            version: '1.29.0-SNAPSHOT',
-            buildTimestamp: '201504140013',
-            scmRevision: '9f6fd63d4a2d0b11e91822af9059eaf2ca63298c',
-            gav: 'com.sap.ui5:mobile:1.29.0-SNAPSHOT:jar'
-          }
-        ]
+      libraries: [
+        {
+          name: 'sap.ui.core',
+          version: '1.29.0-SNAPSHOT',
+          buildTimestamp: '201504140013',
+          scmRevision: '9f6fd63d4a2d0b11e91822af9059eaf2ca63298c',
+          gav: 'com.sap.ui5:core:1.29.0-SNAPSHOT:jar'
+        }, {
+          name: 'sap.m',
+          version: '1.29.0-SNAPSHOT',
+          buildTimestamp: '201504140013',
+          scmRevision: '9f6fd63d4a2d0b11e91822af9059eaf2ca63298c',
+          gav: 'com.sap.ui5:mobile:1.29.0-SNAPSHOT:jar'
+        }
+      ]
     };
 
     var requestStub = {};
-    var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {'urllib-sync' : requestStub});
+    var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {'urllib-sync': requestStub});
     var specResolver = new SpecResolver({});
 
     var aPaths = specResolver._getSuitePaths(oAppInfo);
@@ -38,12 +37,11 @@ describe("RemoteSAPUI5SpecResolver", function() {
     expect(aPaths[1].pathUrl).toEqual("http://localhost:8080/testsuite/test-resources/sap/m/visual/visual.suite.js");
   });
 
-  it("Should download json file to test directory, and return array. Should call mkdirSync and writeFileSync mocks.", function() {
+  it("Should download json file to test directory, and return array. Should call mkdirSync and writeFileSync mocks.", function () {
     var oSuitesMockData = {
       type: 'buffer',
       status: 200,
-      headers:
-      {
+      headers: {
         'access-control-allow-origin': '*',
         vary: 'Origin',
         'accept-ranges': 'bytes',
@@ -59,16 +57,16 @@ describe("RemoteSAPUI5SpecResolver", function() {
     };
 
     var requestStub = {
-      request : function(path) {
+      request: function (path) {
         return oSuitesMockData;
       }
     };
 
     var fsStub = {
-      writeFileSync : function() {
+      writeFileSync: function () {
         return true;
       },
-      mkdirSync : function() {
+      mkdirSync: function () {
         return true;
       }
     };
@@ -77,8 +75,8 @@ describe("RemoteSAPUI5SpecResolver", function() {
     spyOn(fsStub, "mkdirSync")
 
     var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {
-      'urllib-sync' : requestStub,
-      'fs' : fsStub
+      'urllib-sync': requestStub,
+      'fs': fsStub
     });
 
     var specResolver = new SpecResolver({});
@@ -95,40 +93,41 @@ describe("RemoteSAPUI5SpecResolver", function() {
     expect(aResultPaths[0].pathUrl).toContain("sap-ui-version.json");
   });
 
-  it("Should load given spec and return specs array, should call mkdirSync and writeFileSync mocks.", function() {
+  it("Should load given spec and return specs array, should call mkdirSync and writeFileSync mocks.", function () {
     var aSuites = [{
       pathUrl: 'http://localhost:8080/testsuite/test-resources/sap/m/visual/visual.suite.js',
       targetFolder: 'target/specs/sap.m/'
     }];
 
-    var oSpecMockData = { type: 'buffer',
-        status: 200,
-        headers:
-        {
-          'access-control-allow-origin': '*',
-          vary: 'Origin',
-          'accept-ranges': 'bytes',
-          date: 'Mon, 20 Apr 2015 14:10:47 GMT',
-          'cache-control': 'public, max-age=0',
-          'last-modified': 'Wed, 01 Apr 2015 12:56:25 GMT',
-          etag: 'W/"b12-568638981"',
-          'content-type': 'application/javascript',
-          'content-length': '2834',
-          connection: 'keep-alive'
-        },
-        data: 'Spec file mock data' };
+    var oSpecMockData = {
+      type: 'buffer',
+      status: 200,
+      headers: {
+        'access-control-allow-origin': '*',
+        vary: 'Origin',
+        'accept-ranges': 'bytes',
+        date: 'Mon, 20 Apr 2015 14:10:47 GMT',
+        'cache-control': 'public, max-age=0',
+        'last-modified': 'Wed, 01 Apr 2015 12:56:25 GMT',
+        etag: 'W/"b12-568638981"',
+        'content-type': 'application/javascript',
+        'content-length': '2834',
+        connection: 'keep-alive'
+      },
+      data: 'Spec file mock data'
+    };
 
     var requestStub = {
-      request : function(path) {
+      request: function (path) {
         return oSpecMockData;
       }
     };
 
     var fsStub = {
-      writeFileSync : function() {
+      writeFileSync: function () {
         return true;
       },
-      mkdirSync : function() {
+      mkdirSync: function () {
         return true;
       }
     };
@@ -137,8 +136,8 @@ describe("RemoteSAPUI5SpecResolver", function() {
     spyOn(fsStub, "mkdirSync");
 
     var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {
-      'urllib-sync' : requestStub,
-      'fs' : fsStub
+      'urllib-sync': requestStub,
+      'fs': fsStub
     });
 
     var specResolver = new SpecResolver({});

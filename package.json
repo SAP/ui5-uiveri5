@@ -6,7 +6,8 @@
     "lodash": "~3.6.0",
     "optimist": "~0.6.0",
     "protractor": "~1.6.1",
-    "proxyquire": "^1.4.0"
+    "proxyquire": "~1.4.0",
+    "urllib-sync": "~1.0.1"
   },
   "devDependencies": {},
   "repository": {

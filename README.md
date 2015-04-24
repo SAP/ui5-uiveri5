@@ -55,7 +55,7 @@ grunt serve
 Run all tests against the locally running server:
 ```
 cd visualtestjs
-node bin/visualtest --verbose=true --ignoreSync=true conf/nexttoopenui5.conf.js
+npm run visualtest -- --verbose=true --ignoreSync=true conf/nexttoopenui5.conf.js
 ```
 
 ### Advanced options - NOT implemented yet
@@ -84,10 +84,8 @@ Run tests on remote provider (sauselabs, browserstack, ..) on a particular platf
 --browsers="chrome:android4.4" --remote="sause:api.sauselabs.com:443:<user>:<token>"
 ```
 
-Command-line arguments override options from conf.js
+## Development
 
-command-line no conf -> default.conf.js profile=visual -> visualtest.profile.conf.js -> defaults
-command-line conf=conf.js -> conf.js no profile -> visual.profile.conf.js -> defaults
-command-line conf=conf.js -> conf.js profile=integration -> integration.profile.conf.js -> defaults
-
+### Run unit tests
+npm run test
 

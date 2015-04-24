@@ -9,7 +9,9 @@
     "proxyquire": "~1.4.0",
     "urllib-sync": "~1.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine": "^2.2.1"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.wdf.sap.corp:i035254/visualtestjs.git"
@@ -18,7 +20,8 @@
     "visualtest": "bin/visualtest"
   },
   "scripts": {
-    "visualtest": "node bin/visualtest"
+    "visualtest": "node bin/visualtest",
+    "test": "node node_modules/jasmine/bin/jasmine"
   },
   "main": "lib/visualtest.js"
 }

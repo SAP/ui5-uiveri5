@@ -39,11 +39,13 @@ var run = function(config) {
   // resolve specs
   var specResolverName = config.specResolver || DEFAULT_SPEC_RESOLVER;
   logger.debug('Loading spec resolver module: ' + specResolverName);
+  logger.info('Resolving specs');
   var specResolver = require(specResolverName)(config);
   var specs = specResolver.resolve();
-  if (specs.length==0){
+  if (!specs || specs.length==0){
     throw new Error("No specs found");
   }
+  logger.info( specs.length + ' spec file found');
 
   // set default clientsidescripts module
   config.clientsidescripts = config.clientsidescripts || DEFAULT_CLIENTSIDESCRIPTS;
@@ -161,6 +163,7 @@ var run = function(config) {
   }
 
   // call protractor
+  logger.info('Executing specs');
   var protractorLauncher = require('protractor/lib/launcher');
   protractorLauncher.init(null,protractorArgv);
 };

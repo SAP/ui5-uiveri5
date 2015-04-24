@@ -30,7 +30,7 @@ describe("RemoteSAPUI5SpecResolver", function () {
     var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {'urllib-sync': requestStub});
     var specResolver = new SpecResolver({});
 
-    var aPaths = specResolver._getSuitePaths(oAppInfo);
+    var aPaths = specResolver._prepareSuitePaths(oAppInfo);
 
     expect(aPaths.length).toBe(2);
     expect(aPaths[0].pathUrl).toEqual("http://localhost:8080/testsuite/test-resources/sap/ui/core/visual/visual.suite.js");

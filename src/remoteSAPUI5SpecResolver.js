@@ -32,12 +32,14 @@ RemoteSpecResolver.prototype.resolve = function () {
   var oAppInfo = JSON.parse(oAppInfoRaw.data);
 
   //get suite files paths, created from the lib name
-  var aSuitePaths = this._getSuitePaths(oAppInfo);
+  var aSuitePaths = this._prepareSuitePaths(oAppInfo);
 
   //write the suite files with given paths to given folder
-  var aSpecPaths = this._downloadFiles(aSuitePaths,true);
+  logger.info('Download suite files');
+  var aSpecPaths = this._downloadFiles(aSuitePaths,undefined,true);
 
   //load spec files from all downloaded suite files
+  logger.info('Download spec files');
   var aSpecs = this._loadSpecs(aSpecPaths);
 
   return aSpecs;
@@ -49,7 +51,7 @@ RemoteSpecResolver.prototype.resolve = function () {
  * @returns {{pathUrl: String, targetFolder: String}} aSuitePaths - array with paths to suite files of selected libraries,
  * pathUrl - url to suite files, targetFolder - where to store the files
  * */
-RemoteSpecResolver.prototype._getSuitePaths = function (oAppInfo) {
+RemoteSpecResolver.prototype._prepareSuitePaths = function (oAppInfo) {
   var aLibraries = oAppInfo.libraries;
   var len = aLibraries.length;
   var aLibs = [];
@@ -92,32 +94,29 @@ RemoteSpecResolver.prototype._getSuitePaths = function (oAppInfo) {
  * Write data from given path to file
  * @param {{pathUrl: String, targetFolder: String}} aPaths - array of paths for downloading content,
  * pathUrl - url to suite files, targetFolder - where to store the files
- * @param {String} sTargetFolder - name of the folder where the files will be written
+ * @param {String} [sTargetFolder] - name of the folder where the files will be written
  * @param {boolean} [bIgnore404=false] - ignore 404s
  * @return {{pathUrl: String, targetFolder: String}[]} - array with objects - urls and target folder
  * pathUrl - url to suite files, targetFolder - where to store the files
  * */
 RemoteSpecResolver.prototype._downloadFiles = function (aPaths, sTargetFolder, bIgnore404) {
-  bIgnore404 = bIgnore404 || false;
   var aResultPaths = [];
   for (var i = 0; i < aPaths.length; i++) {
     var oResponse = request.request(aPaths[i].pathUrl);
 
-    var sStatus = parseInt(oResponse.status);
     var targetFolder = sTargetFolder ? sTargetFolder : aPaths[i].targetFolder;
-
-    if (sStatus >= 200 && sStatus <= 205) {
+    if (oResponse.status >= 200 && oResponse.status <= 205) {
       if (!fs.existsSync(aPaths[i].targetFolder)) {
         this._mkdirs(targetFolder);
       }
       fs.writeFileSync(targetFolder + aPaths[i].pathUrl.split("/").pop(), oResponse.data, ENCODING_UTF8);
       aResultPaths.push({pathUrl: aPaths[i].pathUrl, targetFolder: aPaths[i].targetFolder});
-      log.debug('Downloaded: ' + aPaths[i].pathUrl);
-    } else if (sStatus == 404 && bIgnore404) {
+      logger.debug('Downloaded: ' + aPaths[i].pathUrl);
+    } else if (oResponse.status == 404 && bIgnore404) {
       logger.debug('Cannot find: ' + aPaths[i].pathUrl);
     } else {
       throw new Error('Cannot download: ' + aPaths[i].pathUrl +
-        ', status: ' + sStatus + ', message: ' + oResponse.data);
+        ', status: ' + oResponse.status + ', message: ' + oResponse.data);
     }
   }
 

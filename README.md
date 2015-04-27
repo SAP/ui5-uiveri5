@@ -31,7 +31,7 @@ Run all *.spec.js tests from the folder that contains conf.js. Make sure that ro
 $ visualtestjs
 ```
 
-### Run visualtests of locally cloned openui5
+### Run visualtests of locally cloned openui5 with sample [tests](https://git.wdf.sap.corp/#/c/826745/)
 Install openui5 locally:
 ```
 $ git clone ssh://<user>@git.wdf.sap.corp:29418/openui5
@@ -40,7 +40,7 @@ $ npm install
 ```
 Pull sample test from draft commit:
 ```
-$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/1
+$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/2
 ```
 Install visualtestjs locally:
 ```
@@ -55,7 +55,7 @@ $ grunt serve
 Run all tests against the locally running server:
 ```
 $ cd visualtestjs
-$ npm run visualtest -- --verbose=true --ignoreSync=true conf/nexttoopenui5.conf.js
+$ npm run visualtest -- --verbose=true --ignoreSync=true
 ```
 
 ### Advanced options - NOT implemented yet

@@ -149,4 +149,64 @@ describe("RemoteSAPUI5SpecResolver", function () {
     expect(aSpecs.length).toBe(1);
     expect(aSpecs[0].name).toEqual("sap.m.ActionSelect");
   });
+
+  it("Should load filtrated specs.", function () {
+    var oSpecMockData = {
+      type: 'buffer',
+      status: 200,
+      headers: {
+        'access-control-allow-origin': '*',
+        vary: 'Origin',
+        'accept-ranges': 'bytes',
+        date: 'Mon, 20 Apr 2015 14:10:47 GMT',
+        'cache-control': 'public, max-age=0',
+        'last-modified': 'Wed, 01 Apr 2015 12:56:25 GMT',
+        etag: 'W/"b12-568638981"',
+        'content-type': 'application/javascript',
+        'content-length': '2834',
+        connection: 'keep-alive'
+      },
+      data: 'Spec file mock data'
+    };
+
+    var requestStub = {
+      request: function (path) {
+        return oSpecMockData;
+      }
+    };
+
+    var fsStub = {
+      writeFileSync: function () {
+        return true;
+      },
+      mkdirSync: function () {
+        return true;
+      }
+    };
+
+    var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {
+      'urllib-sync': requestStub,
+      'fs': fsStub
+    });
+
+    var specResolver = new SpecResolver({specFilter : "sap.ui.core.acc", baseUrl: "http://localhost:8080"});
+    var oSpecAcc = specResolver._applySpecFilter("ACC.spec.js","sap/ui/core");
+    expect(oSpecAcc.name).toEqual("sap.ui.core.ACC");
+
+    specResolver = new SpecResolver({specFilter: "sap.m", baseUrl: "http://localhost:8080"});
+    var oSpecActionSelect = specResolver._applySpecFilter("ActionSelect.spec.js", "sap/m");
+    expect(oSpecActionSelect.name).toEqual("sap.m.ActionSelect");
+
+    specResolver = new SpecResolver({specFilter: "sap.m,ACC", baseUrl: "http://localhost:8080"});
+    var oSpec = specResolver._applySpecFilter("ActionSelect.spec.js", "sap/m");
+    expect(oSpec.name).toEqual("sap.m.ActionSelect");
+
+    specResolver = new SpecResolver({specFilter: "Actionselect", baseUrl: "http://localhost:8080"});
+    var oSpecEmpty = specResolver._applySpecFilter("Table.spec.js", "sap/m");
+    expect(oSpecEmpty).toBeUndefined();
+
+    specResolver = new SpecResolver({baseUrl: "http://localhost:8080"});
+    var oSpecWithoutFilter = specResolver._applySpecFilter("Test", "test");
+    expect(oSpecWithoutFilter.name).toEqual("test.Test");
+  });
 });

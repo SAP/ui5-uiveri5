@@ -144,12 +144,9 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
     var requiredSuite = require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop());
     //check the requiredSuite type
     if (requiredSuite instanceof Array) {
-      //if is Array - push to oSuiteFiles
       oSuiteFiles.specNames.push(requiredSuite);
     } else if (requiredSuite instanceof Function) {
-      //if is Function - first it have to be resolved and then the passed array is pushed to oSuiteFiles
-      var resolvedFunction = requiredSuite(this);
-      oSuiteFiles.specNames.push(resolvedFunction);
+      requiredSuite({specs: oSuiteFiles.specNames});
     }
 
     //get the library name from the path
@@ -169,25 +166,43 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
 
       sLibUri = oSuiteFiles.specUris[i];
 
-      //create specOwnName - get the sLibUri and replace \ with .
-      sLibName = sLibUri.replace(/\//g, ".");
-
       // apply specFilter
-      if (this.sSpecFilter && this.sSpecFilter != "*") {
-        var aSpecsFilter = this.sSpecFilter.split(",");
-
-        if (aSpecsFilter.indexOf(oSuiteFiles.specNames[i][j]) != -1) {
-          //if sSpecFilter is not undefined and not  "*" filter by specs described on it
-          aSpecs = this._fillSpecsArray(sLibUri, oSuiteFiles.specNames[i][j], sLibName);
-        }
-      } else {
-        //if there are no specs described on filter, it will add all found specs in the aSpecs array
-        aSpecs = this._fillSpecsArray(sLibUri, oSuiteFiles.specNames[i][j], sLibName);
+      var oSpec = this._applySpecFilter(oSuiteFiles.specNames[i][j], sLibUri);
+      if(oSpec) {
+        aSpecs.push(oSpec);
       }
     }
   }
 
   return aSpecs;
+};
+
+
+/**
+ * Apply spec filters
+ * @param {String} specName - name of the spec file
+ * @param {String} sLibUri - lib URI fragment
+ * @return {({name: String, path: String, contentUrl: String, _specUrls: String}|undefined)} object with information about spec file
+ * */
+RemoteSpecResolver.prototype._applySpecFilter = function (specName, sLibUri) {
+  var oSpec;
+
+  //create specOwnName - get the sLibUri and replace \ with .
+  var sLibName = sLibUri.replace(/\//g, ".");
+
+  if (this.sSpecFilter && this.sSpecFilter != "*") {
+    var that = this;
+    var aSpecsFilter = this.sSpecFilter.split(",");
+    aSpecsFilter.forEach(function(filter) {
+      if((sLibName + "." + specName).toLowerCase().indexOf(filter.toLowerCase()) != -1) {
+        oSpec = that._fillSpecsArray(sLibUri, specName, sLibName);
+      }
+    });
+  } else {
+    oSpec = this._fillSpecsArray(sLibUri, specName, sLibName);
+  }
+
+  return oSpec;
 };
 
 /**
@@ -218,7 +233,7 @@ RemoteSpecResolver.prototype._fillSpecsArray = function (sLibUri, specName, sLib
   logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
   aSpecs.push(oSpec);
 
-  return aSpecs;
+  return oSpec;
 }
 
 /**

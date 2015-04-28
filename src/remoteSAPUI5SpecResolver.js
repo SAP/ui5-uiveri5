@@ -166,11 +166,8 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
 
       sLibUri = oSuiteFiles.specUris[i];
 
-      //create specOwnName - get the sLibUri and replace \ with .
-      sLibName = sLibUri.replace(/\//g, ".");
-
       // apply specFilter
-      var oSpec = this._specsFilter(oSuiteFiles.specNames[i][j], sLibName, sLibUri);
+      var oSpec = this._applySpecFilter(oSuiteFiles.specNames[i][j], sLibUri);
       if(oSpec) {
         aSpecs.push(oSpec);
       }
@@ -180,8 +177,19 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
   return aSpecs;
 };
 
-RemoteSpecResolver.prototype._specsFilter = function (specName, sLibName, sLibUri) {
+
+/**
+ * Apply spec filters
+ * @param {String} specName - name of the spec file
+ * @param {String} sLibUri - lib URI fragment
+ * @return {({name: String, path: String, contentUrl: String, _specUrls: String}|undefined)} object with information about spec file
+ * */
+RemoteSpecResolver.prototype._applySpecFilter = function (specName, sLibUri) {
   var oSpec;
+
+  //create specOwnName - get the sLibUri and replace \ with .
+  var sLibName = sLibUri.replace(/\//g, ".");
+
   if (this.sSpecFilter && this.sSpecFilter != "*") {
     var that = this;
     var aSpecsFilter = this.sSpecFilter.split(",");

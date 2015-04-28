@@ -149,4 +149,61 @@ describe("RemoteSAPUI5SpecResolver", function () {
     expect(aSpecs.length).toBe(1);
     expect(aSpecs[0].name).toEqual("sap.m.ActionSelect");
   });
+
+  it("Should load filtrated specs.", function () {
+    var oSpecMockData = {
+      type: 'buffer',
+      status: 200,
+      headers: {
+        'access-control-allow-origin': '*',
+        vary: 'Origin',
+        'accept-ranges': 'bytes',
+        date: 'Mon, 20 Apr 2015 14:10:47 GMT',
+        'cache-control': 'public, max-age=0',
+        'last-modified': 'Wed, 01 Apr 2015 12:56:25 GMT',
+        etag: 'W/"b12-568638981"',
+        'content-type': 'application/javascript',
+        'content-length': '2834',
+        connection: 'keep-alive'
+      },
+      data: 'Spec file mock data'
+    };
+
+    var requestStub = {
+      request: function (path) {
+        return oSpecMockData;
+      }
+    };
+
+    var fsStub = {
+      writeFileSync: function () {
+        return true;
+      },
+      mkdirSync: function () {
+        return true;
+      }
+    };
+
+    var SpecResolver = proxyquire("../src/remoteSAPUI5SpecResolver.js", {
+      'urllib-sync': requestStub,
+      'fs': fsStub
+    });
+
+    var specResolver = new SpecResolver({specFilter : "sap.ui.core.acc", baseUrl: "http://localhost:8080"});
+    var oSpecAcc = specResolver._specsFilter("ACC.spec.js", "sap.ui.core", "sap/ui/core");
+
+    specResolver = new SpecResolver({specFilter: "sap.m", baseUrl: "http://localhost:8080"});
+    var oSpecActionSelect = specResolver._specsFilter("ActionSelect.spec.js", "sap.m", "sap/m");
+
+    specResolver = new SpecResolver({specFilter: "sap.m,ACC", baseUrl: "http://localhost:8080"});
+    var oSpec = specResolver._specsFilter("ActionSelect.spec.js", "sap.m", "sap/m");
+
+    specResolver = new SpecResolver({baseUrl: "http://localhost:8080"});
+    var oSpecWithoutFilter = specResolver._specsFilter("Test", "test", "test");
+
+    expect(oSpecActionSelect.name).toEqual("sap.m.ActionSelect");
+    expect(oSpecAcc.name).toEqual("sap.ui.core.ACC");
+    expect(oSpec.name).toEqual("sap.m.ActionSelect")
+    expect(oSpecWithoutFilter.name).toEqual("test.Test");
+  });
 });

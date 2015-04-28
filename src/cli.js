@@ -9,11 +9,10 @@ var argv = require('optimist').
           'confFile defaults to conf.js if presented in current working directory.').
     describe('libFilter', 'Comma separated list of lib suites to execute, defaults to all').
     describe('specFilter', 'Comma separated list of specs to execute, defaults to all').
-    describe('specs', 'Specs to execute').
+    describe('specs', 'Specs to execute, accepts glob pattern').
     describe('baseUrl', 'Base url to execute the spec against, defaults to http://localhost:8080').
-    //describe('browsers', ''Comma separated list of browsers to execute tests, defaults to chrome').
-    //describe('seleniumAddress', 'A running selenium address to use, defaults to localhost').
-    //describe('seleniumPort', 'Optional port for the selenium standalone server', defaults to 4444).
+    //describe('browsers', 'Comma separated list of browsers to execute tests, defaults to chrome').
+    describe('seleniumAddress','Address of remote Selenium server, default to http://localhost:4444/wd/hub').
     describe('verbose', 'Print debug logs').
     argv;
 

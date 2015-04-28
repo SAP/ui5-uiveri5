@@ -59,6 +59,9 @@ var run = function(config) {
   // add baseUrl
   protractorArgv.baseUrl = config.baseUrl;
 
+  // add selenium server address
+  protractorArgv.seleniumAddress = config.seleniumAddress;
+
   // use jasmine 2.0
   protractorArgv.framework = 'jasmine2';
 

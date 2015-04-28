@@ -64,22 +64,25 @@ By default visualtest will discover all `**/visualtest/**.spec.js` from localhos
 All of the above defaults could be modified by providing command-line arguments.
 
 Run tests on Chrome, Firefox and InternetExplorer in parallel
+__not implemented__
 ```
 --browsers="chrome,firefox,iexplorer"
 ```
 Run tests from and against test content on remote sapui5 runtime
 ```
---server="http://veui5infra.dhcp.wdf.sap.corp:8080"
+--baseUrl="http://veui5infra.dhcp.wdf.sap.corp:8080"
 ```
 Run tests on remove selenium server
 ```
---browsers="safari" --remote="myAirBook.wdf.sap.corp:4444"
+--seleniumAddress="myAirBook.wdf.sap.corp:4444/wd/hub"
 ```
 Run tests on remote selenium grid server that dispatches the test job to particular OS/Browser slave
+__not implemented__
 ```
---browsers="iexplorer:ie9:win8" --remote="ui5testgrid.wdf.sap.corp:4444"
+--browsers="iexplorer:ie9:win8" --seleniumAddress="ui5testgrid.wdf.sap.corp:4444/wd/hub"
 ```
 Run tests on remote provider (sauselabs, browserstack, ..) on a particular platform and browser
+__not implemented__
 ```
 --browsers="chrome:android4.4" --remote="sause:api.sauselabs.com:443:<user>:<token>"
 ```

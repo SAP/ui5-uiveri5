@@ -55,7 +55,7 @@ $ grunt serve
 Run all tests against the locally running server:
 ```
 $ cd visualtestjs
-$ npm run visualtest -- --verbose=true --ignoreSync=true
+$ npm run visualtest -- --verbose --ignoreSync
 ```
 
 ### Advanced options - NOT implemented yet

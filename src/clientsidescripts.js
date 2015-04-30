@@ -5,7 +5,7 @@ functions.waitForAngular = function(rootSelector, callback) {
 
   try {
     if (!window.sap) {
-      throw new Error('SAPUI5 could not be found on the window');
+      callback('SAPUI5 could not be found on the window');
     }
 
     var fnDefineTestCooperation = function() {
@@ -363,10 +363,6 @@ functions.waitForAngular = function(rootSelector, callback) {
         if(attempts < 1) {
           if (!sap.ui) {
             callback('SAPUI5 is not present');
-          } else if (!window.clientSideScripts) {
-            callback('window.clientSideScripts is undefined');
-          } else if (!window.clientSideScripts.defineTestCooperation) {
-            callback('window.clientSideScripts.defineTestCooperation is undefined');
           } else {
             callback('retries for notify callback exceeded');
           }

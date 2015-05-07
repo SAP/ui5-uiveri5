@@ -37,7 +37,7 @@ var run = function(config) {
   logger.debug('Using baseUrl: ' + config.baseUrl);
 
   // log cwd
-  logger.debug('Current working directory: ' + process.cwd());
+  logger.info('Current working directory: ' + process.cwd());
 
   // resolve specs
   var specResolverName = config.specResolver || DEFAULT_SPEC_RESOLVER;

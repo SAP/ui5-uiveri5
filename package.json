@@ -23,5 +23,5 @@
     "visualtest": "node bin/visualtest",
     "test": "node node_modules/jasmine/bin/jasmine"
   },
-  "main": "lib/visualtest.js"
+  "main": "src/visualtest.js"
 }

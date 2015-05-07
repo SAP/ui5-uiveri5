@@ -141,7 +141,7 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
 
   //fill the aSpecPaths with specNames and specUris arrays
   aSpecPaths.forEach(function (sPath) {
-    var suiteModule = process.resolve(sPath.targetFolder + sPath.pathUrl.split("/").pop() );
+    var suiteModule = path.resolve(sPath.targetFolder + sPath.pathUrl.split("/").pop() );
     var requiredSuite = require(suiteModule);
 
     //check the requiredSuite type

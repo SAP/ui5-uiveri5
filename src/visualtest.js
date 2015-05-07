@@ -12,7 +12,7 @@ var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 var run = function(config) {
 
   // configure logger
-  logger.enableDebug(config.verbose);
+  logger.setLevel(config.verbose);
 
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
@@ -30,11 +30,14 @@ var run = function(config) {
   }
 
   // update logger with resolved configs
-  logger.enableDebug(config.verbose);
+  logger.setLevel(config.verbose);
 
   // set baseUrl
   config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
   logger.debug('Using baseUrl: ' + config.baseUrl);
+
+  // log cwd
+  logger.debug('Current working directory: ' + process.cwd());
 
   // resolve specs
   var specResolverName = config.specResolver || DEFAULT_SPEC_RESOLVER;
@@ -53,8 +56,8 @@ var run = function(config) {
   // prepare protractor executor args
   var protractorArgv = {};
 
-  // enable debug logs
-  protractorArgv.troubleshoot = config.verbose;
+  // enable protractor debug logs
+  protractorArgv.troubleshoot = config.verbose>0;
 
   // add baseUrl
   protractorArgv.baseUrl = config.baseUrl;
@@ -74,6 +77,7 @@ var run = function(config) {
   // execute before any setup
   protractorArgv.beforeLaunch =  function() {
 
+    // override angular-specific scripts
     var clientsidesriptsName = config.clientsidescripts;
     logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
     var clientsidescripts = require(clientsidesriptsName);
@@ -87,6 +91,18 @@ var run = function(config) {
     // publish visualtest configs on protractor's browser object
     browser.visualtest = {};
     browser.visualtest.config = config;
+
+    // log script executions
+    var origExecuteAsyncScript_= browser.executeAsyncScript_;
+    browser.executeAsyncScript_ = function() {
+
+      // log the call
+      logger.trace('Executing async script: ' + arguments[1] +
+        (config.verbose > 2 ? ('\n' + arguments[0] + '\n') : ''));
+
+      //call original fn in its context
+      return origExecuteAsyncScript_.apply(browser, arguments);
+    }
 
     // open test content page
     jasmine.getEnv().addReporter({

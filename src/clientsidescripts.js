@@ -270,7 +270,7 @@ functions.waitForAngular = function(rootSelector, callback) {
               method.apply(oObject, aParameters || []);
               oEventBus.publish('delayedCallFinished', {id: id});
             }, iDelay);
-            oEventBus.getEventBus().publish('delayedCallScheduled', {id: id});
+            oEventBus.publish('delayedCallScheduled', {id: id});
             return id;
           };
         };

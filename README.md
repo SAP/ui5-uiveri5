@@ -4,15 +4,23 @@
 
 ### Visual testing
 
-### Run from openui5 - NOT implemented
+### Run from openui5
 Clone and install dependencies for openui5:
 ```
 $ git clone https://github.com/SAP/openui5.git
 $ npm install
 ```
-Run all tests against automatically started local server:
+Pull basic grunt support and sample tests from this draft commit:
 ```
-$ grunt visualtest
+$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/2
+```
+Start the selenium server manually:
+```
+$ java -jar selenium-server-standalone.jar
+```
+Run all tests against this server:
+```
+$ grunt visualtest --seleniumAddress=http://localhost:4444/wd/hub
 ```
 
 ### Integration testing
@@ -38,7 +46,7 @@ $ git clone ssh://<user>@git.wdf.sap.corp:29418/openui5
 $ cd openui5
 $ npm install
 ```
-Pull sample test from draft commit:
+Pull sample tests from this draft commit:
 ```
 $ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/2
 ```

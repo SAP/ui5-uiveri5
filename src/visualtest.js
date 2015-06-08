@@ -71,8 +71,19 @@ var run = function(config) {
   // add specs as protractor expects
   protractorArgv.specs = [];
   specs.forEach(function(spec){
-      protractorArgv.specs.push(spec.path);
+    protractorArgv.specs.push(spec.path);
   });
+
+  // set browsers and capabilities TODO
+  if (config.browsers){
+    protractorArgv.multiCapabilities = [];
+    config.browsers.split(',').forEach(function(browser){
+      logger.debug('Schedule run on: ' + browser);  // TODO capabilities
+      protractorArgv.multiCapabilities.push({
+        browserName: browser
+      });
+    });
+  }
 
   // execute before any setup
   protractorArgv.beforeLaunch =  function() {

@@ -32,6 +32,13 @@ functions.waitForAngular = function(rootSelector, callback) {
             this._wrapClearDelayedCall(this.oEventBus);
             this._wrapOData(this.oEventBus);
 
+            // Patch Popup to use the newly defined IntervalTrigger
+            // Because of the module loading in SAPUI5, Popup uses
+            // the old version of IntervalTrigger instead of the newly defined one,
+            // i.e. instrumentation of IntervalTrigger hasn't been done early enough
+            // TODO think of a generic solution, e.g. instrumentation of IntervalTrigger before it is required by any other class
+            sap.ui.core.Popup.DockTrigger = new sap.ui.core.IntervalTrigger(200);
+
             this.oEventBus.subscribe('delayedCallScheduled', this._handleTimeoutScheduled, this);
             this.oEventBus.subscribe('delayedCallFinished', this._handleTimeoutFinished, this);
             this.oEventBus.subscribe('delayedCallCancelled', this._handleTimeoutFinished, this);
@@ -270,7 +277,7 @@ functions.waitForAngular = function(rootSelector, callback) {
               method.apply(oObject, aParameters || []);
               oEventBus.publish('delayedCallFinished', {id: id});
             }, iDelay);
-            oEventBus.getEventBus().publish('delayedCallScheduled', {id: id});
+            oEventBus.publish('delayedCallScheduled', {id: id});
             return id;
           };
         };

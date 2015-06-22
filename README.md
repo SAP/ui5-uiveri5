@@ -8,6 +8,7 @@
 Clone and install dependencies for openui5:
 ```
 $ git clone https://github.com/SAP/openui5.git
+$ npm install
 ```
 Pull grunt support and sample tests from this draft commit:
 ```

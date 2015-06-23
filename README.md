@@ -10,18 +10,20 @@ Clone and install dependencies for openui5:
 $ git clone https://github.com/SAP/openui5.git
 $ npm install
 ```
-Pull basic grunt support and sample tests from this draft commit:
+Pull grunt support and sample tests from this draft commit:
 ```
-$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/2
+$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/3
 ```
-Start the selenium server manually:
+Update dependencies so latest visualtestjs is used:
 ```
-$ java -jar selenium-server-standalone.jar
+$ npm update visualtestjs
 ```
-Run all tests against this server:
+Run all available tests:
 ```
-$ grunt visualtest --seleniumAddress=http://localhost:4444/wd/hub
+$ grunt visualtest 
 ```
+Please check docs/developing.md and docs/tools.md for further arguments that visualtest task accepts.
+Please check docs/controllibraries.md and the availbe sap.m libirary visual tests from the draft commit how to write new visual tests.
 
 ### Integration testing
 Install visualtest globally:
@@ -39,40 +41,13 @@ Run all *.spec.js tests from the folder that contains conf.js. Make sure that ro
 $ visualtestjs
 ```
 
-### Run visualtests of locally cloned openui5 with sample [tests](https://git.wdf.sap.corp/#/c/826745/)
-Install openui5 locally:
-```
-$ git clone ssh://<user>@git.wdf.sap.corp:29418/openui5
-$ cd openui5
-$ npm install
-```
-Pull sample tests from this draft commit:
-```
-$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/2
-```
-Install visualtestjs locally:
-```
-$ git clone git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git
-$ npm install
-```
-Start openui5 server:
-```
-$ cd openui5
-$ grunt serve
-```
-Run all tests against the locally running server:
-```
-$ cd visualtestjs
-$ npm run visualtest -- --verbose --ignoreSync
-```
-
 ### Advanced options - NOT implemented yet
 
 By default visualtest will discover all `**/visualtest/**.spec.js` from localhost:8080 and execute them on local chrome over automatically started selenium server on localhost:4444.
 All of the above defaults could be modified by providing command-line arguments.
 
 Run tests on Chrome, Firefox and InternetExplorer in parallel
-__not implemented__
+__still works with single browser only__
 ```
 --browsers="chrome,firefox,iexplorer"
 ```
@@ -97,7 +72,13 @@ __not implemented__
 
 ## Development
 
-### Run unit tests
+### Run unit tests from visualtestjs project
 ```
 $ npm run test
 ```
+### Run unit tests for grunt integration from openui5 project
+```
+$jasmine-node grunt/spec/selenium_visualtest.spec.js
+```
+
+

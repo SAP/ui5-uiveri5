@@ -71,8 +71,19 @@ var run = function(config) {
   // add specs as protractor expects
   protractorArgv.specs = [];
   specs.forEach(function(spec){
-      protractorArgv.specs.push(spec.path);
+    protractorArgv.specs.push(spec.path);
   });
+
+  // set browsers and capabilities TODO
+  if (config.browsers){
+    protractorArgv.multiCapabilities = [];
+    config.browsers.split(',').forEach(function(browser){
+      logger.debug('Schedule run on: ' + browser);  // TODO capabilities
+      protractorArgv.multiCapabilities.push({
+        browserName: browser
+      });
+    });
+  }
 
   // execute before any setup
   protractorArgv.beforeLaunch =  function() {
@@ -88,9 +99,15 @@ var run = function(config) {
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
+    //TODO visualtest object should be exported on browser object. It will have as members: config, runtime, specs
+
     // publish visualtest configs on protractor's browser object
-    browser.visualtest = {};
-    browser.visualtest.config = config;
+    browser.testrunner = {};
+    browser.testrunner.config = config;
+
+    // TODO publish whole runtime
+    browser.testrunner.runtime = {};
+    browser.testrunner.runtime.browserName = 'chrome';
 
     // log script executions
     var origExecuteAsyncScript_= browser.executeAsyncScript_;

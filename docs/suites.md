@@ -21,12 +21,12 @@ Suite file is actually a node module that is "required" from the visualtest runt
 
 Suite with logic:
 ``` js
-module.exports = function(runner) {
+module.exports = function(testrunner) {
 
-  runner.specs.push('SomeOtherControl.spec.js');
+  testrunner.specs.push('SomeOtherControl.spec.js');
 
-  if(!runner.browser.type('ie9'){
-    runner.specs.push('SomeOtherControl.spec.js');
+  if(testrunner.runtime.browserName !== 'ie9'){
+    testrunner.specs.push('SomeOtherControl.spec.js');
   }
 }
 ```

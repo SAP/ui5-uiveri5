@@ -14,35 +14,33 @@ functions.waitForAngular = function(rootSelector, callback) {
 
       jQuery.sap.declare('sap.ui.core.TestCooperation');
 
-      sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata', 'sap/ui/thirdparty/datajs'],
-        function(jQuery, Metadata, datajs) {
+      sap.ui.define(['jquery.sap.global', 'sap/ui/base/Metadata'],
+        function(jQuery, Metadata) {
         'use strict';
 
         var TestCooperation = Metadata.createClass('sap.ui.core.TestCooperation', {
 
-          constructor : function(oEventBus, oCore) {
+          constructor : function(oCore) {
 
+            this.iPendingXHRs = 0;
             this.iPendingTimeouts = 0;
             this.oPendingTimeoutIDs = {};
             this.oTimeoutInfo = {};
             this.aDoNotTrack = [];
             this.aPendingCallbacks = [];
-            this.oEventBus = oEventBus;
             this.oCore = oCore;
 
             this._wrapSetTimeout();
             this._wrapClearTimeout();
-            this._wrapOData(this.oEventBus);
+            this._wrapXHR();
 
-            this.oEventBus.subscribe('ODataFinished', this._tryToExecuteCallbacks, this);
             this.oCore.attachUIUpdated(this._tryToExecuteCallbacks);
-            jQuery(document).on('ajaxStop', this, this._tryToExecuteCallbacks);
           }
         });
 
         TestCooperation.prototype.notifyWhenStable = function(fnCallback) {
 
-          if (this.iPendingTimeouts === 0 && jQuery.active === 0 && OData.active === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length === 0) {
+          if (this.iPendingTimeouts === 0 && this.iPendingXHRs === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length === 0) {
             fnCallback();
           } else {
             this.aPendingCallbacks.push(fnCallback);
@@ -73,36 +71,24 @@ functions.waitForAngular = function(rootSelector, callback) {
           };
         };
 
-        TestCooperation.prototype._wrapOData = function(oEventBus) {
-          if (typeof OData === 'object' && typeof OData.request === 'function' && typeof OData.active !== 'number') {
-            var fnOriginalRequest = OData.request;
-            var fnRequest = function (oRequest, fnSuccess, fnError, oHandler, oHttpClient, oMetadata) {
-              OData.active += 1;
-              fnOriginalRequest.call(OData, oRequest, function () {
-                try {
-                  fnSuccess.apply(this, arguments);
-                } finally {
-                  OData.active -= 1;
-                  oEventBus.publish('ODataFinished');
-                }
-              },
-              function () {
-                try {
-                  fnError.apply(this, arguments);
-                } finally {
-                  OData.active -= 1;
-                  oEventBus.publish('ODataFinished');
-                }
-              },
-              oHandler, oHttpClient, oMetadata);
-            };
-            OData.active = 0;
-            OData.request = fnRequest;
+        TestCooperation.prototype._wrapXHR = function() {
+          var that = this,
+            fnOriginalSend = window.XMLHttpRequest.prototype.send;
+          window.XMLHttpRequest.prototype.send = function() {
+            this.addEventListener('readystatechange', function() {
+              if (this.readyState == 4 && this.isTracked) {
+                that.iPendingXHRs--;
+                that._tryToExecuteCallbacks();
+              }
+            });
+            this.isTracked = true;
+            that.iPendingXHRs++;
+            fnOriginalSend.apply(this, arguments);
           };
         };
 
         TestCooperation.prototype._handleTimeoutScheduled = function(id, func, delay) {
-          if (this._isTracked(id, func, delay)) {
+          if (this._isTimeoutTracked(id, func, delay)) {
             this.oPendingTimeoutIDs[id] = 1;
             this.iPendingTimeouts++;
           }
@@ -118,7 +104,7 @@ functions.waitForAngular = function(rootSelector, callback) {
           this._tryToExecuteCallbacks();
         };
 
-        TestCooperation.prototype._isTracked = function(id, func, delay) {
+        TestCooperation.prototype._isTimeoutTracked = function(id, func, delay) {
           if (delay > MAX_TIMEOUT_DELAY) {
             this.aDoNotTrack.push(id);
             return false;
@@ -126,7 +112,7 @@ functions.waitForAngular = function(rootSelector, callback) {
             var bAddNewEntry = !this.oTimeoutInfo.hasOwnProperty(func) || this.oTimeoutInfo[func].delay != delay ||
                 new Date().getMilliseconds() - this.oTimeoutInfo[func].callTime > MAX_INTERVAL_STEP;
             if (bAddNewEntry) {
-              this.oTimeoutInfo[func] = {"delay": delay, "callCount": 1, "callTime": new Date().getMilliseconds()};
+              this.oTimeoutInfo[func] = {'delay': delay, 'callCount': 1, 'callTime': new Date().getMilliseconds()};
               return true;
             } else {
               if (++this.oTimeoutInfo[func].callCount <= 5) {
@@ -141,11 +127,11 @@ functions.waitForAngular = function(rootSelector, callback) {
 
         TestCooperation.prototype._tryToExecuteCallbacks = function() {
 
-          if (this.iPendingTimeouts === 0 && jQuery.active === 0 && OData.active === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length > 0) {
+          if (this.iPendingTimeouts === 0 && this.iPendingXHRs === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length > 0) {
             do {
               var fnCallback = this.aPendingCallbacks.shift();
               fnCallback();
-            } while (this.iPendingTimeouts === 0 && jQuery.active === 0 && OData.active === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length > 0)
+            } while (this.iPendingTimeouts === 0 && this.iPendingXHRs === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length > 0)
           }
         }
 
@@ -165,7 +151,7 @@ functions.waitForAngular = function(rootSelector, callback) {
         try {
           sap.ui.getCore().registerPlugin({
             startPlugin: function(oCore) {
-              sap.ui.TestCooperation = new sap.ui.core.TestCooperation(oCore.getEventBus(), {
+              sap.ui.TestCooperation = new sap.ui.core.TestCooperation({
                 getUIDirty: oCore.getUIDirty.bind(oCore),
                 attachUIUpdated: oCore.attachUIUpdated.bind(oCore)
               });

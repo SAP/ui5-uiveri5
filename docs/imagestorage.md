@@ -35,9 +35,9 @@ review+imagestore for this test/runtime/commiter.
 ### Image storage
 
 #### Operations
-Download - downloads a specific image by its uuid
-Upload - uploads a specific image and store by its uuid
-Delete - deletes a specific image by uuid
+* Download - downloads a specific image by its uuid
+* Upload - uploads a specific image and store by its uuid
+* Delete - deletes a specific image by uuid
 
 Upload and Delete operations are user/password protected
 
@@ -57,8 +57,8 @@ Orphaned images are such that do are not referenced in any commit.
 If configured, orphan images are deleted ( automatically or manually - UI needed)
 
 #### Operations
-CRUD on runtimes
-CRUD on orphaned images
+* CRUD on runtimes
+* CRUD on orphaned images
 
 Job scheduling and configuration (git scan, automatic orphan delete) is handled outside imagestore.
 

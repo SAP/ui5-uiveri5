@@ -15,6 +15,18 @@ var LIBS_INFO_URI = '/testsuite/resources/sap-ui-version.json';
 var SPECS_FOLDER = 'target/specs/';
 var ENCODING_UTF8 = 'utf8';
 
+/**
+ * @typedef RemoteSAPUI5SpecResolverConfig
+ * @type {Object}
+ * @extends {SpecResolverConfig}
+ * @property {String}
+ */
+
+/**
+ * Resolves specs
+ * @constructor
+ * @param {RemoteSAPUI5SpecResolverConfig} config - configs
+ */
 function RemoteSpecResolver(config) {
   this.config = config;
   this.sBaseUrl = this.config.baseUrl || BASE_URL;
@@ -178,7 +190,6 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
 
   return aSpecs;
 };
-
 
 /**
  * Apply spec filters

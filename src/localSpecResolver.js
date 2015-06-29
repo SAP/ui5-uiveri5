@@ -10,6 +10,18 @@ function SpecResolver(config){
   this.config  = config;
 }
 
+/**
+ * @typedef LocalSpecResolverConfig
+ * @type {Object}
+ * @extends {SpecResolverConfig}
+ * @property {String} specs - blob pattern to resolve specs, defaults to: './*.spec.js'
+ */
+
+/**
+ * Resolves specs
+ * @constructor
+ * @param {LocalSpecResolverConfig} config - configs
+ */
 SpecResolver.prototype.resolve = function(){
   var that = this;
 
@@ -18,7 +30,7 @@ SpecResolver.prototype.resolve = function(){
   var specsFilter = this.config.specFilter || '*';
   var specGlob = this.config.specs || SPECS_GLOB;
 
-  /** @type {Array.<SpecType>} */
+  /** @type {Spec} */
   var specs = [];
 
   logger.debug('Resolving specs from: ' + specGlob);
@@ -36,7 +48,7 @@ SpecResolver.prototype.resolve = function(){
     var specOwnName = specMatch[1];
     //var specOwnName = path.basename(specPath,path.extname(specPath));
 
-    /** @type {SpecType} */
+    /** @type {Spec} */
     var spec = {
       name: specOwnName,
       path: specPath,

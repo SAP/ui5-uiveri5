@@ -9,6 +9,28 @@ var DEFAULT_BASE_URL = 'http://localhost:8080';
 var DEFAULT_SPEC_RESOLVER = './remoteSAPUI5SpecResolver';
 var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 
+/**
+ * @typedef Config
+ * @type {Object}
+ * @extends {SpecResolverConfig}
+ * @property {String} specResolver - spec resolver to use, defaults to: './remoteSAPUI5SpecResolver'
+ * @property {String} conf - config file to use, defaults to: '../conf/default.conf.js' that contains only: profile: 'visual'
+ * @property {String} profile - used to resolve profile config file with pattern: '../conf/<profile>.conf.js, no profile resolved if undefined, defaults to: visual if default.conf.js loaded
+ * @property {number} verbose - verbose level, 0 shows only info, 1 shows debug, 2 shows waitForUI5 executions, 3 shows also waitForUI5 script content, defaults t: 0
+ * @property {String} seleniumAddress - Address of remote Selenium server, if missing will start local selenium server
+ * TODO seleniumHost
+ * TODO seleniumPort
+ * TODO selenumLoopback
+ * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive, defaults to: 'chrome'
+ * TODO browser.maximised defaults to: true
+ * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
+ * TODO params
+ */
+
+/**
+ * Runs visual tests
+ * @param {Config} config - configs
+ */
 var run = function(config) {
 
   // configure logger

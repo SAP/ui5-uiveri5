@@ -27,6 +27,8 @@ var argv = require('yargs')
     .describe('specs', 'Specs to execute, blob pattern used by localSpecResolver only')
     .strict()
     .argv;
+    //TODO profile argument
+    //TODO params
 
 // copy argv properties, no func, no prototype, no special members
 var config = {};

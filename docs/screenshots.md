@@ -2,13 +2,13 @@
 ### Execution flow
 
 #### Operation
---cache - download reference images from imagestore, default: true
-  --imageStoreUrl, default to: http://imagestore.hana.ondemand.com
---take - take screenshots, default: true
---compare - execute image comparison, default: true
---update - update reference images (if differ) with actual images on LOCAL file system, default: false
---upload - upload reference images to imagestore
-  --imageStoreUrl, default to: http://imagestore.hana.ondemand.com
+* --cache - download reference images from imagestore, default: true
+  * --imageStoreUrl, default to: http://imagestore.hana.ondemand.com
+* --take - take screenshots, default: true
+* --compare - execute image comparison, default: true
+* --update - update reference images (if differ) with actual images on LOCAL file system, default: false
+* --upload - upload reference images to imagestore
+  * --imageStoreUrl, default to: http://imagestore.hana.ondemand.com
 
 ### Runtime structure
 ```wiki
@@ -24,11 +24,11 @@
 ### LocalImageProvider
 
 #### Operation
---cache - nothing to do as the images are already in src/
---take - take screenshots
---compare - does image comparison ( and diff image generation of different in target/)
---update - copies the different actual images as reference in the src/
---upload - nothing to do
+* --cache - nothing to do as the images are already in src/
+* --take - take screenshots
+* --compare - does image comparison ( and diff image generation of different in target/)
+* --update - copies the different actual images as reference in the src/
+* --upload - nothing to do
 
 #### Reference image structure
 ```wiki
@@ -57,11 +57,11 @@ target/
 ### RemoteLFSImageProvider
 
 #### Operation
---cache - reads the (applicable for current spec set) ref.lnk files and downloads from imagestore to target/
---take - take screenshots
---compare - does image comparison ( and diff image generation of different in target/)
---update - update/create the .lnk files
---upload - upload (changed) reference images to imagestore
+* --cache - reads the (applicable for current spec set) ref.lnk files and downloads from imagestore to target/
+* --take - take screenshots
+* --compare - does image comparison ( and diff image generation of different in target/)
+* --update - update/create the .lnk files
+* --upload - upload (changed) reference images to imagestore
 
 Upload of pictures is user/password protected so to prevent accidental/unauthorized image uploads.
 

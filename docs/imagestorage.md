@@ -46,12 +46,14 @@ TODO
 
 ### Management
 * Storage strategy
-we store only images accessible from any commit in supported branches (whitelist - master, rel-* )
+
+We store only images accessible from any commit in supported branches (whitelist - master, rel-* )
 This means that we do not keep for long time the 'intermediate' images generated and commited in git/gerrit (ref/for/*)
 and imagestore while test is being stabilised.
 So this way we avoid image storage DB bloat without a strict need to delete to-become-orphaned images.
 
 * Git synchronization and orphaned images handling
+
 A backend job regularly scans commits ( incrementally ) information from git and updates it in the DB
 In this process orphan images are discovered and marked so.
 Orphaned images are such that do are not referenced in any commit.

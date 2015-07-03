@@ -10,7 +10,7 @@ var CONTENT_ROOT_URI = 'testsuite/test-resources/';
 /**
  * @typedef LocalSAPUI5SpecResolverConfig
  * @type {Object}
- * @extends {SpecResolverConfig}
+ * @extends {Config}
  * @property {String} specs - blob pattern to resolve specs, defaults to: '../openui5/src/**/test/**/visual/*.spec.js'
  * @property {String} LocalSAPUI5SpecResolverConfig.contentRootUri - content uri, defaults to: 'testsuite/test-resources/'
  */

@@ -20,7 +20,7 @@ $ npm update visualtestjs
 ```
 Run all available tests:
 ```
-$ grunt visualtest 
+$ grunt visualtest
 ```
 Please check docs/developing.md and docs/tools.md for further arguments that visualtest task accepts.
 Please check docs/controllibraries.md and the availbe sap.m libirary visual tests from the draft commit how to write new visual tests.
@@ -30,6 +30,11 @@ Install visualtest globally:
 ```
 $ npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
 ```
+Download selenium jar and drivers:
+```
+$ visualtest-webdriver-manager
+```
+
 Create a folder for your integration tests, place them inside and create a conf.js file:
 ```
 exports.config = {
@@ -38,7 +43,7 @@ exports.config = {
 ```
 Run all *.spec.js tests from the folder that contains conf.js. Make sure that root suite is named as spec file name.
 ```
-$ visualtestjs
+$ visualtest
 ```
 
 ### Advanced options - NOT implemented yet

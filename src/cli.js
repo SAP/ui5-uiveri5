@@ -17,8 +17,7 @@ var argv = require('yargs')
     .describe('seleniumAddress','Address of remote Selenium server, if missing will start local selenium server')
     .string('browsers')
     .describe('browsers', 'Comma separated list of browsers to execute tests, defaults to chrome')
-    .boolean('ignoreSync')
-    .alias('i', 'ignoreSync')
+    .string('ignoreSync')
     .describe('ignoreSync', 'Ignore sync')
     .count('verbose')
     .alias('v', 'verbose')
@@ -52,6 +51,21 @@ if (!config.conf) {
 // current dir conf is resolved against cwd()
 if (config.conf){
   config.conf = path.resolve(config.conf);
+}
+
+// TODO research how dot notation works with duplicates ?
+// resolve browsers argument
+if (config.browsers){
+  if(_.isString(config.browsers)){
+    var browsers = config.browsers.split(',');
+    // TODO capabilities from command line -> consider more extensive parsing - ':' notation or full json
+    config.browsers = [];
+    browsers.forEach(function(browser){
+      config.browsers.push({
+        browserName: browser
+      });
+    });
+  }
 }
 
 // run the visualtest

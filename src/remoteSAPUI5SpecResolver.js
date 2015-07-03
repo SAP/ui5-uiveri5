@@ -19,7 +19,11 @@ var ENCODING_UTF8 = 'utf8';
  * @typedef RemoteSAPUI5SpecResolverConfig
  * @type {Object}
  * @extends {SpecResolverConfig}
- * @property {String}
+ * @property {String} baseUrl - base url to reference, defaults to: 'http://localhost:8080'
+ * @property {String} libFilter  - comma separated list of library names, defaults to *
+ * @property {String} specFilter - comma separated list of specs, defaults to *
+ * @property {String} RemoteSAPUI5SpecResolverConfig.specCacheRoot - defaults to: '../target/specs'
+ * @property {String} RemoteSAPUI5SpecResolverConfig.contentRootUri - defaults to: 'testsuite/test-resources/'
  */
 
 /**

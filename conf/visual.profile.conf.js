@@ -4,7 +4,6 @@ exports.config = {
     // specCacheRoot: '../target/specs'
     // contentRootUri: 'testsuite/test-resources/'
   //}
-  // specs: '../openui5/src/**/test/**/visual/*.spec.js';
   // clientsidescripts: './clientsidescripts'
   // ignoreSync: false
 }

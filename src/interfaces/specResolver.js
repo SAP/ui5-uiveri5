@@ -1,13 +1,4 @@
 /**
- * @typedef SpecResolverConfig
- * @type {Object}
- * @property {String} specs - blob pattern to resolve specs, defaults depending of specific specResolver
- * @property {String} baseUrl - base url to reference, defaults to: 'http://localhost:8080'
- * @property {String} libFilter  - comma separated list of library names, defaults to *
- * @property {String} specFilter - comma separated list of specs, defaults to *
- */
-
-/**
  * @typedef Spec
  * @type {Object}
  * @property {String} name - Spec full name e.g. sap.m.ActionSelect

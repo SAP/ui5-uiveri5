@@ -5,14 +5,13 @@ var logger = require('./logger');
 var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
-var DEFAULT_BASE_URL = 'http://localhost:8080';
+//var DEFAULT_BASE_URL = 'http://localhost:8080';
 var DEFAULT_SPEC_RESOLVER = './remoteSAPUI5SpecResolver';
 var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 
 /**
  * @typedef Config
  * @type {Object}
- * @extends {SpecResolverConfig}
  * @property {String} specResolver - spec resolver to use, defaults to: './remoteSAPUI5SpecResolver'
  * @property {String} conf - config file to use, defaults to: '../conf/default.conf.js' that contains only: profile: 'visual'
  * @property {String} profile - used to resolve profile config file with pattern: '../conf/<profile>.conf.js, no profile resolved if undefined, defaults to: visual if default.conf.js loaded
@@ -21,9 +20,11 @@ var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
  * TODO seleniumHost
  * TODO seleniumPort
  * TODO selenumLoopback
+ * TODO seleniumArgs
  * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive, defaults to: 'chrome'
  * TODO browser.maximised defaults to: true
  * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
+ * @property {String} clientsidescripts - client side scripts file, defaults to: ./clientsidescripts
  * TODO params
  */
 
@@ -55,8 +56,9 @@ var run = function(config) {
   logger.setLevel(config.verbose);
 
   // set baseUrl
-  config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
-  logger.debug('Using baseUrl: ' + config.baseUrl);
+  // TODO went to individual spec resolvers
+  //config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
+  //logger.debug('Using baseUrl: ' + config.baseUrl);
 
   // log cwd
   logger.info('Current working directory: ' + process.cwd());
@@ -90,21 +92,16 @@ var run = function(config) {
   // use jasmine 2.0
   protractorArgv.framework = 'jasmine2';
 
-  // add specs as protractor expects
+  // set specs
   protractorArgv.specs = [];
   specs.forEach(function(spec){
     protractorArgv.specs.push(spec.path);
   });
 
-  // set browsers and capabilities TODO
+  // set browsers with capabilities
   if (config.browsers){
-    protractorArgv.multiCapabilities = [];
-    config.browsers.split(',').forEach(function(browser){
-      logger.debug('Schedule run on: ' + browser);  // TODO capabilities
-      protractorArgv.multiCapabilities.push({
-        browserName: browser
-      });
-    });
+    logger.debug('Browsers with capabilities: ' + JSON.stringify(config.browsers));
+    protractorArgv.multiCapabilities = config.browsers;
   }
 
   // execute before any setup

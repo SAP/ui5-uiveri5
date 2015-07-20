@@ -1,9 +1,7 @@
 var functions = {};
 
 functions.waitForAngular = function(rootSelector, callback) {
-  var MAX_RETRY_ATTEMPTS = 10,
-      MAX_TIMEOUT_DELAY = 5000,
-      MAX_INTERVAL_STEP = 2000;
+  var MAX_RETRY_ATTEMPTS = 10;
 
   try {
     if (!window.sap) {
@@ -22,6 +20,7 @@ functions.waitForAngular = function(rootSelector, callback) {
 
           constructor : function(oCore) {
 
+            this._bSameTick = false;
             this.iPendingXHRs = 0;
             this.iPendingTimeouts = 0;
             this.oPendingTimeoutIDs = {};
@@ -37,6 +36,11 @@ functions.waitForAngular = function(rootSelector, callback) {
             this.oCore.attachUIUpdated(this._tryToExecuteCallbacks);
           }
         });
+
+        // Constants for TestCooperation class
+        TestCooperation.EXECUTE_CALLBACKS_REG_EXP = /_tryToExecuteCallbacks/;
+        TestCooperation.MAX_TIMEOUT_DELAY = 5000;
+        TestCooperation.MAX_INTERVAL_STEP = 2000;
 
         TestCooperation.prototype.notifyWhenStable = function(fnCallback) {
 
@@ -99,18 +103,23 @@ functions.waitForAngular = function(rootSelector, callback) {
             if (this.oPendingTimeoutIDs.hasOwnProperty(id)) {
               delete this.oPendingTimeoutIDs[id];
               this.iPendingTimeouts--;
+              this._tryToExecuteCallbacks();
             }
           }
-          this._tryToExecuteCallbacks();
         };
 
         TestCooperation.prototype._isTimeoutTracked = function(id, func, delay) {
-          if (delay > MAX_TIMEOUT_DELAY) {
+          if (delay === 0 && TestCooperation.EXECUTE_CALLBACKS_REG_EXP.test(func.name)) {
+            this.aDoNotTrack.push(id);
+            return false;
+          }
+          
+          if (delay > TestCooperation.MAX_TIMEOUT_DELAY) {
             this.aDoNotTrack.push(id);
             return false;
           } else {
             var bAddNewEntry = !this.oTimeoutInfo.hasOwnProperty(func) || this.oTimeoutInfo[func].delay != delay ||
-                new Date().getMilliseconds() - this.oTimeoutInfo[func].callTime > MAX_INTERVAL_STEP;
+                new Date().getMilliseconds() - this.oTimeoutInfo[func].callTime > TestCooperation.MAX_INTERVAL_STEP;
             if (bAddNewEntry) {
               this.oTimeoutInfo[func] = {'delay': delay, 'callCount': 1, 'callTime': new Date().getMilliseconds()};
               return true;
@@ -126,14 +135,20 @@ functions.waitForAngular = function(rootSelector, callback) {
         };
 
         TestCooperation.prototype._tryToExecuteCallbacks = function() {
-
-          if (this.iPendingTimeouts === 0 && this.iPendingXHRs === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length > 0) {
-            do {
-              var fnCallback = this.aPendingCallbacks.shift();
-              fnCallback();
-            } while (this.iPendingTimeouts === 0 && this.iPendingXHRs === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length > 0)
+          if (!this._bSameTick) {
+            var that = this;
+            this._bSameTick = true;
+            window.setTimeout(function() {
+              if (that.iPendingTimeouts === 0 && that.iPendingXHRs === 0 && !that.oCore.getUIDirty() && that.aPendingCallbacks.length > 0) {
+                do {
+                  var fnCallback = that.aPendingCallbacks.shift();
+                  fnCallback();
+                } while (that.iPendingTimeouts === 0 && that.iPendingXHRs === 0 && !that.oCore.getUIDirty() && that.aPendingCallbacks.length > 0)
+              }
+              that._bSameTick = false;
+            }, 0);
           }
-        }
+        };
 
         return TestCooperation;
 

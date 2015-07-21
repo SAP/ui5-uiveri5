@@ -10,7 +10,9 @@
     "urllib-sync": "~1.0.1"
   },
   "devDependencies": {
-    "jasmine": "^2.2.1"
+    "async": "^1.2.1",
+    "jasmine": "^2.2.1",
+    "resemblejs-tolerance": "0.0.3"
   },
   "repository": {
     "type": "git",

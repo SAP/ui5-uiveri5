@@ -4,10 +4,10 @@
   "dependencies": {
     "glob": "~4.3.5",
     "lodash": "~3.6.0",
-    "optimist": "~0.6.0",
-    "protractor": "~1.6.1",
+    "protractor": "~2.1.0",
     "proxyquire": "~1.4.0",
-    "urllib-sync": "~1.0.1"
+    "urllib-sync": "~1.0.1",
+    "yargs": "^3.8.0"
   },
   "devDependencies": {
     "async": "^1.2.1",
@@ -25,5 +25,5 @@
     "visualtest": "node bin/visualtest",
     "test": "node node_modules/jasmine/bin/jasmine"
   },
-  "main": "lib/visualtest.js"
+  "main": "src/visualtest.js"
 }

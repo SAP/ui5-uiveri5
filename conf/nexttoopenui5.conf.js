@@ -4,5 +4,5 @@ exports.config = {
   //localSAPUI5SpecResolver: {
     //contentRootUri: 'testsuite/test-resources/'
   //},
-  specs: '../openui5/src/**/test/**/visual/*.spec.js'
+  //specs: '../openui5/src/**/test/**/visual/*.spec.js'
 }

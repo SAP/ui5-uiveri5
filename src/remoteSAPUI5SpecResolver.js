@@ -15,6 +15,22 @@ var LIBS_INFO_URI = '/testsuite/resources/sap-ui-version.json';
 var SPECS_FOLDER = 'target/specs/';
 var ENCODING_UTF8 = 'utf8';
 
+/**
+ * @typedef RemoteSAPUI5SpecResolverConfig
+ * @type {Object}
+ * @extends {SpecResolverConfig}
+ * @property {String} baseUrl - base url to reference, defaults to: 'http://localhost:8080'
+ * @property {String} libFilter  - comma separated list of library names, defaults to *
+ * @property {String} specFilter - comma separated list of specs, defaults to *
+ * @property {String} RemoteSAPUI5SpecResolverConfig.specCacheRoot - defaults to: '../target/specs'
+ * @property {String} RemoteSAPUI5SpecResolverConfig.contentRootUri - defaults to: 'testsuite/test-resources/'
+ */
+
+/**
+ * Resolves specs
+ * @constructor
+ * @param {RemoteSAPUI5SpecResolverConfig} config - configs
+ */
 function RemoteSpecResolver(config) {
   this.config = config;
   this.sBaseUrl = this.config.baseUrl || BASE_URL;
@@ -141,7 +157,9 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
 
   //fill the aSpecPaths with specNames and specUris arrays
   aSpecPaths.forEach(function (sPath) {
-    var requiredSuite = require("./../" + sPath.targetFolder + sPath.pathUrl.split("/").pop());
+    var suiteModule = path.resolve(sPath.targetFolder + sPath.pathUrl.split("/").pop() );
+    var requiredSuite = require(suiteModule);
+
     //check the requiredSuite type
     if (requiredSuite instanceof Array) {
       oSuiteFiles.specNames.push(requiredSuite);
@@ -176,7 +194,6 @@ RemoteSpecResolver.prototype._loadSpecs = function (aSpecPaths) {
 
   return aSpecs;
 };
-
 
 /**
  * Apply spec filters

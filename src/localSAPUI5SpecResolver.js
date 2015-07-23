@@ -7,6 +7,19 @@ var logger = require("./logger");
 var SPECS_GLOB = '../openui5/src/**/test/**/visual/*.spec.js';
 var CONTENT_ROOT_URI = 'testsuite/test-resources/';
 
+/**
+ * @typedef LocalSAPUI5SpecResolverConfig
+ * @type {Object}
+ * @extends {Config}
+ * @property {String} specs - blob pattern to resolve specs, defaults to: '../openui5/src/**/test/**/visual/*.spec.js'
+ * @property {String} LocalSAPUI5SpecResolverConfig.contentRootUri - content uri, defaults to: 'testsuite/test-resources/'
+ */
+
+/**
+ * Resolves specs
+ * @constructor
+ * @param {LocalSAPUI5SpecResolverConfig} config - configs
+ */
 function SpecResolver(config){
   this.config  = config;
 }
@@ -23,7 +36,7 @@ SpecResolver.prototype.resolve = function(){
   // c:/work/git/openui5/src/sap.m/test/sap/m/visual/ActionSelect.spec.js
   //http://localhost:8080/testsuite/test-resources/sap/m/ActionSelect.html
 
-  /** @type {Array.<SpecType>} */
+  /** @type {Spec[]} */
   var specs = [];
 
   //log
@@ -43,7 +56,7 @@ SpecResolver.prototype.resolve = function(){
     var specLib = specMatch[1];
     var specOwnName = specMatch[2];
 
-    /** @type {SpecType} */
+    /** @type {Spec} */
     var spec = {
       name: specLib + '.' + specOwnName,
       _ownName: specOwnName,

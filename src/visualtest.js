@@ -5,14 +5,37 @@ var logger = require('./logger');
 var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
-var DEFAULT_BASE_URL = 'http://localhost:8080';
+//var DEFAULT_BASE_URL = 'http://localhost:8080';
 var DEFAULT_SPEC_RESOLVER = './remoteSAPUI5SpecResolver';
 var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 
+/**
+ * @typedef Config
+ * @type {Object}
+ * @property {String} specResolver - spec resolver to use, defaults to: './remoteSAPUI5SpecResolver'
+ * @property {String} conf - config file to use, defaults to: '../conf/default.conf.js' that contains only: profile: 'visual'
+ * @property {String} profile - used to resolve profile config file with pattern: '../conf/<profile>.conf.js, no profile resolved if undefined, defaults to: visual if default.conf.js loaded
+ * @property {number} verbose - verbose level, 0 shows only info, 1 shows debug, 2 shows waitForUI5 executions, 3 shows also waitForUI5 script content, defaults t: 0
+ * @property {String} seleniumAddress - Address of remote Selenium server, if missing will start local selenium server
+ * TODO seleniumHost
+ * TODO seleniumPort
+ * TODO selenumLoopback
+ * TODO seleniumArgs
+ * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive, defaults to: 'chrome'
+ * TODO browser.maximised defaults to: true
+ * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
+ * @property {String} clientsidescripts - client side scripts file, defaults to: ./clientsidescripts
+ * TODO params
+ */
+
+/**
+ * Runs visual tests
+ * @param {Config} config - configs
+ */
 var run = function(config) {
 
   // configure logger
-  logger.enableDebug(config.verbose);
+  logger.setLevel(config.verbose);
 
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
@@ -30,11 +53,15 @@ var run = function(config) {
   }
 
   // update logger with resolved configs
-  logger.enableDebug(config.verbose);
+  logger.setLevel(config.verbose);
 
   // set baseUrl
-  config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
-  logger.debug('Using baseUrl: ' + config.baseUrl);
+  // TODO went to individual spec resolvers
+  //config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
+  //logger.debug('Using baseUrl: ' + config.baseUrl);
+
+  // log cwd
+  logger.info('Current working directory: ' + process.cwd());
 
   // resolve specs
   var specResolverName = config.specResolver || DEFAULT_SPEC_RESOLVER;
@@ -53,8 +80,8 @@ var run = function(config) {
   // prepare protractor executor args
   var protractorArgv = {};
 
-  // enable debug logs
-  protractorArgv.troubleshoot = config.verbose;
+  // enable protractor debug logs
+  protractorArgv.troubleshoot = config.verbose>0;
 
   // add baseUrl
   protractorArgv.baseUrl = config.baseUrl;
@@ -65,15 +92,22 @@ var run = function(config) {
   // use jasmine 2.0
   protractorArgv.framework = 'jasmine2';
 
-  // add specs as protractor expects
+  // set specs
   protractorArgv.specs = [];
   specs.forEach(function(spec){
-      protractorArgv.specs.push(spec.path);
+    protractorArgv.specs.push(spec.path);
   });
+
+  // set browsers with capabilities
+  if (config.browsers){
+    logger.debug('Browsers with capabilities: ' + JSON.stringify(config.browsers));
+    protractorArgv.multiCapabilities = config.browsers;
+  }
 
   // execute before any setup
   protractorArgv.beforeLaunch =  function() {
 
+    // override angular-specific scripts
     var clientsidesriptsName = config.clientsidescripts;
     logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
     var clientsidescripts = require(clientsidesriptsName);
@@ -84,9 +118,27 @@ var run = function(config) {
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
+    //TODO visualtest object should be exported on browser object. It will have as members: config, runtime, specs
+
     // publish visualtest configs on protractor's browser object
-    browser.visualtest = {};
-    browser.visualtest.config = config;
+    browser.testrunner = {};
+    browser.testrunner.config = config;
+
+    // TODO publish whole runtime
+    browser.testrunner.runtime = {};
+    browser.testrunner.runtime.browserName = 'chrome';
+
+    // log script executions
+    var origExecuteAsyncScript_= browser.executeAsyncScript_;
+    browser.executeAsyncScript_ = function() {
+
+      // log the call
+      logger.trace('Executing async script: ' + arguments[1] +
+        (config.verbose > 2 ? ('\n' + arguments[0] + '\n') : ''));
+
+      //call original fn in its context
+      return origExecuteAsyncScript_.apply(browser, arguments);
+    }
 
     // open test content page
     jasmine.getEnv().addReporter({

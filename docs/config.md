@@ -57,3 +57,28 @@ Handle certificates
 http://stackoverflow.com/questions/24507078/how-to-deal-with-certificates-using-selenium
 https://support.google.com/chrome/a/answer/187202
 https://support.google.com/chrome/a/answer/2657289
+
+### Params to be passed to test
+Define in conf.js file
+``` javascript
+exports.config = {
+  params: {
+    someKey: someValue,
+    anotherKey: {
+     secondLevelKey: secondLevelValue
+    }
+  }
+};
+```
+Override from command line or define new params
+```
+$ visualtest --params.someKey=redefineSomeValue --params.anotherKey.anotherSecondLevelKey=anotherSecondLevelValue
+```
+Use in tests
+```
+if('should check something',function(){
+  if(browser.testrunner.config.params.someKey) {
+    doSomethingWithThisValue(browser.testrunner.config.params.someKey);
+  }
+});
+```

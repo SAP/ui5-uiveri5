@@ -22,6 +22,7 @@ var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
  * TODO selenumLoopback
  * TODO seleniumArgs
  * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive, defaults to: 'chrome'
+ * @property {Object} params - params object to be passed to the tests
  * TODO browser.maximised defaults to: true
  * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
  * @property {String} clientsidescripts - client side scripts file, defaults to: ./clientsidescripts

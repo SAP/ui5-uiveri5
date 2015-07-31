@@ -32,7 +32,7 @@ $ npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
 ```
 Download selenium jar and drivers:
 ```
-$ visualtest-webdriver-manager
+$ node %USERPROFILE%\AppData\Roaming\npm\node_modules\visualtestjs\node_modules\protractor\bin\webdriver-manager
 ```
 
 Create a folder for your integration tests, place them inside and create a conf.js file:

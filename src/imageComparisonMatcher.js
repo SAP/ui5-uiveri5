@@ -1,6 +1,7 @@
 /**
  * Created by I304310 on 6/15/2015.
  */
+'use strict';
 
 /**
  *  @alias toLookLike
@@ -11,36 +12,46 @@ var fs = require('fs');
 var webdriver = require('selenium-webdriver');
 require('jasminewd2');
 var resemble = require('resemblejs-tolerance');
+var logger = require('./logger');
 
 // default values
 var TARGET_FOLDER = 'diffs/';
 var DIFF_FILE_NAME = 'diffr';
 var DIFF_FILE_FORMAT = '.png';
-var IGNORE_COLORS = true;
-var IGNORE_ANTIALIASING = true;
-var ERROR_COLOR = {
-  red: 255,
-  green: 0,
-  blue: 255
-};
-var ERROR_TYPE = 'movement';
-var TRANSPARENCY = 0.3;
-var IMAGE_TOLERANCE = 1200;
-var IGNORE_RECTANGLE = [[325, 170, 100, 40]];
-var TOLERANCE = 10;
+var TOLERANCE = 5;
 
+/**
+ * @typedef ImageComparisonMatcherConfig
+ * @type {Object}
+ * @property {String} targetFolder - folder where the diff image will be saved
+ * @property {String} diffFileName - name of the diff image file
+ * @property {Boolean} ignoreColors - setting for color ignore while image comparison
+ * @property {Boolen} ignoreAntialiasing - setting for antialiasing ignore while image comparison
+ * @property {Object} errorColor - object with red, green and blue properties for defining color for diff pixels
+ * @property {String} errorType - what type of error will expect (flat or movement)
+ * @property {Number) transparency - transparency of the diff image
+ * @property {Array} ignoreRectangles - array of coords of rectangles which will be ignored in comparison
+ * @property {Number) tolerance - above this percentage of difference the matcher will fail
+ *
+ * */
+
+/**
+ * Image comparison custom jasmine matcher
+ * @constructor
+ * @param {ImageComparisonMatcherConfig} config - configs
+ * */
 function ImageComparisonMatcher(config) {
   this.config = config;
-  this.targetFolder = this.config.targetFolder ? this.config.targetFolder : TARGET_FOLDER;
-  this.diffFileName = this.config.diffFileName ? this.config.diffFileName : DIFF_FILE_NAME;
-  this.ignoreColors = this.config.ignoreColors ? this.config.ignoreColors : IGNORE_COLORS;
-  this.ignoreAntialiasing = this.config.ignoreAntialiasing ? this.config.ignoreAntialiasing : IGNORE_ANTIALIASING;
-  this.errorColor = this.config.errorColor ? this.config.errorColor : ERROR_COLOR;
-  this.errorType = this.config.errorType ? this.config.errorType : ERROR_TYPE;
-  this.transparency = this.config.transparency ? this.config.transparency : TRANSPARENCY;
-  this.imageTolerance = this.config.imageTolerance ? this.config.imageTolerance : IMAGE_TOLERANCE;
-  this.ignoreRectangles = this.config.ignoreRectangles ? this.config.ignoreRectangles : IGNORE_RECTANGLE;
-  this.tolerance = this.config.tolerance ? this.config.tolerance : TOLERANCE;
+  this.targetFolder = this.config.screenshotTaking ? this.config.screenshotTaking.targetFolder : '';
+  this.diffFileName = this.config.screenshotTaking ? this.config.screenshotTaking.diffFileName : '';
+  this.ignoreColors = this.config.screenshotTaking ? this.config.screenshotTaking.ignoreColors : '';
+  this.ignoreAntialiasing = this.config.screenshotTaking ? this.config.screenshotTaking.ignoreAntialiasing : '';
+  this.errorColor = this.config.screenshotTaking ? this.config.screenshotTaking.errorColor : '';
+  this.errorType = this.config.screenshotTaking ? this.config.screenshotTaking.errorType : '';
+  this.transparency = this.config.screenshotTaking ? this.config.screenshotTaking.transparency : '';
+  this.imageTolerance = this.config.screenshotTaking ? this.config.screenshotTaking.imageTolerance : '';
+  this.ignoreRectangles = this.config.screenshotTaking ? this.config.screenshotTaking.ignoreRectangles : '';
+  this.tolerance = this.config.screenshotTaking ? this.config.screenshotTaking.tolerance : TOLERANCE;
 
   var that = this;
   this.options = {
@@ -57,66 +68,75 @@ function ImageComparisonMatcher(config) {
   };
 }
 
+/**
+ * Registers the custom matcher to the jasmine matchers
+ * */
 ImageComparisonMatcher.prototype.register = function () {
   var jasmineEnv = jasmine.getEnv();
   var that = this;
+
+  // create custom matcher
   var toLookLike = function () {
     return {
-      compare: function (expected, actual) {
-        //to be async
-        var d = webdriver.promise.defer();
+      compare: function (actual, expected) {
+        // create deffer object
+        var defer = webdriver.promise.defer();
 
         var expectedImageBuffer = '';
         var actualImageBuffer = '';
         var dataExpectedImage = [];
-        var dataActualImage = [];
+
+        // get the reference image
         var expectedImageStream = fs.createReadStream(expected);
         expectedImageStream.on('data', function (chunk) {
           dataExpectedImage.push(chunk);
         });
 
         expectedImageStream.on('end', function () {
+
+          // create Buffers from streams - use in resemblejs-tolerance
           expectedImageBuffer = Buffer.concat(dataExpectedImage);
+          actualImageBuffer = new Buffer(actual, 'base64');
 
-          var actualImageStream = fs.createReadStream(actual);
-          actualImageStream.on('data', function (chunk) {
-            dataActualImage.push(chunk);
-          });
-          actualImageStream.on('end', function () {
-            actualImageBuffer = Buffer.concat(dataActualImage);
+          // set outputSettings
+          resemble.outputSettings(that.options);
 
-            // set outputSettings
-            resemble.outputSettings(that.options);
-            var resJS = resemble(expectedImageBuffer).compareTo(actualImageBuffer);
-            resJS.inputSettings(that.options);
+          // compare two images
+          var resJS = resemble(expectedImageBuffer).compareTo(actualImageBuffer);
+          resJS.inputSettings(that.options);
 
-            resJS.onComplete(function (data) {
-              var misMatchPercentage = parseInt(data.misMatchPercentage);
-              var dimensionDifference = data.dimensionDifference;
-              var errorPixels = data.errorPixels;
-              var diffImage = data.getDiffImage();
-              var isSameDimension = data.isSameDimensions;
-              var misMatchCount = data.misMatchCount;
+          // on comparison complate
+          resJS.onComplete(function (data) {
 
+            // data after comparison
+            var misMatchPercentage = parseInt(data.misMatchPercentage);
+            var dimensionDifference = data.dimensionDifference;
+            var errorPixels = data.errorPixels;
+            var diffImage = data.getDiffImage();
+            var isSameDimension = data.isSameDimensions;
+            var misMatchCount = data.misMatchCount;
+
+            // check the mismatch percentage
+            if (misMatchPercentage < that.tolerance) {
+              result.message = 'Mismatch percentage: ' + data.misMatchPercentage;
+              logger.error('Expected image: ' + expected + ' to be the same as the screenshot. Mismatch percentage: ' + data.misMatchPercentage
+                + ', errorPixels: ' + errorPixels + ', misMatchCount: ' + misMatchCount);
+              // pass
+              defer.fulfill(true);
+            } else {
+              result.message = 'Mismatch percentage: ' + data.misMatchPercentage;
+              logger.error('Expected image: ' + expected + ' to be the same as the screenshot. Mismatch percentage: ' + data.misMatchPercentage
+                + ', errorPixels: ' + errorPixels + ', misMatchCount: ' + misMatchCount);
               data.getDiffImage().pack().pipe(fs.createWriteStream(TARGET_FOLDER + DIFF_FILE_NAME + "-" + Date.now() + DIFF_FILE_FORMAT));
-
-              if (misMatchPercentage < 10) {
-                result.message = "Expected image " + expected + " to be the same as image " + actual + ". Mismatch percentage: " + data.misMatchPercentage
-                + ", errorPixels: " + errorPixels + ", misMatchCount: " + misMatchCount + ", dimensionDifference: " + dimensionDifference;
-
-                d.fulfill(true);
-              } else {
-                result.message = "Expected image " + expected + " to be the same as image " + actual + ". Mismatch percentage: " + data.misMatchPercentage
-                + ", misMatchCount: " + misMatchCount + ", dimensionDifference: " + dimensionDifference;
-
-                d.fulfill(false);
-              }
-            });
+              // fail
+              defer.fulfill(false);
+            }
           });
         });
 
+        // matcher have to return result object with boolean pass value
         var result = {
-          pass: d.then(function (res) {
+          pass: defer.then(function (res) {
             return res;
           })
         };
@@ -126,6 +146,7 @@ ImageComparisonMatcher.prototype.register = function () {
     }
   };
 
+  // add custom matcher to jasmine matchers
   jasmineEnv.addMatchers({toLookLike: toLookLike});
 };
 

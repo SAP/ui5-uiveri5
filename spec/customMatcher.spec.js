@@ -7,6 +7,8 @@ describe("RemoteSAPUI5SpecResolver", function () {
   beforeEach(function () {
     var comparison = require('../src/imageComparisonMatcher.js')({ignoreColors: true});
     comparison.register();
+
+
   });
 
   it('It should works!', function () {

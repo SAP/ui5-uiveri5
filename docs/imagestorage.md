@@ -44,7 +44,7 @@ Upload and Delete operations are user/password protected
 #### REST api
 TODO
 
-### Management
+### General
 * Storage strategy
 
 We store only images accessible from any commit in supported branches (whitelist - master, rel-* )
@@ -59,14 +59,17 @@ In this process orphan images are discovered and marked so.
 Orphaned images are such that do are not referenced in any commit.
 If configured, orphan images are deleted ( automatically or manually - UI needed)
 
-#### Operations
-* CRUD on runtimes
-* CRUD on orphaned images
+#### Storage
 
+##### REST api
+* CRUD on images
+
+#### Management
 Job scheduling and configuration (git scan, automatic orphan delete) is handled outside imagestore.
 
-#### REST api
-TODO
+##### REST api
+* CRUD on runtimes
+* CRUD on orphaned images
 
 
 

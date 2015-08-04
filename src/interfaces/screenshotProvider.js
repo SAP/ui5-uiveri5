@@ -1,22 +1,33 @@
 /**
  * @typedef ScreenshotProviderConfig
  * @type {Object}
+ * @extends {Config}
+ * @property {boolean} take - enable screenshot taking
+ * @property {boolean} update - update ref with act screenshot
  */
 
 /**
  * Resolves specs
  * @constructor
  * @param {ScreenshotProviderConfig} config - configs
- * @param {ImageResolver} imageResolver -
  */
 function ScreeenshotProvider(config){
   this.config  = config;
 }
 
 /**
- * Take screenshot, decode and store at correct place
- * @return {String} absolute path to actual image
+ * Takes a screenshot of the current browser state
+ * @typedef takeScreenshot
+ * @type {function}
+ * @global
+ * @return {webdriver.promise<Buffer>} promise that resolves with screenshot image blob
+ *
+ * If (config.take) => log info and take the screenshot. Then if (config.update) store the screenshot as ref.
  */
-ScreeenshotProvider.prototype.takeScreenshot = function(){
-}
+
+/**
+ * Registers global screenshot taking function
+ */
+ScreeenshotProvider.prototype.register = function(){
+};
 

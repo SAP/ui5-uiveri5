@@ -21,14 +21,21 @@
                         +---<Cosy|Compact>/
 ```
 
-### LocalImageProvider
+### LocalStorageProvider
 
 #### Operation
 * --cache - nothing to do as the images are already in src/
+  * not used
 * --take - take screenshots
+  * if false => no take act
+  * if true => take act
 * --compare - does image comparison ( and diff image generation of different in target/)
+  * if ( compare && take ) => run compare => take act && resolve ref
+  * else => no compare => no take act && no resolve ref
 * --update - copies the different actual images as reference in the src/
+  * if ( update && take ) => take act -> copy as ref
 * --upload - nothing to do
+  * not used
 
 #### Reference image structure
 ```wiki
@@ -54,7 +61,7 @@ target/
       ...
 ```
 
-### RemoteLFSImageProvider
+### RemoteLfsStorageProvider
 
 #### Operation
 * --cache - reads the (applicable for current spec set) ref.lnk files and downloads from imagestore to target/

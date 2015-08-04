@@ -119,13 +119,11 @@ var run = function(config) {
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
-    //TODO visualtest object should be exported on browser object. It will have as members: config, runtime, specs
-
     // publish visualtest configs on protractor's browser object
     browser.testrunner = {};
     browser.testrunner.config = config;
 
-    // TODO publish whole runtime
+    // TODO resolve and publish whole runtime
     browser.testrunner.runtime = {};
     browser.testrunner.runtime.browserName = 'chrome';
 
@@ -141,7 +139,8 @@ var run = function(config) {
       return origExecuteAsyncScript_.apply(browser, arguments);
     }
 
-    // open test content page
+    // hook into specs lifecycle
+    // open test content page before every suite
     jasmine.getEnv().addReporter({
       //TODO consider several describe() per spec file
       suiteStarted: function(result){

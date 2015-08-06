@@ -10,9 +10,11 @@
  * Resolves specs
  * @constructor
  * @param {ScreenshotProviderConfig} config - configs
+ * @param {StorageProvider} storageProvider - the storage provider to use ( update ref image )
  */
 function ScreeenshotProvider(config){
   this.config  = config;
+  this.storageProvider = storageProvider;
 }
 
 /**

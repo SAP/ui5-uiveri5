@@ -13,7 +13,7 @@
 ### Runtime structure
 ```wiki
 <TestName>/
-    +---<OS>/
+    +---<Platform>/
         +---<Resolution>/
             +---<Browser>/
                 +---<Theme>/
@@ -33,7 +33,7 @@
   * if ( compare && take ) => run compare => take act && resolve ref
   * else => no compare => no take act && no resolve ref
 * --update - copies the different actual images as reference in the src/
-  * if ( update && take ) => take act -> copy as ref
+  * if ( update && take && compare  ) => take act -> compare -> if diff => save act as ref
 * --upload - nothing to do
   * not used
 

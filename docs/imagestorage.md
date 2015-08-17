@@ -7,9 +7,9 @@ Runtime is a set of specific os/resolution/browser/theme/direction/mode that is 
 
 #### Local with upload
 A developer creates his new visual test. He runs it locally against his preferred runtime
-( emulated - chrome with mobile emulation and/or standard ) checks the images and corrects whats is necessayr.
+( emulated - chrome with mobile emulation and/or standard ) checks the images and corrects whats is necessary.
 When happy with the result he runs with --update flag that updates the .lnk files. Then he runs with --upload that will
-__uploads the new screenshots__ in the imagestore. Then he commits his changes ( that cover test and .lnk files)
+__upload the new screenshots__ in the imagestore. Then he commits his changes ( that cover test and .lnk files)
 and pushes his commit to gerrit. If necessary, this sequence could be repeated many times.
 A side effect is that several images could be created that will be referenced by intermediate commits and at the end,
 when the gerrit review is merged those images could become orphaned. But this is not such an issue, please check below.

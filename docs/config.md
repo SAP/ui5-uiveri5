@@ -21,27 +21,9 @@ If found, it is used. If not found, the conf\default.conf.js file is used.
   * command-line conf=conf.js -> conf.js profile=integration -> integration.profile.conf.js -> build-in defaults
 
 ### Browser capabilities
-``` json
-browsers: [{
-  browserName: 'chrome',            // chrome, firefox, ie, safari
-  browserVersion: '40',             // version or missing for latest available
-  platformName: 'windows',          // windows,mac,linux,android,ios
-  platformVersion: '8',             // like: 8,9,... for IE, 5.0,5.1,... for Android, ...
-  platformResolution: '1024x768',   // defines also orientation
-  ui5: {
-    theme: <bluecrystal|hcp|...>
-    direction: <rtl|ltr>
-    mode: '<compact|cosy>'
-  }
-}]
-```
 
 ```wiki
 --browsers="chrome,ie,firefox"
-
---browsers=chrome
---browsers=ie
---browsers=firefox
 ```
 
 parallel browsers in protractor:

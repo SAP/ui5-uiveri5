@@ -26,7 +26,6 @@ function ComparisonProvider(config,storageProvider){
  * @param {string} refImageName - ref image name to compare against
  * @param {wabdriver.promise<Buffer>} - actImageBuf - actual screenshot
  *
- * If (config.take) => log info and take the screenshot, else log info message and return.
  * If (config.take && config.compare) => log info message and execute compare, else log an info message and return.
  * Resolves the refImageName to a refImageBuf using the given storageProvider.
  * Resolves the actual screenshot promise to actImageBuf. Feeds both buffers to resemble

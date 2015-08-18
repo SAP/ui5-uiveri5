@@ -21,6 +21,8 @@ function ScreeenshotProvider(config){
  * @type {function}
  * @global
  * @return {webdriver.promise<Buffer>} promise that resolves with screenshot image blob
+ *
+ * If (config.take) => log info and take the screenshot, else log info message and return.
  */
 
 /**

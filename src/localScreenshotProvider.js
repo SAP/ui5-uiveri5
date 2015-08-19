@@ -4,19 +4,20 @@
 'use strict';
 var logger = require('./logger.js');
 /**
- * @typedef ScreenshotProviderConfig
+ * @typedef LocalScreenshotProviderConfig
  * @type {Object}
  * @extends {Config}
  * @property {boolean} take - enable screenshot taking
  * @property (boolean) update - update ref with actual screenshot
- * */
+ */
 
 /**
  * Screenshot provider
  * @constructor
- * @param (ScreenshotTakingConfig} config - configs
- * */
-function ScreenshotTaking(config) {
+ * @implements {ScreenshotProvider}
+ * @param (LocalScreenshotProviderConfig} config - configs
+ */
+function LocalScreenshotProvider(config) {
   this.config = config;
 }
 
@@ -29,27 +30,27 @@ function ScreenshotTaking(config) {
  *
  * if(config.take) => log info and take the screenshot. Then if(config.update) store the screenshot as ref.
  *
- * */
+ */
 
 /**
  * Registers takeScreenshot at global variable
- * */
-ScreenshotTaking.prototype.register = function() {
+ */
+LocalScreenshotProvider.prototype.register = function() {
   var that = this;
   global.takeScreenshot = function() {
     // uses browser object and call webdriverjs function takeScreenshot
-    return browser.takeScreenshot().then(function(screenshot) {
-      if(that.config.take) {
-        logger.info('Taking screenshot.');
-        return screenshot;
+    return browser.takeScreenshot().then(function(encodedScreenshot) {
+      if(that.config.localScreenshotProvider.take) {
+        logger.debug('Taking screenshot');
+        return encodedScreenshot;
       } else {
-        logger.error('Invalid user settings.');
+        logger.debug('Skipping screenshot taking');
         return [];
       }
     });
   };
 };
 
-module.exports = function (oConfig) {
-  return new ScreenshotTaking(oConfig);
+module.exports = function (config) {
+  return new LocalScreenshotProvider(config);
 };

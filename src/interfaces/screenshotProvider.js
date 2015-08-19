@@ -11,7 +11,7 @@
  * @constructor
  * @param {ScreenshotProviderConfig} config - configs
  */
-function ScreeenshotProvider(config){
+function ScreenshotProvider(config){
   this.config  = config;
 }
 
@@ -28,6 +28,6 @@ function ScreeenshotProvider(config){
 /**
  * Registers global screenshot taking function
  */
-ScreeenshotProvider.prototype.register = function(){
+ScreenshotProvider.prototype.register = function(){
 };
 

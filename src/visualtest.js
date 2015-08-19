@@ -5,25 +5,27 @@ var logger = require('./logger');
 var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
-//var DEFAULT_BASE_URL = 'http://localhost:8080';
-var DEFAULT_SPEC_RESOLVER = './remoteSAPUI5SpecResolver';
 var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 
 /**
  * @typedef Config
  * @type {Object}
- * @property {String} specResolver - spec resolver to use, defaults to: './remoteSAPUI5SpecResolver'
- * @property {String} conf - config file to use, defaults to: '../conf/default.conf.js' that contains only: profile: 'visual'
- * @property {String} profile - used to resolve profile config file with pattern: '../conf/<profile>.conf.js, no profile resolved if undefined, defaults to: visual if default.conf.js loaded
- * @property {number} verbose - verbose level, 0 shows only info, 1 shows debug, 2 shows waitForUI5 executions, 3 shows also waitForUI5 script content, defaults t: 0
+ * @property {String} specResolver - spec resolver to use, defaults to: localSpecResolver for profile integration
+ *  and localUI5SpecResolver for profile visual
+ * @property {String} conf - config file to use, defaults to: '../conf/default.conf.js'
+ *  that contains only: profile: 'visual'
+ * @property {String} profile - used to resolve profile config file with pattern: '../conf/<profile>.conf.js,
+ *  no profile resolved if undefined, defaults to: visual if default.conf.js loaded
+ * @property {number} verbose - verbose level, 0 shows only info, 1 shows debug,
+ *  2 shows waitForUI5 executions,3 shows also waitForUI5 script content, defaults t: 0
  * @property {String} seleniumAddress - Address of remote Selenium server, if missing will start local selenium server
  * TODO seleniumHost
  * TODO seleniumPort
  * TODO selenumLoopback
  * TODO seleniumArgs
-* @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive. single word is assumed to be browserName, defaults to: 'chrome'
+ * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive. single word is assumed to
+ *  be browserName else is parsed as json, defaults to: 'chrome'
  * @property {Object} params - params object to be passed to the tests
- * TODO browser.maximised defaults to: true
  * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
  * @property {String} clientsidescripts - client side scripts file, defaults to: ./clientsidescripts
  * TODO params
@@ -56,16 +58,14 @@ var run = function(config) {
   // update logger with resolved configs
   logger.setLevel(config.verbose);
 
-  // set baseUrl
-  // TODO went to individual spec resolvers
-  //config.baseUrl = config.baseUrl || DEFAULT_BASE_URL;
-  //logger.debug('Using baseUrl: ' + config.baseUrl);
-
   // log cwd
   logger.info('Current working directory: ' + process.cwd());
 
   // resolve specs
-  var specResolverName = config.specResolver || DEFAULT_SPEC_RESOLVER;
+  var specResolverName = config.specResolver;
+  if(!specResolverName){
+    throw Error("Spec resolver is not defined, unable to continue")
+  }
   logger.debug('Loading spec resolver module: ' + specResolverName);
   logger.info('Resolving specs');
   var specResolver = require(specResolverName)(config);
@@ -73,7 +73,7 @@ var run = function(config) {
   if (!specs || specs.length==0){
     throw new Error("No specs found");
   }
-  logger.info( specs.length + ' spec file found');
+  logger.info( specs.length + ' spec file(s) found');
 
   // set default clientsidescripts module
   config.clientsidescripts = config.clientsidescripts || DEFAULT_CLIENTSIDESCRIPTS;
@@ -96,13 +96,22 @@ var run = function(config) {
   // set specs
   protractorArgv.specs = [];
   specs.forEach(function(spec){
-    protractorArgv.specs.push(spec.path);
+    protractorArgv.specs.push(spec.testPath);
   });
 
-  // set browsers with capabilities
-  if (config.browsers){
-    logger.debug('Browsers with capabilities: ' + JSON.stringify(config.browsers));
-    protractorArgv.multiCapabilities = config.browsers;
+  // resolve runtime and set browsers with capabilities
+  var runtimeResolver = require('./runtimeResolver')(config);
+  var runtimes = runtimeResolver.resolveRuntimes();
+  protractorArgv.multiCapabilities = runtimeResolver.prepareMultiCapabilitiesFromRuntimes(runtimes);
+
+  // execute runtimes consequently
+  // TODO consider concurrent execution
+  protractorArgv.maxSessions = 1;
+
+  // register screenshot provider
+  if(config.screenshotProvider){
+    var screenshotProvider = require(config.screenshotProvider)(config);
+    screenshotProvider.register();
   }
 
   // execute before any setup
@@ -114,7 +123,7 @@ var run = function(config) {
     var clientsidescripts = require(clientsidesriptsName);
     var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
       {'./clientsidescripts.js': clientsidescripts});
-  }
+  };
 
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
@@ -123,31 +132,54 @@ var run = function(config) {
     browser.testrunner = {};
     browser.testrunner.config = config;
 
-    // TODO resolve and publish whole runtime
-    browser.testrunner.runtime = {};
-    browser.testrunner.runtime.browserName = 'chrome';
+    browser.getProcessedConfig().then(function(capabilities) {
+      var currentRuntime = runtimeResolver.enrichRuntimeFromCapabilities(capabilities);
+
+      // register storage provider
+      var storageProvider;
+      if(config.storageProvider){
+        storageProvider = require(config.storageProvider)(config,currentRuntime);
+      }
+
+      // export current runtime for tests
+      browser.testrunner.runtime = currentRuntime;
+
+      // register comparison provider
+      if(config.comparisonProvider){
+        var comparisonProvider = require(config.comparisonProvider)(config,storageProvider);
+        comparisonProvider.register();
+      }
+    });
 
     // log script executions
     var origExecuteAsyncScript_= browser.executeAsyncScript_;
     browser.executeAsyncScript_ = function() {
 
-      // log the call
+      // log the  call
       logger.trace('Executing async script: ' + arguments[1] +
         (config.verbose > 2 ? ('\n' + arguments[0] + '\n') : ''));
 
       //call original fn in its context
       return origExecuteAsyncScript_.apply(browser, arguments);
-    }
+    };
 
     // hook into specs lifecycle
     // open test content page before every suite
     jasmine.getEnv().addReporter({
+
+      jasmineStarted: function(){
+        // call storage provider beforeAll hook
+        if (storageProvider && storageProvider.onBeforeAllSpecs){
+          storageProvider.onBeforeAllSpecs(specs);
+        }
+      },
+
       //TODO consider several describe() per spec file
       suiteStarted: function(result){
         try {
-          var specName = result.description;
-          var spec = _getSpecByName(specName);
-          logger.debug('Starting spec with name: ' + specName);
+          var specFullName = result.description;
+          var spec = _getSpecByFullName(specFullName);
+          logger.debug('Starting spec with full name: ' + specFullName);
 
           // disable waitForUI5() if explicitly requested
           if(config.ignoreSync) {
@@ -162,6 +194,11 @@ var run = function(config) {
             // bypass browser.get() as it does angular-magic that we do not need to overwride
             browser.driver.get(spec.contentUrl);
             // TODO check http status, throw error if error
+          }
+
+          // call storage provider beforeEach hook
+          if (storageProvider || storageProvider.onBeforeEachSpec){
+            storageProvider.onBeforeEachSpec(spec);
           }
 
           // as failed expectation
@@ -183,17 +220,27 @@ var run = function(config) {
           // TODO display only once -> https://github.com/jasmine/jasmine/issues/778
           fail(error);
         }
+      },
+
+      suiteDone: function(result){
+        var specFullName = result.description;
+        var spec = _getSpecByFullName(specFullName);
+        logger.debug('Finished spec with full name: ' + specFullName);
+
+        // call storage provider afterEach hook
+        if (storageProvider || storageProvider.onAfterEachSpec){
+          storageProvider.onAfterEachSpec(spec);
+        }
+      },
+
+      jasmineDone: function(){
+        // call storage provider afterAll hook
+        if (storageProvider || storageProvider.onAfterAllSpecs){
+          storageProvider.onAfterAllSpecs(specs);
+        }
       }
     });
   };
-
-  // If you need access back to the current configuration object,
-// use a pattern like the following:
-// browser.getProcessedConfig().then(function(config) {
-// // config.capabilities is the CURRENT capability being run, if
-// // you are using multiCapabilities.
-// console.log('Executing capability', config.capabilities);
-// });
 
   /*
   // attach spec decorator
@@ -208,10 +255,10 @@ var run = function(config) {
   }};
   */
 
-  function _getSpecByName(specName){
-    var specIndex = specs.map(function(spec){return spec.name;}).indexOf(specName);
+  function _getSpecByFullName(specFullName){
+    var specIndex = specs.map(function(spec){return spec.fullName;}).indexOf(specFullName);
     if(specIndex==-1){
-      throw new Error('Spec with name: ' + specName + ' not found');
+      throw new Error('Spec with full name: ' + specFullName + ' not found');
     }
 
     return specs[specIndex];

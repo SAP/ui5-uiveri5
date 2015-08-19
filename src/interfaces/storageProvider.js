@@ -1,20 +1,8 @@
+
 /**
  * @typedef StorageProviderConfig
  * @type {Object}
  * @extends {Config}
- */
-
-/**
- * @typedef Runtime
- * @type {Object}
- * @param {string(chrome|firefox|ie|safari,edge)} browserName - browser name, default: chrome
- * @param {number} browserVersion - browser version, default: *
- * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
- * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
- * @param {string(default|/\d+x\d+/)} platformResolution - platform resolution, WIDTHxHEIGHT, default: resolved from available
- * @param {string(bluecrystal|hcp)} ui5.theme - UI5 theme, default bluecrystal
- * @param {string(rtl|ltr)} ui5.direction - UI5 direction, default: ltr
- * @param {string(cosy|compact)} ui5.mode - UI5 mode, default: cosy
  */
 
 /**
@@ -70,8 +58,8 @@ StorageProvider.prototype.onBeforeAllSpecs = function(specs){
 };
 
 /**
- * Hook, called before each specs
- * @param {Spec[]} specs - specs
+ * Hook, called before each spec
+ * @param {Spec} spec - spec
  *
  * Used to store current spec name
  */
@@ -84,13 +72,12 @@ StorageProvider.prototype.onBeforeEachSpec = function(spec){
  *
  * Used to implement 'upload' for RemoteLfsStorageProvider
  */
-StorageProvider.prototype.onAfterEachSpec = function(){
+StorageProvider.prototype.onAfterEachSpec = function(spec){
 };
 
 /**
- * Hook, called after each spec
- * @param {Spec} spec - spec
- *
+ * Hook, called after all spec
+ * @param {[Specs]} specs - specs
  */
-StorageProvider.prototype.onAfterAllSpecs = function(){
+StorageProvider.prototype.onAfterAllSpecs = function(specs){
 };

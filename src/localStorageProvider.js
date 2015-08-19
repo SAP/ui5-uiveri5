@@ -1,8 +1,15 @@
+var fs = require('fs');
+
+var DEFAULT_LOCAL_BASE_PATH = 'target/images';
+var DEFAULT_REF_IMAGE_EXT = '.ref.png';
+var DEFAULT_ACT_IMAGE_EXT = '.act.png';
+var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
+
 /**
  * @typedef LocalStorageProviderConfig
  * @type {Object}
  * @extends {StorageProviderConfig}
- * @property {string} localBasePath - local storage base path e.g. c:\openui5\target
+ * @property {string} localStorageProvider.localBasePath - local storage base path e.g. c:\openui5\target\images
  */
 
 /**
@@ -17,15 +24,79 @@ function LocalStorageProvider(config,runtime) {
   this.runtime = runtime;
 
   this.currentSpec = null;
-  this.localStoreBasePath = config.localBasePath;
+  this.localBasePath = this.config.localStorageProvider ?
+    config.localStorageProvider.localBasePath || DEFAULT_LOCAL_BASE_PATH : DEFAULT_LOCAL_BASE_PATH;
 }
+
+//// API to comparisonProvider
+
+/**
+ * Return the ref image read stream
+ * @param {string} refImageName - reference image name
+ * @return {ReadStream} - read stream for the reference image content
+ */
+LocalStorageProvider.prototype.readRefImage = function(refImageName){
+  var refImagePath = [
+    this.currentSpec.testBasePath,
+    'images',           // TODO consider if this level is really necessary
+    this._getRuntimePathSegment(),
+    (refImageName + DEFAULT_REF_IMAGE_EXT)
+  ].join('/');
+  return fs.createReadStream(refImagePath); // TODO error handling ?
+};
+
+/**
+ * Returns the ref image write stream
+ * @param {string} refImageName  - reference image name
+ * @return {WriteStream} - write stream to pipe the ref image content
+ */
+LocalStorageProvider.prototype.storeRefImage = function(refImageName){
+  var refImagePath = [
+    this.currentSpec.testBasePath,
+    'images',           // TODO consider if this level is really necessary
+    this._getRuntimePathSegment(),
+    (refImageName + DEFAULT_REF_IMAGE_EXT)
+  ].join('/');
+  this._mkdirs(refImagePath);
+  return fs.createWriteStream(refImagePath); // TODO error handling ?
+};
+
+/**
+ * Returns the act image write stream
+ * @param {string} refImageName  - reference image name
+ * @return {WriteStream} - write stream to pipe the ref image content
+ */
+LocalStorageProvider.prototype.storeActImage = function(refImageName){
+  var actImagePath = [
+    this.localBasePath,
+    this._getRuntimePathSegment(),
+    (refImageName + DEFAULT_ACT_IMAGE_EXT)
+  ].join('/');
+  this._mkdirs(actImagePath);
+  return fs.createWriteStream(actImagePath); // TODO error handling ?
+};
+
+/**
+ * Returns the diff image write stream
+ * @param {string} refImageName  - reference image name
+ * @return {WriteStream} - write stream to pipe the diff image content
+ */
+LocalStorageProvider.prototype.storeDiffImage = function(refImageName){
+  var diffImagePath = [
+    this.localBasePath,
+    this._getRuntimePathSegment(),
+    (refImageName + DEFAULT_DIFF_IMAGE_EXT)
+  ].join('/');
+  this._mkdirs(diffImagePath);
+  return fs.createWriteStream(diffImagePath);
+};
 
 /**
  * Return runtime path segment
  * @private
  * @return {string} runtime path segment, no front or trailing slashes
  */
-StorageProvider.prototype._getRuntimePathSegment = function(){
+LocalStorageProvider.prototype._getRuntimePathSegment = function(){
   return [
     this.currentSpec.name,
     this.runtime.platformName,
@@ -37,66 +108,22 @@ StorageProvider.prototype._getRuntimePathSegment = function(){
   ].join('/');
 };
 
-//// API to comparisonProvider
-
 /**
- * Return the ref image read stream
- * @param {string} refImageName - reference image name
- * @return {ReadStream} - read stream for the reference image content
- */
-StorageProvider.prototype.readRefImage = function(refImageName){
-  var refImagePath = [
-    spec.testBasePath,
-    'images',           // TODO consider if this level is really necessary
-    this._getRuntimePathSegment(),
-    (refImageName + '.ref.png')
-  ].join('/');
-  return fs.createReadStream(refImagePath); // TODO error handling ?
-};
+ * Makes directory from given path and root
+ * @param {String} path - string of directory path
+ * @param {String} [root] - optional string for directory root
+ * */
+LocalStorageProvider.prototype._mkdirs = function (path, root) {
+  var dirs = path.split('/'), dir = dirs.shift(), root = (root || '') + dir + '/';
 
-/**
- * Returns the ref image write stream
- * @param {string} refImageName  - reference image name
- * @return {WriteStream} - write stream to pipe the ref image content
- */
-StorageProvider.prototype.storeRefImage = function(refImageName){
-  var refImagePath = [
-    spec.testBasePath,
-    'images',           // TODO consider if this level is really necessary
-    this._getRuntimePathSegment(),
-    (refImageName + '.ref.png')
-  ].join('/');
-  return fs.createWriteStream(refImagePath); // TODO error handling ?
-};
+  try {
+    fs.mkdirSync(root);
+  } catch (e) {
+    //dir wasn't made, something went wrong
+    if (!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
+  }
 
-/**
- * Returns the act image write stream
- * @param {string} refImageName  - reference image name
- * @return {WriteStream} - write stream to pipe the ref image content
- */
-StorageProvider.prototype.storeActImage = function(refImageName){
-  var refImagePath = [
-    this.localStoreBasePath, // c:\work\openui5\dist
-    'images',           // TODO consider if this level is really necessary
-    this._getRuntimePathSegment(),
-    (refImageName + '.act.png')
-  ].join('/');
-  return fs.createWriteStream(refImagePath); // TODO error handling ?
-};
-
-/**
- * Returns the diff image write stream
- * @param {string} refImageName  - reference image name
- * @return {WriteStream} - write stream to pipe the diff image content
- */
-StorageProvider.prototype.storeDiffImage = function(refImageName){
-  var diffImagePath = [
-    this.localStoreBasePath, // c:\work\openui5\dist
-    'images',
-    this._getRuntimePathSegment(),
-    (refImageName + '.diff.png')
-  ].join('/');
-  return fs.createWriteStream(refImagePath);
+  return !dirs.length || this._mkdirs(dirs.join('/'), root);
 };
 
 /**
@@ -105,6 +132,11 @@ StorageProvider.prototype.storeDiffImage = function(refImageName){
  *
  * Used to store current spec
  */
-StorageProvider.prototype.onBeforeEachSpec = function(spec){
+LocalStorageProvider.prototype.onBeforeEachSpec = function(spec){
   this.currentSpec = spec;
 };
+
+module.exports = function(config,runtime){
+  return new LocalStorageProvider(config,runtime);
+};
+

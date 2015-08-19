@@ -1,54 +1,193 @@
+var logger = require('./logger');
+var _ = require('lodash');
 
+var DEFAULT_BROWSER_NAME = 'chrome';
+var DEFAULT_VERSION = '*';
+var DEFAULT_UI5_THEME = 'bluecrystal';
+var DEFAULT_UI5_DIRECTION = 'ltr';
+var DEFAULT_UI5_MODE = 'cosy';
 
+defaultPlatformResolutionPerPlatformName = {
+  windows: '1600x1200',
+  mac: '1280x1024',
+  linux: '1600x1200',
+  android: '320x480',
+  ios: '1536х1854',
+  winphone: '1080x1920'
+};
+defaultPlatformNamePerBrowserName = {
+  chrome: 'windows',
+  safari: 'mac'
+};
+supportedBrowserNames = [
+  'chrome','firefox','ie','safari','edge'
+];
+supportedPlatformNames = [
+  'windows','mac','linux','android','ios','winphone'
+];
+supportedUI5Themes = [
+  'bluecrystal','hcp'
+];
+supportedUI5Directions = [
+  'ltr','rtl'
+];
+supportedUI5Modes = [
+  'cosy','compact'
+];
 
-function RuntimeResolver(){
-  this.defaultResolutionPerPlatformName = {
-    windows: '',
-    mac: '',
-    //linux: '',
-    android: '320x480',
-    ios: '1536х1854',
-    winphone: '1080x1920'
-  };
-  this.defaultBrowserPerPlatformName = {
-    windows: 'chrome',
-    mac: 'safari',
-    linux: 'chrome',
-    android: 'browser',
-    ios: 'safari',
-    winphone: 'edge'
-  };
+/**
+ * @typedef Runtime
+ * @type {Object}
+ * @param {string(chrome|firefox|ie|safari,edge)} browserName - browser name, default: chrome
+ * @param {number} browserVersion - browser version, default: *
+ * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
+ * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
+ * @param {string(default|/\d+x\d+/)} platformResolution - platform resolution, WIDTHxHEIGHT, default: resolved from available
+ * @param {string(bluecrystal|hcp)} ui5.theme - UI5 theme, default bluecrystal
+ * @param {string(rtl|ltr)} ui5.direction - UI5 direction, default: ltr
+ * @param {string(cosy|compact)} ui5.mode - UI5 mode, default: cosy
+ * @param {Object} capabilities - additional browser capabilities object
+ */
+
+/**
+ * @typedef RuntimeResolverConfig
+ * @type {Object}
+ * @extends {Config}
+ * @property {Object} browserCapabilities - default capabilities per browser
+ */
+
+/**
+ * Resolves runtime
+ * @constructor
+ * @param {RuntimeResolverConfig} config - configs
+ */
+function RuntimeResolver(config){
+  this.config = config;
 };
 
 /**
- * Resolves browser request string to runtime object
- * @param {string} requestedRuntimeArgs - requested runtime from arguments
- * @param  {Runtime} requestedRuntimeConfig - requested runtime from config
- * @return {Runtime} - resolver runtime
+ * Resolve requires browser runtimes
+ * @return {[Runtime]} - resolver runtime
  */
-RuntimeResolver.prototype.resolveRuntime = function(requestedRuntimeArgs,requestedRuntimeConfig){
+RuntimeResolver.prototype.resolveRuntimes = function(){
+  var that = this;
+  var runtimes = this.config.browsers;
 
-  // if requestedRuntime typeof string => split at , and put as browserName in browser[]
-
-  // merge with requsetdRuntime from config
+  // no runtimes => run on chrome
+  if (!runtimes) {
+    runtimes = [{browserName: DEFAULT_BROWSER_NAME}];
+  }
 
   // resolve missing fields with defaults and PerXxxx defaults
+  runtimes.forEach(function(runtime){
+    // handle browserName
+    if (!runtime.browserName){
+      throw Error('Browser name not specified');
+    }
+    if(supportedBrowserNames.indexOf(runtime.browserName)==-1){
+      throw Error('Browser: ' + runtime.browserName + ' is not supported, use one of: ' +
+        JSON.stringify(supportedBrowserNames));
+    }
+
+    // handle platformName
+    if(!runtime.platformName){
+      runtime.platformName = defaultPlatformNamePerBrowserName[runtime.browserName];
+    }
+    if(supportedPlatformNames.indexOf(runtime.platformName)==-1){
+      throw Error('Platform: ' + runtime.platformName + ' is not supported, use one of: ' +
+        JSON.stringify(supportedPlatformNames));
+    }
+    // TODO validate runtime-platform combinations ?
+
+    // handler platformResolution
+    runtime.platformResolution = defaultPlatformResolutionPerPlatformName[runtime.platformName];
+    // TODO validate platform-resolution combinations ?
+
+    // handle versions
+    if (!runtime.browserVersion){
+      runtime.browserVersion = DEFAULT_VERSION;
+    }
+    if (!runtime.platformVersion){
+      runtime.platformVersion = DEFAULT_VERSION;
+    }
+
+    // handle ui5 defaults
+    if (!runtime.ui5){
+      runtime.ui5 = {};
+    }
+    if(!runtime.ui5.theme){
+      runtime.ui5.theme = DEFAULT_UI5_THEME;
+    }
+    if(supportedUI5Themes.indexOf(runtime.ui5.theme)==-1){
+      throw Error('UI5 theme: ' + runtime.ui5.theme + ' is not supported, use one of: ' +
+        JSON.stringify(supportedUI5Themes));
+    }
+    if(!runtime.ui5.direction){
+      runtime.ui5.direction = DEFAULT_UI5_DIRECTION;
+    }
+    if(supportedUI5Directions.indexOf(runtime.ui5.direction)==-1){
+      throw Error('UI5 direction: ' + runtime.ui5.direction + ' is not supported, use one of: ' +
+        JSON.stringify(supportedUI5Directions));
+    }
+    if(!runtime.ui5.mode){
+      runtime.ui5.mode = DEFAULT_UI5_MODE;
+    }
+    if(supportedUI5Modes.indexOf(runtime.ui5.mode)==-1){
+      throw Error('UI5 mode: ' + runtime.ui5.mode + ' is not supported, use one of: ' +
+       JSON.stringify(supportedUI5Modes));
+    }
+
+    // merge with browserCapabilities for this runtime
+    if (!runtime.capabilities) {
+      runtime.capabilities = {};
+    }
+    if (that.config.browserCapabilities) {
+      var capabilities = that.config.browserCapabilities[runtime.browserName];
+      if(capabilities){
+        _.merge(runtime.capabilities,capabilities);
+      }
+    }
+
+    logger.debug('Resolved runtime: ' + JSON.stringify(runtime));
+  });
+
+  return runtimes;
 };
 
 /**
- * Resolve selenium browser capabilities from runtime
- * @param {Runtime} runtime - requsted runtime
- * @return {Capabilities} selenium capabilities object
+ * Prepare protractor/selenium browser capabilities from runtime
+ * @param {[Runtime]} runtimes - requsted runtimes
  */
-RuntimeResolver.prototype.resolveCababilitiesFromRuntime = function(runtime){
+RuntimeResolver.prototype.prepareMultiCapabilitiesFromRuntimes = function(runtimes){
 
+  var protractorMultiCapabilities = runtimes.map(function(runtime){
+    // clone runtime without the capabilities
+    var protractorCapabilities = _.clone(runtime,true);  // deep copy
+    delete protractorCapabilities.capabilities;
+
+    // merge capabilities on root level
+    _.merge(protractorCapabilities,runtime.capabilities);
+
+    // TODO rename/reformat some options ?
+    return protractorCapabilities;
+  });
+
+  logger.debug('Resolved protractor multiCapabilities: ' + JSON.stringify(protractorMultiCapabilities));
+  return protractorMultiCapabilities;
 };
 
 /**
- * Resolve runtime from connected browser capabilities
+ * Enrich runtime from connected browser capabilities
  * @param capabilities
  * @return {Runtime} updated runtime with values from capabilities
  */
-RuntimeResolver.prototype.resolveRuntimeFromCapabilities = function(capabilities,runtime){
+RuntimeResolver.prototype.enrichRuntimeFromCapabilities = function(capabilities,runtime){
 
+  // TODO parse and merge back options from capabilities
+
+  return runtime;
+};
+
+module.exports = function(config){
+  return new RuntimeResolver(config);
 };

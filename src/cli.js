@@ -57,7 +57,7 @@ if (config.conf){
 if (config.browsers){
   if(_.isString(config.browsers)){
     var browsers = config.browsers.split(',');
-    // TODO capabilities from command line -> consider more extensive parsing - ':' notation or full json
+    // TODO capabilities from command line -> consider json
     config.browsers = [];
     browsers.forEach(function(browser){
       config.browsers.push({

@@ -1,3 +1,3 @@
 exports.config = {
   specResolver: './localSpecResolver'
-}
+};

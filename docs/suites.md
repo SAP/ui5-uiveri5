@@ -15,7 +15,7 @@ some.lib/
                     SomeControl.spec.js
 ```
 
-### Suite file
+### Suite file - NOT IMPLEMENTED YET
 
 Suite file is actually a node module that is "required" from the visualtest runtime so it could contain JS code to evaluate some conditions when preparing the list of specs applicable for this run.
 

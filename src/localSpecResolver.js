@@ -6,16 +6,12 @@ var logger = require("./logger");
 
 var SPECS_GLOB = './*.spec.js';
 
-function SpecResolver(config){
-  this.config  = config;
-}
-
 /**
  * @typedef LocalSpecResolverConfig
  * @type {Object}
  * @extends {Config}
  * @property {String} specs - blob pattern to resolve specs, defaults to: './*.spec.js'
- * @property {String} baseUrl - base url to reference, undefined disables page loading, defaults to: undefined
+ * @property {String} baseUrl - base url to reference, falsy disables page loading, defaults to: falsy
  * @property {Object} auth - authentication scheme, undefined disables is, defaults to: undefined
  * @property {String} auth.type - authentication type, defaults to: basic
  * @property {String} auth.user - user to set in baseUrl
@@ -27,7 +23,11 @@ function SpecResolver(config){
  * @constructor
  * @param {LocalSpecResolverConfig} config - configs
  */
-SpecResolver.prototype.resolve = function(){
+function LocalSpecResolver(config){
+  this.config  = config;
+}
+
+LocalSpecResolver.prototype.resolve = function(){
   var that = this;
 
   // defaults
@@ -52,20 +52,24 @@ SpecResolver.prototype.resolve = function(){
 
     // form contentUrl, add user and pass
     var contentUrlWithAuth = false;
-    if(that.config.auth){
-      if(that.config.auth.type == 'basic'){
-        if(that.config.auth.user && that.config.auth.pass){
-          var baseUrlMatches = that.config.baseUrl.match(/(\w*\:?\/\/)(.+)/);
-          if (baseUrlMatches===null){
-            throw new Error('Could not parse baseUrl: ' + that.config);
-          }
-          contentUrlWithAuth = baseUrlMatches[1] + that.config.auth.user + ':' + that.config.auth.pass + '@'+
+    if (that.config.baseUrl) {
+      if (that.config.auth) {
+        if (that.config.auth.type == 'basic') {
+          if (that.config.auth.user && that.config.auth.pass) {
+            var baseUrlMatches = that.config.baseUrl.match(/(\w*\:?\/\/)(.+)/);
+            if (baseUrlMatches === null) {
+              throw new Error('Could not parse baseUrl: ' + that.config);
+            }
+            contentUrlWithAuth = baseUrlMatches[1] + that.config.auth.user + ':' + that.config.auth.pass + '@' +
             baseUrlMatches[2];
-        }else{
-          logger.debug('Basic auth requested but user or pass is not specified' );
+          } else {
+            logger.debug('Basic auth requested but user or pass is not specified');
+          }
+        } else {
+          logger.debug('Auth type not supported: ' + that.config.auth.type + ' ,only supported: basic');
         }
       }else{
-        logger.debug('Auth type not supported: ' + that.config.auth.type + ' ,only supported: basic' );
+        contentUrlWithAuth = that.config.baseUrl;
       }
     }
 
@@ -85,5 +89,5 @@ SpecResolver.prototype.resolve = function(){
 };
 
 module.exports = function(config){
-  return new SpecResolver(config);
+  return new LocalSpecResolver(config);
 };

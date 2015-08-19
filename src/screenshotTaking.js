@@ -39,13 +39,9 @@ ScreenshotTaking.prototype.register = function() {
   global.takeScreenshot = function() {
     // uses browser object and call webdriverjs function takeScreenshot
     return browser.takeScreenshot().then(function(screenshot) {
-      if(that.config.take && !that.config.update) {
+      if(that.config.take) {
         logger.info('Taking screenshot.');
         return screenshot;
-      } else if(that.config.update && !that.config.take) {
-        logger.info('Updating reference image with new screenshot.');
-        //TODO: update the ref image
-        //storageProvider.storeRefImage(screenshot);
       } else {
         logger.error('Invalid user settings.');
         return [];

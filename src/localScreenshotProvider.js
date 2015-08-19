@@ -8,21 +8,20 @@ var logger = require('./logger.js');
  * @type {Object}
  * @extends {Config}
  * @property {boolean} take - enable screenshot taking
- * @property (boolean) update - update ref with actual screenshot
+ * @property {boolean} update - update ref with actual screenshot
  */
 
 /**
  * Screenshot provider
  * @constructor
  * @implements {ScreenshotProvider}
- * @param (LocalScreenshotProviderConfig} config - configs
+ * @param {LocalScreenshotProviderConfig} config - configs
  */
 function LocalScreenshotProvider(config) {
   this.config = config;
 }
 
 /**
- * Takes a screenshot of the current browser state
  * @typedef takeScreenshot
  * @type {function}
  * @global
@@ -36,19 +35,18 @@ function LocalScreenshotProvider(config) {
  * Registers takeScreenshot at global variable
  */
 LocalScreenshotProvider.prototype.register = function() {
-  var that = this;
-  global.takeScreenshot = function() {
-    // uses browser object and call webdriverjs function takeScreenshot
-    return browser.takeScreenshot().then(function(encodedScreenshot) {
-      if(that.config.localScreenshotProvider.take) {
+  if(this.config.take) {
+    global.takeScreenshot = function() {
+      // uses browser object and call webdriverjs function takeScreenshot
+      return browser.takeScreenshot().then(function(encodedScreenshot) {
         logger.debug('Taking screenshot');
         return encodedScreenshot;
-      } else {
-        logger.debug('Skipping screenshot taking');
-        return [];
-      }
-    });
-  };
+      });
+    };
+  } else {
+    logger.debug('Skipping screenshot taking');
+    return [];
+  }
 };
 
 module.exports = function (config) {

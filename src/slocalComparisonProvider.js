@@ -27,7 +27,6 @@ var DEFAULT_TOLERANCE = 5;
  */
 
 /**
- * Image comparison custom jasmine matcher
  * @constructor
  * @implements {ComparisonProvider}
  * @param {LocalComparisonProviderConfig} config - configs

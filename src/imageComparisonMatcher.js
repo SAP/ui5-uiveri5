@@ -13,69 +13,29 @@ require('jasminewd2');
 var resemble = require('resemblejs-tolerance');
 var logger = require('./logger');
 
-// default values
-var TARGET_FOLDER = 'diffs/';
-var DIFF_FILE_NAME = 'diffr';
-var DIFF_FILE_FORMAT = '.png';
-var TOLERANCE = 5;
-
 /**
- * @typedef ImageComparisonMatcherConfig
+ * @typedef LocalComparisonProviderConfig
  * @type {Object}
  * @extends {Config}
- * @property {boolean} take - enable screenshot taking
  * @property {boolean} compare - enable screenshot comparison
- * @property {String} targetFolder - folder where the diff image will be saved
- * @property {String} diffFileName - name of the diff image file
- * @property {Boolean} ignoreColors - setting for color ignore while image comparison
- * @property {Boolean} ignoreAntialiasing - setting for antialiasing ignore while image comparison
- * @property {Object} errorColor - object with red, green and blue properties for defining color for diff pixels
- * @property {String} errorType - what type of error will expect (flat or movement)
- * @property {Number) transparency - transparency of the diff image
- * @property {Array} ignoreRectangles - array of coords of rectangles which will be ignored in comparison
- * @property {Number) tolerance - above this percentage of difference the matcher will fail
+ *
+ * @property {Boolean} localComparisonProvider.ignoreColors - enable color ignore in comparison
+ * @property {Boolean} localComparisonProvider.ignoreAntialiasing - enable antialiasing ignore while image comparison
+ * @property {Object} localComparisonProvider.errorColor - object with red, green and blue number value for defining color for diff pixels
+ * @property {String} localComparisonProvider.errorType - what type of error will expect (flat or movement)
+ * @property {Number) localComparisonProvider.transparency - transparency intensity of the diff image
+ * @property {Array} localComparisonProvider.ignoreRectangles - array of coords of rectangles which will be ignored in comparison
+ * @property {Number) localComparisonProvider.tolerance - above this percentage of difference the matcher will fail
  * */
 
 /**
  * Image comparison custom jasmine matcher
- * @constructor
+ * @tructor
  * @param {ImageComparisonMatcherConfig} config - configs
  * */
 function ImageComparisonMatcher(config, storageProvider) {
   this.config = config;
-
-  this.take = this.config.imageComparison ? this.config.imageComparison.take : true;
-  this.compare = this.config.imageComparison ? this.config.imageComparison.compare : true;
-
-  this.targetFolder = this.config.imageComparison ? this.config.imageComparison.targetFolder : '';
-  this.diffFileName = this.config.imageComparison ? this.config.imageComparison.diffFileName : '';
-  this.ignoreColors = this.config.imageComparison ? this.config.imageComparison.ignoreColors : '';
-  this.ignoreAntialiasing = this.config.imageComparison ? this.config.imageComparison.ignoreAntialiasing : '';
-  this.errorColor = this.config.imageComparison ? this.config.imageComparison.errorColor : '';
-  this.errorType = this.config.imageComparison ? this.config.imageComparison.errorType : '';
-  this.transparency = this.config.imageComparison ? this.config.imageComparison.transparency : '';
-  this.imageTolerance = this.config.imageComparison ? this.config.imageComparison.imageTolerance : '';
-  this.ignoreRectangles = this.config.imageComparison ? this.config.imageComparison.ignoreRectangles : '';
-  this.tolerance = this.config.imageComparison ? this.config.imageComparison.tolerance : TOLERANCE;
-
   this.storageProvider = storageProvider;
-
-  var that = this;
-  this.options = {
-    tolerance: that.tolerance,
-
-    take: that.take,
-    compare: that.compare,
-
-    ignoreColors: that.ignoreColors,
-    ignoreAntialiasing: that.ignoreAntialiasing,
-    ignoreRectangles: that.ignoreRectangles,
-    imageTolerance: that.imageTolerance,
-
-    errorColor: that.errorColor,
-    errorType: that.errorType,
-    transparency: that.transparency
-  };
 }
 
 /**
@@ -84,14 +44,14 @@ function ImageComparisonMatcher(config, storageProvider) {
  * @type {function}
  * @extends Jasmine.compare
  * @global
- * @param {string} refImageName - ref image to compare against
+ * @param {string} refImageName - ref image name to compare against
  * @param (webdriver.promise<Buffer> - actualImageBuffer - actual screenshot
  *
  * Resolves the refImageName to a refImageBuffer using the given
  * storageProvider. Resolves the actual screenshot promise to actualImageBuffer.
  * Feeds both buffers to resemble and stores the diff image using the imageProvider.
  *
- * if(config.take && config.compare) => log info message and run, else log info message and exit.
+ * if(config.compare) => log info message and run, else log info message and exit.
  * */
 
 /**
@@ -101,69 +61,83 @@ ImageComparisonMatcher.prototype.register = function () {
   var jasmineEnv = jasmine.getEnv();
   var that = this;
 
-  // create custom matcher
+  // create jasmine custom matcher
   var toLookLike = function () {
     return {
       compare: function (actual, expected) {
-        // create defer object
-        if(that.options.take && that.options.compare) {
-          logger.info('Comparing screenshot to: ' + expected);
+        if(that.config.compare) {
           var defer = webdriver.promise.defer();
 
           var refImageBuffer = '';
-          var actualImageBuffer = '';
+          var actualImageBuffer = new Buffer(actual, 'base64');
           var dataRefImage = [];
 
-          // get the reference image
-          var refImageStream = fs.createReadStream(expected);
+          // get the reference image from storage provider
+          var refImageStream = that.storageProvider.readRefImage(expected);
+
           refImageStream.on('data', function (chunk) {
             dataRefImage.push(chunk);
+          });
+
+          refImageStream.on('error', function() {
+            if(that.config.update) {
+              logger.info('No reference image found. Saving new one');
+              updateRefImage(expected, actualImageBuffer);
+            } else {
+              logger.info('No reference image found');
+              return {
+                pass: false
+              }
+            }
           });
 
           refImageStream.on('end', function () {
 
             // create Buffers from streams - use in resemblejs-tolerance
             refImageBuffer = Buffer.concat(dataRefImage);
-            actualImageBuffer = new Buffer(actual, 'base64');
 
-            resemble.outputSettings(that.options);
+            resemble.outputSettings(that.config);
 
-            // compare two images
-            var resJS = resemble(refImageBuffer).compareTo(actualImageBuffer);
-            resJS.inputSettings(that.options);
+            // compare two images and add input settings - they are chained and set to resJS object
+            // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
+            logger.info('Comparing screenshot to: ' + expected);
+            var resJS = resemble(refImageBuffer).compareTo(actualImageBuffer)
+              .inputSettings(that.config).onComplete(function (comparisonResultData) {
 
-            resJS.onComplete(function (comparisonResultData) {
+                var misMatchPercentage = parseInt(comparisonResultData.misMatchPercentage);
+                var dimensionDifference = comparisonResultData.dimensionDifference;
+                var errorPixels = comparisonResultData.errorPixels;
+                var diffImage = comparisonResultData.getDiffImage();
+                var isSameDimension = comparisonResultData.isSameDimensions;
+                var misMatchCount = comparisonResultData.misMatchCount;
 
-              // data after comparison
-              var misMatchPercentage = parseInt(comparisonResultData.misMatchPercentage);
-              var dimensionDifference = comparisonResultData.dimensionDifference;
-              var errorPixels = comparisonResultData.errorPixels;
-              var diffImage = comparisonResultData.getDiffImage();
-              var isSameDimension = comparisonResultData.isSameDimensions;
-              var misMatchCount = comparisonResultData.misMatchCount;
+                // check the mismatch percentage
+                if (misMatchPercentage < that.config.tolerance) {
+                  result.message = 'Mismatch percentage: ' + comparisonResultData.misMatchPercentage;
+                  defer.fulfill(true);
+                } else {
+                  result.message = 'Mismatch percentage: ' + comparisonResultData.misMatchPercentage;
 
-              // check the mismatch percentage
-              if (misMatchPercentage < that.tolerance) {
-                result.message = 'Mismatch percentage: ' + comparisonResultData.misMatchPercentage;
+                  // store diff image
+                  logger.info('Saving diff image');
+                  var diffImageStream = that.storageProvider.storeDiffImage(expected);
+                  comparisonResultData.getDiffImage().pack().pipe(diffImageStream);
 
-                defer.fulfill(true);
-              } else {
-                result.message = 'Mismatch percentage: ' + comparisonResultData.misMatchPercentage;
-                //TODO: Implement custom reporter
-                //logger.error('Expected image: ' + expected + ' to be the same as the screenshot. Mismatch percentage: ' + comparisonResultData.misMatchPercentage
-                //  + ', misMatchCount: ' + misMatchCount);
+                  // store actual image
+                  logger.info('Saving actual image');
+                  var actImageStream = that.storageProvider.storeActImage(expected);
+                  actImageStream.write(actualImageBuffer);
 
-                if (that.storageProvider === 'local') {
-                  logger.info('Loccal image storage chosen. Saving diff image...');
-                  comparisonResultData.getDiffImage().pack().pipe(fs.createWriteStream(TARGET_FOLDER + DIFF_FILE_NAME + "-" + Date.now() + DIFF_FILE_FORMAT));
-                } else if (that.storageProvider === 'central') {
-                  loger.info('Central image storage chosen. Sending diff image...');
-                  //TODO: Send diff image to central image storage
+                  if(that.config.update) {
+                    logger.info('Updating ref image with the current screenshot');
+                    updateRefImage(expected, actualImageBuffer);
+                  }
+
+                  // fail
+                  defer.fulfill(false);
                 }
-                // fail
-                defer.fulfill(false);
-              }
-            });
+              });
+
           });
 
           // matcher have to return result object with boolean pass value
@@ -176,11 +150,15 @@ ImageComparisonMatcher.prototype.register = function () {
           return result;
         } else {
           logger.info('Skipping image comparison.');
-
         }
       }
     }
   };
+
+  function updateRefImage(expected, actualImageBuffer) {
+    var createRefImageStream = that.storageProvider.storeRefImage(expected);
+    createRefImageStream.write(actualImageBuffer);
+  }
 
   // add custom matcher to jasmine matchers
   jasmineEnv.addMatchers({toLookLike: toLookLike});

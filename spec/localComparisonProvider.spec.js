@@ -10,7 +10,7 @@ describe("RemoteSAPUI5SpecResolver", function () {
 
     var storageProviderMock = {
       storeRefImage : function(refImageName) {
-        return fs.createWriteStream(refImageName);;
+        return fs.createWriteStream(refImageName);
       },
       readRefImage: function(refImageName) {
         var readImageStream = fs.createReadStream(refImageName);

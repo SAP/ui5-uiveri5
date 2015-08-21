@@ -2,8 +2,7 @@
  * Created by i304310 on 30/3/2015
  */
 'use strict';
-//requires
-var logger = require("./logger");
+
 var fs = require('fs');
 var request = require('urllib-sync');
 var path = require('path');
@@ -31,8 +30,10 @@ var ENCODING_UTF8 = 'utf8';
  * @constructor
  * @param {RemoteSAPUI5SpecResolverConfig} config - configs
  */
-function RemoteSpecResolver(config) {
+function RemoteSpecResolver(config, logger) {
   this.config = config;
+  this.logger = logger;
+
   this.sBaseUrl = this.config.baseUrl || BASE_URL;
   this.sContentRootUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.contentUri : CONTENT_ROOT_URI;
   this.sLibsInfoUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libsInfoUri : LIBS_INFO_URI;
@@ -51,11 +52,11 @@ RemoteSpecResolver.prototype.resolve = function () {
   var aSuitePaths = this._prepareSuitePaths(oAppInfo);
 
   //write the suite files with given paths to given folder
-  logger.info('Download suite files');
+  this.logger.info('Download suite files');
   var aSpecPaths = this._downloadFiles(aSuitePaths,undefined,true);
 
   //load spec files from all downloaded suite files
-  logger.info('Download spec files');
+  this.logger.info('Download spec files');
   var aSpecs = this._loadSpecs(aSpecPaths);
 
   return aSpecs;
@@ -127,9 +128,9 @@ RemoteSpecResolver.prototype._downloadFiles = function (aPaths, sTargetFolder, b
       }
       fs.writeFileSync(targetFolder + aPaths[i].pathUrl.split("/").pop(), oResponse.data, ENCODING_UTF8);
       aResultPaths.push({pathUrl: aPaths[i].pathUrl, targetFolder: aPaths[i].targetFolder});
-      logger.debug('Downloaded: ' + aPaths[i].pathUrl);
+      this.logger.debug('Downloaded: ' + aPaths[i].pathUrl);
     } else if (oResponse.status == 404 && bIgnore404) {
-      logger.debug('Cannot find: ' + aPaths[i].pathUrl);
+      this.logger.debug('Cannot find: ' + aPaths[i].pathUrl);
     } else {
       throw new Error('Cannot download: ' + aPaths[i].pathUrl +
         ', status: ' + oResponse.status + ', message: ' + oResponse.data);
@@ -247,7 +248,7 @@ RemoteSpecResolver.prototype._fillSpecsArray = function (sLibUri, specName, sLib
   };
 
   this._downloadFiles([{pathUrl: oSpec._specUrls}], sSpecLibFolderName + "/");
-  logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
+  this.logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
   aSpecs.push(oSpec);
 
   return oSpec;
@@ -271,6 +272,6 @@ RemoteSpecResolver.prototype._mkdirs = function (path, root) {
   return !dirs.length || this._mkdirs(dirs.join('/'), root);
 };
 
-module.exports = function (oConfig) {
-  return new RemoteSpecResolver(oConfig);
+module.exports = function (config, logger) {
+  return new RemoteSpecResolver(config, logger);
 };

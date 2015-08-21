@@ -23,6 +23,12 @@ var argv = require('yargs').
     describe('verbose', 'Print debug logs').
     string('specs').
     describe('specs', 'Specs to execute, blob pattern used by localSpecResolver only').
+    //string('take').
+    describe('take', 'Take screenshots, default: true').
+    //string('compare').
+    describe('compare', 'Compare actual to reference screenshots, default: true').
+    //string('update').
+    describe('update', 'Update reference screenshots with actual screenshots if differ, default false').
     strict().
     argv;
     //TODO profile argument

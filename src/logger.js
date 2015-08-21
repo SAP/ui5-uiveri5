@@ -2,34 +2,45 @@
 // 1 - +DEBUG
 // 2 - +TRACE
 // 3 - +trace data
-var level = 0;
 
-var setLevel = function(newLevel){
-  level = newLevel;
+function ConsoleLogger(level){
+  this.level = level;
 }
 
-var info = function(msg) {
+ConsoleLogger.prototype.setLevel = function(newLevel){
+  this.level = newLevel;
+};
+
+ConsoleLogger.prototype.info = function(msg) {
   console.log('INFO: ' + msg);
 };
 
-var error = function(msg) {
+ConsoleLogger.prototype.error = function(msg) {
   console.log('ERROR: ' + msg);
 };
 
-var debug = function(msg) {
-  if(level>0) {
+ConsoleLogger.prototype.debug = function(msg) {
+  if(this.level>0) {
     console.log('DEBUG: ' + msg);
   }
 };
 
-var trace = function(msg) {
-  if(level>1) {
+//TODO placeholders and var args
+//TODO stringity for objects and arrays
+ConsoleLogger.prototype.trace = function(msg) {
+  if(this.level>1) {
     console.log('TRACE: ' + msg);
   }
 };
 
+module.exports = function (level) {
+  return new ConsoleLogger(level);
+};
+
+/*
 exports.setLevel = setLevel;
 exports.info = info;
 exports.error = error;
 exports.debug = debug;
 exports.trace = trace;
+*/

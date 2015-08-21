@@ -1,7 +1,6 @@
 'use strict';
 
 var _ = require('lodash');
-var logger = require('./logger');
 var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
@@ -38,7 +37,7 @@ var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 var run = function(config) {
 
   // configure logger
-  logger.setLevel(config.verbose);
+  var logger = require('./logger')(config.verbose);
 
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
@@ -68,7 +67,7 @@ var run = function(config) {
   }
   logger.debug('Loading spec resolver module: ' + specResolverName);
   logger.info('Resolving specs');
-  var specResolver = require(specResolverName)(config);
+  var specResolver = require(specResolverName)(config,logger);
   var specs = specResolver.resolve();
   if (!specs || specs.length==0){
     throw new Error("No specs found");
@@ -100,7 +99,7 @@ var run = function(config) {
   });
 
   // resolve runtime and set browsers with capabilities
-  var runtimeResolver = require('./runtimeResolver')(config);
+  var runtimeResolver = require('./runtimeResolver')(config,logger);
   var runtimes = runtimeResolver.resolveRuntimes();
   protractorArgv.multiCapabilities = runtimeResolver.prepareMultiCapabilitiesFromRuntimes(runtimes);
 
@@ -110,7 +109,7 @@ var run = function(config) {
 
   // register screenshot provider
   if(config.screenshotProvider){
-    var screenshotProvider = require(config.screenshotProvider)(config);
+    var screenshotProvider = require(config.screenshotProvider)(config,logger);
     screenshotProvider.register();
   }
 
@@ -132,13 +131,15 @@ var run = function(config) {
     browser.testrunner = {};
     browser.testrunner.config = config;
 
-    browser.getProcessedConfig().then(function(capabilities) {
-      var currentRuntime = runtimeResolver.enrichRuntimeFromCapabilities(capabilities);
+    var matchers = {};
+    var storageProvider;
+    // register a hook to be called once webdriver connection is established
+    browser.getProcessedConfig().then(function(protractorConfig) {
+      var currentRuntime = runtimeResolver.enrichRuntimeFromCapabilities(protractorConfig.capabilities);
 
       // register storage provider
-      var storageProvider;
       if(config.storageProvider){
-        storageProvider = require(config.storageProvider)(config,currentRuntime);
+        storageProvider = require(config.storageProvider)(config,logger,currentRuntime);
       }
 
       // export current runtime for tests
@@ -146,8 +147,8 @@ var run = function(config) {
 
       // register comparison provider
       if(config.comparisonProvider){
-        var comparisonProvider = require(config.comparisonProvider)(config,storageProvider);
-        comparisonProvider.register();
+        var comparisonProvider = require(config.comparisonProvider)(config,logger,storageProvider);
+        comparisonProvider.register(matchers);
       }
     });
 
@@ -155,13 +156,18 @@ var run = function(config) {
     var origExecuteAsyncScript_= browser.executeAsyncScript_;
     browser.executeAsyncScript_ = function() {
 
-      // log the  call
+      // log the call
       logger.trace('Executing async script: ' + arguments[1] +
-        (config.verbose > 2 ? ('\n' + arguments[0] + '\n') : ''));
+        (logger.level > 2 ? ('\n' + arguments[0] + '\n') : ''));
 
       //call original fn in its context
       return origExecuteAsyncScript_.apply(browser, arguments);
     };
+
+    // add global matchers
+    beforeEach(function() {
+      jasmine.getEnv().addMatchers(matchers);
+    });
 
     // hook into specs lifecycle
     // open test content page before every suite
@@ -192,13 +198,13 @@ var run = function(config) {
             logger.debug('Opening: ' + spec.contentUrl);
 
             // bypass browser.get() as it does angular-magic that we do not need to overwride
-            browser.driver.get(spec.contentUrl);
+            browser.driver.get(spec.contentUrl).then(function(){
+              // call storage provider beforeEach hook
+              if (storageProvider && storageProvider.onBeforeEachSpec){
+                storageProvider.onBeforeEachSpec(spec);
+              }
+            });
             // TODO check http status, throw error if error
-          }
-
-          // call storage provider beforeEach hook
-          if (storageProvider || storageProvider.onBeforeEachSpec){
-            storageProvider.onBeforeEachSpec(spec);
           }
 
           // as failed expectation
@@ -228,14 +234,14 @@ var run = function(config) {
         logger.debug('Finished spec with full name: ' + specFullName);
 
         // call storage provider afterEach hook
-        if (storageProvider || storageProvider.onAfterEachSpec){
+        if (storageProvider && storageProvider.onAfterEachSpec){
           storageProvider.onAfterEachSpec(spec);
         }
       },
 
       jasmineDone: function(){
         // call storage provider afterAll hook
-        if (storageProvider || storageProvider.onAfterAllSpecs){
+        if (storageProvider && storageProvider.onAfterAllSpecs){
           storageProvider.onAfterAllSpecs(specs);
         }
       }

@@ -3,12 +3,12 @@
  */
 'use strict';
 
-require('jasminewd2');
-var webdriver = require('selenium-webdriver');
+var _ = require('lodash');
 var resemble = require('resemblejs-tolerance');
-var logger = require('./logger');
 
 //default values
+var DEFAULT_COMPARE = true;
+var DEFAULT_UPDATE = false;
 var DEFAULT_TOLERANCE = 5;
 
 /**
@@ -29,43 +29,32 @@ var DEFAULT_TOLERANCE = 5;
 /**
  * @constructor
  * @implements {ComparisonProvider}
- * @param {LocalComparisonProviderConfig} config - configs
+ * @param {LocalComparisonProviderConfig} config
+ * @param {Logger} logger
+ * @param {StorageProvider} storage provider
  */
-function LocalComparisonProvider(config, storageProvider) {
+function LocalComparisonProvider(config, logger, storageProvider) {
   this.config = config;
+  this.logger = logger;
+
   this.storageProvider = storageProvider;
   this.tolerance = this.config.tolerance || DEFAULT_TOLERANCE;
+  this.compare = config.compare || DEFAULT_COMPARE;
+  this.update = config.update || DEFAULT_UPDATE;
 }
 
 /**
- * Compare actual screenshot to reference screenshot
- * @typedef toLookLike
- * @type {function}
- * @extends Jasmine.compare
- * @global
- * @param {string} refImageName - ref image name to compare against
- * @param {webdriver.promise<Buffer>} - actualImageBuffer - actual screenshot
- *
- * Resolves the refImageName to a refImageBuffer using the given
- * storageProvider. Resolves the actual screenshot promise to actualImageBuffer.
- * Feeds both buffers to resemble and stores the diff image using the imageProvider.
- *
- * if(config.compare) => log info message and run, else log info message and exit.
+ * Registers the custom matcher to jasmine environment
  */
-
-/**
- * Registers the custom matcher to the jasmine matchers
- */
-LocalComparisonProvider.prototype.register = function () {
-  var jasmineEnv = jasmine.getEnv();
+LocalComparisonProvider.prototype.register = function (matchers) {
   var that = this;
 
   // create jasmine custom matcher
-  var toLookLike = function () {
+  var toLookAs = function () {
     return {
       compare: function (actEncodedImage, expectedImageName) {
-        if(that.config.compare) {
-          var defer = webdriver.promise.defer();
+        if(that.compare) {
+          var defer = protractor.promise.defer();
 
           var actualImageBuffer = new Buffer(actEncodedImage, 'base64');
           var dataRefImage = [];
@@ -78,14 +67,16 @@ LocalComparisonProvider.prototype.register = function () {
           });
 
           refImageStream.on('error', function() {
-            if(that.config.localComparisonProvider.update) {
-              logger.info('No reference image found. Saving new one');
+            if(that.update) {
+              that.logger.debug('Comparison enabled but no reference image found: ' + expectedImageName + ' ,storing current as reference' );
               updateRefImage(expectedImageName, actualImageBuffer);
+              // TODO error handling - set done/error callback and fulfil/reject the promise there
+              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName + ' ,storing current as reference';
+              defer.fulfill(true);
             } else {
-              logger.info('No reference image found');
-              return {
-                pass: false
-              }
+              that.logger.debug('Comparison enabled but no reference image found: ' + expectedImageName);
+              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName;
+              defer.fulfill(false);
             }
           });
 
@@ -97,39 +88,57 @@ LocalComparisonProvider.prototype.register = function () {
 
             // compare two images and add input settings - they are chained and set to resJS object
             // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
-            logger.debug('Comparing screenshot to: ' + expectedImageName);
+            that.logger.debug('Comparing current screenshot to reference image: ' + expectedImageName);
             resemble(refImageBuffer).compareTo(actualImageBuffer)
               .inputSettings(localComparisonProviderConfig).onComplete(function (comparisonResultData) {
 
                 var misMatchPercentage = parseInt(comparisonResultData.misMatchPercentage);
                 //var dimensionDifference = comparisonResultData.dimensionDifference;
-                //var errorPixels = comparisonResultData.errorPixels;
+                var errorPixels = _.clone(comparisonResultData.errorPixels);
+                delete comparisonResultData.errorPixels;
                 //var diffImage = comparisonResultData.getDiffImage();
                 //var isSameDimension = comparisonResultData.isSameDimensions;
                 //var misMatchCount = comparisonResultData.misMatchCount;
 
                 // check the mismatch percentage
                 if (misMatchPercentage < that.tolerance) {
-                  result.message = 'Image comparison failed. Reference image: ' + expectedImageName +
+
+                  that.logger.debug('Image comparison passed. Reference image: ' + expectedImageName +
+                    ' ,tolerance: ' + that.tolerance +
+                    ' ,results: ' + JSON.stringify(comparisonResultData));
+                  that.logger.trace('Image comparison for reference image: ' + expectedImageName +
+                    ' error pixels: ' +  (that.logger.level > 2 ? ('\n' + JSON.stringify(errorPixels) + '\n') : ''));
+
+                  result.message = 'Image comparison passed. Reference image: ' + expectedImageName +
                     ' is not different from the actual image by: ' + comparisonResultData.misMatchPercentage + '%';
+
+                  // pass
                   defer.fulfill(true);
                 } else {
+
+                  that.logger.debug('Image comparison faliled. Reference image: ' + expectedImageName +
+                  ' ,tolerance: ' + that.tolerance +
+                  ' ,results: ' + JSON.stringify(comparisonResultData));
+                  that.logger.trace('Image comparison for reference image: ' + expectedImageName +
+                  ' error pixels: ' +  (that.logger.level > 2 ? ('\n' + JSON.stringify(errorPixels) + '\n') : ''));
+
                   result.message = 'Image comparison failed. Reference image: ' + expectedImageName +
                     ' is different from the actual image by: ' + comparisonResultData.misMatchPercentage + '%';
 
                   // store diff image
-                  logger.debug('Saving diff image');
+                  that.logger.debug('Saving diff image');
                   var diffImageStream = that.storageProvider.storeDiffImage(expectedImageName);
                   comparisonResultData.getDiffImage().pack().pipe(diffImageStream);
 
                   // store actual image
-                  logger.debug('Saving actual image');
+                  that.logger.debug('Saving actual image');
                   var actImageStream = that.storageProvider.storeActImage(expectedImageName);
                   actImageStream.write(actualImageBuffer);
 
-                  if(that.config.localComparisonProvider.update) {
-                    logger.debug('Updating ref image with the current screenshot');
+                  if(that.config.update) {
+                    that.logger.debug('Updating reference image: ' + expectedImageName + ' with the current screenshot');
                     updateRefImage(expectedImageName, actualImageBuffer);
+                    // TODO error handling
                   }
 
                   // fail
@@ -148,7 +157,7 @@ LocalComparisonProvider.prototype.register = function () {
 
           return result;
         } else {
-          logger.debug('Skipping image comparison.');
+          that.logger.debug('Skipping image comparison.');
         }
       }
     }
@@ -159,10 +168,15 @@ LocalComparisonProvider.prototype.register = function () {
     createRefImageStream.write(actualImageBuffer);
   }
 
+  /*
   // add custom matcher to jasmine matchers
-  jasmineEnv.addMatchers({toLookLike: toLookLike});
+  beforeEach(function() {
+    jasmine.getEnv().addMatchers({toLookAs: toLookAs});
+  });
+  */
+  matchers.toLookAs = toLookAs;
 };
 
-module.exports = function (config, storageProvider) {
-  return new LocalComparisonProvider(config, storageProvider);
+module.exports = function (config, logger, storageProvider) {
+  return new LocalComparisonProvider(config, logger, storageProvider);
 };

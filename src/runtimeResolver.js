@@ -1,4 +1,4 @@
-var logger = require('./logger');
+
 var _ = require('lodash');
 
 var DEFAULT_BROWSER_NAME = 'chrome';
@@ -59,10 +59,12 @@ supportedUI5Modes = [
 /**
  * Resolves runtime
  * @constructor
- * @param {RuntimeResolverConfig} config - configs
+ * @param {RuntimeResolverConfig} config
+ * @param {Logger} logger
  */
-function RuntimeResolver(config){
+function RuntimeResolver(config,logger){
   this.config = config;
+  this.logger = logger;
 };
 
 /**
@@ -148,7 +150,7 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
       }
     }
 
-    logger.debug('Resolved runtime: ' + JSON.stringify(runtime));
+    that.logger.debug('Resolved runtime: ' + JSON.stringify(runtime));
   });
 
   return runtimes;
@@ -159,6 +161,7 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
  * @param {[Runtime]} runtimes - requsted runtimes
  */
 RuntimeResolver.prototype.prepareMultiCapabilitiesFromRuntimes = function(runtimes){
+  var that = this;
 
   var protractorMultiCapabilities = runtimes.map(function(runtime){
     // clone runtime without the capabilities
@@ -172,7 +175,7 @@ RuntimeResolver.prototype.prepareMultiCapabilitiesFromRuntimes = function(runtim
     return protractorCapabilities;
   });
 
-  logger.debug('Resolved protractor multiCapabilities: ' + JSON.stringify(protractorMultiCapabilities));
+  that.logger.debug('Resolved protractor multiCapabilities: ' + JSON.stringify(protractorMultiCapabilities));
   return protractorMultiCapabilities;
 };
 
@@ -181,13 +184,13 @@ RuntimeResolver.prototype.prepareMultiCapabilitiesFromRuntimes = function(runtim
  * @param capabilities
  * @return {Runtime} updated runtime with values from capabilities
  */
-RuntimeResolver.prototype.enrichRuntimeFromCapabilities = function(capabilities,runtime){
+RuntimeResolver.prototype.enrichRuntimeFromCapabilities = function(capabilities){
 
   // TODO parse and merge back options from capabilities
 
-  return runtime;
+  return capabilities;
 };
 
-module.exports = function(config){
-  return new RuntimeResolver(config);
+module.exports = function(config, logger){
+  return new RuntimeResolver(config, logger);
 };

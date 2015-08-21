@@ -2,7 +2,9 @@
  * Created by I304310 on 7/22/2015.
  */
 'use strict';
-var logger = require('./logger.js');
+
+var DEFAULT_TAKE = true;
+
 /**
  * @typedef LocalScreenshotProviderConfig
  * @type {Object}
@@ -15,40 +17,39 @@ var logger = require('./logger.js');
  * Screenshot provider
  * @constructor
  * @implements {ScreenshotProvider}
- * @param {LocalScreenshotProviderConfig} config - configs
+ * @param {LocalScreenshotProviderConfig} config
+ * @param {Logger} logger
  */
-function LocalScreenshotProvider(config) {
+function LocalScreenshotProvider(config, logger) {
   this.config = config;
-}
+  this.logger = logger;
 
-/**
- * @typedef takeScreenshot
- * @type {function}
- * @global
- * @return {webdriver.promise<Buffer>} promise that resolves with screenshot image blob
- *
- * if(config.take) => log info and take the screenshot. Then if(config.update) store the screenshot as ref.
- *
- */
+  this.take = config.take || DEFAULT_TAKE;
+}
 
 /**
  * Registers takeScreenshot at global variable
  */
 LocalScreenshotProvider.prototype.register = function() {
-  if(this.config.take) {
-    global.takeScreenshot = function() {
-      // uses browser object and call webdriverjs function takeScreenshot
-      return browser.takeScreenshot().then(function(encodedScreenshot) {
-        logger.debug('Taking screenshot');
-        return encodedScreenshot;
+  var that = this;
+
+  global.takeScreenshot = function() {
+    if (that.take) {
+      // take screenshot once UI5 has settled down
+      return browser.waitForAngular().then(function(){
+        // uses browser object and call webdriverjs function takeScreenshot
+        return browser.takeScreenshot().then(function (encodedScreenshot) {
+          that.logger.debug('Taking actual screenshot');
+          return encodedScreenshot;
+        });
       });
-    };
-  } else {
-    logger.debug('Skipping screenshot taking');
-    return [];
-  }
+    } else {
+      that.logger.debug('Skipp taking actual screenshot');
+      return '';
+    }
+  };
 };
 
-module.exports = function (config) {
-  return new LocalScreenshotProvider(config);
+module.exports = function (config, logger) {
+  return new LocalScreenshotProvider(config, logger);
 };

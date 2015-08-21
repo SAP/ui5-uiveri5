@@ -16,11 +16,13 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
  * Stores and loads images from local git structure
  * @constructor
  * @implements {StorageProvider}
- * @param {LocalStorageProviderConfig} config - configs
+ * @param {LocalStorageProviderConfig} config
+ * @param {Logger} logger
  * @param {Runtime} runtime - runtime properties
  */
-function LocalStorageProvider(config,runtime) {
+function LocalStorageProvider(config, logger, runtime) {
   this.config = config;
+  this.logger = logger;
   this.runtime = runtime;
 
   this.currentSpec = null;
@@ -51,14 +53,13 @@ LocalStorageProvider.prototype.readRefImage = function(refImageName){
  * @return {WriteStream} - write stream to pipe the ref image content
  */
 LocalStorageProvider.prototype.storeRefImage = function(refImageName){
-  var refImagePath = [
+  var refImageBasePath = [
     this.currentSpec.testBasePath,
     'images',           // TODO consider if this level is really necessary
-    this._getRuntimePathSegment(),
-    (refImageName + DEFAULT_REF_IMAGE_EXT)
+    this._getRuntimePathSegment()
   ].join('/');
-  this._mkdirs(refImagePath);
-  return fs.createWriteStream(refImagePath); // TODO error handling ?
+  this._mkdirs(refImageBasePath);
+  return fs.createWriteStream(refImageBasePath + '/' + refImageName + DEFAULT_REF_IMAGE_EXT);
 };
 
 /**
@@ -67,13 +68,12 @@ LocalStorageProvider.prototype.storeRefImage = function(refImageName){
  * @return {WriteStream} - write stream to pipe the ref image content
  */
 LocalStorageProvider.prototype.storeActImage = function(refImageName){
-  var actImagePath = [
+  var actImageBasePath = [
     this.localBasePath,
-    this._getRuntimePathSegment(),
-    (refImageName + DEFAULT_ACT_IMAGE_EXT)
+    this._getRuntimePathSegment()
   ].join('/');
-  this._mkdirs(actImagePath);
-  return fs.createWriteStream(actImagePath); // TODO error handling ?
+  this._mkdirs(actImageBasePath);
+  return fs.createWriteStream(actImageBasePath + '/' + refImageName + DEFAULT_ACT_IMAGE_EXT);
 };
 
 /**
@@ -82,13 +82,12 @@ LocalStorageProvider.prototype.storeActImage = function(refImageName){
  * @return {WriteStream} - write stream to pipe the diff image content
  */
 LocalStorageProvider.prototype.storeDiffImage = function(refImageName){
-  var diffImagePath = [
+  var diffImageBasePath = [
     this.localBasePath,
-    this._getRuntimePathSegment(),
-    (refImageName + DEFAULT_DIFF_IMAGE_EXT)
+    this._getRuntimePathSegment()
   ].join('/');
-  this._mkdirs(diffImagePath);
-  return fs.createWriteStream(diffImagePath);
+  this._mkdirs(diffImageBasePath);
+  return fs.createWriteStream(diffImageBasePath + '/' + refImageName + DEFAULT_DIFF_IMAGE_EXT);
 };
 
 /**
@@ -136,7 +135,7 @@ LocalStorageProvider.prototype.onBeforeEachSpec = function(spec){
   this.currentSpec = spec;
 };
 
-module.exports = function(config,runtime){
-  return new LocalStorageProvider(config,runtime);
+module.exports = function(config, logger, runtime){
+  return new LocalStorageProvider(config, logger, runtime);
 };
 

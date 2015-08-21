@@ -2,7 +2,6 @@
 
 var path = require('path');
 var glob = require('glob');
-var logger = require("./logger");
 
 var BASE_URL = 'http://localhost:8080';
 var SUITES_GLOB = 'src/**/test/**/visual/visual.suite.js';
@@ -25,8 +24,9 @@ var CONTENT_ROOT_URI = 'testsuite/test-resources/';
  * @implements {SpecResolver}
  * @param {LocalUI5SpecResolverConfig} config - configs
  */
-function LocalUI5SpecResolver(config){
+function LocalUI5SpecResolver(config, logger){
   this.config  = config;
+  this.logger = logger;
 
   this.baseUrl = this.config.baseUrl || BASE_URL;
   this.libFilter = this.config.libFilter || '*';
@@ -48,7 +48,7 @@ LocalUI5SpecResolver.prototype.resolve = function(){
   var specs = [];
 
   //log
-  logger.debug('Resolving specs from suites glob: ' + that.suitesGlob + " contentRootUri: " + that.contentRootUri);
+  that.logger.debug('Resolving specs from suites glob: ' + that.suitesGlob + " contentRootUri: " + that.contentRootUri);
 
   // resolve suite glob to array of paths
   var suitePathMask = path.normalize(process.cwd() + '/' + that.suitesGlob);
@@ -64,8 +64,8 @@ LocalUI5SpecResolver.prototype.resolve = function(){
     var libName = suitePathMatch[2];
 
     // filter out this lib if necessary
-    if(that.libFilter!=='*' && that.libFilter.indexOf(libName)==-1){
-      logger.debug('Drop lib: ' + libName + ' that does not match lib filter: ' + that.libFilter);
+    if(that.libFilter!=='*' && that.libFilter.toLowerCase().indexOf(libName.toLowerCase())==-1){
+      that.logger.debug('Drop lib: ' + libName + ' that does not match lib filter: ' + that.libFilter);
       return;
     }
 
@@ -79,16 +79,18 @@ LocalUI5SpecResolver.prototype.resolve = function(){
     }
 
     // prepare a spec for each name from suite
-    specs = specs.concat(specs,specFileNames.map(function(specFileName){
+    specFileNames.forEach(function(specFileName){
 
+      // extract spec name from file name
       var specFileNameMatch = specFileName.match(/(\w+)\.spec\.js/);
       if( specFileNameMatch===null){
         throw Error('Could not parse spec file name: ' + specFileName);
       }
       var specName = specFileNameMatch[1];
 
-      if(that.specFilter!=='*' && that.specFilter.indexOf(specName)==-1){
-        logger.debug('Drop spec: ' + specName + ' that does not match spec filter: ' + that.specFilter);
+      // apply spec filter
+      if(that.specFilter!=='*' && that.specFilter.toLowerCase().indexOf(specName.toLowerCase())==-1){
+        that.logger.debug('Drop spec: ' + specName + ' that does not match spec filter: ' + that.specFilter);
         return;
       }
 
@@ -102,15 +104,15 @@ LocalUI5SpecResolver.prototype.resolve = function(){
           false
       };
 
-      logger.debug('Spec found: ' + JSON.stringify(spec));
-      return spec;
-    }));
+      that.logger.debug('Spec found: ' + JSON.stringify(spec));
+      specs.push(spec);
+    });
   });
 
   // return the specs
   return specs;
 };
 
-module.exports = function(config){
-  return new LocalUI5SpecResolver(config);
+module.exports = function(config, logger){
+  return new LocalUI5SpecResolver(config, logger);
 };

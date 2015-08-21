@@ -10,10 +10,14 @@ describe("RemoteSAPUI5SpecResolver", function () {
 
     var storageProviderMock = {
       storeRefImage : function(refImageName) {
-        return fs.createWriteStream(refImageName);
+        return fs.createWriteStream(refImageName);;
       },
       readRefImage: function(refImageName) {
-        return fs.createReadStream(refImageName);
+        var readImageStream = fs.createReadStream(refImageName);
+        readImageStream.on('error', function(error) {
+          return null;
+        });
+        return readImageStream;
       },
       storeDiffImage : function() {
         return fs.createWriteStream('spec/localComparisonProvider/diff.png');
@@ -51,8 +55,14 @@ describe("RemoteSAPUI5SpecResolver", function () {
     expect(imageFile).toLookAs('spec/localComparisonProvider/People.png');
   });
 
-  it('Should not look like the ref image - mismatch percentage more than 10%..', function() {
+  it('Should not look like the ref image - mismatch percentage more than 10%.', function() {
     var imageFile = fs.readFileSync('spec/localComparisonProvider/example.png').toString('base64');
     expect(imageFile).not.toLookAs('spec/localComparisonProvider/People.png');
-  })
+  });
+
+  it('Should cannot find the reference image.', function() {
+    var imageFile = fs.readFileSync('spec/localComparisonProvider/example.png').toString('base64');
+    expect(imageFile).not.toLookAs('spec/localComparisonProvider/doNotExist.png');
+  });
+
 });

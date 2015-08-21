@@ -12,7 +12,7 @@ $ npm install
 ```
 Pull grunt support and sample tests from this draft commit:
 ```
-$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/3
+$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/5
 ```
 Update dependencies so latest visualtestjs is used:
 ```
@@ -46,7 +46,7 @@ Run all *.spec.js tests from the folder that contains conf.js. Make sure that ro
 $ visualtest
 ```
 
-### Advanced options - NOT implemented yet
+### Advanced options - NOT ALL are implemented yet
 
 By default visualtest will discover all `**/visualtest/**.spec.js` from localhost:8080 and execute them on local chrome over automatically started selenium server on localhost:4444.
 All of the above defaults could be modified by providing command-line arguments.
@@ -67,12 +67,13 @@ Run tests on remove selenium server
 Run tests on remote selenium grid server that dispatches the test job to particular OS/Browser slave
 __not implemented__
 ```
---browsers="iexplorer:ie9:win8" --seleniumAddress="ui5testgrid.wdf.sap.corp:4444/wd/hub"
+--browsers="ie:9:windows:8"
+--browsers="{browserName:'ie',browserVersion:9,platformName:'windows',platformVersion'8'}" --seleniumAddress="ui5testgrid.wdf.sap.corp:4444/wd/hub"
 ```
 Run tests on remote provider (sauselabs, browserstack, ..) on a particular platform and browser
 __not implemented__
 ```
---browsers="chrome:android4.4" --remote="sause:api.sauselabs.com:443:<user>:<token>"
+--browsers="{browserName:chrome,platformName:android,platformVersion:'4.4'}" --remote="sause:api.sauselabs.com:443:<user>:<token>"
 ```
 
 ## Development

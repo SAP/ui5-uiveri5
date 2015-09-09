@@ -119,9 +119,9 @@ functions.waitForAngular = function(rootSelector, callback) {
             return false;
           } else {
             var bAddNewEntry = !this.oTimeoutInfo.hasOwnProperty(func) || this.oTimeoutInfo[func].delay != delay ||
-                new Date().getMilliseconds() - this.oTimeoutInfo[func].callTime > TestCooperation.MAX_INTERVAL_STEP;
+                Date.now() - this.oTimeoutInfo[func].callTime > TestCooperation.MAX_INTERVAL_STEP;
             if (bAddNewEntry) {
-              this.oTimeoutInfo[func] = {'delay': delay, 'callCount': 1, 'callTime': new Date().getMilliseconds()};
+              this.oTimeoutInfo[func] = {'delay': delay, 'callCount': 1, 'callTime': Date.now()};
               return true;
             } else {
               if (++this.oTimeoutInfo[func].callCount <= 5) {

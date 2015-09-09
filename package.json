@@ -18,10 +18,12 @@
     "url": "git://github.wdf.sap.corp:i035254/visualtestjs.git"
   },
   "bin": {
-    "visualtest": "bin/visualtest"
+    "visualtest": "bin/visualtest",
+    "visualtest-webdriver" : "bin/visualtest-webdriver"
   },
   "scripts": {
     "visualtest": "node bin/visualtest",
+    "visualtest-webdriver": "node bin/visualtest-webdriver",
     "test": "node node_modules/jasmine/bin/jasmine"
   },
   "main": "src/visualtest.js"

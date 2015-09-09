@@ -9,7 +9,7 @@ var resemble = require('resemblejs-tolerance');
 //default values
 var DEFAULT_COMPARE = true;
 var DEFAULT_UPDATE = false;
-var DEFAULT_TOLERANCE = 5;
+var DEFAULT_TOLERANCE = 1;
 
 /**
  * @typedef LocalComparisonProviderConfig

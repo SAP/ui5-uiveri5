@@ -28,7 +28,7 @@ Please check docs/controllibraries.md and the availbe sap.m libirary visual test
 ### Integration testing
 Install visualtest globally:
 ```
-$ npm install git://github.wdf.sap.corp/maximnaidenov/visualtestjs.git -g
+$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git -g
 ```
 Download selenium jar and drivers:
 ```

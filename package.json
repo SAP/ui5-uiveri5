@@ -22,7 +22,6 @@
   },
   "scripts": {
     "visualtest": "node bin/visualtest",
-    "visualtest-webdriver": "node bin/visualtest-webdriver",
     "test": "node node_modules/jasmine/bin/jasmine"
   },
   "main": "src/visualtest.js"

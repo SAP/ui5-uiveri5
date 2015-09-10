@@ -18,8 +18,7 @@
     "url": "git://github.wdf.sap.corp:i035254/visualtestjs.git"
   },
   "bin": {
-    "visualtest": "bin/visualtest",
-    "visualtest-webdriver" : "bin/visualtest-webdriver"
+    "visualtest": "bin/visualtest"
   },
   "scripts": {
     "visualtest": "node bin/visualtest",

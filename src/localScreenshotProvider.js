@@ -8,7 +8,7 @@ var DEFAULT_TAKE = true;
 /**
  * @typedef LocalScreenshotProviderConfig
  * @type {Object}
- * @extends {Config}
+ * @extends {ScreenshotProviderConfig}
  * @property {boolean} take - enable screenshot taking
  * @property {boolean} update - update ref with actual screenshot
  */
@@ -20,7 +20,7 @@ var DEFAULT_TAKE = true;
  * @param {LocalScreenshotProviderConfig} config
  * @param {Logger} logger
  */
-function LocalScreenshotProvider(config, logger) {
+function LocalScreenshotProvider(config,logger) {
   this.config = config;
   this.logger = logger;
 

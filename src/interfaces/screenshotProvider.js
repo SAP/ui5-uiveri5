@@ -10,8 +10,9 @@
  * Resolves specs
  * @constructor
  * @param {ScreenshotProviderConfig} config - configs
+ * @param {Logger} logger
  */
-function ScreenshotProvider(config){
+function ScreenshotProvider(config,logger){
   this.config  = config;
 }
 

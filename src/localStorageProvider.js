@@ -1,4 +1,5 @@
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 
 var DEFAULT_LOCAL_BASE_PATH = 'target/images';
 var DEFAULT_REF_IMAGE_EXT = '.ref.png';
@@ -9,7 +10,8 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
  * @typedef LocalStorageProviderConfig
  * @type {Object}
  * @extends {StorageProviderConfig}
- * @property {string} localStorageProvider.localBasePath - local storage base path e.g. c:\openui5\target\images
+ * @property {string} localStorageProvider.localBasePath - local storage base path e.g. c:\openui5\target\images,
+ *  default to ./target
  */
 
 /**
@@ -58,7 +60,7 @@ LocalStorageProvider.prototype.storeRefImage = function(refImageName){
     'images',           // TODO consider if this level is really necessary
     this._getRuntimePathSegment()
   ].join('/');
-  this._mkdirs(refImageBasePath);
+  mkdirp.sync(refImageBasePath);
   return fs.createWriteStream(refImageBasePath + '/' + refImageName + DEFAULT_REF_IMAGE_EXT);
 };
 
@@ -72,7 +74,7 @@ LocalStorageProvider.prototype.storeActImage = function(refImageName){
     this.localBasePath,
     this._getRuntimePathSegment()
   ].join('/');
-  this._mkdirs(actImageBasePath);
+  mkdirp.sync(actImageBasePath);
   return fs.createWriteStream(actImageBasePath + '/' + refImageName + DEFAULT_ACT_IMAGE_EXT);
 };
 
@@ -86,7 +88,7 @@ LocalStorageProvider.prototype.storeDiffImage = function(refImageName){
     this.localBasePath,
     this._getRuntimePathSegment()
   ].join('/');
-  this._mkdirs(diffImageBasePath);
+  mkdirp.sync(diffImageBasePath);
   return fs.createWriteStream(diffImageBasePath + '/' + refImageName + DEFAULT_DIFF_IMAGE_EXT);
 };
 
@@ -105,24 +107,6 @@ LocalStorageProvider.prototype._getRuntimePathSegment = function(){
     this.runtime.ui5.direction,
     this.runtime.ui5.mode
   ].join('/');
-};
-
-/**
- * Makes directory from given path and root
- * @param {String} path - string of directory path
- * @param {String} [root] - optional string for directory root
- * */
-LocalStorageProvider.prototype._mkdirs = function (path, root) {
-  var dirs = path.split('/'), dir = dirs.shift(), root = (root || '') + dir + '/';
-
-  try {
-    fs.mkdirSync(root);
-  } catch (e) {
-    //dir wasn't made, something went wrong
-    if (!fs.statSync(root).isDirectory()) throw new Error("Folder cannot be created: " + e);
-  }
-
-  return !dirs.length || this._mkdirs(dirs.join('/'), root);
 };
 
 /**

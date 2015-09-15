@@ -9,10 +9,12 @@
  * Stores and loads images
  * @constructor
  * @param {StorageProviderConfig} config - configs
+ * @param {Logger} logger
  * @param {RuntimeConfig} runtimeProps - runtime properties
  */
-function StorageProvider(config,runtime){
+function StorageProvider(config,logger,runtime){
   this.config  = config;
+  this.logger = logger;
   this.runtime = runtime;
 }
 

@@ -14,9 +14,8 @@ var DEFAULT_TOLERANCE = 1;
 /**
  * @typedef LocalComparisonProviderConfig
  * @type {Object}
- * @extends {Config}
+ * @extends {ComparisonProviderConfig}
  * @property {boolean} compare - enable screenshot comparison
- *
  * @property {boolean} localComparisonProvider.ignoreColors - enable color ignore in comparison
  * @property {boolean} localComparisonProvider.ignoreAntialiasing - enable antialiasing ignore while image comparison
  * @property {{red: {number}, green: {number}, blue: {number}}} localComparisonProvider.errorColor - object with red, green and blue number value for defining color for diff pixels
@@ -45,6 +44,7 @@ function LocalComparisonProvider(config, logger, storageProvider) {
 
 /**
  * Registers the custom matcher to jasmine environment
+ * @param {Object} matchers - jasmine matchers, adds toLookAs matcher here
  */
 LocalComparisonProvider.prototype.register = function (matchers) {
   var that = this;

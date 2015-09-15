@@ -10,16 +10,18 @@
  * Resolves specs
  * @constructor
  * @param {ComparisonProviderConfig} config - configs
+ * @param {Logger} logger
  * @param {StorageProvider} storageProvider - the storage provider to use
  */
-function ComparisonProvider(config,storageProvider){
+function ComparisonProvider(config,logger,storageProvider){
   this.config  = config;
+  this.logger = logger;
   this.storageProvider = storageProvider;
 }
 
 /**
  * Compare actual screenshot to reference screenshot
- * @typedef toLookLike
+ * @typedef toLookAs
  * @type {function}
  * @extends Jasmine.compare
  * @global
@@ -30,11 +32,12 @@ function ComparisonProvider(config,storageProvider){
  * Resolves the refImageName to a refImageBuf using the given storageProvider.
  * Resolves the actual screenshot promise to actImageBuf. Feeds both buffers to resemble
  * and if difference store the diff and act images using storageProvider.
-  * If (config.take && config.compare & config.update) store the act image as ref image else just return.
+ * If (config.take && config.compare & config.update) store the act image as ref image else just return.
  */
 
 /**
- * Registers the jasmine custom matchers
+ * Registers the jasmine custom matcher
+ * @param {Object} matchers - jasmine matchers, adds toLookAs matcher here
  */
-ComparisonProvider.prototype.register = function(){
+ComparisonProvider.prototype.register = function(matchers){
 };

@@ -22,8 +22,10 @@ Run all available tests:
 ```
 $ grunt visualtest
 ```
-Please check docs/developing.md and docs/tools.md for further arguments that visualtest task accepts.
-Please check docs/controllibraries.md and the availbe sap.m libirary visual tests from the draft commit how to write new visual tests.
+Please check [developing.md](https://github.com/SAP/openui5/blob/master/docs/developing.md) and
+[tools.md](https://github.com/SAP/openui5/blob/master/docs/tools.md) for further command-line arguments that
+visualtest grunt task accepts. Please check [controllibraries.md](https://github.com/SAP/openui5/blob/master/docs/controllibraries.md)
+and the available sap.m library visual tests from the draft commit above how to write new visual tests.
 
 ### Integration testing
 Install visualtest globally:
@@ -54,7 +56,7 @@ All of the above defaults could be modified by providing command-line arguments.
 Run tests on Chrome, Firefox and InternetExplorer in parallel
 __still works with single browser only__
 ```
---browsers="chrome,firefox,iexplorer"
+--browsers="chrome,firefox,ie"
 ```
 Run tests from and against test content on remote sapui5 runtime
 ```
@@ -68,6 +70,7 @@ Run tests on remote selenium grid server that dispatches the test job to particu
 __not implemented__
 ```
 --browsers="ie:9:windows:8"
+--browsers="chrome:*:windows"
 --browsers="{browserName:'ie',browserVersion:9,platformName:'windows',platformVersion'8'}" --seleniumAddress="ui5testgrid.wdf.sap.corp:4444/wd/hub"
 ```
 Run tests on remote provider (sauselabs, browserstack, ..) on a particular platform and browser

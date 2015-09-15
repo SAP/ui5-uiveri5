@@ -2,6 +2,7 @@
 var _ = require('lodash');
 
 var DEFAULT_BROWSER_NAME = 'chrome';
+var DEFAULT_PLATFORM_NAME = 'windows';
 var DEFAULT_VERSION = '*';
 var DEFAULT_UI5_THEME = 'bluecrystal';
 var DEFAULT_UI5_DIRECTION = 'ltr';
@@ -16,7 +17,8 @@ defaultPlatformResolutionPerPlatformName = {
   winphone: '1080x1920'
 };
 defaultPlatformNamePerBrowserName = {
-  chrome: 'windows',
+  ie: 'windows',
+  edge: 'windows',
   safari: 'mac'
 };
 supportedBrowserNames = [
@@ -38,7 +40,7 @@ supportedUI5Modes = [
 /**
  * @typedef Runtime
  * @type {Object}
- * @param {string(chrome|firefox|ie|safari,edge)} browserName - browser name, default: chrome
+ * @param {string(chrome|firefox|ie|safari|edge)} browserName - browser name, default: chrome
  * @param {number} browserVersion - browser version, default: *
  * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
@@ -93,7 +95,7 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
 
     // handle platformName
     if(!runtime.platformName){
-      runtime.platformName = defaultPlatformNamePerBrowserName[runtime.browserName];
+      runtime.platformName = defaultPlatformNamePerBrowserName[runtime.browserName] || DEFAULT_PLATFORM_NAME;
     }
     if(supportedPlatformNames.indexOf(runtime.platformName)==-1){
       throw Error('Platform: ' + runtime.platformName + ' is not supported, use one of: ' +

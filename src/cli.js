@@ -1,9 +1,5 @@
 'use strict';
 
-var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
-
 var argv = require('yargs').
     usage('Usage: visualtest [options] [confFile]\n' +
           'confFile defaults to conf.js if presented in current working directory.').
@@ -34,6 +30,10 @@ var argv = require('yargs').
     //TODO profile argument
     //TODO params
 
+var cliParser = require('./cliParser')();
+var config = cliParser.parse(argv);
+
+/*
 // copy argv properties, no func, no prototype, no special members
 var config = {};
 for (var name in argv) {
@@ -63,15 +63,39 @@ if (config.conf){
 if (config.browsers){
   if(_.isString(config.browsers)){
     var browsers = config.browsers.split(',');
-    // TODO capabilities from command line -> consider json
     config.browsers = [];
     browsers.forEach(function(browser){
-      config.browsers.push({
-        browserName: browser
-      });
+      var confBrowser;
+      if (browser.indexOf('{') !== -1){
+        // JSON formatting found => parse it
+        confBrowser = JSON.parse(browser);
+      } else if (browser.indexOf(':') !== -1){
+        // : separator found => split on them
+        var browserParams = browser.split(':');
+        confBrowser = {
+          browserName: browserParams[0], // at least browser name should be available
+          browserVersion: browserParams[1],
+          platformName: browserParams[2],
+          platformVersion: browserParams[3],
+          platformResolution: browserParams[4],
+          ui5: {
+            theme: browserParams[5],
+            direction: browserParams[6],
+            mode: browserParams[7]
+          }
+          // capabilities could not be given in this notation
+        }
+      } else {
+        // no formatting found => only browser name
+        confBrowser = {
+          browserName: browser
+        };
+      }
+      config.browsers.push(confBrowser);
     });
   }
 }
+*/
 
 // run the visualtest
 require('./visualtest').run(config);

@@ -7,7 +7,7 @@
     "mkdirp": "^0.5.1",
     "protractor": "~2.1.0",
     "proxyquire": "~1.4.0",
-    "resemblejs-tolerance": "git://github.wdf.sap.corp/I304310/resemblejs-tolerance.git#v1.0.0",
+    "resemblejs-tolerance": "git://github.wdf.sap.corp/I035254/resemblejs-tolerance.git#v1.0.0",
     "urllib-sync": "~1.0.1",
     "yargs": "^3.8.0"
   },

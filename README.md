@@ -30,7 +30,7 @@ and the available sap.m library visual tests from the draft commit above how to 
 ### Integration testing
 Install visualtest globally:
 ```
-$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git -g
+$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.0.0 -g
 ```
 Download selenium jar and drivers:
 ```

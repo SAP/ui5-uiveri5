@@ -35,7 +35,7 @@ $ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.0.0 -g
 If you face errors from node-gyp with the above installation, try with: --no-optional argument
 Download selenium jar and browser drivers:
 ```
-$ node %USERPROFILE%\AppData\Roaming\npm\node_modules\visualtestjs\node_modules\protractor\bin\webdriver-manager
+$ visualtest-webdriver update
 ```
 Create a conf.js file in the root of your project with the following content:
 ```

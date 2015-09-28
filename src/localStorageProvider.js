@@ -1,7 +1,7 @@
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 
-var DEFAULT_LOCAL_BASE_PATH = 'target/images';
+var DEFAULT_ACT_IMAGES_ROOT = 'target/images';
 var DEFAULT_REF_IMAGE_EXT = '.ref.png';
 var DEFAULT_ACT_IMAGE_EXT = '.act.png';
 var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
@@ -10,8 +10,8 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
  * @typedef LocalStorageProviderConfig
  * @type {Object}
  * @extends {StorageProviderConfig}
- * @property {string} localStorageProvider.localBasePath - local storage base path e.g. c:\openui5\target\images,
- *  default to ./target
+ * @property {string} localStorageProvider.actImagesRoot - actual and diff images root, defaults to: target/images
+ * @property {string} localStorageProvider.refImagesRoot - reference images root, defaults to spec.testBasePath
  */
 
 /**
@@ -28,8 +28,10 @@ function LocalStorageProvider(config, logger, runtime) {
   this.runtime = runtime;
 
   this.currentSpec = null;
-  this.localBasePath = this.config.localStorageProvider ?
-    config.localStorageProvider.localBasePath || DEFAULT_LOCAL_BASE_PATH : DEFAULT_LOCAL_BASE_PATH;
+  this.actImagesRoot = this.config.localStorageProvider ?
+    config.localStorageProvider.actImagesRoot || DEFAULT_ACT_IMAGES_ROOT : DEFAULT_ACT_IMAGES_ROOT;
+  this.refImagesRoot = this.config.localStorageProvider ?
+    config.localStorageProvider.refImagesRoot : undefined ;
 }
 
 //// API to comparisonProvider
@@ -41,7 +43,7 @@ function LocalStorageProvider(config, logger, runtime) {
  */
 LocalStorageProvider.prototype.readRefImage = function(refImageName){
   var refImagePath = [
-    this.currentSpec.testBasePath,
+    this.refImagesRoot || this.currentSpec.testBasePath,
     'images',           // TODO consider if this level is really necessary
     this._getRuntimePathSegment(),
     (refImageName + DEFAULT_REF_IMAGE_EXT)
@@ -56,7 +58,7 @@ LocalStorageProvider.prototype.readRefImage = function(refImageName){
  */
 LocalStorageProvider.prototype.storeRefImage = function(refImageName){
   var refImageBasePath = [
-    this.currentSpec.testBasePath,
+    this.refImagesRoot || this.currentSpec.testBasePath,
     'images',           // TODO consider if this level is really necessary
     this._getRuntimePathSegment()
   ].join('/');
@@ -71,7 +73,7 @@ LocalStorageProvider.prototype.storeRefImage = function(refImageName){
  */
 LocalStorageProvider.prototype.storeActImage = function(refImageName){
   var actImageBasePath = [
-    this.localBasePath,
+    this.actImagesRoot,
     this._getRuntimePathSegment()
   ].join('/');
   mkdirp.sync(actImageBasePath);
@@ -85,7 +87,7 @@ LocalStorageProvider.prototype.storeActImage = function(refImageName){
  */
 LocalStorageProvider.prototype.storeDiffImage = function(refImageName){
   var diffImageBasePath = [
-    this.localBasePath,
+    this.actImagesRoot,
     this._getRuntimePathSegment()
   ].join('/');
   mkdirp.sync(diffImageBasePath);

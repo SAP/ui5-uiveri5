@@ -1,46 +1,82 @@
-#### Config file
-Config file is a node module that exports a single 'config' object of type: 'visualtes.js/Config'
-Config file could specify a profile that is another config file with name <profile>.profile.conf.js
+### Config file
+Config file is a node module that exports a single 'config' object of type: 'src/visualtest.js/{Config}'
+Config file could reference a profile that is another config file with name <profile>.profile.conf.js
 
 ### Command-line arguments
 Command-line arguments override options from config file, config file overwrites options from profile config file,
 profile overwrites build-in defaults.
 
 If config file is not provided on command line, a file with name 'conf.js' is looked up in the current working directory.
-If found, it is used. If not found, the conf\default.conf.js file is used.
+If found, it is used. If not found, the default conf/default.conf.js file is used.
 
-#### Common config file use-cases
-* Run from visualtestjs agains local sapui5 server
-  * command-line no conf -> no conf.js in cwd -> default.conf.js profile=visual -> visual.profile.conf.js -> build-in defaults
+### Browser runtimes
 
-* Run visualtestjs with custom options
-  * command-line conf=conf.js -> conf.js no profile -> visual.profile.conf.js -> build-in defaults
+Browser runtime is an object of type: 'src/runtimeResolver.js/{Runtime}' that specifies the browser and platform
+on which to execute the test. You could specify only few of the properties of a runtime. The rest will be derived
+if possible or wildcards will be assumed. For example, if platformName is omitted, the default for the specific browser
+will be assumed. Like 'windows' for browser 'ie', 'mac' for browser 'safari', etc. If browserVersion or platformVersion
+are not explicitly specified, wildcard will be assumed and test will run on any  available platform and browser versions.
+[NOT IMPLEMENTED YET]Several browser runtimes could be specified and so the test will run in parallel on all of them.
 
-* Run integration tests
-  * command-line no conf -> conf.js in cwd found -> profile=integration -> integration.profile.conf.js -> build-in defaults
-  * command-line conf=conf.js -> conf.js profile=integration -> integration.profile.conf.js -> build-in defaults
+Values and defaults:
+* browserName - one of (chrome|firefox|ie|safari|edge), browser name, default: chrome
+* browserVersion - browser version, default: *
+* platformName - one of (windows|mac|linux|android|ios|winphone)} - platform name, default: windows
+* platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
+* platformResolution - format: /\d+x\d+/- platform resolution, WIDTHxHEIGHT, default: resolved from available
+* ui5.theme - one of (bluecrystal|hcp) - UI5 theme, default bluecrystal
+* ui5.direction - one of (rtl|ltr) - UI5 direction, default: ltr
+* ui5.mode - one of (cosy|compact) - UI5 mode, default: cosy
+
+Specify in custom spec.js:
+```javascript
+browsers:[{
+  browserName: 'chrome'
+}]
+```
+Specify on command line in ':' -separated notation:
+```
+$ visualtest --browsers=ie:9
+```
+Runtime attributes are extracted sequentially in the order they are defined above.
+Specify on command line in json format:
+```
+$ visualtest --browsers={"browserName":"chrome',"ui5":{"theme":"hcb"}}
+```
+Specify several browser runtimes:
+```
+$ visualtest --browsers=chrome,firefox
+```
 
 ### Browser capabilities
 
-```wiki
---browsers="chrome,ie,firefox"
+Default browser capabilities could be provided in browserCapabilities for every browser. Those capabilities will be used
+by default when driving the specific browser.
+Those capabilities could be overwritten or extended in the browser runtime configuration.
+
+Add default options to browser capabilities:
+```javascript
+browserCapabilities: {
+  chrome: {
+    chromeOptions: {
+      args: ['start-maximized']
+    }
+  }
+}
+```
+or overwrite or extend in browser runtime:
+```javascript
+browsers: [{
+  browserName: 'chrome',
+  capabilities: {
+    chromeOptions: {
+      args: ['start-maximized']
+    }
+  }
+}]
 ```
 
-parallel browsers in protractor:
-http://www.ngroutes.com/questions/AUuAC2THa5vEqxqlK3lQ/e2e-testing-on-multiple-parallel-browsers-in-protractor.html
-
-WebDriver capabilities
-https://code.google.com/p/selenium/wiki/DesiredCapabilities
-https://code.google.com/p/selenium/source/browse/javascript/webdriver/capabilities.js
-https://www.browserstack.com/automate/capabilities
-https://sites.google.com/a/chromium.org/chromedriver/capabilities
-
-Handle certificates
-http://stackoverflow.com/questions/24507078/how-to-deal-with-certificates-using-selenium
-https://support.google.com/chrome/a/answer/187202
-https://support.google.com/chrome/a/answer/2657289
-
-### Params to be passed to test
+### Passing params to test
 Define in conf.js file
 ``` javascript
 exports.config = {
@@ -56,7 +92,7 @@ Override from command line or define new params
 ```
 $ visualtest --params.someKey=redefineSomeValue --params.anotherKey.anotherSecondLevelKey=anotherSecondLevelValue
 ```
-Use in tests
+Usage in tests
 ```
 if('should check something',function(){
   if(browser.testrunner.config.params.someKey) {

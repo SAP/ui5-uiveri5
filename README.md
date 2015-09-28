@@ -4,7 +4,7 @@
 
 ### Visual testing
 
-### Run from openui5
+### Run visual tests from openui5
 Clone and install dependencies for openui5:
 ```
 $ git clone https://github.com/SAP/openui5.git
@@ -27,17 +27,33 @@ Please check [developing.md](https://github.com/SAP/openui5/blob/master/docs/dev
 visualtest grunt task accepts. Please check [controllibraries.md](https://github.com/SAP/openui5/blob/master/docs/controllibraries.md)
 and the available sap.m library visual tests from the draft commit above how to write new visual tests.
 
+### Run visual tests from ui5-contributor project
+Install visualtest globally:
+```
+$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.0.0 -g
+```
+If you face errors from node-gyp with the above installation, try with: --no-optional argument
+Download selenium jar and browser drivers:
+```
+$ node %USERPROFILE%\AppData\Roaming\npm\node_modules\visualtestjs\node_modules\protractor\bin\webdriver-manager
+```
+Create a conf.js file in the root of your project with the following content:
+```
+exports.config = {
+  profile: 'visual'
+};
+```
+
 ### Integration testing
 Install visualtest globally:
 ```
 $ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.0.0 -g
 ```
 If you face errors from node-gyp with the above installation, try with: --no-optional argument
-Download selenium jar and drivers:
+Download selenium jar and browser drivers:
 ```
 $ node %USERPROFILE%\AppData\Roaming\npm\node_modules\visualtestjs\node_modules\protractor\bin\webdriver-manager
 ```
-
 Create a folder for your integration tests, place them inside and create a conf.js file:
 ```
 exports.config = {

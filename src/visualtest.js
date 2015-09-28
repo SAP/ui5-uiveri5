@@ -52,6 +52,12 @@ var run = function(config) {
     logger.debug('Loading profile config from: ' + profileConfigFileName);
     var profileConfigFile = require(profileConfigFileName).config;
     config = _.merge(profileConfigFile,config);
+
+    // apply common profile
+    profileConfigFileName = '../conf/profile.conf.js';
+    logger.debug('Loading common profile config from: ' + profileConfigFileName);
+    var profileConfigFile = require(profileConfigFileName).config;
+    config = _.merge(profileConfigFile,config);
   }
 
   // update logger with resolved configs

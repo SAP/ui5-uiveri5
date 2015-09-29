@@ -124,6 +124,14 @@ var run = function(config) {
       {'./clientsidescripts.js': clientsidescripts});
   };
 
+  // disable Jasmine default reporter
+  var jasmineNodeOpts = {
+    print: function() {
+    }
+  };
+
+  protractorArgv.jasmineNodeOpts = jasmineNodeOpts;
+
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
@@ -246,6 +254,9 @@ var run = function(config) {
         }
       }
     });
+
+    var SpecReporter = require('jasmine-spec-reporter');
+    jasmine.getEnv().addReporter(new SpecReporter({}));
   };
 
   /*

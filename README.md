@@ -48,7 +48,7 @@ To store the reference images outside the source tree, check [config.md](docs/co
 * Start your server
 * Run all available tests:
 ```
-$ grunt visualtest
+$ visualtest
 ```
 
 ### Integration testing

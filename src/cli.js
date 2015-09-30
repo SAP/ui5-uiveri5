@@ -20,10 +20,16 @@ var argv = require('yargs').
     string('specs').
     describe('specs', 'Specs to execute, blob pattern used by localSpecResolver only').
     //string('take').
+    boolean('take').default('take',undefined).
+    //alias('t','take').
     describe('take', 'Take screenshots, default: true').
     //string('compare').
+    boolean('compare').default('compare',undefined).
+    //alias('c','compare').
     describe('compare', 'Compare actual to reference screenshots, default: true').
     //string('update').
+    boolean('update').default('update',undefined).
+    //alias('u','update').
     describe('update', 'Update reference screenshots with actual screenshots if differ, default false').
     strict().
     argv;

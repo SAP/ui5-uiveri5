@@ -48,6 +48,7 @@ LocalStorageProvider.prototype.readRefImage = function(refImageName){
     this._getRuntimePathSegment(),
     (refImageName + DEFAULT_REF_IMAGE_EXT)
   ].join('/');
+  this.logger.debug('Reading reference image: ' + refImagePath);
   return fs.createReadStream(refImagePath); // TODO error handling ?
 };
 
@@ -57,13 +58,15 @@ LocalStorageProvider.prototype.readRefImage = function(refImageName){
  * @return {WriteStream} - write stream to pipe the ref image content
  */
 LocalStorageProvider.prototype.storeRefImage = function(refImageName){
-  var refImageBasePath = [
+  var refImagePath = [
     this.refImagesRoot || this.currentSpec.testBasePath,
     'images',           // TODO consider if this level is really necessary
     this._getRuntimePathSegment()
   ].join('/');
-  mkdirp.sync(refImageBasePath);
-  return fs.createWriteStream(refImageBasePath + '/' + refImageName + DEFAULT_REF_IMAGE_EXT);
+  mkdirp.sync(refImagePath);
+  refImagePath += '/' + refImageName + DEFAULT_REF_IMAGE_EXT;
+  this.logger.debug('Store reference image: ' + refImagePath);
+  return fs.createWriteStream(refImagePath);
 };
 
 /**
@@ -72,12 +75,14 @@ LocalStorageProvider.prototype.storeRefImage = function(refImageName){
  * @return {WriteStream} - write stream to pipe the ref image content
  */
 LocalStorageProvider.prototype.storeActImage = function(refImageName){
-  var actImageBasePath = [
+  var actImagePath = [
     this.actImagesRoot,
     this._getRuntimePathSegment()
   ].join('/');
-  mkdirp.sync(actImageBasePath);
-  return fs.createWriteStream(actImageBasePath + '/' + refImageName + DEFAULT_ACT_IMAGE_EXT);
+  mkdirp.sync(actImagePath);
+  actImagePath += '/' + refImageName + DEFAULT_ACT_IMAGE_EXT;
+  this.logger.debug('Storing actual image: ' + actImagePath);
+  return fs.createWriteStream(actImagePath);
 };
 
 /**
@@ -86,12 +91,14 @@ LocalStorageProvider.prototype.storeActImage = function(refImageName){
  * @return {WriteStream} - write stream to pipe the diff image content
  */
 LocalStorageProvider.prototype.storeDiffImage = function(refImageName){
-  var diffImageBasePath = [
+  var diffImagePath = [
     this.actImagesRoot,
     this._getRuntimePathSegment()
   ].join('/');
-  mkdirp.sync(diffImageBasePath);
-  return fs.createWriteStream(diffImageBasePath + '/' + refImageName + DEFAULT_DIFF_IMAGE_EXT);
+  mkdirp.sync(diffImagePath);
+  diffImagePath += '/' + refImageName + DEFAULT_DIFF_IMAGE_EXT;
+  this.logger.debug('Storing diff image: ' + diffImagePath);
+  return fs.createWriteStream(diffImagePath);
 };
 
 /**
@@ -119,6 +126,8 @@ LocalStorageProvider.prototype._getRuntimePathSegment = function(){
  */
 LocalStorageProvider.prototype.onBeforeEachSpec = function(spec){
   this.currentSpec = spec;
+
+  this.logger.debug('Init localStorageProvider with spec: ' + spec.fullName);
 };
 
 module.exports = function(config, logger, runtime){

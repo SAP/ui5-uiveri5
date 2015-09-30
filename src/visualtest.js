@@ -64,7 +64,7 @@ var run = function(config) {
   logger.setLevel(config.verbose);
 
   // log cwd
-  logger.info('Current working directory: ' + process.cwd());
+  logger.debug('Current working directory: ' + process.cwd());
 
   // resolve specs
   var specResolverName = config.specResolver;
@@ -76,9 +76,8 @@ var run = function(config) {
   var specResolver = require(specResolverName)(config,logger);
   var specs = specResolver.resolve();
   if (!specs || specs.length==0){
-    throw new Error("No specs found");
+    throw Error("No specs found");
   }
-  logger.info( specs.length + ' spec file(s) found');
 
   // set default clientsidescripts module
   config.clientsidescripts = config.clientsidescripts || DEFAULT_CLIENTSIDESCRIPTS;
@@ -155,6 +154,27 @@ var run = function(config) {
       if(config.comparisonProvider){
         var comparisonProvider = require(config.comparisonProvider)(config,logger,storageProvider);
         comparisonProvider.register(matchers);
+      }
+
+      // process remoteWebDriverOptions
+      var currentCapabilities = browser.testrunner.runtime;
+      if (currentCapabilities.remoteWebDriverOptions){
+        var options = currentCapabilities.remoteWebDriverOptions;
+        if (options.maximized){
+          browser.driver.manage().window().maximize();
+        }
+        if (options.size){
+          if (!options.size.width || !options.size.height){
+            throw Error('Setting browser window size required but no width and/or height specified');
+          }
+          browser.driver.manage().window().setSize(options.size.width,options.size.height);
+        }
+        if (options.position){
+          if (!options.position.x || !options.position.y){
+            throw Error('Setting browser window position required but no X and/or Y coordinates specified');
+          }
+          browser.driver.manage().window().setPosition(options.position.x,options.position.y);
+        }
       }
     });
 
@@ -277,7 +297,7 @@ var run = function(config) {
   }
 
   // call protractor
-  logger.info('Executing specs');
+  logger.info('Executing ' + specs.length + ' specs');
   var protractorLauncher = require('protractor/lib/launcher');
   protractorLauncher.init(null,protractorArgv);
 };

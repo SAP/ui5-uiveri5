@@ -9,7 +9,7 @@ var resemble = require('resemblejs-tolerance');
 //default values
 var DEFAULT_COMPARE = true;
 var DEFAULT_UPDATE = false;
-var DEFAULT_TOLERANCE = 1;
+var DEFAULT_THRESHOLD_PERCENTAGE = 1;
 
 /**
  * @typedef LocalComparisonProviderConfig
@@ -22,7 +22,7 @@ var DEFAULT_TOLERANCE = 1;
  * @property {string} localComparisonProvider.errorType - what type of error will expect (flat or movement)
  * @property {number) localComparisonProvider.transparency - transparency intensity of the diff image
  * @property {[{x: {number}, y: {number}, width: {number}, height: {number}}]} localComparisonProvider.ignoreRectangles - array of coords of rectangles which will be ignored in comparison
- * @property {number) localComparisonProvider.tolerance - above this percentage of difference the matcher will fail
+ * @property {number) localComparisonProvider.thresholdPercentage - treshold image difference, in % to fail the comparison
  */
 
 /**
@@ -37,9 +37,10 @@ function LocalComparisonProvider(config, logger, storageProvider) {
   this.logger = logger;
 
   this.storageProvider = storageProvider;
-  this.tolerance = this.config.tolerance || DEFAULT_TOLERANCE;
-  this.compare = config.compare || DEFAULT_COMPARE;
-  this.update = config.update || DEFAULT_UPDATE;
+  this.thresholdPercentage = this.config.thresholdPercentage || DEFAULT_THRESHOLD_PERCENTAGE;
+
+  config.compare = typeof config.compare !== 'undefined' ? config.compare : DEFAULT_COMPARE;
+  config.update = typeof config.update !== 'undefined' ? config.update : DEFAULT_UPDATE;
 }
 
 /**
@@ -53,9 +54,14 @@ LocalComparisonProvider.prototype.register = function (matchers) {
   var toLookAs = function () {
     return {
       compare: function (actEncodedImage, expectedImageName) {
-        if(that.compare) {
-          var defer = protractor.promise.defer();
 
+        // matcher returns result object
+        var defer = protractor.promise.defer();
+        var result = {
+          pass: defer
+        };
+
+        if(that.config.take && that.config.compare) {
           var actualImageBuffer = new Buffer(actEncodedImage, 'base64');
           var dataRefImage = [];
 
@@ -67,15 +73,19 @@ LocalComparisonProvider.prototype.register = function (matchers) {
           });
 
           refImageStream.on('error', function() {
-            if(that.update) {
-              that.logger.debug('Comparison enabled but no reference image found: ' + expectedImageName + ' ,storing current as reference' );
+            if(that.config.update) {
+              that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update enabled so storing current as reference' );
               updateRefImage(expectedImageName, actualImageBuffer);
               // TODO error handling - set done/error callback and fulfil/reject the promise there
-              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName + ' ,storing current as reference';
+              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update enabled so storing current as reference';
               defer.fulfill(true);
             } else {
-              that.logger.debug('Comparison enabled but no reference image found: ' + expectedImageName);
-              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName;
+              that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update disabled');
+              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update disabled';
               defer.fulfill(false);
             }
           });
@@ -90,48 +100,46 @@ LocalComparisonProvider.prototype.register = function (matchers) {
             // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
             that.logger.debug('Comparing current screenshot to reference image: ' + expectedImageName);
             resemble(refImageBuffer).compareTo(actualImageBuffer)
-              .inputSettings(localComparisonProviderConfig).onComplete(function (comparisonResultData) {
+              .inputSettings(localComparisonProviderConfig).onComplete(function (comparisonResult) {
 
-                var misMatchPercentage = parseInt(comparisonResultData.misMatchPercentage);
-                //var dimensionDifference = comparisonResultData.dimensionDifference;
-                var errorPixels = _.clone(comparisonResultData.errorPixels);
-                delete comparisonResultData.errorPixels;
-                //var diffImage = comparisonResultData.getDiffImage();
-                //var isSameDimension = comparisonResultData.isSameDimensions;
-                //var misMatchCount = comparisonResultData.misMatchCount;
+                // resolve mismatch percentage, dimension difference is elevated to 100%
+                var mismatchPercentage = parseInt(comparisonResult.misMatchPercentage);
+                if (!comparisonResult.isSameDimensions){
+                  mismatchPercentage = 100;
+                }
+
+                // remove error pixes to avoid trace clutter
+                var errorPixels = _.clone(comparisonResult.errorPixels);
+                delete comparisonResult.errorPixels;
+
+                that.logger.trace('Image comparison done, reference image: ' + expectedImageName +
+                  ' ,result: ' +  JSON.stringify(comparisonResult) +
+                   +  (that.logger.level > 2 ? (' ,error pixels: \n' + JSON.stringify(errorPixels)) : ''));
 
                 // check the mismatch percentage
-                if (misMatchPercentage < that.tolerance) {
+                if (mismatchPercentage < that.thresholdPercentage) {
 
-                  that.logger.debug('Image comparison passed. Reference image: ' + expectedImageName +
-                    ' ,tolerance: ' + that.tolerance +
-                    ' ,results: ' + JSON.stringify(comparisonResultData));
-                  that.logger.trace('Image comparison for reference image: ' + expectedImageName +
-                    ' error pixels: ' +  (that.logger.level > 2 ? ('\n' + JSON.stringify(errorPixels) + '\n') : ''));
-
-                  result.message = 'Image comparison passed. Reference image: ' + expectedImageName +
-                    ' is not different from the actual image by: ' + comparisonResultData.misMatchPercentage + '%';
+                  that.logger.debug('Image comparison passed, reference image: ' + expectedImageName +
+                    ' ,difference: ' +  mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%');
+                  result.message = 'Image comparison passed, reference image: ' + expectedImageName +
+                    ' ,difference: ' +  mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%';
 
                   // pass
                   defer.fulfill(true);
                 } else {
 
-                  that.logger.debug('Image comparison faliled. Reference image: ' + expectedImageName +
-                  ' ,tolerance: ' + that.tolerance +
-                  ' ,results: ' + JSON.stringify(comparisonResultData));
-                  that.logger.trace('Image comparison for reference image: ' + expectedImageName +
-                  ' error pixels: ' +  (that.logger.level > 2 ? ('\n' + JSON.stringify(errorPixels) + '\n') : ''));
-
-                  result.message = 'Image comparison failed. Reference image: ' + expectedImageName +
-                    ' is different from the actual image by: ' + comparisonResultData.misMatchPercentage + '%';
+                  that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
+                    ' ,difference: ' +  mismatchPercentage + "% is above threshold: " + that.thresholdPercentage + '%');
+                  result.message = 'Image comparison failed, reference image: ' + expectedImageName +
+                    ' ,difference: ' +  mismatchPercentage + "% is above threshold: " + that.thresholdPercentage + '%';
 
                   // store diff image
-                  that.logger.debug('Saving diff image');
+                  that.logger.debug('Storing diff image: ' + expectedImageName);
                   var diffImageStream = that.storageProvider.storeDiffImage(expectedImageName);
-                  comparisonResultData.getDiffImage().pack().pipe(diffImageStream);
+                  comparisonResult.getDiffImage().pack().pipe(diffImageStream);
 
                   // store actual image
-                  that.logger.debug('Saving actual image');
+                  that.logger.debug('Storing actual image: ' + expectedImageName);
                   var actImageStream = that.storageProvider.storeActImage(expectedImageName);
                   actImageStream.write(actualImageBuffer);
 
@@ -145,35 +153,26 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                   defer.fulfill(false);
                 }
               });
-
           });
-
-          // matcher have to return result object with boolean pass value
-          var result = {
-            pass: defer.then(function (res) {
-              return res;
-            })
-          };
-
-          return result;
         } else {
-          that.logger.debug('Skipping image comparison.');
+          that.logger.debug('Comparison or screenshot taking disabled so skipping comparison');
+          result.message = 'Comparison or screenshot taking disabled so skipping comparison';
+
+          // pass
+          defer.fulfill(true);
         }
+
+        return result;
       }
     }
   };
 
-  function updateRefImage(expected, actualImageBuffer) {
-    var createRefImageStream = that.storageProvider.storeRefImage(expected);
+  function updateRefImage(expectedImageName, actualImageBuffer) {
+    that.logger.debug('Storing reference image: ' + expectedImageName);
+    var createRefImageStream = that.storageProvider.storeRefImage(expectedImageName);
     createRefImageStream.write(actualImageBuffer);
   }
 
-  /*
-  // add custom matcher to jasmine matchers
-  beforeEach(function() {
-    jasmine.getEnv().addMatchers({toLookAs: toLookAs});
-  });
-  */
   matchers.toLookAs = toLookAs;
 };
 

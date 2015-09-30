@@ -146,7 +146,14 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
       runtime.capabilities = {};
     }
     if (that.config.browserCapabilities) {
+      // merge this specific browser capabilities
       var capabilities = that.config.browserCapabilities[runtime.browserName];
+      if(capabilities){
+        _.merge(runtime.capabilities,capabilities);
+      }
+
+      // merge 'generic' browser capabilities
+      capabilities = that.config.browserCapabilities['generic'];
       if(capabilities){
         _.merge(runtime.capabilities,capabilities);
       }

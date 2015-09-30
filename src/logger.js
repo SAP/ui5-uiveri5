@@ -26,7 +26,7 @@ ConsoleLogger.prototype.debug = function(msg) {
 };
 
 //TODO placeholders and var args
-//TODO stringity for objects and arrays
+//TODO stringify for objects and arrays
 ConsoleLogger.prototype.trace = function(msg) {
   if(this.level>1) {
     console.log('TRACE: ' + msg);

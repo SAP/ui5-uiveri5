@@ -25,7 +25,6 @@
  * @extends {Config}
  */
 
-
 /**
  * Resolves specs
  * @constructor

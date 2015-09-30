@@ -24,7 +24,8 @@ function LocalScreenshotProvider(config,logger) {
   this.config = config;
   this.logger = logger;
 
-  this.take = config.take || DEFAULT_TAKE;
+  // set default for take if not provided
+  config.take = typeof config.take !== 'undefined' ? config.take : DEFAULT_TAKE;
 }
 
 /**
@@ -34,7 +35,7 @@ LocalScreenshotProvider.prototype.register = function() {
   var that = this;
 
   global.takeScreenshot = function() {
-    if (that.take) {
+    if (that.config.take) {
       // take screenshot once UI5 has settled down
       return browser.waitForAngular().then(function(){
         // uses browser object and call webdriverjs function takeScreenshot
@@ -44,8 +45,8 @@ LocalScreenshotProvider.prototype.register = function() {
         });
       });
     } else {
-      that.logger.debug('Skipp taking actual screenshot');
-      return '';
+      that.logger.debug('Screenshot taking disabled so skipping it');
+      return '';  // TODO return resolved promise ?
     }
   };
 };

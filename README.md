@@ -31,7 +31,7 @@ Please use the sample visual tests from the draft commit above for reference.
 ### Run visual tests from ui5-contributor project
 * Install visualtest globally:
 ```
-$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.1.0 -g
+$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.2.0 -g
 ```
 If you face errors from node-gyp with the above installation, try with: --no-optional argument
 * Download selenium jar and browser drivers:
@@ -54,7 +54,7 @@ $ grunt visualtest
 ### Integration testing
 * Install visualtest globally:
 ```
-$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.1.0 -g
+$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.2.0 -g
 ```
 If you face errors from node-gyp with the above installation, try with: --no-optional argument
 * Download selenium jar and browser drivers:

@@ -5,6 +5,7 @@ var proxyquire =  require('proxyquire');
 
 var DEFAULT_CONF = '../conf/default.conf.js';
 var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
+var DEFAULT_CONNECTION_NAME = 'direct';
 
 /**
  * @typedef Config
@@ -34,7 +35,7 @@ var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
  * Runs visual tests
  * @param {Config} config - configs
  */
-var run = function(config) {
+function run(config) {
 
   // configure logger
   var logger = require('./logger')(config.verbose);
@@ -82,6 +83,22 @@ var run = function(config) {
   // set default clientsidescripts module
   config.clientsidescripts = config.clientsidescripts || DEFAULT_CLIENTSIDESCRIPTS;
 
+  // resolve connection
+  var connectionName = config.connection || DEFAULT_CONNECTION_NAME;
+  var connectionConfig = config.connectionConfigs[connectionName];
+  if (!connectionConfig){
+    throw Error('Could not find connection: ' + connectionName);
+  }
+
+  // create connectionProvider
+  var connectionProviderName = connectionConfig.connectionProvider;
+  if(!connectionProviderName){
+    throw Error("Could not find connection provider: " + connectionProviderName +
+      ' for connection: ' + connectionName);
+  }
+  logger.debug('Loading connection provider module: ' + connectionProviderName);
+  var connectionProvider = require(connectionProviderName)(config,logger);
+
   // prepare protractor executor args
   var protractorArgv = {};
 
@@ -104,9 +121,9 @@ var run = function(config) {
   });
 
   // resolve runtime and set browsers with capabilities
-  var runtimeResolver = require('./runtimeResolver')(config,logger);
+  var runtimeResolver = require('./runtimeResolver')(config,logger,connectionProvider);
   var runtimes = runtimeResolver.resolveRuntimes();
-  protractorArgv.multiCapabilities = runtimeResolver.prepareMultiCapabilitiesFromRuntimes(runtimes);
+  protractorArgv.multiCapabilities = runtimeResolver.resolveMultiCapabilitiesFromRuntimes(runtimes);
 
   // execute runtimes consequently
   // TODO consider concurrent execution
@@ -127,6 +144,10 @@ var run = function(config) {
     var clientsidescripts = require(clientsidesriptsName);
     var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
       {'./clientsidescripts.js': clientsidescripts});
+
+    // setup connection provider env
+    logger.debug('Setting up connection provider environment');
+    return connectionProvider.setupEnv();
   };
 
   // execute after complete setup and just before test execution starts
@@ -140,7 +161,8 @@ var run = function(config) {
     var storageProvider;
     // register a hook to be called once webdriver connection is established
     browser.getProcessedConfig().then(function(protractorConfig) {
-      var currentRuntime = runtimeResolver.enrichRuntimeFromCapabilities(protractorConfig.capabilities);
+      var currentCapabilities = protractorConfig.capabilities;
+      var currentRuntime = runtimeResolver.resolveRuntimeFromCapabilities(currentCapabilities);
 
       // register storage provider
       if(config.storageProvider){
@@ -157,7 +179,6 @@ var run = function(config) {
       }
 
       // process remoteWebDriverOptions
-      var currentCapabilities = browser.testrunner.runtime;
       if (currentCapabilities.remoteWebDriverOptions){
         var options = currentCapabilities.remoteWebDriverOptions;
         if (options.maximized){
@@ -286,6 +307,12 @@ var run = function(config) {
     return specs[specIndex].specPath;
   }};
   */
+
+  protractorArgv.afterLaunch = function(){
+    // teardown connection provider env
+    logger.debug('Tearing down connection provider environment');
+    return connectionProvider.teardownEnv();
+  };
 
   function _getSpecByFullName(specFullName){
     var specIndex = specs.map(function(spec){return spec.fullName;}).indexOf(specFullName);

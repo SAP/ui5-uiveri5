@@ -1,4 +1,3 @@
-
 describe("cliParser", function() {
 
   var argvStub = {

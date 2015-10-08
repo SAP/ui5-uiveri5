@@ -22,7 +22,7 @@ defaultPlatformNamePerBrowserName = {
   safari: 'mac'
 };
 supportedBrowserNames = [
-  'chrome','firefox','ie','safari','edge'
+  'chrome','chromium','browser','firefox','ie','safari','edge'
 ];
 supportedPlatformNames = [
   'windows','mac','linux','android','ios','winphone'
@@ -40,7 +40,7 @@ supportedUI5Modes = [
 /**
  * @typedef Runtime
  * @type {Object}
- * @param {string(chrome|firefox|ie|safari|edge)} browserName - browser name, default: chrome
+ * @param {string(chrome|chromium|browser|firefox|ie|safari|edge)} browserName - browser name, default: chrome
  * @param {number} browserVersion - browser version, default: *
  * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
@@ -64,9 +64,10 @@ supportedUI5Modes = [
  * @param {RuntimeResolverConfig} config
  * @param {Logger} logger
  */
-function RuntimeResolver(config,logger){
+function RuntimeResolver(config,logger,connectionProvider){
   this.config = config;
   this.logger = logger;
+  this.connectionProvider = connectionProvider;
 };
 
 /**
@@ -141,22 +142,25 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
        JSON.stringify(supportedUI5Modes));
     }
 
-    // merge with browserCapabilities for this runtime
+    // merge with browserCapabilities for this browser and runtime
     if (!runtime.capabilities) {
       runtime.capabilities = {};
     }
     if (that.config.browserCapabilities) {
-      // merge this specific browser capabilities
-      var capabilities = that.config.browserCapabilities[runtime.browserName];
-      if(capabilities){
-        _.merge(runtime.capabilities,capabilities);
-      }
+      that._mergeMatchingCapabilities(runtime,that.config.browserCapabilities);
+          /*
+       // merge this specific browser capabilities
+       var capabilities = that.config.browserCapabilities[runtime.browserName];
+       if(capabilities){
+       _.merge(runtime.capabilities,capabilities);
+       }
 
-      // merge 'generic' browser capabilities
-      capabilities = that.config.browserCapabilities['generic'];
-      if(capabilities){
-        _.merge(runtime.capabilities,capabilities);
-      }
+       // merge 'generic' browser capabilities
+       capabilities = that.config.browserCapabilities['generic'];
+       if(capabilities){
+       _.merge(runtime.capabilities,capabilities);
+       }
+      */
     }
 
     that.logger.debug('Resolved runtime: ' + JSON.stringify(runtime));
@@ -165,23 +169,57 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
   return runtimes;
 };
 
+RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserCapabilities){
+  // loop over all capabilities
+  var browserNamePattern;
+  for (browserNamePattern in browserCapabilities){
+    if (this._isMatching(runtime.browserName,browserNamePattern)){
+      var platformNamePattern;
+      for (platformNamePattern in browserCapabilities[browserNamePattern]){
+        if (this._isMatching(runtime.platformName,platformNamePattern)){
+          _.merge(runtime.capabilities,browserCapabilities[browserNamePattern][platformNamePattern]);
+        }
+      }
+    }
+  }
+};
+
+/**
+ * Matcher a name against a pattern
+ * @param name - the name
+ * @param pattern - comma separated list of names or * for all or ! to exclude
+ * @returns true if name matches the pattern
+ */
+RuntimeResolver.prototype._isMatching = function(name,pattern){
+  var matchingFlag = false;
+  var patternNames = pattern.split(',');
+  patternNames.forEach(function(patternName){
+    if (patternName === name){
+      matchingFlag = true;
+    } else if (patternName === '*'){
+      matchingFlag = true;
+    } else if (patternName.charAt(0) === '!'){
+      patternName = patternName.slice(1);
+      if (patternName === name){
+        matchingFlag = false;
+      }
+    }
+  });
+  return matchingFlag;
+};
+
 /**
  * Prepare protractor/selenium browser capabilities from runtime
  * @param {[Runtime]} runtimes - requsted runtimes
  */
-RuntimeResolver.prototype.prepareMultiCapabilitiesFromRuntimes = function(runtimes){
+RuntimeResolver.prototype.resolveMultiCapabilitiesFromRuntimes = function(runtimes){
   var that = this;
 
+  // resolve capabilities from runtime over this provider
   var protractorMultiCapabilities = runtimes.map(function(runtime){
-    // clone runtime without the capabilities
-    var protractorCapabilities = _.clone(runtime,true);  // deep copy
-    delete protractorCapabilities.capabilities;
 
-    // merge capabilities on root level
-    _.merge(protractorCapabilities,runtime.capabilities);
-
-    // TODO rename/reformat some options ?
-    return protractorCapabilities;
+    // prepare capabilities from runtime for this specific connection type
+    return that.connectionProvider.resolveCapabilitiesFromRuntime(runtime);
   });
 
   that.logger.debug('Resolved protractor multiCapabilities: ' + JSON.stringify(protractorMultiCapabilities));
@@ -193,13 +231,11 @@ RuntimeResolver.prototype.prepareMultiCapabilitiesFromRuntimes = function(runtim
  * @param capabilities
  * @return {Runtime} updated runtime with values from capabilities
  */
-RuntimeResolver.prototype.enrichRuntimeFromCapabilities = function(capabilities){
+RuntimeResolver.prototype.resolveRuntimeFromCapabilities = function(capabilities){
 
-  // TODO parse and merge back options from capabilities
-
-  return capabilities;
+  return this.connectionProvider.resolveRuntimeFromCapabilities(capabilities);
 };
 
-module.exports = function(config, logger){
-  return new RuntimeResolver(config, logger);
+module.exports = function(config,logger,connectionProvider){
+  return new RuntimeResolver(config,logger,connectionProvider);
 };

@@ -2,6 +2,20 @@
 Only one describe() block with name <lib>.<SpecName>
 No browser.get()
 
+### Examples
+
+#### Run against android emulator
+Start appium
+```
+$ appium --device-name=android
+```
+Execute the visual test
+```
+$ grunt visualtest --browsers=browser:*:android --seleniumAddress=http://127.0.0.1:4723/wd/hub --baseUrl=http://10.0.2.2:8080
+```
+___Limitation___ Currently screenshots are not supported on default browser on android emulator so disable
+them with --take=false
+
 ### Advanced
 
 #### Override reference image storage for local image storage case

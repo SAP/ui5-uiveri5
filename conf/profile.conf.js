@@ -1,23 +1,39 @@
 exports.config = {
+  connection: 'direct',
+  connectionConfigs: {
+    'direct': { connectionProvider : './directConnectionProvider' }//,
+    //'sauselabs': { connectionProvider : './sauselabsConnectionProvider' },
+    //'browserstack': { connectionProvider : './browserstackConnectionProvider' },
+  },
+
   browserCapabilities: {
-    chrome: {
-      chromeOptions: {
-        args: ['start-maximized']
+    'browser': {
+      'android': {
+        deviceName: 'android'
       }
     },
-    generic: {
-      remoteWebDriverOptions: {
-        maximized: true//,
-        /*
-        position: {
-          width: 800,
-          height: 600
-        },
-        size: {
-          x: 100,
-          y: 100
+    'chrome,chromium': {
+      'windows,mac,linux': {
+        chromeOptions: {
+          args: ['start-maximized']
         }
-        */
+      }
+    },
+    'firefox,ie': {
+      'windows,mac,linux': {
+        remoteWebDriverOptions: {
+          maximized: true//,
+          /*
+          position: {
+            width: 800,
+            height: 600
+          },
+          size: {
+            x: 100,
+            y: 100
+          }
+          */
+        }
       }
     }
   }

@@ -78,8 +78,7 @@ All of the defaults could be modified either in conf.js or by providing command-
 --browsers="chrome:*:windows"
 --browsers="{browserName:'ie',browserVersion:9,platformName:'windows',platformVersion'8'}" --seleniumAddress="ui5testgrid.wdf.sap.corp:4444/wd/hub"
 ```
-*Run tests over remote connection (sauselabs, browserstack, ..)
-__not implemented__
+* Run tests over remote connection (sauselabs, browserstack, ..) __not implemented__
 ```
 --browsers="chrome:*:android:4.4" --connection="sauselabs:<user>:<token>:<url>:<further params>"
 ```

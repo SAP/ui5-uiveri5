@@ -4,11 +4,12 @@ visualtesjs requires nodejs >=0.12 and java>=1.6
 ### Installation
 
 #### Install globally
-* Install visualtest globally:
+* Install latest version of visualtest globally:
 ```
-$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.2.0 -g
+$ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#v1.3.0 -g --no-optional
 ```
-If you face errors from node-gyp with the above installation, try with: --no-optional argument
+The --no-optional flag is necessary to avoid the installation of some optional dependencies (buffer-utils) that
+require native build that itself requires PYTHON and VC++.
 * Download selenium jar and browser drivers:
 ```
 $ visualtest-webdriver update

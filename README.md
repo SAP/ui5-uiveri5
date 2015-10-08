@@ -37,7 +37,6 @@ To store the reference images outside the source tree, check [config.md](docs/co
 ```
 $ visualtest
 ```
-
 ### Integration testing
 * Please follow the procedure [install globally](docs/installation.md).
 * Create a folder for your integration tests, place them inside and create a conf.js file:
@@ -45,7 +44,8 @@ $ visualtest
 exports.config = {
   profile: 'integration'
 };
-```* Run all *.spec.js tests from the folder that contains conf.js. Make sure that root suite is named as spec file name.
+```
+* Run all *.spec.js tests from the folder that contains conf.js. Make sure that root suite is named as spec file name.
 ```
 $ visualtest
 ```
@@ -60,8 +60,7 @@ All of the defaults could be modified either in conf.js or by providing command-
 ```
 --browsers=firefox
 ```
-* Run tests on Chrome, Firefox and InternetExplorer in parallel
-__not implemented__
+* Run tests on Chrome, Firefox and InternetExplorer in parallel __not implemented__
 ```
 --browsers=chrome,firefox,ie
 ```
@@ -84,9 +83,7 @@ __not implemented__
 ```
 --browsers="chrome:*:android:4.4" --connection="sauselabs:<user>:<token>:<url>:<further params>"
 ```
-
 ## Development
-
 ### Run unit tests from visualtestjs project
 ```
 $ npm run test

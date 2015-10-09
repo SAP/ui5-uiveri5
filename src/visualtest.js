@@ -150,6 +150,14 @@ function run(config) {
     return connectionProvider.setupEnv();
   };
 
+  // disable Jasmine default reporter
+  var jasmineNodeOpts = {
+    print: function() {
+    }
+  };
+
+  protractorArgv.jasmineNodeOpts = jasmineNodeOpts;
+
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
@@ -293,6 +301,9 @@ function run(config) {
         }
       }
     });
+
+    var SpecReporter = require('jasmine-spec-reporter');
+    jasmine.getEnv().addReporter(new SpecReporter({}));
   };
 
   /*

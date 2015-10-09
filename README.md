@@ -31,7 +31,7 @@ exports.config = {
   profile: 'visual'
 };
 ```
-To store the reference images outside the source tree, check [config.md](docs/config.md)
+To store the reference images outside the source tree, check [visualtesting.md](docs/visualtesting.md)
 * Start your server
 * Run all available tests:
 ```

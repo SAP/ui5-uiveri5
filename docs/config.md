@@ -50,16 +50,20 @@ $ visualtest --browsers=chrome,firefox
 
 ### Browser capabilities
 
-Default browser capabilities could be provided in browserCapabilities for every browser. Those capabilities will be used
-by default when driving the specific browser.
+Default browser capabilities could be provided in browserCapabilities for a browser and platform pair.
+Those capabilities will be used by default when driving the specific browser. Both browser and platform fields
+accept a comma-separated list of names, wildcard character '*'. Prepend the exclusion charatcter '!' in front
+of the name to exclude this name from the match.
 Those capabilities could be overwritten or extended in the browser runtime configuration.
 
 Add default options to browser capabilities:
 ```javascript
 browserCapabilities: {
-  chrome: {
-    chromeOptions: {
-      args: ['start-maximized']
+  'chrome': {
+    'windows': {
+      chromeOptions: {
+        args: ['start-maximized']
+      }
     }
   }
 }
@@ -68,6 +72,7 @@ or overwrite or extend in browser runtime:
 ```javascript
 browsers: [{
   browserName: 'chrome',
+  platformName: 'linux',
   capabilities: {
     chromeOptions: {
       args: ['start-maximized']

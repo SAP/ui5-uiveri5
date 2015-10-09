@@ -45,7 +45,7 @@ LocalSpecResolver.prototype.resolve = function(){
   specPaths.forEach(function(specPath){
 
     // extract spec file name - no extension, no path
-    var specMatches = specPath.match(/((?:\w\:)?\/(?:[\w\-]+\/)*)([\w\-]+)\.(?:[\w\.]+)/);
+    var specMatches = specPath.match(/((?:\w\:)?\/(?:[\w\-\.]+\/)*)([\w\-]+)\.(?:[\w\.]+)/);
     if (specMatches===null){
       throw new Error('Could not parse spec path: ' + specPath);
     }

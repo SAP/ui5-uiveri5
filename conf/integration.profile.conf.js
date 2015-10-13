@@ -1,3 +1,7 @@
 exports.config = {
-  specResolver: './localSpecResolver'
+  specResolver: './localSpecResolver',
+  pageLoading: {
+    wait: '20000'//,
+    //initialReload: true
+  }
 };

@@ -113,6 +113,32 @@ function run(config) {
 
   // use jasmine 2.0
   protractorArgv.framework = 'jasmine2';
+  protractorArgv.jasmineNodeOpts = {};
+
+  // copy timeouts
+  if (config.timeouts){
+    if (config.timeouts.getPageTimeout){
+      var getPageTimeout = config.timeouts.getPageTimeout;
+      if(_.isString(getPageTimeout)){
+        getPageTimeout = parseInt(getPageTimeout,10);
+      }
+      protractorArgv.getPageTimeout = getPageTimeout;
+    }
+    if (config.timeouts.allScriptsTimeout){
+      var allScriptsTimeout = config.timeouts.allScriptsTimeout;
+      if(_.isString(allScriptsTimeout)){
+        allScriptsTimeout = parseInt(allScriptsTimeout,10);
+      }
+      protractorArgv.allScriptsTimeout = allScriptsTimeout;
+    }
+    if (config.timeouts.defaultTimeoutInterval){
+      var defaultTimeoutInterval = config.timeouts.defaultTimeoutInterval;
+      if(_.isString(defaultTimeoutInterval)){
+        defaultTimeoutInterval = parseInt(defaultTimeoutInterval,10);
+      }
+      protractorArgv.jasmineNodeOpts.defaultTimeoutInterval = defaultTimeoutInterval;
+    }
+  }
 
   // set specs
   protractorArgv.specs = [];
@@ -150,14 +176,6 @@ function run(config) {
     return connectionProvider.setupEnv();
   };
 
-  // disable Jasmine default reporter
-  var jasmineNodeOpts = {
-    print: function() {
-    }
-  };
-
-  protractorArgv.jasmineNodeOpts = jasmineNodeOpts;
-
   // execute after complete setup and just before test execution starts
   protractorArgv.onPrepare = function() {
 
@@ -190,19 +208,38 @@ function run(config) {
       if (currentCapabilities.remoteWebDriverOptions){
         var options = currentCapabilities.remoteWebDriverOptions;
         if (options.maximized){
+          logger.debug('Maximizing browser window');
           browser.driver.manage().window().maximize();
         }
         if (options.size){
           if (!options.size.width || !options.size.height){
             throw Error('Setting browser window size required but no width and/or height specified');
           }
-          browser.driver.manage().window().setSize(options.size.width,options.size.height);
+          var width = options.size.width;
+          if(_.isString(width)){
+            width = parseInt(width,10);
+          }
+          var height = options.size.height;
+          if(_.isString(height)){
+            width = parseInt(height,10);
+          }
+          logger.debug('Setting browser width: ' + width + ' ,height: ' + height);
+          browser.driver.manage().window().setSize(width,height);
         }
         if (options.position){
           if (!options.position.x || !options.position.y){
             throw Error('Setting browser window position required but no X and/or Y coordinates specified');
           }
-          browser.driver.manage().window().setPosition(options.position.x,options.position.y);
+          var x = options.position.x;
+          if(_.isString(x)){
+            width = parseInt(x,10);
+          }
+          var y = options.position.y;
+          if(_.isString(y)){
+            width = parseInt(y,10);
+          }
+          logger.debug('Setting browser position: ' + x + ' ,y: ' + y);
+          browser.driver.manage().window().setPosition(x,y);
         }
       }
     });
@@ -260,6 +297,27 @@ function run(config) {
               }
             });
             // TODO check http status, throw error if error
+
+            // handle pageLoading options
+            if(config.pageLoading){
+
+              // reload the page immediately if required
+              if(config.pageLoading.initialReload){
+                logger.debug('Initial page reload requested');
+                browser.driver.navigate().refresh();
+              }
+
+              // wait some time after page is loaded
+              if(config.pageLoading.wait){
+                var wait = config.pageLoading.wait;
+                if(_.isString(wait)) {
+                  wait = parseInt(wait,10);
+                }
+
+                logger.debug('Initial page load wait: ' + wait + 'ms');
+                browser.sleep(wait);
+              }
+            }
           }
 
           // as failed expectation
@@ -302,6 +360,8 @@ function run(config) {
       }
     });
 
+    // TODO reportedProviders[]
+    protractorArgv.jasmineNodeOpts.print = function() {};
     var SpecReporter = require('jasmine-spec-reporter');
     jasmine.getEnv().addReporter(new SpecReporter({}));
   };

@@ -105,3 +105,25 @@ if('should check something',function(){
   }
 });
 ```
+
+### Timeouts
+Override default timeout values in config file:
+``` javascript
+timeouts: {
+  getPageTimeout: '10000',
+  allScriptsTimeout: '11000',
+  defaultTimeoutInterval: '30000'
+}
+```
+Please check [protractor timeouts](https://github.com/angular/protractor/blob/master/docs/timeouts.md)
+for their meaning.
+
+### Wait after initial page loading and forced reload
+Some application testing usecases require immediate page reload after authentication. Or some wait period after initial
+pageload so that some non-ui5 code to settle page state. Enable those features in config file:
+```javascript
+pageLoading: {
+  wait: '20000',  // provided by default, remove when https://github.wdf.sap.corp/I035254/visualtestjs/issues/27 is done
+  initialReload: false
+}
+```

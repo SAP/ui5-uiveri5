@@ -122,6 +122,7 @@ function run(config) {
       if(_.isString(getPageTimeout)){
         getPageTimeout = parseInt(getPageTimeout,10);
       }
+      logger.debug('Setting getPageTimeout: ' + getPageTimeout);
       protractorArgv.getPageTimeout = getPageTimeout;
     }
     if (config.timeouts.allScriptsTimeout){
@@ -129,6 +130,7 @@ function run(config) {
       if(_.isString(allScriptsTimeout)){
         allScriptsTimeout = parseInt(allScriptsTimeout,10);
       }
+      logger.debug('Setting allScriptsTimeout: ' + allScriptsTimeout);
       protractorArgv.allScriptsTimeout = allScriptsTimeout;
     }
     if (config.timeouts.defaultTimeoutInterval){
@@ -136,6 +138,7 @@ function run(config) {
       if(_.isString(defaultTimeoutInterval)){
         defaultTimeoutInterval = parseInt(defaultTimeoutInterval,10);
       }
+      logger.debug('Setting defaultTimeoutInterval: ' + defaultTimeoutInterval);
       protractorArgv.jasmineNodeOpts.defaultTimeoutInterval = defaultTimeoutInterval;
     }
   }

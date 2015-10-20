@@ -175,7 +175,7 @@ function run(config) {
     logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
     var clientsidescripts = require(clientsidesriptsName);
     //var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
-    var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
+    var protractor = proxyquire('protractor/lib/protractor',
       {'./clientsidescripts.js': clientsidescripts});
 
     // setup connection provider env

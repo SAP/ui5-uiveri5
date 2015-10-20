@@ -39,10 +39,13 @@ CliParser.prototype.parse = function(argv){
       config.browsers = [];
       browsers.forEach(function(browser){
         var confBrowser;
+        /*
         if (browser.indexOf('{') !== -1 && browser.indexOf('}') !== -1){
           // JSON formatting found => parse it
           confBrowser = JSON.parse(browser);
-        } else if (browser.indexOf(':') !== -1) {
+        } else
+        */
+        if (browser.indexOf(':') !== -1) {
           // : separator found => split on them
           var browserParams = browser.split(':');
           confBrowser = {};
@@ -85,7 +88,34 @@ CliParser.prototype.parse = function(argv){
     }
   }
 
+  // parse generic configuration from JSON
+  var confDef = config.config;
+  if (confDef){
+    if(_.isString(confDef) && confDef.indexOf('{') !== -1 && confDef.indexOf('}') !== -1) {
+        // JSON formatting found => parse it
+        confDef = JSON.parse(confDef);
+        // merge json config over
+        _mergeConfig(config,confDef);
+    } else if (_.isObject(confDef)){
+      _mergeConfig(config,confDef);
+      delete config.config;
+    }
+
+    // silently skipp any invalid config statements
+  }
+
   return config;
+};
+
+/**
+ * Merge objects and arrays
+ */
+function _mergeConfig(object,src){
+  return _.merge(object,src,function(objectValue,sourceValue){
+    if (_.isArray(objectValue)) {
+      return objectValue.concat(sourceValue);
+    }
+  });
 };
 
 module.exports = function () {

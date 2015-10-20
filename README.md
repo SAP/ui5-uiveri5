@@ -66,17 +66,16 @@ All of the defaults could be modified either in conf.js or by providing command-
 ```
 * Run tests against test content on remote sapui5 runtime
 ```
---baseUrl="http://veui5infra.dhcp.wdf.sap.corp:8080"
+--baseUrl="http://<host>:<port>"
 ```
 * Run tests on remove selenium server
 ```
---seleniumAddress="myAirBook.wdf.sap.corp:4444/wd/hub"
+--seleniumAddress="<host>:<port>/wd/hub"
 ```
-* Run tests on remote selenium grid server that dispatches the test job to particular OS/Browser slave
+* Run tests on specific Browser/OS combination.
 ```
 --browsers="ie:9:windows:8"
 --browsers="chrome:*:windows"
---browsers="{browserName:'ie',browserVersion:9,platformName:'windows',platformVersion'8'}" --seleniumAddress="ui5testgrid.wdf.sap.corp:4444/wd/hub"
 ```
 * Run tests over remote connection (sauselabs, browserstack, ..) __not implemented__
 ```

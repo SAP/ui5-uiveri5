@@ -15,6 +15,8 @@ var argv = require('yargs').
     describe('browsers', 'Comma separated list of browsers to execute tests, defaults to chrome').
     describe('params', 'Param object to be passed to the tests').
     describe('timeouts', 'Timeouts').
+    string('config').
+    describe('config', 'JSON formatted config object to override config file options').
     count('verbose').
     alias('v', 'verbose').
     describe('verbose', 'Print debug logs').

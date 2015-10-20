@@ -36,5 +36,9 @@ exports.config = {
         }
       }
     }
-  }
+  },
+
+  reporters: [
+    {reporter: './consoleReporter'}
+  ]
 };

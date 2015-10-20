@@ -28,7 +28,7 @@ ConnectionProvider.prototype.setupEnv = function() {
 };
 
 /**
- * Teardown this connection providerenvironment
+ * Teardown this connection provider environment
  * @return {q.promise} A promise which will resolve when the environment is down.
  */
 ConnectionProvider.prototype.teardownEnv = function() {

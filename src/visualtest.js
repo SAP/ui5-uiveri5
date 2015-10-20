@@ -44,7 +44,7 @@ function run(config) {
   var configFileName = config.conf || DEFAULT_CONF;
   logger.debug('Loading config from: ' + configFileName);
   var configFile = require(configFileName).config;
-  config = _.merge(configFile,config);
+  config = _mergeConfig(configFile,config);
   logger.debug('Loaded config from: ' + configFileName);
 
   // resolve profile
@@ -52,13 +52,13 @@ function run(config) {
     var profileConfigFileName = '../conf/' + config.profile + '.profile.conf.js';
     logger.debug('Loading profile config from: ' + profileConfigFileName);
     var profileConfigFile = require(profileConfigFileName).config;
-    config = _.merge(profileConfigFile,config);
+    config = _mergeConfig(profileConfigFile,config);
 
     // apply common profile
     profileConfigFileName = '../conf/profile.conf.js';
     logger.debug('Loading common profile config from: ' + profileConfigFileName);
     var profileConfigFile = require(profileConfigFileName).config;
-    config = _.merge(profileConfigFile,config);
+    config = _mergeConfig(profileConfigFile,config);
   }
 
   // update logger with resolved configs
@@ -114,6 +114,9 @@ function run(config) {
   // use jasmine 2.0
   protractorArgv.framework = 'jasmine2';
   protractorArgv.jasmineNodeOpts = {};
+
+  // disable default jasmine console reporter
+  protractorArgv.jasmineNodeOpts.print = function() {};
 
   // copy timeouts
   if (config.timeouts){
@@ -171,6 +174,7 @@ function run(config) {
     var clientsidesriptsName = config.clientsidescripts;
     logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
     var clientsidescripts = require(clientsidesriptsName);
+    //var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
     var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
       {'./clientsidescripts.js': clientsidescripts});
 
@@ -363,24 +367,17 @@ function run(config) {
       }
     });
 
-    // TODO reportedProviders[]
-    protractorArgv.jasmineNodeOpts.print = function() {};
-    var SpecReporter = require('jasmine-spec-reporter');
-    jasmine.getEnv().addReporter(new SpecReporter({}));
-  };
-
-  /*
-  // attach spec decorator
-  protractorArgv.jasmineNodeOpts = {specDecorator : function(specName){
-
-    var specIndex = specs.map(function(spec){return spec.name;}).indexOf(specName);
-    if(specIndex==-1){
-      throw new Error('Spec: '+specName+'not found');
+    // register reporters
+    var jasmineEnv = jasmine.getEnv();
+    if (config.reporters) {
+      config.reporters.forEach(function(reporterDef){
+        var instanceConfig = _.clone(reporterDef,true);
+        delete instanceConfig.reporter;
+        var reporter = require(reporterDef.reporter)(config,instanceConfig,logger);
+        reporter.register(jasmineEnv);
+      })
     }
-
-    return specs[specIndex].specPath;
-  }};
-  */
+  };
 
   protractorArgv.afterLaunch = function(){
     // teardown connection provider env
@@ -401,6 +398,17 @@ function run(config) {
   logger.info('Executing ' + specs.length + ' specs');
   var protractorLauncher = require('protractor/lib/launcher');
   protractorLauncher.init(null,protractorArgv);
+};
+
+/**
+ * Merge objects and arrays
+ */
+function _mergeConfig(object,src){
+  return _.merge(object,src,function(objectValue,sourceValue){
+    if (_.isArray(objectValue)) {
+      return objectValue.concat(sourceValue);
+    }
+  });
 };
 
 exports.run = run;

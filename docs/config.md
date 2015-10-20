@@ -16,7 +16,7 @@ on which to execute the test. You could specify only few of the properties of a 
 if possible or wildcards will be assumed. For example, if platformName is omitted, the default for the specific browser
 will be assumed. Like 'windows' for browser 'ie', 'mac' for browser 'safari', etc. If browserVersion or platformVersion
 are not explicitly specified, wildcard will be assumed and test will run on any  available platform and browser versions.
-[NOT IMPLEMENTED YET]Several browser runtimes could be specified and so the test will run in parallel on all of them.
+__NOT IMPLEMENTED YET__Several browser runtimes could be specified and so the test will run in parallel on all of them.
 
 Values and defaults:
 * browserName - one of (chrome|firefox|ie|safari|edge), browser name, default: chrome
@@ -39,10 +39,6 @@ Specify on command line in ':' -separated notation:
 $ visualtest --browsers=ie:9
 ```
 Runtime attributes are extracted sequentially in the order they are defined above.
-Specify on command line in json format:
-```
-$ visualtest --browsers={"browserName":"chrome',"ui5":{"theme":"hcb"}}
-```
 Specify several browser runtimes:
 ```
 $ visualtest --browsers=chrome,firefox
@@ -126,4 +122,15 @@ pageLoading: {
   wait: '20000',  // provided by default, remove when https://github.wdf.sap.corp/I035254/visualtestjs/issues/27 is done
   initialReload: false
 }
+```
+
+### Override arbitrary configuration from command line:
+You could override arbitrary config value from command like:
+```javascript
+// linux
+--config={"browsers:[{"browserName":"firefox"}]}
+// windows
+--config={\"browsers\":[{\"browserName\":\"firefox\"}]}
+// java-based environments ( WebStorm debug configuration )
+--config={\\"browsers\\\":[{\\\"browserName\":\\\"firefox\\\"}]}
 ```

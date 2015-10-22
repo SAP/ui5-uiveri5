@@ -39,6 +39,6 @@ exports.config = {
   },
 
   reporters: [
-    {reporter: './consoleReporter'}
+    {reporter: './reporters/visualtestConsoleReporter'}
   ]
 };

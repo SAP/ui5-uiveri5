@@ -40,12 +40,16 @@ function run(config) {
   // configure logger
   var logger = require('./logger')(config.verbose);
 
+  // log command-line arguments
+
+  // log config object so far
+  logger.debug('Config from command-line: ${JSON.stringify(config)}',{config:config});
+
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
   logger.debug('Loading config from: ' + configFileName);
   var configFile = require(configFileName).config;
   config = _mergeConfig(configFile,config);
-  logger.debug('Loaded config from: ' + configFileName);
 
   // resolve profile
   if (config.profile){
@@ -63,6 +67,9 @@ function run(config) {
 
   // update logger with resolved configs
   logger.setLevel(config.verbose);
+
+  // log config object so far
+  logger.debug('Config after resolving config file and profile: ${JSON.stringify(config)}',{config:config});
 
   // log cwd
   logger.debug('Current working directory: ' + process.cwd());

@@ -3,6 +3,8 @@
 // 2 - +TRACE
 // 3 - +trace data
 
+var _ = require('lodash');
+
 function ConsoleLogger(level){
   this.level = level;
 }
@@ -11,25 +13,24 @@ ConsoleLogger.prototype.setLevel = function(newLevel){
   this.level = newLevel;
 };
 
-ConsoleLogger.prototype.info = function(msg) {
-  console.log('INFO: ' + msg);
+ConsoleLogger.prototype.info = function(msg,args) {
+  console.log('INFO: ' + _.template(msg)(args));
 };
 
-ConsoleLogger.prototype.error = function(msg) {
-  console.log('ERROR: ' + msg);
+ConsoleLogger.prototype.error = function(msg,args) {
+  console.log('ERROR: ' + _.template(msg)(args));
 };
 
-ConsoleLogger.prototype.debug = function(msg) {
+ConsoleLogger.prototype.debug = function(msg,args) {
   if(this.level>0) {
-    console.log('DEBUG: ' + msg);
+    console.log('DEBUG: ' + _.template(msg)(args));
   }
 };
 
-//TODO placeholders and var args
 //TODO stringify for objects and arrays
 ConsoleLogger.prototype.trace = function(msg) {
   if(this.level>1) {
-    console.log('TRACE: ' + msg);
+    console.log('TRACE: ' + _.template(msg)(args));
   }
 };
 

@@ -56,7 +56,7 @@ LocalUI5SpecResolver.prototype.resolve = function(){
   suitePaths.forEach(function(suitePath){
 
     // extract lib from
-    var suitePathMatch = suitePath.match(/((?:\w\:)?\/(?:[\w\-]+\/)+([\w\.]+)\/(?:\w+\/)+)visual\.suite\.js/);
+    var suitePathMatch = suitePath.match(/((?:\w\:)?\/(?:[\w\-.]+\/)+src\/([\w\.]+)\/(?:\w+\/)+)visual\.suite\.js/);
     if (suitePathMatch===null){
       throw new Error('Could not parse suite path: ' + suitePath);
     }

@@ -6,7 +6,7 @@ var DEFAULT_PLATFORM_NAME = 'windows';
 var DEFAULT_VERSION = '*';
 var DEFAULT_UI5_THEME = 'bluecrystal';
 var DEFAULT_UI5_DIRECTION = 'ltr';
-var DEFAULT_UI5_MODE = 'cosy';
+var DEFAULT_UI5_MODE = 'cozy';
 
 defaultPlatformResolutionPerPlatformName = {
   windows: '1600x1200',
@@ -28,13 +28,13 @@ supportedPlatformNames = [
   'windows','mac','linux','android','ios','winphone'
 ];
 supportedUI5Themes = [
-  'bluecrystal','hcp'
+  'bluecrystal','hcb'
 ];
 supportedUI5Directions = [
   'ltr','rtl'
 ];
 supportedUI5Modes = [
-  'cosy','compact'
+  'cozy','compact'
 ];
 
 /**
@@ -45,9 +45,9 @@ supportedUI5Modes = [
  * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
  * @param {string(default|/\d+x\d+/)} platformResolution - platform resolution, WIDTHxHEIGHT, default: resolved from available
- * @param {string(bluecrystal|hcp)} ui5.theme - UI5 theme, default bluecrystal
+ * @param {string(bluecrystal|hcb)} ui5.theme - UI5 theme, default bluecrystal
  * @param {string(rtl|ltr)} ui5.direction - UI5 direction, default: ltr
- * @param {string(cosy|compact)} ui5.mode - UI5 mode, default: cosy
+ * @param {string(cozy|compact)} ui5.mode - UI5 mode, default: cozy
  * @param {Object} capabilities - additional browser capabilities object
  */
 

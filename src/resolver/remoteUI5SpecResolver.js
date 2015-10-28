@@ -9,37 +9,45 @@ var path = require('path');
 
 //constants
 var BASE_URL = 'http://localhost:8080';
-var CONTENT_ROOT_URI = '/testsuite/test-resources/';
-var LIBS_INFO_URI = '/testsuite/resources/sap-ui-version.json';
-var SPECS_FOLDER = 'target/specs/';
+var DEFAULT_CONTENT_ROOT_URI = '/testsuite/test-resources/';
+var DEFAULT_LIBS_INFO_URI = '/testsuite/resources/sap-ui-version.json';
+var DEFAULT_SPECS_FOLDER = 'target/specs/';
 var ENCODING_UTF8 = 'utf8';
 
 /**
  * @typedef RemoteSAPUI5SpecResolverConfig
  * @type {Object}
- * @extends {SpecResolverConfig}
+ * @extends {Config}
  * @property {String} baseUrl - base url to reference, defaults to: 'http://localhost:8080'
  * @property {String} libFilter  - comma separated list of library names, defaults to *
  * @property {String} specFilter - comma separated list of specs, defaults to *
- * @property {String} RemoteSAPUI5SpecResolverConfig.specCacheRoot - defaults to: '../target/specs'
- * @property {String} RemoteSAPUI5SpecResolverConfig.contentRootUri - defaults to: 'testsuite/test-resources/'
+ */
+
+/**
+ * @typedef RemoteSAPUI5SpecResolverInstanceConfig
+ * @type {Object}
+ * @property {String} specCacheRoot - defaults to: '../target/specs'
+ * @property {String} contentRootUri - defaults to: 'testsuite/test-resources/'
  */
 
 /**
  * Resolves specs
  * @constructor
- * @param {RemoteSAPUI5SpecResolverConfig} config - configs
+ * @param {RemoteSAPUI5SpecResolverConfig} config
+ * @param {RemoteSAPUI5SpecResolverInstanceConfig} instanceConfig
+ * @param {Logger} logger
  */
-function RemoteSpecResolver(config, logger) {
+function RemoteSpecResolver(config,instanceConfig,logger) {
   this.config = config;
+  this.instanceConfig = instanceConfig;
   this.logger = logger;
 
-  this.sBaseUrl = this.config.baseUrl || BASE_URL;
-  this.sContentRootUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.contentUri : CONTENT_ROOT_URI;
-  this.sLibsInfoUri = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.libsInfoUri : LIBS_INFO_URI;
-  this.sSpecFolder = this.config.remoteSAPUI5SpecResolver ? this.config.remoteSAPUI5SpecResolver.specsFolder : SPECS_FOLDER;
+  this.sBaseUrl = config.baseUrl || BASE_URL;
   this.sLibFilter = this.config.libFilter  || "*";
   this.sSpecFilter = this.config.specFilter  || "*";
+  this.sContentRootUri = instanceConfig.contentUri || DEFAULT_CONTENT_ROOT_URI;
+  this.sLibsInfoUri = instanceConfig.libsInfoUri || DEFAULT_LIBS_INFO_URI;
+  this.sSpecFolder = instanceConfig.specsFolder || DEFAULT_SPECS_FOLDER;
 };
 
 RemoteSpecResolver.prototype.resolve = function () {
@@ -272,6 +280,6 @@ RemoteSpecResolver.prototype._mkdirs = function (path, root) {
   return !dirs.length || this._mkdirs(dirs.join('/'), root);
 };
 
-module.exports = function (config, logger) {
-  return new RemoteSpecResolver(config, logger);
+module.exports = function (config,instanceConfig,logger) {
+  return new RemoteSpecResolver(config,instanceConfig,logger);
 };

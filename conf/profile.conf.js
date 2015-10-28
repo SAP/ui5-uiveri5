@@ -1,9 +1,9 @@
 exports.config = {
   connection: 'direct',
   connectionConfigs: {
-    'direct': { connectionProvider : './directConnectionProvider' }//,
-    //'sauselabs': { connectionProvider : './sauselabsConnectionProvider' },
-    //'browserstack': { connectionProvider : './browserstackConnectionProvider' },
+    'direct': { name : './connection/directConnectionProvider' }//,
+    //'sauselabs': { name : './connection/sauselabsConnectionProvider' },
+    //'browserstack': { name : './connection/browserstackConnectionProvider' },
   },
 
   browserCapabilities: {
@@ -39,6 +39,6 @@ exports.config = {
   },
 
   reporters: [
-    {reporter: './consoleReporter'}
+    {name: './reporter/consoleReporter'}
   ]
 };

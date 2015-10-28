@@ -1,10 +1,7 @@
-/**
- * Created by I304310 on 6/15/2015.
- */
-'use strict';
 
 var _ = require('lodash');
 var resemble = require('resemblejs-tolerance');
+var webdriver = require('selenium-webdriver');
 
 //default values
 var DEFAULT_COMPARE = true;
@@ -14,33 +11,43 @@ var DEFAULT_THRESHOLD_PERCENTAGE = 1;
 /**
  * @typedef LocalComparisonProviderConfig
  * @type {Object}
- * @extends {ComparisonProviderConfig}
+ * @extends {Config}
+ * @property {boolean} take - enable screenshot taking
  * @property {boolean} compare - enable screenshot comparison
- * @property {boolean} localComparisonProvider.ignoreColors - enable color ignore in comparison
- * @property {boolean} localComparisonProvider.ignoreAntialiasing - enable antialiasing ignore while image comparison
- * @property {{red: {number}, green: {number}, blue: {number}}} localComparisonProvider.errorColor - object with red, green and blue number value for defining color for diff pixels
- * @property {string} localComparisonProvider.errorType - what type of error will expect (flat or movement)
- * @property {number) localComparisonProvider.transparency - transparency intensity of the diff image
- * @property {[{x: {number}, y: {number}, width: {number}, height: {number}}]} localComparisonProvider.ignoreRectangles - array of coords of rectangles which will be ignored in comparison
- * @property {number) localComparisonProvider.thresholdPercentage - treshold image difference, in % to fail the comparison
+ * @property {boolean} update - enable reference image update
+ */
+
+/**
+ * @typedef LocalComparisonProviderInstanceConfig
+ * @type {Object}
+ * @property {boolean} ignoreColors - enable color ignore in comparison
+ * @property {boolean} ignoreAntialiasing - enable antialiasing ignore while image comparison
+ * @property {{red: {number}, green: {number}, blue: {number}}} errorColor - object with red, green and blue number value for defining color for diff pixels
+ * @property {string} errorType - what type of error will expect (flat or movement)
+ * @property {number) transparency - transparency intensity of the diff image
+ * @property {[{x: {number}, y: {number}, width: {number}, height: {number}}]} ignoreRectangles - array of coords of rectangles which will be ignored in comparison
+ * @property {number) thresholdPercentage - treshold image difference, in % to fail the comparison
  */
 
 /**
  * @constructor
  * @implements {ComparisonProvider}
  * @param {LocalComparisonProviderConfig} config
+ * @param {LocalComparisonProviderInstanceConfig} instanceConfig
  * @param {Logger} logger
  * @param {StorageProvider} storage provider
  */
-function LocalComparisonProvider(config, logger, storageProvider) {
-  this.config = config;
+function LocalComparisonProvider(config,instanceConfig,logger,storageProvider) {
+  //this.config = config;
+  this.instanceConfig = instanceConfig;
   this.logger = logger;
 
   this.storageProvider = storageProvider;
-  this.thresholdPercentage = this.config.thresholdPercentage || DEFAULT_THRESHOLD_PERCENTAGE;
+  this.thresholdPercentage = config.thresholdPercentage || DEFAULT_THRESHOLD_PERCENTAGE;
 
-  config.compare = typeof config.compare !== 'undefined' ? config.compare : DEFAULT_COMPARE;
-  config.update = typeof config.update !== 'undefined' ? config.update : DEFAULT_UPDATE;
+  this.take = typeof config.take !== 'undefined' ? config.take : DEFAULT_COMPARE;
+  this.compare = typeof config.compare !== 'undefined' ? config.compare : DEFAULT_COMPARE;
+  this.update = typeof config.update !== 'undefined' ? config.update : DEFAULT_UPDATE;
 }
 
 /**
@@ -56,12 +63,12 @@ LocalComparisonProvider.prototype.register = function (matchers) {
       compare: function (actEncodedImage, expectedImageName) {
 
         // matcher returns result object
-        var defer = protractor.promise.defer();
+        var defer = webdriver.promise.defer();
         var result = {
           pass: defer
         };
 
-        if(that.config.take && that.config.compare) {
+        if(that.take && that.compare) {
           var actualImageBuffer = new Buffer(actEncodedImage, 'base64');
           var dataRefImage = [];
 
@@ -73,7 +80,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
           });
 
           refImageStream.on('error', function() {
-            if(that.config.update) {
+            if(that.update) {
               that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
                 ' ,update enabled so storing current as reference' );
               updateRefImage(expectedImageName, actualImageBuffer);
@@ -92,15 +99,14 @@ LocalComparisonProvider.prototype.register = function (matchers) {
 
           refImageStream.on('end', function () {
             var refImageBuffer = Buffer.concat(dataRefImage);
-            var localComparisonProviderConfig = that.config.localComparisonProvider || {};
 
-            resemble.outputSettings(localComparisonProviderConfig);
+            resemble.outputSettings(that.instanceConfig);
 
             // compare two images and add input settings - they are chained and set to resJS object
             // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
             that.logger.debug('Comparing current screenshot to reference image: ' + expectedImageName);
             resemble(refImageBuffer).compareTo(actualImageBuffer)
-              .inputSettings(localComparisonProviderConfig).onComplete(function (comparisonResult) {
+              .inputSettings(that.instanceConfig).onComplete(function(comparisonResult) {
 
                 // resolve mismatch percentage, dimension difference is elevated to 100%
                 var mismatchPercentage = parseInt(comparisonResult.misMatchPercentage);
@@ -143,7 +149,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                   var actImageStream = that.storageProvider.storeActImage(expectedImageName);
                   actImageStream.write(actualImageBuffer);
 
-                  if(that.config.update) {
+                  if(that.update) {
                     that.logger.debug('Updating reference image: ' + expectedImageName + ' with the current screenshot');
                     updateRefImage(expectedImageName, actualImageBuffer);
                     // TODO error handling
@@ -176,6 +182,6 @@ LocalComparisonProvider.prototype.register = function (matchers) {
   matchers.toLookAs = toLookAs;
 };
 
-module.exports = function (config, logger, storageProvider) {
-  return new LocalComparisonProvider(config, logger, storageProvider);
+module.exports = function (config,instanceConfig,logger,storageProvider) {
+  return new LocalComparisonProvider(config,instanceConfig,logger,storageProvider);
 };

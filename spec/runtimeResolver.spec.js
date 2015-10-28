@@ -1,4 +1,5 @@
-describe("runtimeResolver", function() {
+
+describe("RuntimeResolver", function() {
   var resolver = new require('../src/runtimeResolver')();
 
   describe("Should match browserCapabilities", function() {
@@ -50,6 +51,4 @@ describe("runtimeResolver", function() {
       expect(runtime.capabilities.matched).toBeUndefined();
     });
   });
-
-
 });

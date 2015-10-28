@@ -1,3 +1,4 @@
+
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 
@@ -9,9 +10,14 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
 /**
  * @typedef LocalStorageProviderConfig
  * @type {Object}
- * @extends {StorageProviderConfig}
- * @property {string} localStorageProvider.actImagesRoot - actual and diff images root, defaults to: target/images
- * @property {string} localStorageProvider.refImagesRoot - reference images root, defaults to spec.testBasePath
+ * @extends {Config}
+ */
+
+/**
+ * @typedef LocalStorageProviderInstanceConfig
+ * @type {Object}
+ * @property {string} actImagesRoot - actual and diff images root, defaults to: target/images
+ * @property {string} refImagesRoot - reference images root, defaults to spec.testBasePath
  */
 
 /**
@@ -19,19 +25,20 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
  * @constructor
  * @implements {StorageProvider}
  * @param {LocalStorageProviderConfig} config
+ * @param {LocalStorageProviderInstanceConfig} instanceConfig
  * @param {Logger} logger
  * @param {Runtime} runtime - runtime properties
  */
-function LocalStorageProvider(config, logger, runtime) {
+function LocalStorageProvider(config,instanceConfig,logger,runtime) {
   this.config = config;
   this.logger = logger;
+  this.instanceConfig = instanceConfig;
   this.runtime = runtime;
 
+  this.actImagesRoot = instanceConfig.actImagesRoot || DEFAULT_ACT_IMAGES_ROOT;
+  this.refImagesRoot = instanceConfig.refImagesRoot;
+
   this.currentSpec = null;
-  this.actImagesRoot = this.config.localStorageProvider ?
-    config.localStorageProvider.actImagesRoot || DEFAULT_ACT_IMAGES_ROOT : DEFAULT_ACT_IMAGES_ROOT;
-  this.refImagesRoot = this.config.localStorageProvider ?
-    config.localStorageProvider.refImagesRoot : undefined ;
 }
 
 //// API to comparisonProvider
@@ -130,7 +137,6 @@ LocalStorageProvider.prototype.onBeforeEachSpec = function(spec){
   this.logger.debug('Init localStorageProvider with spec: ' + spec.fullName);
 };
 
-module.exports = function(config, logger, runtime){
-  return new LocalStorageProvider(config, logger, runtime);
+module.exports = function(config,instanceConfig,logger,runtime){
+  return new LocalStorageProvider(config,instanceConfig,logger,runtime);
 };
-

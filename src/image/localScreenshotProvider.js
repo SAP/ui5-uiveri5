@@ -1,16 +1,16 @@
-/**
- * Created by I304310 on 7/22/2015.
- */
-'use strict';
 
 var DEFAULT_TAKE = true;
 
 /**
  * @typedef LocalScreenshotProviderConfig
  * @type {Object}
- * @extends {ScreenshotProviderConfig}
+ * @extends {Config}
  * @property {boolean} take - enable screenshot taking
- * @property {boolean} update - update ref with actual screenshot
+ */
+
+/**
+ * @typedef LocalScreenshotProviderInstanceConfig
+ * @type {Object}
  */
 
 /**
@@ -18,14 +18,16 @@ var DEFAULT_TAKE = true;
  * @constructor
  * @implements {ScreenshotProvider}
  * @param {LocalScreenshotProviderConfig} config
+ * @param {LocalScreenshotProviderInstanceConfig} instanceConfig
  * @param {Logger} logger
  */
-function LocalScreenshotProvider(config,logger) {
+function LocalScreenshotProvider(config,instanceConfig,logger) {
   this.config = config;
+  this.instanceConfig = instanceConfig;
   this.logger = logger;
 
   // set default for take if not provided
-  config.take = typeof config.take !== 'undefined' ? config.take : DEFAULT_TAKE;
+  this.take = typeof config.take !== 'undefined' ? config.take : DEFAULT_TAKE;
 }
 
 /**
@@ -35,7 +37,7 @@ LocalScreenshotProvider.prototype.register = function() {
   var that = this;
 
   global.takeScreenshot = function() {
-    if (that.config.take) {
+    if (that.take) {
       // take screenshot once UI5 has settled down
       return browser.waitForAngular().then(function(){
         // uses browser object and call webdriverjs function takeScreenshot
@@ -51,6 +53,6 @@ LocalScreenshotProvider.prototype.register = function() {
   };
 };
 
-module.exports = function (config, logger) {
-  return new LocalScreenshotProvider(config, logger);
+module.exports = function (config,instanceConfig,logger) {
+  return new LocalScreenshotProvider(config,instanceConfig,logger);
 };

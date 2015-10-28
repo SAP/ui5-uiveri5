@@ -1,9 +1,10 @@
+
+var _ = require('lodash');
+
 // 0 - INFO,ERROR
 // 1 - +DEBUG
 // 2 - +TRACE
 // 3 - +trace data
-
-var _ = require('lodash');
 
 function ConsoleLogger(level){
   this.level = level;

@@ -11,10 +11,12 @@
     "q": "^1.4.1",
     "resemblejs-tolerance": "git://github.wdf.sap.corp/I035254/resemblejs-tolerance.git#v1.0.0",
     "urllib-sync": "~1.0.1",
-    "yargs": "^3.8.0"
+    "yargs": "^3.8.0",
+    "selenium-webdriver": "2.47.0"
   },
   "devDependencies": {
-    "jasmine": "^2.2.1"
+    "jasmine": "^2.2.1",
+    "jasminewd2": "0.0.6"
   },
   "repository": {
     "type": "git",

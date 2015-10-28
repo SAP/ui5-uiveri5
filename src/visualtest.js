@@ -1,4 +1,3 @@
-'use strict';
 
 var _ = require('lodash');
 var proxyquire =  require('proxyquire');
@@ -40,8 +39,6 @@ function run(config) {
   // configure logger
   var logger = require('./logger')(config.verbose);
 
-  // log command-line arguments
-
   // log config object so far
   logger.debug('Config from command-line: ${JSON.stringify(config)}',{config:config});
 
@@ -74,14 +71,14 @@ function run(config) {
   // log cwd
   logger.debug('Current working directory: ' + process.cwd());
 
+  // start module loader
+  var moduleLoader = require('./moduleLoader')(config,logger);
+
+  // load spec resolver
+  var specResolver = moduleLoader.loadModule('specResolver');
+
   // resolve specs
-  var specResolverName = config.specResolver;
-  if(!specResolverName){
-    throw Error("Spec resolver is not defined, unable to continue")
-  }
-  logger.debug('Loading spec resolver module: ' + specResolverName);
   logger.info('Resolving specs');
-  var specResolver = require(specResolverName)(config,logger);
   var specs = specResolver.resolve();
   if (!specs || specs.length==0){
     throw Error("No specs found");
@@ -98,13 +95,7 @@ function run(config) {
   }
 
   // create connectionProvider
-  var connectionProviderName = connectionConfig.connectionProvider;
-  if(!connectionProviderName){
-    throw Error("Could not find connection provider: " + connectionProviderName +
-      ' for connection: ' + connectionName);
-  }
-  logger.debug('Loading connection provider module: ' + connectionProviderName);
-  var connectionProvider = require(connectionProviderName)(config,logger);
+  var connectionProvider = moduleLoader.loadNamedModule('connection');
 
   // prepare protractor executor args
   var protractorArgv = {};
@@ -169,8 +160,8 @@ function run(config) {
   protractorArgv.maxSessions = 1;
 
   // register screenshot provider
-  if(config.screenshotProvider){
-    var screenshotProvider = require(config.screenshotProvider)(config,logger);
+  var screenshotProvider = moduleLoader.loadModuleIfAvailable('screenshotProvider');
+  if(screenshotProvider){
     screenshotProvider.register();
   }
 
@@ -204,17 +195,15 @@ function run(config) {
       var currentCapabilities = protractorConfig.capabilities;
       var currentRuntime = runtimeResolver.resolveRuntimeFromCapabilities(currentCapabilities);
 
-      // register storage provider
-      if(config.storageProvider){
-        storageProvider = require(config.storageProvider)(config,logger,currentRuntime);
-      }
+      // load storage provider
+      storageProvider = moduleLoader.loadModuleIfAvailable('storageProvider',[currentRuntime]);
 
       // export current runtime for tests
       browser.testrunner.runtime = currentRuntime;
 
-      // register comparison provider
-      if(config.comparisonProvider){
-        var comparisonProvider = require(config.comparisonProvider)(config,logger,storageProvider);
+      // load comparison provider and register the custom matcher
+      var comparisonProvider = moduleLoader.loadModuleIfAvailable('comparisonProvider',[storageProvider]);
+      if(comparisonProvider){
         comparisonProvider.register(matchers);
       }
 
@@ -376,14 +365,9 @@ function run(config) {
 
     // register reporters
     var jasmineEnv = jasmine.getEnv();
-    if (config.reporters) {
-      config.reporters.forEach(function(reporterDef){
-        var instanceConfig = _.clone(reporterDef,true);
-        delete instanceConfig.reporter;
-        var reporter = require(reporterDef.reporter)(config,instanceConfig,logger);
-        reporter.register(jasmineEnv);
-      })
-    }
+    moduleLoader.loadModule('reporters').forEach(function(reporter){
+      reporter.register(jasmineEnv);
+    });
   };
 
   protractorArgv.afterLaunch = function(){

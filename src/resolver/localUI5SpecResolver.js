@@ -4,17 +4,26 @@ var path = require('path');
 var glob = require('glob');
 
 var BASE_URL = 'http://localhost:8080';
-var SUITES_GLOB = 'src/**/test/**/visual/visual.suite.js';
+var DEFAULT_SUITES_GLOB = '**/test/**/visual/visual.suite.js';
+var DEFAULT_SUITES_REGEX = '((?:\\w\\:)?\\/(?:[\\w\\-.]+\\/)+([\\w\\.]+)\\/test\\/(?:\\w+\\/)+)visual\\.suite\\.js';
 var CONTENT_ROOT_URI = 'testsuite/test-resources/';
+
+// c:/work/git/openui5/src/sap.m/test/sap/m/visual/ActionSelect.spec.js
+// c:/Users/i076005/git/sap.gantt/gantt.lib/test/sap/gantt/visual’
 
 /**
  * @typedef LocalUI5SpecResolverConfig
  * @type {Object}
- * @extends {Config}
- * @property {String} baseUrl - base url to reference, falsy disables page loading, defaults to: 'http://localhost:8080'
+ * @property {string} baseUrl - base url to reference, falsy disables page loading, defaults to: 'http://localhost:8080'
  * @property {string} libFilter - comma separated list of libraries, '*' means all, defaults to: '*'
  * @property {string} specFilter - comma separated list of spec names, '*' means all, defaults to '*'
- * @property {string} LocalUI5SpecResolverConfig.suitesGlob - suites glob, default to: 'src/<any>/test/<any>/visual/visual.suite.js'
+  */
+
+/**
+ * @typedef LocalUI5SpecResolverInstanceConfig
+ * @type {Object}
+ * @property {string} LocalUI5SpecResolverConfig.suitesGlob - suites glob, default to all visual.suite.js files in test dirs
+ * @property {string} LocalUI5SpecResolverConfig.suitesRegex - suites regex, default to all visual.suite.js files in test dirs
  * @property {string} LocalUI5SpecResolverConfig.contentRootUri - content uri, defaults to: 'testsuite/test-resources/'
  */
 
@@ -22,41 +31,45 @@ var CONTENT_ROOT_URI = 'testsuite/test-resources/';
  * Resolves specs from local UI5 project
  * @constructor
  * @implements {SpecResolver}
- * @param {LocalUI5SpecResolverConfig} config - configs
+ * @param {LocalUI5SpecResolverConfig} config
+ * @param {LocalUI5SpecResolverInstanceConfig} instanceConfig
+ * @param {Logger} logger
  */
-function LocalUI5SpecResolver(config, logger){
-  this.config  = config;
+function LocalUI5SpecResolver(config,instanceConfig,logger){
+  //this.config  = config;
+  //this.instanceConfig = instanceConfig;
   this.logger = logger;
 
-  this.baseUrl = this.config.baseUrl || BASE_URL;
-  this.libFilter = this.config.libFilter || '*';
-  this.specFilter = this.config.specFilter || '*';
-  this.suitesGlob =
-    (this.config.localUI5SpecResolver ? this.config.localUI5SpecResolver.suitesGlob : false) || SUITES_GLOB;
-  this.contentRootUri =
-    (this.config.localUI5SpecResolver ? this.config.localUI5SpecResolver.contentRootUri : false) || CONTENT_ROOT_URI;
-
+  this.baseUrl = config.baseUrl || BASE_URL;
+  this.libFilter = config.libFilter || '*';
+  this.specFilter = config.specFilter || '*';
+  this.suitesGlob = instanceConfig.suitesGlob || DEFAULT_SUITES_GLOB;
+  this.suitesRegex = instanceConfig.suitesRegex || DEFAULT_SUITES_REGEX;
+  this.contentRootUri = instanceConfig.contentRootUri || CONTENT_ROOT_URI;
+  this.suiteRootPath = instanceConfig.suiteRootPath || process.cwd();
 }
 
 LocalUI5SpecResolver.prototype.resolve = function(){
   var that = this;
 
   // c:/work/git/openui5/src/sap.m/test/sap/m/visual/ActionSelect.spec.js
+  // c:/Users/i076005\git\sap.gantt\gantt.lib\test\sap\gantt\visual’
   //http://localhost:8080/testsuite/test-resources/sap/m/ActionSelect.html
 
   /** @type {Spec[]} */
   var specs = [];
 
   //log
-  that.logger.debug('Resolving specs from suites glob: ' + that.suitesGlob + " contentRootUri: " + that.contentRootUri);
+  this.logger.debug('Resolving suites from: ' + this.suiteRootPath +
+    ' using suites glob: ' + this.suitesGlob);
 
   // resolve suite glob to array of paths
-  var suitePathMask = path.normalize(process.cwd() + '/' + that.suitesGlob);
+  var suitePathMask = path.normalize(this.suiteRootPath + '/' + this.suitesGlob);
   var suitePaths = glob.sync(suitePathMask);
   suitePaths.forEach(function(suitePath){
 
     // extract lib from
-    var suitePathMatch = suitePath.match(/((?:\w\:)?\/(?:[\w\-.]+\/)+src\/([\w\.]+)\/(?:\w+\/)+)visual\.suite\.js/);
+    var suitePathMatch = suitePath.match(that.suitesRegex);
     if (suitePathMatch===null){
       throw new Error('Could not parse suite path: ' + suitePath);
     }
@@ -113,6 +126,6 @@ LocalUI5SpecResolver.prototype.resolve = function(){
   return specs;
 };
 
-module.exports = function(config, logger){
-  return new LocalUI5SpecResolver(config, logger);
+module.exports = function(config,instanceConfig,logger){
+  return new LocalUI5SpecResolver(config,instanceConfig,logger);
 };

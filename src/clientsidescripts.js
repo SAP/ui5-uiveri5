@@ -1,3 +1,4 @@
+
 var functions = {};
 
 functions.waitForAngular = function(rootSelector, callback) {
@@ -113,7 +114,7 @@ functions.waitForAngular = function(rootSelector, callback) {
             this.aDoNotTrack.push(id);
             return false;
           }
-          
+
           if (delay > TestCooperation.MAX_TIMEOUT_DELAY) {
             this.aDoNotTrack.push(id);
             return false;

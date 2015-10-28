@@ -20,18 +20,13 @@
  */
 
 /**
- * @typedef SpecResolverConfig
- * @type {Object}
- * @extends {Config}
- */
-
-/**
  * Resolves specs
  * @constructor
- * @param {SpecResolverConfig} config - configs
+ * @param {LocalSpecResolverConfig} config
+ * @param {LocalSpecResolverInstanceConfig} instanceConfig
+ * @param {Logger} logger
  */
-function SpecResolver(config){
-  this.config  = config;
+function SpecResolver(config,instanceConfig,logger){
 }
 
 /**
@@ -39,5 +34,5 @@ function SpecResolver(config){
  * @return {Spec[]} all applicable specs
  */
 SpecResolver.prototype.resolve = function(){
-}
+};
 

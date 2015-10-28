@@ -1,68 +1,49 @@
-/**
- * Created by I304310 on 6/15/2015.
- */
 
 var fs = require('fs');
 require('jasminewd2');
 
-describe("RemoteSAPUI5SpecResolver", function () {
-  beforeEach(function () {
+describe("LocalComparisonProvider", function () {
+  var logger = require('../src/logger')(3);
 
+  beforeAll(function () {
     var storageProviderMock = {
-      storeRefImage : function(refImageName) {
-        return fs.createWriteStream(refImageName);
-      },
       readRefImage: function(refImageName) {
-        var readImageStream = fs.createReadStream(refImageName);
-        readImageStream.on('error', function(error) {
-          return null;
-        });
-        return readImageStream;
+        return fs.createReadStream(__dirname + '/localComparisonProvider/' + refImageName);
+      },
+      storeRefImage : function(refImageName) {
+        //return fs.createWriteStream(refImageName);
       },
       storeDiffImage : function() {
-        return fs.createWriteStream('spec/localComparisonProvider/diff.png');
+        //return fs.createWriteStream('spec/localComparisonProvider/diff.png');
       },
       storeActImage : function() {
-        return fs.createWriteStream('spec/localComparisonProvider/act.png');
+        //return fs.createWriteStream('spec/localComparisonProvider/act.png');
       }
     };
 
     var config = {
       tolerance: 10,
-      compare: true,
-      localComparisonProvider: {
-        update: false,
-        ignoreColors: false
-      }
+      compare: true
+    };
+    var instanceConfig = {
+      ignoreColors: false
     };
 
-    var comparison = require('../src/localComparisonProvider.js')(
-      config,
-      storageProviderMock
-    );
+    var LocalComparisonProvider = require('../src/image/localComparisonProvider.js');
+    var comparisonProvider = new LocalComparisonProvider(config,instanceConfig,logger,storageProviderMock);
 
-    comparison.register();
+    var matchers = {};
+    comparisonProvider.register(matchers);
+    jasmine.getEnv().addMatchers(matchers);
   });
 
-  it('Should have mismatch percentage less than 10%.', function () {
-    var imageFile = fs.readFileSync('spec/localComparisonProvider/People.png').toString('base64');
-    expect(imageFile).toLookAs('spec/localComparisonProvider/People2.png');
-
+  it('Should pass with similar images', function () {
+    var imageFile = fs.readFileSync(__dirname + '/localComparisonProvider/Original.png').toString('base64');
+    expect(imageFile).toLookAs('Similar.png');
   });
 
-  it('Should have mismatch percentage less than 10%.', function() {
-    var imageFile = fs.readFileSync('spec/localComparisonProvider/People2.png').toString('base64');
-    expect(imageFile).toLookAs('spec/localComparisonProvider/People.png');
+  it('Should fail with different images', function() {
+    var imageFile = fs.readFileSync(__dirname + '/localComparisonProvider/Original.png').toString('base64');
+    expect(imageFile).not.toLookAs('Different.png');
   });
-
-  it('Should not look like the ref image - mismatch percentage more than 10%.', function() {
-    var imageFile = fs.readFileSync('spec/localComparisonProvider/example.png').toString('base64');
-    expect(imageFile).not.toLookAs('spec/localComparisonProvider/People.png');
-  });
-
-  it('Should cannot find the reference image.', function() {
-    var imageFile = fs.readFileSync('spec/localComparisonProvider/example.png').toString('base64');
-    expect(imageFile).not.toLookAs('spec/localComparisonProvider/doNotExist.png');
-  });
-
 });

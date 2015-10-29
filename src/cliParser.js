@@ -3,6 +3,8 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 
+var DEFAULT_CONF_FILE = './conf.js';
+
 function CliParser(){
 }
 
@@ -21,13 +23,13 @@ CliParser.prototype.parse = function(argv){
 
   // conf file is not provided on command line => try loading conf.js from current dir
   if (!config.conf) {
-    var localConf = './conf.js';
+    var localConf = DEFAULT_CONF_FILE;
     if (fs.existsSync(localConf)) {
       config.conf = localConf;
     }
   }
 
-  // current dir conf is resolved against cwd()
+  // conf file name is resolved against cwd() to get absolute pathname
   if (config.conf){
     config.conf = path.resolve(config.conf);
   }

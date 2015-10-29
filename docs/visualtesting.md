@@ -24,7 +24,6 @@ the tests in a subfolder 'visual'. This is fine if you plan to submit the images
 In central visual test execution usaces, it could be useful to store the reference images in a separate folder,
 outside ot the source tree. Configure the required folder in your conf.js like this:
 ```javascript
-localStorageProvider: {
-    refImagesRoot: '../../storage'
-  }
+storageProvider: {name: './image/localStorageProvider',refImagesRoot: '../../storage'}
 ```
+

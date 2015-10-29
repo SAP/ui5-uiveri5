@@ -42,6 +42,10 @@ function run(config) {
   // log config object so far
   logger.debug('Config from command-line: ${JSON.stringify(config)}',{config:config});
 
+  // merge in config files
+  var configParser = require('./configParser')(logger);
+  config = configParser.mergeConfigs(config);
+  /*
   // load config file
   var configFileName = config.conf || DEFAULT_CONF;
   logger.debug('Loading config from: ' + configFileName);
@@ -61,6 +65,7 @@ function run(config) {
     var profileConfigFile = require(profileConfigFileName).config;
     config = _mergeConfig(profileConfigFile,config);
   }
+  */
 
   // update logger with resolved configs
   logger.setLevel(config.verbose);

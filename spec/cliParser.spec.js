@@ -1,3 +1,4 @@
+
 describe("cliParser", function() {
 
   var ArgvStub = function(){
@@ -51,7 +52,7 @@ describe("cliParser", function() {
         [{browserName:'firefox'},{browserName:'ie'},{browserName:'chrome',browserVersion:'45'}]);
     });
 
-    it('Should single value JSON-formatted objects in config key', function () {
+    it('Should parse single value JSON-formatted objects in config key', function () {
       var argvStub = new ArgvStub();
       argvStub.config = {key1:{key2:'value'}};
       var config = cliParser.parse(argvStub);

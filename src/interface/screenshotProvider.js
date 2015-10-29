@@ -1,19 +1,12 @@
-/**
- * @typedef ScreenshotProviderConfig
- * @type {Object}
- * @extends {Config}
- * @property {boolean} take - enable screenshot taking
- * @property {boolean} update - update ref with act screenshot
- */
 
 /**
  * Resolves specs
  * @constructor
- * @param {ScreenshotProviderConfig} config - configs
+ * @param {Config} config
+ * @param {Object} instanceConfig
  * @param {Logger} logger
  */
-function ScreenshotProvider(config,logger){
-  this.config  = config;
+function ScreenshotProvider(config,instanceConfig,logger){
 }
 
 /**

@@ -3,19 +3,15 @@ var _ = require('lodash');
 var q = require('q');
 
 /**
- * @typedef ConnectionProviderConfig
- * @type {Object}
- * @extends {Config}
- */
-
-/**
  * Provides connection to the test environment
  * @constructor
- * @param config - config
- * @param logger - logger
+ * @param {Config} config
+ * @param {Object} instanceConfig
+ * @param {Logger} logger
  */
-function ConnectionProvider(config,logger) {
+function ConnectionProvider(config,instanceConfig,logger) {
   this.config = config;
+  this.instanceConfig = instanceConfig;
   this.logger = logger;
 }
 

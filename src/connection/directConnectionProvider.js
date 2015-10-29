@@ -1,6 +1,6 @@
 
 var _ = require('lodash');
-var ConnectionProvider = require('./../interfaces/connectionProvider');
+var ConnectionProvider = require('./../interface/connectionProvider');
 
 /**
  * @typedef DirectConnectionProviderConfig

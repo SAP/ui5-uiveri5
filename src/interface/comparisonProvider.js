@@ -1,22 +1,13 @@
-/**
- * @typedef ComparisonProviderConfig
- * @type {Object}
- * @extends {Config}
- * @property {boolean} take - enable screenshot taking
- * @property {boolean} compare - enable screenshot comparison
- */
 
 /**
  * Resolves specs
  * @constructor
- * @param {ComparisonProviderConfig} config - configs
+ * @param {Config} config
+ * @param {Object} instanceConfig
  * @param {Logger} logger
  * @param {StorageProvider} storageProvider - the storage provider to use
  */
 function ComparisonProvider(config,logger,storageProvider){
-  this.config  = config;
-  this.logger = logger;
-  this.storageProvider = storageProvider;
 }
 
 /**

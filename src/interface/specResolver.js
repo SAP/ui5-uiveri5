@@ -22,8 +22,8 @@
 /**
  * Resolves specs
  * @constructor
- * @param {LocalSpecResolverConfig} config
- * @param {LocalSpecResolverInstanceConfig} instanceConfig
+ * @param {Config} config
+ * @param {Object} instanceConfig
  * @param {Logger} logger
  */
 function SpecResolver(config,instanceConfig,logger){

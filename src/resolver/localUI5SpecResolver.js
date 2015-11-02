@@ -5,8 +5,8 @@ var glob = require('glob');
 
 var BASE_URL = 'http://localhost:8080';
 var DEFAULT_SUITES_GLOB = '**/test/**/visual/visual.suite.js';
-var DEFAULT_SUITES_REGEX = '((?:\\w\\:)?\\/(?:[\\w\\-.]+\\/)+([\\w\\.]+)\\/test\\/(?:\\w+\\/)+)visual\\.suite\\.js';
-var CONTENT_ROOT_URI = 'testsuite/test-resources/';
+var DEFAULT_SUITES_REGEX = '((?:\\w\\:)?\\/(?:[\\w\\-.]+\\/)+([\\w\\.]+)\\/test\\/([\\w\\/]+)+visual\\/)visual\\.suite\\.js';
+var CONTENT_ROOT_URI = 'testsuite/test-resources';
 
 // c:/work/git/openui5/src/sap.m/test/sap/m/visual/ActionSelect.spec.js
 // c:/Users/i076005/git/sap.gantt/gantt.lib/test/sap/gantt/visual’
@@ -24,7 +24,7 @@ var CONTENT_ROOT_URI = 'testsuite/test-resources/';
  * @type {Object}
  * @property {string} LocalUI5SpecResolverConfig.suitesGlob - suites glob, default to all visual.suite.js files in test dirs
  * @property {string} LocalUI5SpecResolverConfig.suitesRegex - suites regex, default to all visual.suite.js files in test dirs
- * @property {string} LocalUI5SpecResolverConfig.contentRootUri - content uri, defaults to: 'testsuite/test-resources/'
+ * @property {string} LocalUI5SpecResolverConfig.contentRootUri - content uri, defaults to: 'testsuite/test-resources'
  */
 
 /**
@@ -73,8 +73,9 @@ LocalUI5SpecResolver.prototype.resolve = function(){
     if (suitePathMatch===null){
       throw new Error('Could not parse suite path: ' + suitePath);
     }
-    var suiteBasePath = suitePathMatch[1].slice(0,-1);  // remove trailing '/' for consistency
+    var suiteBasePath = suitePathMatch[1] .slice(0,-1);  // remove trailing '/' for consistency
     var libName = suitePathMatch[2];
+    var suiteNamespace = suitePathMatch[3].slice(0,-1);  // remove trailing '/' for consistency
 
     // filter out this lib if necessary
     if(that.libFilter!=='*' && that.libFilter.toLowerCase().indexOf(libName.toLowerCase())==-1){
@@ -109,11 +110,10 @@ LocalUI5SpecResolver.prototype.resolve = function(){
 
       var spec = {
         name: specName,
-        fullName: libName + '.' + specName,
-        testBasePath: suiteBasePath,
+        fullName: suiteNamespace.replace(/\//,'.') + '.' + specName,
         testPath: suiteBasePath + '/' + specFileName,
         contentUrl: that.baseUrl ?
-          (that.baseUrl + '/' + that.contentRootUri + libName.replace(/\./,'/') + '/' + specName + '.html') :
+          (that.baseUrl + '/' + that.contentRootUri + '/' + suiteNamespace + '/' + specName + '.html') :
           false
       };
 

@@ -30,15 +30,16 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
  * @param {Runtime} runtime - runtime properties
  */
 function LocalStorageProvider(config,instanceConfig,logger,runtime) {
-  this.config = config;
+  //this.config = config;
+  //this.instanceConfig = instanceConfig;
   this.logger = logger;
-  this.instanceConfig = instanceConfig;
   this.runtime = runtime;
 
   this.actImagesRoot = instanceConfig.actImagesRoot || DEFAULT_ACT_IMAGES_ROOT;
   this.refImagesRoot = instanceConfig.refImagesRoot;
 
-  this.currentSpec = null;
+  this.currentSpecName = null;
+  this.currentSpecTestBasePath = null;
 }
 
 //// API to comparisonProvider
@@ -50,7 +51,7 @@ function LocalStorageProvider(config,instanceConfig,logger,runtime) {
  */
 LocalStorageProvider.prototype.readRefImage = function(refImageName){
   var refImagePath = [
-    this.refImagesRoot || this.currentSpec.testBasePath,
+    this.refImagesRoot || this.currentSpecTestBasePath,
     'images',           // TODO consider if this level is really necessary
     this._getRuntimePathSegment(),
     (refImageName + DEFAULT_REF_IMAGE_EXT)
@@ -66,7 +67,7 @@ LocalStorageProvider.prototype.readRefImage = function(refImageName){
  */
 LocalStorageProvider.prototype.storeRefImage = function(refImageName){
   var refImagePath = [
-    this.refImagesRoot || this.currentSpec.testBasePath,
+    this.refImagesRoot || this.currentSpecTestBasePath,
     'images',           // TODO consider if this level is really necessary
     this._getRuntimePathSegment()
   ].join('/');
@@ -115,7 +116,7 @@ LocalStorageProvider.prototype.storeDiffImage = function(refImageName){
  */
 LocalStorageProvider.prototype._getRuntimePathSegment = function(){
   return [
-    this.currentSpec.name,
+    this.currentSpecName,
     this.runtime.platformName,
     this.runtime.platformResolution,
     this.runtime.browserName,
@@ -132,9 +133,10 @@ LocalStorageProvider.prototype._getRuntimePathSegment = function(){
  * Used to store current spec
  */
 LocalStorageProvider.prototype.onBeforeEachSpec = function(spec){
-  this.currentSpec = spec;
-
   this.logger.debug('Init localStorageProvider with spec: ' + spec.fullName);
+
+  this.currentSpecName = spec.name;
+  this.currentSpecTestBasePath = spec.testPath.substring(0,spec.testPath.lastIndexOf('/'));
 };
 
 module.exports = function(config,instanceConfig,logger,runtime){

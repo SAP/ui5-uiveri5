@@ -51,7 +51,9 @@ describe("RemoteUI5SpecResolver", function () {
     var specs = specResolver.resolve();
 
     expect(specs.length).toEqual(2);
-    expect(specs[0]).toEqual(jasmine.objectContaining({name:'sap.m.Comp1'}));
+    expect(specs[0]).toEqual(jasmine.objectContaining({name:'Comp1',fullName:'sap.m.Comp1',
+      testPath: __dirname + '\\remoteUI5SpecResolver\\target\\specs\\sap.m\\Comp1.spec.js',
+      contentUrl:'http://localhost:8080/testsuite/test-resources/sap/m/Comp1.html'}));
   });
 
   it("Should filter specs by spec name", function () {
@@ -61,7 +63,7 @@ describe("RemoteUI5SpecResolver", function () {
     var specs = specResolver.resolve();
 
     expect(specs.length).toEqual(1);
-    expect(specs[0]).toEqual(jasmine.objectContaining({name:'sap.m.Comp1'}));
+    expect(specs[0]).toEqual(jasmine.objectContaining({name:'Comp1'}));
   });
 
   it("Should filter specs by lib name", function () {
@@ -71,6 +73,6 @@ describe("RemoteUI5SpecResolver", function () {
     var specs = specResolver.resolve();
 
     expect(specs.length).toEqual(1);
-    expect(specs[0]).toEqual(jasmine.objectContaining({name:'sap.ui.Comp2'}));
+    expect(specs[0]).toEqual(jasmine.objectContaining({name:'Comp2'}));
   });
 });

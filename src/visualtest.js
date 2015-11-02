@@ -297,6 +297,8 @@ function run(config) {
           if (spec.contentUrl) {
             logger.debug('Opening: ' + spec.contentUrl);
 
+            // below driver.xxx operations are inherently synchronized by webdriver flow
+
             // bypass browser.get() as it does angular-magic that we do not need to overwride
             browser.driver.get(spec.contentUrl).then(function(){
               // call storage provider beforeEach hook

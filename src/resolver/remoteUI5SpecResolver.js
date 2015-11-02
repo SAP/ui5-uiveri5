@@ -236,9 +236,7 @@ RemoteSpecResolver.prototype._applySpecFilter = function (specName, sLibUri) {
  * @param {String} sLibUri - String of library URI
  * @param (String} specName - name of the current spec
  * @param {String} sLibName - name of the spec's library
- * @return {{name: String, path: String, contentUrl: String, _specUrls: String}[]} array of spec objects,
- * name is the spec name, path: is the absolute path to the spec file, contentUrl is the url to content page (html),
- * _specUrls is the url to the spec file on the server
+ * @return {Spec} resolved spec
  * */
 RemoteSpecResolver.prototype._fillSpecsArray = function (sLibUri, specName, sLibName) {
   var sSpecPath;
@@ -249,18 +247,20 @@ RemoteSpecResolver.prototype._fillSpecsArray = function (sLibUri, specName, sLib
   sSpecPath = path.resolve(this.sSpecFolder, sLibName, specName);
 
   var oSpec = {
-    name: sLibName + "." + specName.split(".")[0],
-    path: sSpecPath,
+    name: specName.split(".")[0],
+    fullName: sLibName + "." + specName.split(".")[0],  // TODO namespace could be different from lib name like in sap.gantt
+    testPath: sSpecPath,
     contentUrl: this.sBaseUrl + this.sContentRootUri + sLibUri + "/" + specName.replace("visual/", "").replace("spec.js", "html"),
     _specUrls: this.sBaseUrl + this.sContentRootUri + sLibUri + "/visual/" + specName
   };
 
   this._downloadFiles([{pathUrl: oSpec._specUrls}], sSpecLibFolderName + "/");
-  this.logger.debug("Spec found, name: " + oSpec.name + ", path: " + oSpec.path + ", contentUrl: " + oSpec.contentUrl);
+  this.logger.debug("Spec found, name: " + oSpec.name + ", fullName: " + oSpec.fullName +
+    ", testPath: " + oSpec.testPath + ", contentUrl: " + oSpec.contentUrl);
   aSpecs.push(oSpec);
 
   return oSpec;
-}
+};
 
 /**
  * Makes directory from given path and root

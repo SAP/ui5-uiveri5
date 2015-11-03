@@ -102,6 +102,17 @@ if('should check something',function(){
 });
 ```
 
+### Authentication
+To test a protected page you need to specify authentication type and credentials in config.
+Supported authentication types are: basic and fiori-form
+``` javascript
+auth: {
+  type: 'basic',       // basic or fiori-form
+  user: '<username>',
+  pass: '<password>'
+}
+```
+
 ### Timeouts
 Override default timeout values in config file:
 ``` javascript

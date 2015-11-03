@@ -4,7 +4,7 @@ var path = require('path');
 var glob = require('glob');
 
 var DEFAULT_SPECS_GLOB = './*.spec.js';
-var DEFAULT_SPEC_REGEX = '((?:\w\:)?\/(?:[\w\-\.]+\/)*)([\w\-]+)\.(?:[\w\.]+)';
+var DEFAULT_SPEC_REGEX = '((?:\\w\\:)?\\/(?:[\\w\\-\\.]+\\/)*)([\\w\\-]+)\\.(?:[\\w\\.]+)';
 
 /**
  * @typedef LocalSpecResolverConfig
@@ -56,7 +56,7 @@ LocalSpecResolver.prototype.resolve = function(){
   specPaths.forEach(function(specPath){
 
     // extract spec file name - no extension, no path
-    var specMatches = specPath.match(specRegex);
+    var specMatches = specPath.match(that.specRegex);
     if (specMatches===null){
       throw new Error('Could not parse spec path: ' + specPath);
     }
@@ -78,6 +78,10 @@ LocalSpecResolver.prototype.resolve = function(){
           } else {
             that.logger.debug('Basic auth requested but user or pass is not specified');
           }
+        } else if (that.auth.type == 'fiori-form') {
+          // just log, actual work will follow in get()
+          that.logger.debug('Auth type: fiori-form requested, will be handled when page is opened');
+          contentUrlWithAuth = that.baseUrl;
         } else {
           that.logger.debug('Auth type not supported: ' + that.auth.type + ' ,only supported: basic');
         }

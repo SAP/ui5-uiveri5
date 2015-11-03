@@ -299,14 +299,26 @@ function run(config) {
 
             // below driver.xxx operations are inherently synchronized by webdriver flow
 
-            // bypass browser.get() as it does angular-magic that we do not need to overwride
-            browser.driver.get(spec.contentUrl).then(function(){
+            // bypass browser.get() as it does angular-magic that we do not need to override
+            browser.driver.get(spec.contentUrl).then(function () {
               // call storage provider beforeEach hook
-              if (storageProvider && storageProvider.onBeforeEachSpec){
+              if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
               }
             });
             // TODO check http status, throw error if error
+
+            // handle fiori-form
+            var auth = config.auth;
+            if (auth && auth.type === 'fiori-form') {
+              if (!auth.user || !auth.pass) {
+                throw Error('Fiori-form auth requested but user or pass is not specified');
+              }
+
+              browser.driver.findElement(by.id('USERNAME_FIELD-inner')).sendKeys(auth.user);
+              browser.driver.findElement(by.id('PASSWORD_FIELD-inner')).sendKeys(auth.pass);
+              browser.driver.findElement(by.id('LOGIN_LINK')).click();
+            }
 
             // handle pageLoading options
             if(config.pageLoading){

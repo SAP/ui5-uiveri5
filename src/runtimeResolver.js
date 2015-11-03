@@ -4,11 +4,12 @@ var _ = require('lodash');
 var DEFAULT_BROWSER_NAME = 'chrome';
 var DEFAULT_PLATFORM_NAME = 'windows';
 var DEFAULT_VERSION = '*';
+var DEFAULT_DEVICE_NAME = '*';
 var DEFAULT_UI5_THEME = 'bluecrystal';
 var DEFAULT_UI5_DIRECTION = 'ltr';
 var DEFAULT_UI5_MODE = 'cozy';
 
-defaultPlatformResolutionPerPlatformName = {
+var defaultPlatformResolutionPerPlatformName = {
   windows: '1600x1200',
   mac: '1280x1024',
   linux: '1600x1200',
@@ -16,24 +17,24 @@ defaultPlatformResolutionPerPlatformName = {
   ios: '1536х1854',
   winphone: '1080x1920'
 };
-defaultPlatformNamePerBrowserName = {
+var defaultPlatformNamePerBrowserName = {
   ie: 'windows',
   edge: 'windows',
   safari: 'mac'
 };
-supportedBrowserNames = [
+var supportedBrowserNames = [
   'chrome','chromium','browser','firefox','ie','safari','edge'
 ];
-supportedPlatformNames = [
+var supportedPlatformNames = [
   'windows','mac','linux','android','ios','winphone'
 ];
-supportedUI5Themes = [
+var supportedUI5Themes = [
   'bluecrystal','hcb'
 ];
-supportedUI5Directions = [
+var supportedUI5Directions = [
   'ltr','rtl'
 ];
-supportedUI5Modes = [
+var supportedUI5Modes = [
   'cozy','compact'
 ];
 
@@ -45,6 +46,7 @@ supportedUI5Modes = [
  * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
  * @param {string(default|/\d+x\d+/)} platformResolution - platform resolution, WIDTHxHEIGHT, default: resolved from available
+ * @param {string} deviceName - device name, default: *
  * @param {string(bluecrystal|hcb)} ui5.theme - UI5 theme, default bluecrystal
  * @param {string(rtl|ltr)} ui5.direction - UI5 direction, default: ltr
  * @param {string(cozy|compact)} ui5.mode - UI5 mode, default: cozy
@@ -116,6 +118,10 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
       runtime.platformVersion = DEFAULT_VERSION;
     }
 
+    // handle device name
+    if (!runtime.deviceName) {
+      runtime.deviceName = DEFAULT_DEVICE_NAME;
+    }
     // handle ui5 defaults
     if (!runtime.ui5){
       runtime.ui5 = {};

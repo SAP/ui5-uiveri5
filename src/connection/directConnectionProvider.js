@@ -50,7 +50,7 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
     capabilities.version = runtime.browserVersion;
   }
 
-  // format platformName and platformVersion
+  // format platformName
   if (runtime.platformName === 'windows') {
     if (runtime.platformVersion === '*') {
       capabilities.platform = 'WINDOWS';
@@ -80,6 +80,11 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
   // format platformVersion
   if (runtime.platformVersion !== '*'){
     capabilities.platformVersion = runtime.platformVersion;
+  }
+
+  // format deviceName
+  if (runtime.deviceName !== '*'){
+    capabilities.deviceName = runtime.deviceName;
   }
 
   return this._mergeRuntimeCapabilities(capabilities,runtime);

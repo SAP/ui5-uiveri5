@@ -67,16 +67,19 @@ CliParser.prototype.parse = function(argv){
           if (browserParams[4]) {
             confBrowser.platformResolution = browserParams[4];
           }
-          if (browserParams[5] || browserParams[6] || browserParams[7]) {
+		  if (browserParams[5]) {
+            confBrowser.deviceName = browserParams[5];
+          }
+          if (browserParams[6] || browserParams[7] || browserParams[8]) {
             confBrowser.ui5 = {};
-            if (browserParams[5]) {
-              confBrowser.ui5.theme = browserParams[5];
-            }
             if (browserParams[6]) {
-              confBrowser.ui5.direction = browserParams[6];
+              confBrowser.ui5.theme = browserParams[6];
             }
             if (browserParams[7]) {
-              confBrowser.ui5.mode = browserParams[7];
+              confBrowser.ui5.direction = browserParams[7];
+            }
+            if (browserParams[8]) {
+              confBrowser.ui5.mode = browserParams[8];
             }
           }
           // capabilities could not be given in this notation

@@ -118,7 +118,7 @@ JasmineConsoleReporter.prototype.specDone = function(spec) {
     // passed specs are not counted explicitly, will be computed
 
     // passed expectations need to be stored explicitly as there is no startExpectation hook
-    this.currentSuite._expectPassed = spec.passedExpectations.length;
+    this.currentSuite._expectPassed += spec.passedExpectations.length;
   }
 };
 

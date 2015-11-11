@@ -5,6 +5,7 @@ var glob = require('glob');
 
 var BASE_URL = 'http://localhost:8080';
 var DEFAULT_SUITES_GLOB = '**/test/**/visual/visual.suite.js';
+var DEFAULT_SUITES_EXCLUDE = 'node_modules';
 var DEFAULT_SUITES_REGEX = '((?:\\w\\:)?\\/(?:[\\w\\-.]+\\/)+([\\w\\.]+)\\/test\\/([\\w\\/]+)+visual\\/)visual\\.suite\\.js';
 var CONTENT_ROOT_URI = 'testsuite/test-resources';
 
@@ -44,6 +45,7 @@ function LocalUI5SpecResolver(config,instanceConfig,logger){
   this.libFilter = config.libFilter || '*';
   this.specFilter = config.specFilter || '*';
   this.suitesGlob = instanceConfig.suitesGlob || DEFAULT_SUITES_GLOB;
+  this.suitesExclude = instanceConfig.suitesExclude || DEFAULT_SUITES_EXCLUDE;
   this.suitesRegex = instanceConfig.suitesRegex || DEFAULT_SUITES_REGEX;
   this.contentRootUri = instanceConfig.contentRootUri || CONTENT_ROOT_URI;
   this.suiteRootPath = instanceConfig.suiteRootPath || process.cwd();
@@ -66,7 +68,17 @@ LocalUI5SpecResolver.prototype.resolve = function(){
   // resolve suite glob to array of paths
   var suitePathMask = path.normalize(this.suiteRootPath + '/' + this.suitesGlob);
   var suitePaths = glob.sync(suitePathMask);
+  this.logger.debug('Suites found: ' + suitePaths.length);
+
+  // resolve specs from each suite
   suitePaths.forEach(function(suitePath){
+
+    // couldn't make glob excludes to work so doing it manually
+    // ignore if path contains exclude mask
+    if (suitePath.indexOf(that.suitesExclude) !== -1){
+      that.logger.debug('Suite path: ' + suitePath + ' matches exclude mask: ' + that.suitesExclude + ', ignoring');
+      return;
+    }
 
     // extract lib from
     var suitePathMatch = suitePath.match(that.suitesRegex);
@@ -91,6 +103,8 @@ LocalUI5SpecResolver.prototype.resolve = function(){
     } else if (suite instanceof Function) {
       suite({specs: specFileNames});
     }
+
+    that.logger.debug('Specs for lib: ' + libName + ' found: ' + specFileNames.length);
 
     // prepare a spec for each name from suite
     specFileNames.forEach(function(specFileName){

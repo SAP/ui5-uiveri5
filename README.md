@@ -50,10 +50,10 @@ exports.config = {
 $ visualtest
 ```
 
-### Advanced options
+### Features
 
 By default visualtest will discover all applicable visual tests and execute them on local chrome
-against over automatically started selenium server on localhost:4444.
+over automatically started selenium server on localhost:4444.
 All of the defaults could be modified either in conf.js or by providing command-line arguments.
 
 * Run tests on different browser
@@ -90,5 +90,3 @@ $ npm run test
 ```
 $jasmine-node grunt/spec/selenium_visualtest.spec.js
 ```
-
-

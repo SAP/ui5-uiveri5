@@ -269,6 +269,11 @@ function run(config) {
       jasmine.getEnv().addMatchers(matchers);
     });
 
+    // add additional locators
+    moduleLoader.loadModule('locators').forEach(function(locator){
+      locator.register(by);
+    });
+
     // hook into specs lifecycle
     // open test content page before every suite
     jasmine.getEnv().addReporter({

@@ -40,5 +40,9 @@ exports.config = {
 
   reporters: [
     {name: './reporter/consoleReporter'}
+  ],
+
+  locators: [
+    {name: './defaultLocators'}
   ]
 };

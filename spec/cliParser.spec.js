@@ -30,6 +30,16 @@ describe("cliParser", function() {
 
       expect(config.browsers).toEqual([{browserName:'chrome',browserVersion:'45'}]);
     });
+
+    it('Should parse all :-separated arguments with spaces in browsers key', function () {
+      var argvStub = new ArgvStub();
+      argvStub.browsers = 'safari:*:ios:9.1:*:iPad Air 2:bluecrystal:ltr:cozy';
+      var config = cliParser.parse(argvStub);
+
+      expect(config.browsers).toEqual([{
+        browserName:'safari',browserVersion:'*',platformName:'ios',platformVersion:'9.1',platformResolution:'*',
+        deviceName:'iPad Air 2',ui5:{theme:'bluecrystal',direction:'ltr',mode:'cozy'}}]);
+    });
   });
 
   describe("Should parse generic configs from command-line", function() {

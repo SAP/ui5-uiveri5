@@ -5,8 +5,9 @@
  * @param {Config} config
  * @param {Object} instanceConfig
  * @param {Logger} logger
+ * @param {StatisticCollector} collector
  */
-function Reporter(config,instanceConfig,logger){
+function Reporter(config,instanceConfig,logger,collector){
 }
 
 /**

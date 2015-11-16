@@ -290,7 +290,6 @@ function run(config) {
         try {
           var specFullName = result.description;
           var spec = _getSpecByFullName(specFullName);
-          logger.debug('Starting spec with full name: ' + specFullName);
 
           // disable waitForUI5() if explicitly requested
           if(config.ignoreSync) {
@@ -371,7 +370,6 @@ function run(config) {
       suiteDone: function(result){
         var specFullName = result.description;
         var spec = _getSpecByFullName(specFullName);
-        logger.debug('Finished spec with full name: ' + specFullName);
 
         // call storage provider afterEach hook
         if (storageProvider && storageProvider.onAfterEachSpec){
@@ -387,9 +385,32 @@ function run(config) {
       }
     });
 
+    // gather statistic
+    var statisticCollector = require('./statisticCollector')();
+    jasmine.getEnv().addReporter({
+      jasmineStarted: function(){
+        statisticCollector.jasmineStarted()
+      },
+      suiteStarted: function(jasmineSuite){
+        statisticCollector.suiteStarted(jasmineSuite);
+      },
+      specStarted: function(jasmineSpec){
+        statisticCollector.specStarted(jasmineSpec);
+      },
+      specDone: function(jasmineSpec){
+        statisticCollector.specDone(jasmineSpec);
+      },
+      suiteDone: function(jasmineSuite){
+        statisticCollector.suiteDone(jasmineSuite);
+      },
+      jasmineDone: function(){
+        statisticCollector.jasmineDone();
+      }
+    });
+
     // register reporters
     var jasmineEnv = jasmine.getEnv();
-    moduleLoader.loadModule('reporters').forEach(function(reporter){
+    moduleLoader.loadModule('reporters',[statisticCollector]).forEach(function(reporter){
       reporter.register(jasmineEnv);
     });
   };

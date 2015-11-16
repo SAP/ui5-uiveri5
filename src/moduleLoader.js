@@ -81,6 +81,11 @@ ModuleLoader.prototype.loadModuleIfAvailable = function(moduleName,args) {
   return this._loadModuleArray(moduleDef,args);
 };
 
+/**
+ * Load explicitly named module instance
+ * @param moduleName - used as key in config to find module instance name
+ * @param args
+ */
 ModuleLoader.prototype.loadNamedModule = function(moduleName,args){
 
   // serch for module and its configs

@@ -24,8 +24,10 @@ There are several problems with using such generated IDs in application tests.
 1. IDs are mostly static between application runs but they will definitely change when the application is modified.
 Even minor unrelated change like adding one more button in some common area like header could cause a change of
 all IDs. This will require changes in all selectors used in all tests for this application.
-2. There are cases when the generated IDs will be different depending on the environment the application is running.
-2. Generated IDs are totally not self-documenting and this makes the test harder to understand and maintain.
+2. IDs are execution-unique and are generated on the runtime. So repetitive ID's require repetitive navigation path
+in the application. This makes it especially hard for a human to develop and support the test.
+3. There are cases when the generated IDs will be different depending on the environment the application is running.
+4. Generated IDs are totally not self-documenting and this makes the test harder to understand and maintain.
 
 ### Avoid non-visible attributes
 Think from the point of view of the users. Users do not see DOM nodes and their attributes but see them rendered.

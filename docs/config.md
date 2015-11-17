@@ -143,5 +143,5 @@ You could override arbitrary config value from command like:
 // windows
 --config={\"browsers\":[{\"browserName\":\"firefox\"}]}
 // java-based environments ( WebStorm debug configuration )
---config={\\"browsers\\\":[{\\\"browserName\":\\\"firefox\\\"}]}
+--config={\\\"browsers\\\":[{\\\"browserName\":\\\"firefox\\\"}]}
 ```

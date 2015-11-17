@@ -2,7 +2,6 @@
 var _ = require('lodash');
 var proxyquire =  require('proxyquire');
 
-var DEFAULT_CONF = '../conf/default.conf.js';
 var DEFAULT_CLIENTSIDESCRIPTS = './clientsidescripts';
 var DEFAULT_CONNECTION_NAME = 'direct';
 
@@ -45,27 +44,6 @@ function run(config) {
   // merge in config files
   var configParser = require('./configParser')(logger);
   config = configParser.mergeConfigs(config);
-  /*
-  // load config file
-  var configFileName = config.conf || DEFAULT_CONF;
-  logger.debug('Loading config from: ' + configFileName);
-  var configFile = require(configFileName).config;
-  config = _mergeConfig(configFile,config);
-
-  // resolve profile
-  if (config.profile){
-    var profileConfigFileName = '../conf/' + config.profile + '.profile.conf.js';
-    logger.debug('Loading profile config from: ' + profileConfigFileName);
-    var profileConfigFile = require(profileConfigFileName).config;
-    config = _mergeConfig(profileConfigFile,config);
-
-    // apply common profile
-    profileConfigFileName = '../conf/profile.conf.js';
-    logger.debug('Loading common profile config from: ' + profileConfigFileName);
-    var profileConfigFile = require(profileConfigFileName).config;
-    config = _mergeConfig(profileConfigFile,config);
-  }
-  */
 
   // update logger with resolved configs
   logger.setLevel(config.verbose);

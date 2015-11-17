@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <style>
+    table tr td, table tr th {
+      padding-right: 20px;
+      width: 110px;
+      text-align: center;
+    }
+
+    table.content-table tr.spec td, table.content-table tr.titles td{
+      border-bottom: 2px solid skyblue;
+    }
+
+    .expectation {
+      border: 2px solid green;
+    }
+
+    .content-table {
+      border: 2px solid skyblue;
+      background-color: rgba(135, 206, 235, 0.1);
+    }
+
+    #header-table {
+      margin-bottom: 50px;
+    }
+
+    tr.expectations td {
+      border: none !important;
+    }
+
+    td.passed {
+      font-weight: bold;
+      color: green;
+    }
+
+    td.failed {
+      font-weight: bold;
+      color: red;
+    }
+
+    body table.expectations-table tr.expectations td{
+      border: none;
+    }
+
+    #wrapper > table.content-table tbody tr td table > tbody tr > td {
+      border: none;
+    }
+
+  </style>
+</head>
+<body>
+<header id="header">
+  <h3 id="title">
+    Visual test reports
+  </h3>
+</header>
+<section id="wrapper">
+  <table id="header-table">
+    <tr>
+      <th>Name</th>
+      <th>Total Expects</th>
+      <th>Total Expects Passed</th>
+      <th>Total Expects Failed</th>
+      <th>Total Expects Image Failed</th>
+      <th>Total Expects Error Failed</th>
+      <th>Total Execution Time</th>
+      <th>Result</th>
+      <th>Expectations</th>
+    </tr>
+    <% _.forEach(suites, function(suite){ %>
+    <tr>
+      <td><%- suite.suiteFullName %></td>
+      <td><%- suite.statistics.expectations.total %></td>
+      <td><%- suite.statistics.expectations.passed %></td>
+      <td><%- suite.statistics.expectations.failed.total %></td>
+      <td><%- suite.statistics.expectations.failed.image %></td>
+      <td><%- suite.statistics.expectations.failed.error %></td>
+      <td><%- suite.duration %>s</td>
+      <td class="<%- suite.status %>"><%- suite.status %></td>
+    </tr>
+  </table>
+
+  <table class="content-table">
+    <tr class="titles">
+      <td>Description: </td>
+      <td>Total Expects: </td>
+      <td>Total Expects Passed: </td>
+      <td>Total Expects Failed: </td>
+      <td>Total Expects Image Failed: </td>
+      <td>Total Expects Error Failed: </td>
+      <td>Duration: </td>
+      <td>Matcher name:</td>
+      <td>Matcher status:</td>
+      <th style="border-left: 2px solid skyblue; border-bottom: 2px solid skyblue;">Spec Status: </th>
+    </tr>
+    <% _.forEach(suite.specs, function(spec){ %>
+    <tr class="spec">
+      <td><%- spec.description %></td>
+      <td><%- spec.statistics.expectations.total %></td>
+      <td><%- spec.statistics.expectations.passed %></td>
+      <td><%- spec.statistics.expectations.failed.total %></td>
+      <td><%- spec.statistics.expectations.failed.image %></td>
+      <td><%- spec.statistics.expectations.failed.error %></td>
+      <td><%- spec.duration %>ms</td>
+      <td colspan="2">
+        <table class="expectations-table">
+          <% _.forEach(spec.expectations, function(expectation){ %>
+          <tr clsas="expectations">
+            <td><%-expectation.matcherName%></td>
+            <td class="<%- expectation.status %>"><%-expectation.status%></td>
+          </tr>
+          <% }); %>
+        </table>
+      </td>
+      <td class="<%- spec.status %>"><%- spec.status %></td>
+    </tr>
+    <% }); %>
+    <% }); %>
+  </table>
+</section>
+</body>
+</html>

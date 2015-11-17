@@ -27,27 +27,30 @@ ModuleLoader.prototype._loadModule = function(moduleDef,args){
     args = [];
   }
 
+  // prepare module name and instance config
+  var moduleName;
+  var instanceConfig;
   if (_.isObject(moduleDef)){
     var moduleName = moduleDef.name;
     if (!moduleName){
-      throw Error('Module: ' + moduleName + ' object does not have member "name"');
+      throw Error('Module: ' + JSON.stringify(moduleDef) + ' object does not have member "name"');
     }
     var instanceConfig = _.clone(moduleDef,true);
     delete instanceConfig.name;
-    args.unshift(this.config,instanceConfig,this.logger);
-
-    this.logger.debug('Loading module: ${moduleName} with instance config: ${JSON.stringify(instanceConfig)}',
-      {moduleName:moduleName,instanceConfig:instanceConfig});
-    return require(moduleName).apply(this,args);
   } else if (_.isString(moduleDef)) {
-    args.unshift(this.config, {}, this.logger);
-
-    this.logger.debug('Loading module: ${moduleName} with empty instance config',
-      {moduleName: moduleDef});
-    return require(moduleDef).apply(this, args);
+    moduleName = moduleDef;
+    instanceConfig = {};
   } else {
     throw Error('Module instance: ' + moduleDef + ' is not an object or string');
   }
+
+  // prepend default args - shallow copy as should keep references
+  var argsClone = _.clone(args,false);
+  argsClone.unshift(this.config,instanceConfig,this.logger);
+
+  this.logger.debug('Loading module: ${moduleName} with instance config: ${JSON.stringify(instanceConfig)}',
+    {moduleName:moduleName,instanceConfig:instanceConfig});
+  return require(moduleName).apply(this,argsClone);
 };
 
 /**

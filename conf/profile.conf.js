@@ -19,7 +19,7 @@ exports.config = {
         }
       }
     },
-    'firefox,ie': {
+    'firefox,ie,safari': {
       'windows,mac,linux': {
         remoteWebDriverOptions: {
           maximized: true//,

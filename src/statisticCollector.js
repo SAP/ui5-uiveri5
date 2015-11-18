@@ -134,7 +134,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
   var failedWithImageCount = 0;
   jasmineSpec.failedExpectations.forEach(function (jasmineExpectation) {
     expectation = {
-      status: jasmineExpectation.status,
+      status: 'failed',
       matcher: jasmineExpectation.matcher,
       stack: jasmineExpectation.stack
     };
@@ -160,7 +160,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
   // process passed expectations
   jasmineSpec.passedExpectations.forEach(function (jasmineExpectation) {
     expectation = {
-      status: jasmineExpectation.status,
+      status: 'passed',
       matcher: jasmineExpectation.matcher
     };
 

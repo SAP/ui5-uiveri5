@@ -142,12 +142,6 @@ function run(config) {
   // TODO consider concurrent execution
   protractorArgv.maxSessions = 1;
 
-  // register screenshot provider
-  var screenshotProvider = moduleLoader.loadModuleIfAvailable('screenshotProvider');
-  if(screenshotProvider){
-    screenshotProvider.register();
-  }
-
   // execute before any setup
   protractorArgv.beforeLaunch =  function() {
 
@@ -177,6 +171,12 @@ function run(config) {
     browser.getProcessedConfig().then(function(protractorConfig) {
       var currentCapabilities = protractorConfig.capabilities;
       var currentRuntime = runtimeResolver.resolveRuntimeFromCapabilities(currentCapabilities);
+
+      // register screenshot provider
+      var screenshotProvider = moduleLoader.loadModuleIfAvailable('screenshotProvider');
+      if(screenshotProvider){
+        screenshotProvider.register();
+      }
 
       // load storage provider
       storageProvider = moduleLoader.loadModuleIfAvailable('storageProvider',[currentRuntime]);

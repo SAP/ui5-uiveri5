@@ -44,9 +44,8 @@ ModuleLoader.prototype._loadModule = function(moduleDef,args){
     throw Error('Module instance: ' + moduleDef + ' is not an object or string');
   }
 
-  // prepend default args - shallow copy as should keep references
-  var argsClone = _.clone(args,false);
-  argsClone.unshift(this.config,instanceConfig,this.logger);
+  // prepend default args
+  var argsClone = [this.config,instanceConfig,this.logger].concat(args);
 
   this.logger.debug('Loading module: ${moduleName} with instance config: ${JSON.stringify(instanceConfig)}',
     {moduleName:moduleName,instanceConfig:instanceConfig});

@@ -41,9 +41,9 @@ LocalScreenshotProvider.prototype.register = function() {
       // take screenshot once UI5 has settled down
       return browser.waitForAngular().then(function(){
         // uses browser object and call webdriverjs function takeScreenshot
-        return browser.takeScreenshot().then(function (encodedScreenshot) {
-          that.logger.debug('Taking actual screenshot');
-          return encodedScreenshot;
+        that.logger.debug('Taking actual screenshot');
+        return browser.takeScreenshot().then(function (screenshot) {
+          return screenshot;
         });
       });
     } else {

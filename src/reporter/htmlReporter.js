@@ -3,7 +3,7 @@ var _ = require('lodash');
 var fs = require('fs');
 
 var DEFAULT_TEMPLATE_NAME = __dirname + '/report.tpl.html';
-var DEFAULT_REPORT_NAME = 'target/report.html';
+var DEFAULT_REPORT_NAME = 'target/report/report.html';
 
 /**
  * @typedef HtmlReporterConfig

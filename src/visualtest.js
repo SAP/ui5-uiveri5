@@ -235,8 +235,8 @@ function run(config) {
     browser.executeAsyncScript_ = function() {
 
       // log the call
-      logger.trace('Executing async script: ' + arguments[1] +
-        (logger.level > 2 ? ('\n' + arguments[0] + '\n') : ''));
+      logger.trace('Execute async script: ${name}, code:\n ${JSON.stringify(code)}',
+        {name:  arguments[1], code: arguments[0]});
 
       //call original fn in its context
       return origExecuteAsyncScript_.apply(browser, arguments);

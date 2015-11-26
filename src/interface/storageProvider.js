@@ -2,43 +2,47 @@
 /**
  * Stores and loads images
  * @constructor
- * @param {Config} config
+ * @param {LocalStorageProviderConfig}
+ * @param {LocalStorageProviderInstanceConfig}
  * @param {Logger} logger
- * @param {RuntimeConfig} runtimeProps - runtime properties
+ * @param {Runtime} runtime
  */
-function StorageProvider(config,logger,runtime){
+function StorageProvider(config,instanceConfig,logger,runtime){
 }
 
 /**
- * Returns the ref image read stream
+ * Read ref image
  * @param {string} refImageName - reference image name
- * @return {ReadStream} - read stream for the reference image content
+ * @return {q.promise<{refImageBuffer:Buffer,refImageUrl:string},{Error}>} - promise that resolves with data and image url
  */
 StorageProvider.prototype.readRefImage = function(refImageName){
 };
 
 /**
- * Returns the ref image write stream
+ * Store new ref image
  * @param {string} refImageName  - reference image name
- * @return {WriteStream} - write stream to pipe the ref image content
+ * @param {Buffer} refImageBuffer - reference image buffer
+ * @return {q.promise<{refImageUrl:Buffer},{Error}>} - promise that resolves with ref image url
  */
-StorageProvider.prototype.storeRefImage = function(refImageName){
+StorageProvider.prototype.storeRefImage = function(refImageName,refImageBuffer){
 };
 
 /**
- * Returns the act image write stream
- * @param {string} refImageName  - reference image name
- * @return {WriteStream} - write stream to pipe the ref image content
+ * Store new act image
+ * @param {string} actImageName  - act image name
+ * @param {Buffer} actImageBuffer - actual image buffer
+ * @return {q.promise<{actImageUrl},{Error}>} - promise that resolves with act image url
  */
-StorageProvider.prototype.storeActImage = function(refImageName){
+StorageProvider.prototype.storeActImage = function(actImageName,actImageBuffer){
 };
 
 /**
- * Returns the diff image write stream
- * @param {string} refImageName  - reference image name
- * @return {WriteStream} - write stream to pipe the diff image content
+ * Store new diff image
+ * @param {string} diffImageName  - diff image name
+ * @param {Buffer} diffImageBuffer - diff image buffer
+ * @return {q.promise<{diffImageUrl},{Error}>} - promise that resolves with diff image url
  */
-StorageProvider.prototype.storeDiffImage = function(refImageName){
+StorageProvider.prototype.storeDiffImage = function(diffImageName,diffImageBuffer){
 };
 
 /**

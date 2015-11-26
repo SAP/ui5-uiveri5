@@ -135,7 +135,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
   jasmineSpec.failedExpectations.forEach(function (jasmineExpectation) {
     expectation = {
       status: 'failed',
-      matcher: jasmineExpectation.matcher,
+      matcher: jasmineExpectation.matcherName,
       stack: jasmineExpectation.stack
     };
 
@@ -152,7 +152,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
     this.currentSpec.expectations.push(expectation);
 
     // count image comparison failures
-    if(jasmineExpectation.matcher === 'toLookAs'){
+    if(jasmineExpectation.matcherName === 'toLookAs'){
       failedWithImageCount++;
     }
   },this);
@@ -161,7 +161,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
   jasmineSpec.passedExpectations.forEach(function (jasmineExpectation) {
     expectation = {
       status: 'passed',
-      matcher: jasmineExpectation.matcher
+      matcher: jasmineExpectation.matcherName
     };
 
     this.currentSpec.expectations.push(expectation);

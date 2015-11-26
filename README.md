@@ -2,8 +2,8 @@
 
 ## Introduction
 Visualtesjs is a visual and application testing framework for UI5-base applications. It is using
-(webdriverjs)[https://code.google.com/p/selenium/wiki/WebDriverJs] to drive a real browser and interacts with your
-application as a real user would. Visualtestjs is heavily inspired and based on (Protractor)[http://www.protractortest.org/]
+[webdriverjs](https://code.google.com/p/selenium/wiki/WebDriverJs) to drive a real browser and interacts with your
+application as a real user would. Visualtestjs is heavily inspired and based on [Protractor](http://www.protractortest.org/)
 and brings most of its benefits to UI5 applications.
 
 ### Benefits
@@ -69,10 +69,10 @@ it('should view the TrackPurchase Order screen', function () {
 ````
 
 ### Application testing further development
-* Component selectors (__not available__)
+* Component selectors (__not available yet__). 
 In the application testing approach outlined above, we use hierarchical class selectors composed of UI5 component main
 (marker) class names. This hierarchical composition is important to guarantee the stability of selectors,
-check (here)[docs/applicationtesting.md] for further details. But the usage of component classes is somehow problematic
+check [here](docs/applicationtesting.md) for further details. But the usage of component classes is somehow problematic
 as DOM is not UI5 API and DOM could change between UI5 minor releases. Only UI5 JS API is guaranteed to be
 backward-compatible so an approach to mitigate this issue is to use component selectors.
 Component selector is a css-like selector that works on the UI5 component tree and not on the DOM tree.
@@ -82,7 +82,6 @@ This selector is handled by ToolsAPI inside recent UI5 versions (>1.34) and inte
 masterSection = {
   filterIcon: element(by.comp('sap.m.PageFooter sap.m.Button[label="filter"]')
 }
-
 masterSection.filterIcon.click();
 ````
 

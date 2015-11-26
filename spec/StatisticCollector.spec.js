@@ -7,7 +7,6 @@ describe("StatisticCollector", function() {
   });
 
   it("Should compute overall statistic", function() {
-
     // simulate jasmine-core calling our reporter
     reporter.jasmineStarted();
     reporter.suiteStarted({description: 'Enabled suite'});
@@ -72,4 +71,31 @@ describe("StatisticCollector", function() {
     expect(overview.statistic.expectations.failed.image).toBe(1);
   });
 
+  it("Should handle failed expectation details", function() {
+    reporter.jasmineStarted();
+    reporter.suiteStarted({description: 'Enabled suite'});
+    reporter.specStarted({fullName: 'should fail'});
+    reporter.specDone({
+      status: 'failed',
+      passedExpectations:[],
+      failedExpectations:[{
+        status: 'failed',
+        message: JSON.stringify({
+          message: 'message',
+          details:{
+            key:'value'
+          }}),
+        matcher: 'toLookAs',
+        stack: 'stack'
+      }]
+    });
+    reporter.suiteDone();
+    reporter.jasmineDone();
+
+    // validate
+    var overview = reporter.getOverview();
+    var failedExpectation = overview.suites[0].specs[0].expectations[0];
+    expect(failedExpectation.message).toBe('message');
+    expect(failedExpectation.details.key).toBe('value');
+  })
 });

@@ -47,7 +47,7 @@ JasmineConsoleReporter.prototype.specDone = function(spec) {
     if (expectation.status === 'failed') {
       this.logger.info('Expectation FAILED: ' + expectation.message);
       if(expectation.details){
-        this.logger.info('Expectation FAILED details: ' + expectation.details);
+        this.logger.info('Expectation FAILED details: ${JSON.stringify(details)}',{details: expectation.details});
       }
       this.logger.debug('Expectation FAILED stack: ${stack}',{stack: expectation.stack});
     }

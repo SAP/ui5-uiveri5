@@ -2,6 +2,7 @@
 var _ = require('lodash');
 var resemble = require('resemblejs-tolerance');
 var webdriver = require('selenium-webdriver');
+var Q = require('q');
 
 //default values
 var DEFAULT_COMPARE = true;
@@ -70,96 +71,167 @@ LocalComparisonProvider.prototype.register = function (matchers) {
 
         if(that.take && that.compare) {
           var actualImageBuffer = new Buffer(actEncodedImage, 'base64');
-          var dataRefImage = [];
 
           // get the reference image from storage provider
-          var refImageStream = that.storageProvider.readRefImage(expectedImageName);
+          that.storageProvider.readRefImage(expectedImageName)
+            .then(function (refImageResult) {
+              resemble.outputSettings(that.instanceConfig);
 
-          refImageStream.on('data', function (chunk) {
-            dataRefImage.push(chunk);
-          });
+              // compare two images and add input settings - they are chained and set to resJS object
+              // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
+              that.logger.debug('Comparing current screenshot to reference image: ' + expectedImageName);
+              resemble(refImageResult.refImageBuffer).compareTo(actualImageBuffer).inputSettings(that.instanceConfig)
+                .onComplete(function (comparisonResult) {
 
-          refImageStream.on('error', function() {
-            if(that.update) {
-              that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
-                ' ,update enabled so storing current as reference' );
-              updateRefImage(expectedImageName, actualImageBuffer);
-              // TODO error handling - set done/error callback and fulfil/reject the promise there
-              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName +
-                ' ,update enabled so storing current as reference';
-              defer.fulfill(true);
-            } else {
-              that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
-                ' ,update disabled');
-              result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName +
-                ' ,update disabled';
-              defer.fulfill(false);
-            }
-          });
+                  // resolve mismatch percentage
+                  var mismatchPercentage = parseInt(comparisonResult.misMatchPercentage);
 
-          refImageStream.on('end', function () {
-            var refImageBuffer = Buffer.concat(dataRefImage);
-
-            resemble.outputSettings(that.instanceConfig);
-
-            // compare two images and add input settings - they are chained and set to resJS object
-            // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
-            that.logger.debug('Comparing current screenshot to reference image: ' + expectedImageName);
-            resemble(refImageBuffer).compareTo(actualImageBuffer)
-              .inputSettings(that.instanceConfig).onComplete(function(comparisonResult) {
-
-                // resolve mismatch percentage, dimension difference is elevated to 100%
-                var mismatchPercentage = parseInt(comparisonResult.misMatchPercentage);
-                if (!comparisonResult.isSameDimensions){
-                  mismatchPercentage = 100;
-                }
-
-                // remove error pixes to avoid trace clutter
-                var errorPixels = _.clone(comparisonResult.errorPixels);
-                delete comparisonResult.errorPixels;
-
-                that.logger.trace('Image comparison done, reference image: ' + expectedImageName +
-                  ' ,result: ' +  JSON.stringify(comparisonResult) +
-                   +  (that.logger.level > 2 ? (' ,error pixels: \n' + JSON.stringify(errorPixels)) : ''));
-
-                // check the mismatch percentage
-                if (mismatchPercentage < that.thresholdPercentage) {
-
-                  that.logger.debug('Image comparison passed, reference image: ' + expectedImageName +
-                    ' ,difference: ' +  mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%');
-                  result.message = 'Image comparison passed, reference image: ' + expectedImageName +
-                    ' ,difference: ' +  mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%';
-
-                  // pass
-                  defer.fulfill(true);
-                } else {
-
-                  that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
-                    ' ,difference: ' +  mismatchPercentage + "% is above threshold: " + that.thresholdPercentage + '%');
-                  result.message = 'Image comparison failed, reference image: ' + expectedImageName +
-                    ' ,difference: ' +  mismatchPercentage + "% is above threshold: " + that.thresholdPercentage + '%';
-
-                  // store diff image
-                  that.logger.debug('Storing diff image: ' + expectedImageName);
-                  var diffImageStream = that.storageProvider.storeDiffImage(expectedImageName);
-                  comparisonResult.getDiffImage().pack().pipe(diffImageStream);
-
-                  // store actual image
-                  that.logger.debug('Storing actual image: ' + expectedImageName);
-                  var actImageStream = that.storageProvider.storeActImage(expectedImageName);
-                  actImageStream.write(actualImageBuffer);
-
-                  if(that.update) {
-                    that.logger.debug('Updating reference image: ' + expectedImageName + ' with the current screenshot');
-                    updateRefImage(expectedImageName, actualImageBuffer);
-                    // TODO error handling
+                  // dimension difference is elevated to 100%
+                  if (!comparisonResult.isSameDimensions) {
+                    // TODO better error message
+                    mismatchPercentage = 100;
                   }
 
-                  // fail
-                  defer.fulfill(false);
-                }
-              });
-          });
+                  // remove error pixes to avoid trace clutter
+                  var errorPixels = _.clone(comparisonResult.errorPixels);
+                  delete comparisonResult.errorPixels;
+
+                  that.logger.trace('Image comparison done ' +
+                  ',reference image: ${expectedImageName} ' +
+                  ',results: ${JSON.stringify(comparisonResult)} ' +
+                  ',error pixels: ${JSON.stringify(errorPixels)}', {
+                    expectedImageName: expectedImageName,
+                    comparisonResult: comparisonResult,
+                    errorPixels: errorPixels
+                  });
+
+                  // check the mismatch percentage
+                  if (mismatchPercentage < that.thresholdPercentage) {
+                    that.logger.debug('Image comparison passed, reference image: ' + expectedImageName +
+                    ' ,difference: ' + mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%');
+                    result.message = JSON.stringify({
+                      message: 'Image comparison passed, reference image: ' + expectedImageName +
+                      ' ,difference: ' + mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%',
+                      details: {
+                        refImageUrl: refImageResult.refImageUrl
+                      }
+                    });
+                    // pass
+                    defer.fulfill(true);
+                  } else {
+                    // handle image updates - no need to show error
+                    if (that.update) {
+                      that.logger.debug('Image comparison failed, updating reference image: ' + expectedImageName +
+                      ' with the current screenshot');
+                      var res = {
+                        message: 'Image comparison failed, updating reference image: ' + expectedImageName +
+                          ' with the current screenshot'
+                      };
+
+                      that.storageProvider.storeRefImage(expectedImageName,actualImageBuffer)
+                        .then(function(refImageUrl){
+                          // update details and store message
+                          res.details = {
+                            refImageUrl: refImageUrl
+                          };
+                          result.message = JSON.stringify(res);
+                          // pass
+                          defer.fulfill(true);
+                        })
+                        .catch(function(error){
+                          result.message = error.stack;
+                          //fail
+                          defer.fulfill(false);
+                        });
+                    } else {
+                      that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
+                      ' ,difference: ' + mismatchPercentage + "% is above or equal threshold: " + that.thresholdPercentage + '%');
+                      var res = {
+                        message: 'Image comparison failed, reference image: ' + expectedImageName +
+                        ' ,difference: ' + mismatchPercentage + "% is above or equal threshold: " + that.thresholdPercentage + '%',
+                        details: {
+                          refImageUrl: refImageResult.refImageUrl
+                        }
+                      };
+
+                      // store actual image
+                      var storeActPromise =
+                        that.storageProvider.storeActImage(expectedImageName,actualImageBuffer)
+                          .then(function(actImageUrl){
+                            res.details.actImageUrl = actImageUrl;
+                          });
+
+                      // store diff image
+                      var storeDiffPromise = Q.Promise(function(resolveFn,rejectFn){
+                        var diffImageChunks = [];
+                        var diffImageReadStream = comparisonResult.getDiffImage().pack();
+                        diffImageReadStream.on('data', function (chunk) {
+                          diffImageChunks.push(chunk);
+                        });
+                        diffImageReadStream.on('error', function(error) {
+                          rejectFn(error);
+                        });
+                        diffImageReadStream.on('end', function () {
+                          var diffImageBuffer = Buffer.concat(diffImageChunks);
+                          that.storageProvider.storeDiffImage(expectedImageName,diffImageBuffer)
+                            .then(function(diffImageUrl){
+                              res.details.diffImageUrl = diffImageUrl;
+                              resolveFn();
+                            })
+                            .catch(function(error){
+                              rejectFn(error);
+                            });
+                        });
+
+                      });
+
+                      // wait for both promises and finish the match
+                      Q.all([storeActPromise,storeDiffPromise])
+                        .then(function(){
+                          // add details
+                          result.message = JSON.stringify(res);
+                          // fail
+                          defer.fulfill(false);
+                        })
+                        .catch(function(error){
+                          result.message = error.stack;
+                          // fail
+                          defer.fulfill(false);
+                        });
+                    }
+                  }
+                });
+              })
+            .catch(function(error){
+              if(that.update) {
+                that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update enabled so storing current as reference' );
+                var res = {
+                  message: 'Image comparison enabled but no reference image found: ' + expectedImageName +
+                  ' ,update enabled so storing current as reference'
+                };
+
+                that.storageProvider.storeRefImage(expectedImageName,actualImageBuffer)
+                  .then(function(refImageUrl){
+                    // update details and store message
+                    res.details = {refImageUrl:refImageUrl};
+                    result.message = JSON.stringify(res);
+                    //pass
+                    defer.fulfill(true);
+                  })
+                  .catch(function(error){
+                    result.message = error.stack;
+                    // fail
+                    defer.fulfill(false);
+                  });
+              } else {
+                that.logger.debug('Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update disabled');
+                result.message = 'Image comparison enabled but no reference image found: ' + expectedImageName +
+                ' ,update disabled';
+                defer.fulfill(false);
+              }
+            });
         } else {
           that.logger.debug('Comparison or screenshot taking disabled so skipping comparison');
           result.message = 'Comparison or screenshot taking disabled so skipping comparison';
@@ -172,12 +244,6 @@ LocalComparisonProvider.prototype.register = function (matchers) {
       }
     }
   };
-
-  function updateRefImage(expectedImageName, actualImageBuffer) {
-    that.logger.debug('Storing reference image: ' + expectedImageName);
-    var createRefImageStream = that.storageProvider.storeRefImage(expectedImageName);
-    createRefImageStream.write(actualImageBuffer);
-  }
 
   matchers.toLookAs = toLookAs;
 };

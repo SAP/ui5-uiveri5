@@ -134,7 +134,7 @@
     <tr class="<%- spec.name.replace(new RegExp(' ', 'g'), '_')%>_expectations hidden">
       <td colspan="13">
         <p class="message"><%- expectation.message %></p>
-        <% if(!expectation.details.diffImageUrl) {%>
+        <% if(!expectation.details) {%>
         <p class="message pre"><%- expectation.stack %></p>
         <% } %>
       </td>

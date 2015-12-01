@@ -141,7 +141,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
 
     // unpack details if any
     var message = jasmineExpectation.message;
-   if (message.indexOf('{') === 0 && message.lastIndexOf('}')+1 === message.length) {
+    if (message.indexOf('{') === 0 && message.lastIndexOf('}')+1 === message.length) {
       var messageJSON = JSON.parse(message);
       expectation.message = messageJSON.message;
       expectation.details = messageJSON.details;

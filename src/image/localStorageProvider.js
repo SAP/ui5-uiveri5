@@ -113,7 +113,7 @@ LocalStorageProvider.prototype.storeActImage = function(actImageName,actImageBuf
   var actImagePath = [
     this.actImagesRoot,
     this._getRuntimePathSegment(),
-    (actImageName + DEFAULT_REF_IMAGE_EXT)
+    (actImageName + DEFAULT_ACT_IMAGE_EXT)
   ].join('/');
   actImagePath = path.resolve(actImagePath).replace(/\\/g,'/');
   mkdirp.sync(actImagePath.substring(0,actImagePath.lastIndexOf('/')));

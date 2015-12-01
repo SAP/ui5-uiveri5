@@ -15,7 +15,7 @@ describe("StatisticCollector", function() {
       status: 'passed',
       passedExpectations:[{
         status: 'passed',
-        matcher: 'toBe'
+        matcherName: 'toBe'
       }],
       failedExpectations:[]
     });
@@ -26,12 +26,12 @@ describe("StatisticCollector", function() {
       failedExpectations:[{
         status: 'failed',
         message: 'message',
-        matcher: 'toBe',
+        matcherName: 'toBe',
         stack: 'stack'
       },{
         status: 'failed',
         message: 'image diff',
-        matcher: 'toLookAs',
+        matcherName: 'toLookAs',
         stack: 'stack'
       }]
     });
@@ -85,7 +85,7 @@ describe("StatisticCollector", function() {
           details:{
             key:'value'
           }}),
-        matcher: 'toLookAs',
+        matcherName: 'toLookAs',
         stack: 'stack'
       }]
     });

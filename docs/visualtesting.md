@@ -27,3 +27,11 @@ outside ot the source tree. Configure the required folder in your conf.js like t
 storageProvider: {name: './image/localStorageProvider',refImagesRoot: '../../storage'}
 ```
 
+#### External image references in HTML report
+You could overwrite images (reference and actual) root for consumption from remote host like:
+```javascript
+storageProvider: {name: './image/localStorageProvider',
+  refImagesRoot: 'c:\imagestore',actImagesRoot:'c:\imagestore',
+  refImagesShowRoot: 'file://share',actImagesShowRoot:'file://share'}
+```
+

@@ -67,7 +67,7 @@ describe("LocalStorageProvider", function () {
   });
 
   it("Should store new act image", function(done) {
-    var storageProvider = new LocalStorageProvider({},{actImagesRoot:'target/localStorageProvider/images'},logger,runtime);
+    var storageProvider = new LocalStorageProvider({},{actImagesRoot:'target/localStorageProvider'},logger,runtime);
     storageProvider.onBeforeEachSpec(spec);
 
     storageProvider.storeActImage('arrow_left',refImageBuffer)
@@ -95,7 +95,7 @@ describe("LocalStorageProvider", function () {
   });
 
   it("Should store new diff image", function(done) {
-    var storageProvider = new LocalStorageProvider({},{actImagesRoot:'target/localStorageProvider/images'},logger,runtime);
+    var storageProvider = new LocalStorageProvider({},{actImagesRoot:'target/localStorageProvider'},logger,runtime);
     storageProvider.onBeforeEachSpec(spec);
 
     storageProvider.storeDiffImage('arrow_left',refImageBuffer)

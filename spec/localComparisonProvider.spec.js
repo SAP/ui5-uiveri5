@@ -32,7 +32,7 @@ describe("LocalComparisonProvider", function () {
     };
     var storageProvider = new LocalStorageProvider({},{
         refImagesRoot: __dirname + '/localComparisonProvider',
-        actImagesRoot:'target/localComparisonProvider/images'},
+        actImagesRoot:'target/localComparisonProvider'},
       logger,runtime);
     storageProvider.onBeforeEachSpec(spec);
 

@@ -31,7 +31,6 @@
     .name {
       width: 50%;
       text-decoration: underline;
-
     }
 
     #result-table {
@@ -117,18 +116,19 @@
       <td><%- suite.statistic.expectations.failed.image %></td>
       <td><%- Math.round( suite.statistic.duration/1000 * 10 ) / 10 %></td>
     </tr>
-      <% _.forEach(suite.specs, function(spec){ %>
-      <tr class="<%-suite.name%>_specs specs hidden">
-        <td class="<%- spec.status %>"><%- spec.status %></td>
-        <td class="name-spec" onclick="expand('<%- spec.name %>', '_expectations')"><%- spec.name %></td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><%- spec.statistic.expectations.total %></td>
-        <td><%- spec.statistic.expectations.passed %></td>
-        <td><%- spec.statistic.expectations.failed.total %></td>
-        <td><%- spec.statistic.expectations.failed.error %></td>
-        <td><%- spec.statistic.expectations.failed.image %></td>
-        <td><%- Math.round( spec.statistic.duration/1000 * 10 ) / 10 %></td>
-      </tr>
+    <% _.forEach(suite.specs, function(spec){ %>
+    <tr class="<%-suite.name%>_specs specs hidden">
+      <td class="<%- spec.status %>"><%- spec.status %></td>
+      <td class="name-spec" onclick="expand('<%- spec.name %>', '_expectations');
+        showImages('<%- spec.name %>')"><%- spec.name %></td>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td><%- spec.statistic.expectations.total %></td>
+      <td><%- spec.statistic.expectations.passed %></td>
+      <td><%- spec.statistic.expectations.failed.total %></td>
+      <td><%- spec.statistic.expectations.failed.error %></td>
+      <td><%- spec.statistic.expectations.failed.image %></td>
+      <td><%- Math.round( spec.statistic.duration/1000 * 10 ) / 10 %></td>
+    </tr>
     <% _.forEach(spec.expectations, function(expectation){
     if(expectation.status === 'failed') {%>
     <tr class="<%- spec.name.replace(new RegExp(' ', 'g'), '_')%>_expectations hidden">
@@ -146,19 +146,19 @@
           <li>
             <a href="<%- expectation.details.actImageUrl %>" target="_blank">
               <p>Actual</p>
-              <img width="300px" src="<%- expectation.details.actImageUrl %>"/>
+              <img width="300px" data-source="<%- expectation.details.actImageUrl %>"/>
             </a>
           </li>
           <li>
             <a href="<%- expectation.details.refImageUrl %>" target="_blank">
               <p>Reference</p>
-              <img width="300px" src="<%- expectation.details.refImageUrl %>"/>
+              <img width="300px" data-source="<%- expectation.details.refImageUrl %>"/>
             </a>
           </li>
           <li>
             <a href="<%- expectation.details.diffImageUrl %>" target="_blank">
               <p>Difference</p>
-              <img width="300px" src="<%- expectation.details.diffImageUrl %>"/>
+              <img width="300px" data-source="<%- expectation.details.diffImageUrl %>"/>
             </a>
           </li>
         </ul>
@@ -182,15 +182,6 @@
       <td><%- statistic.expectations.failed.image %></td>
       <td><%- Math.round( statistic.duration/1000 * 10 ) / 10 %></td>
     </tr>
-    <!--TODO: -->
-    <!--<tr>-->
-    <!--</tr>-->
-    <!--<tr>-->
-      <!--<td>Suites</td>-->
-      <!--<td style="text-align: right">Total: <%- statistic.suites.total %></td>-->
-      <!--<td>Passed: <%- statistic.suites.passed %></td>-->
-      <!--<td>Failed: <%- statistic.suites.failed %></td>-->
-    <!--</tr>-->
   </table>
   <div id="suites-summary">
     <span>Suites Total: <%- statistic.suites.total %></span>
@@ -214,8 +205,23 @@
       } else {
         elementClass = elementClass.substr(0, nameIndex-1) + elementClass.substr(nameIndex + elementClass.length);
       }
-
+      
       elements[i].className = elementClass;
+    }
+  }
+  function showImages(className) {
+    className = className.replace(new RegExp(' ', 'g'), '_') + '_expectations';
+    // get img elements
+    var trImages = document.getElementsByClassName(className);
+    var imgs = [];
+    for(var i = 0; i < trImages.length; i++) {
+      imgs.push(trImages[i].getElementsByTagName('img'));
+    }
+    // set value to src and load images
+    for(var i = 0; i < imgs.length; i++) {
+      for(var k = 0; k < imgs[i].length; k++) {
+        imgs[i][k].src = imgs[i][k].attributes['data-source'].value;
+      }
     }
   }
 </script>

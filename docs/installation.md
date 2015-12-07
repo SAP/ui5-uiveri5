@@ -8,7 +8,7 @@ visualtesjs requires nodejs >=0.12 and java>=1.6
 ```
 $ npm install git://github.wdf.sap.corp/I035254/visualtestjs.git#<version> -g --no-optional
 ```
-Please use the latest version from here: [releases](https://github.wdf.sap.corp/I035254/visualtestjs/releases)
+Please use the latest version from here: [releases](https://github.wdf.sap.corp/I035254/visualtestjs/releases), e.g. v1.6.0
 The --no-optional flag is necessary to avoid the installation of some optional dependencies (buffer-utils) that
 require native build that itself requires PYTHON and VC++.
 * Download selenium jar and browser drivers:

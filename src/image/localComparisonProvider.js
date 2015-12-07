@@ -7,7 +7,8 @@ var Q = require('q');
 //default values
 var DEFAULT_COMPARE = true;
 var DEFAULT_UPDATE = false;
-var DEFAULT_THRESHOLD_PERCENTAGE = 1;
+var DEFAULT_THRESHOLD_PERCENTAGE = 0.1;
+var DEFAULT_THRESHOLD_PIXELS = 200;
 
 /**
  * @typedef LocalComparisonProviderConfig
@@ -27,7 +28,8 @@ var DEFAULT_THRESHOLD_PERCENTAGE = 1;
  * @property {string} errorType - what type of error will expect (flat or movement)
  * @property {number) transparency - transparency intensity of the diff image
  * @property {[{x: {number}, y: {number}, width: {number}, height: {number}}]} ignoreRectangles - array of coords of rectangles which will be ignored in comparison
- * @property {number) thresholdPercentage - treshold image difference, in % to fail the comparison
+ * @property {number) thresholdPercentage - threshold image difference, in % to fail the comparison
+ * @property {number) thresholdPixels - threshold image difference, in wrong pixels count to fail the comparison
  */
 
 /**
@@ -45,6 +47,7 @@ function LocalComparisonProvider(config,instanceConfig,logger,storageProvider) {
 
   this.storageProvider = storageProvider;
   this.thresholdPercentage = config.thresholdPercentage || DEFAULT_THRESHOLD_PERCENTAGE;
+  this.thresholdPixels = config.thresholdPixels || DEFAULT_THRESHOLD_PIXELS;
 
   this.take = typeof config.take !== 'undefined' ? config.take : DEFAULT_COMPARE;
   this.compare = typeof config.compare !== 'undefined' ? config.compare : DEFAULT_COMPARE;
@@ -83,18 +86,20 @@ LocalComparisonProvider.prototype.register = function (matchers) {
               resemble(refImageResult.refImageBuffer).compareTo(actualImageBuffer).inputSettings(that.instanceConfig)
                 .onComplete(function (comparisonResult) {
 
-                  // resolve mismatch percentage
-                  var mismatchPercentage = parseInt(comparisonResult.misMatchPercentage);
+                  // remove error pixes to avoid trace clutter
+                  var errorPixels = _.clone(comparisonResult.errorPixels);
+                  delete comparisonResult.errorPixels;
+
+                  // resolve mismatch percentage and count
+                  var mismatchPercentage = parseFloat(comparisonResult.misMatchPercentage);
+                  var mismatchPixelsCount = errorPixels.length;
 
                   // dimension difference is elevated to 100%
                   if (!comparisonResult.isSameDimensions) {
                     // TODO better error message
                     mismatchPercentage = 100;
+                    mismatchPixelsCount = -1;
                   }
-
-                  // remove error pixes to avoid trace clutter
-                  var errorPixels = _.clone(comparisonResult.errorPixels);
-                  delete comparisonResult.errorPixels;
 
                   that.logger.trace('Image comparison done ' +
                   ',reference image: ${expectedImageName} ' +
@@ -105,13 +110,22 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                     errorPixels: errorPixels
                   });
 
-                  // check the mismatch percentage
-                  if (mismatchPercentage < that.thresholdPercentage) {
+                  // resolve pixel threshold from the given threshold percentage
+                  var allImagePixels = comparisonResult.getDiffImage().width * comparisonResult.getDiffImage().height;
+                  var thresholdPixelsFromPercentage = (allImagePixels * that.thresholdPercentage) / 100;
+                  var resolvedPixelThreshold = Math.min(thresholdPixelsFromPercentage, that.thresholdPixels);
+
+                  // check the mismatch percentage and the mismatch pixel count
+                  if (mismatchPixelsCount > -1 && mismatchPixelsCount < resolvedPixelThreshold) {
                     that.logger.debug('Image comparison passed, reference image: ' + expectedImageName +
-                    ' ,difference: ' + mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%');
+                    ', difference in percentages: ' + mismatchPercentage + '% (threshold: ' + that.thresholdPercentage
+                    + '%), difference in pixels: ' + mismatchPixelsCount + ' (threshold: ' + resolvedPixelThreshold
+                    + ')');
                     result.message = JSON.stringify({
                       message: 'Image comparison passed, reference image: ' + expectedImageName +
-                      ' ,difference: ' + mismatchPercentage + "% is below threshold: " + that.thresholdPercentage + '%',
+                      ', difference in percentages: ' + mismatchPercentage + '% (threshold: ' + that.thresholdPercentage
+                      + '%), difference in pixels: ' + mismatchPixelsCount + ' (threshold: ' + resolvedPixelThreshold
+                      + ')',
                       details: {
                         refImageUrl: refImageResult.refImageUrl
                       }
@@ -145,10 +159,14 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                         });
                     } else {
                       that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
-                      ' ,difference: ' + mismatchPercentage + "% is above or equal threshold: " + that.thresholdPercentage + '%');
+                      ', difference in percentages: ' + mismatchPercentage + '% (threshold: ' + that.thresholdPercentage
+                      + '%), difference in pixels: ' + mismatchPixelsCount + ' (threshold: ' + resolvedPixelThreshold
+                      + ')');
                       var res = {
                         message: 'Image comparison failed, reference image: ' + expectedImageName +
-                        ' ,difference: ' + mismatchPercentage + "% is above or equal threshold: " + that.thresholdPercentage + '%',
+                        ', difference in percentages: ' + mismatchPercentage + '% (threshold: '
+                        + that.thresholdPercentage + '%), difference in pixels: ' + mismatchPixelsCount
+                        + ' (threshold: ' + resolvedPixelThreshold + ')',
                         details: {
                           refImageUrl: refImageResult.refImageUrl
                         }

@@ -22,24 +22,26 @@ ModuleLoader.prototype._loadModuleArray = function(moduleDef,args){
   }
 };
 
-ModuleLoader.prototype._loadModule = function(moduleDef,args){
+ModuleLoader.prototype._loadModule = function(moduleDef,args,instanceConfig){
   if (!args){
     args = [];
   }
 
+  if (!instanceConfig){
+    instanceConfig = {};
+  }
+
   // prepare module name and instance config
   var moduleName;
-  var instanceConfig;
   if (_.isObject(moduleDef)){
-    var moduleName = moduleDef.name;
+    moduleName = moduleDef.name;
     if (!moduleName){
       throw Error('Module: ' + JSON.stringify(moduleDef) + ' object does not have member "name"');
     }
-    var instanceConfig = _.clone(moduleDef,true);
-    delete instanceConfig.name;
+    delete moduleDef.name;
+    instanceConfig = _.merge(instanceConfig,moduleDef);
   } else if (_.isString(moduleDef)) {
     moduleName = moduleDef;
-    instanceConfig = {};
   } else {
     throw Error('Module instance: ' + moduleDef + ' is not an object or string');
   }
@@ -85,17 +87,30 @@ ModuleLoader.prototype.loadModuleIfAvailable = function(moduleName,args) {
 
 /**
  * Load explicitly named module instance
- * @param moduleName - used as key in config to find module instance name
- * @param args
+ * @param {string} moduleName - used as key in config to find module instance name
+ * @param {*[]} args
+ * @param {string} [modulePath]
  */
 ModuleLoader.prototype.loadNamedModule = function(moduleName,args){
 
-  // serch for module and its configs
+  // search for module and its configs
   var moduleDefName = this.config[moduleName];
   if (typeof moduleDefName == 'undefined'){
     throw Error('Module: ' + moduleName + ' is not available in config');
   }
 
+  // extract module name and args from module object instance
+  var instanceConfig = {};
+  if (_.isObject(moduleDefName)) {
+    var moduleDefNames = Object.keys(moduleDefName);
+    if (moduleDefNames.length>1){
+      throw new Error('More than one module instance definition found under: ' + moduleName);
+    }
+    instanceConfig = moduleDefName[moduleDefNames[0]];
+    moduleDefName = moduleDefNames[0];
+  }
+
+  // resolve module type definition
   var moduleDefs = this.config[moduleName + 'Configs'];
   if (typeof moduleDefs == 'undefined'){
     throw Error('Module: ' + moduleName + ' configs are not available in config');
@@ -108,7 +123,7 @@ ModuleLoader.prototype.loadNamedModule = function(moduleName,args){
   }
 
   // load the specific definition
-  return this._loadModule(moduleDef,args);
+  return this._loadModule(moduleDef,args,instanceConfig);
 };
 
 module.exports = function(config,logger){

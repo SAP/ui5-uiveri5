@@ -7,7 +7,7 @@
  * @param {Logger} logger
  * @param {StorageProvider} storageProvider - the storage provider to use
  */
-function ComparisonProvider(config,logger,storageProvider){
+function ComparisonProvider(config,instanceConfig,logger,storageProvider){
 }
 
 /**

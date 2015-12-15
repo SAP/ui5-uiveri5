@@ -61,4 +61,17 @@ describe("RuntimeResolver", function() {
     expect(module.logger).toBe(logger);
     expect(module.mockParam).toBe(param);
   });
+
+  it("Should load named modules and merge params", function() {
+    var config = {test: {'testModule':{key2:'value2'}},testConfigs: {testModule:{name:__dirname + '/moduleLoader/testModule',key1:'value1'}}};
+    var param = {key:'value'};
+
+    var loader = new ModuleLoader(config,logger);
+    var module = loader.loadNamedModule('test',[param]);
+
+    expect(module.config).toBe(config);
+    expect(module.logger).toBe(logger);
+    expect(module.mockParam).toBe(param);
+    expect(module.instanceConfig).toEqual({key1:'value1',key2:'value2'});
+  });
 });

@@ -38,6 +38,28 @@ exports.config = {
     }
   },
 
+  auth: 'plain',
+  authConfigs: {
+    'plain': {
+      name: './authenticator/plainAuthenticator'
+    },
+    'basic': {
+      name: './authenticator/basicUrlAuthenticator'
+    },
+    'fiori-form': {
+      name: './authenticator/formAuthenticator',
+      userFieldSelector: '#USERNAME_FIELD input',
+      passFieldSelector: '#PASSWORD_FIELD input',
+      logonButtonSelector: '#LOGIN_LINK'
+    },
+    'sapcloud-form': {
+      name: './authenticator/formAuthenticator',
+      userFieldSelector: '#j_username',
+      passFieldSelector: '#j_password',
+      logonButtonSelector: '#logOnFormSubmit'
+    }
+  },
+
   reporters: [
     {name: './reporter/consoleReporter'}
   ],

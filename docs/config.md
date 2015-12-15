@@ -103,13 +103,24 @@ if('should check something',function(){
 ```
 
 ### Authentication
-To test a protected page you need to specify authentication type and credentials in config.
-Supported authentication types are: basic and fiori-form
+__Syntax for auth config changed in v1.7.__
+To test a protected page you need to specify authentication type and credentials in config. Authentication
+is handled by plugable authenticator [modules](src/moduleLoader.js). Basic(in URL) and plain form and form with UI5
+authentication modules are available. Form authenticators could be configured with the selectors for the necessary fields.
+Few common auth configurations are available: 'basic','fiori-form','sapcloud-form' and could be used directly as shown below.
+Please check 'authConfigs' section in [profile.conf.js](conf/profile.conf.js) how to customize proprietary authenticator.
 ``` javascript
 auth: {
-  type: 'basic',       // basic or fiori-form
-  user: '<username>',
-  pass: '<password>'
+  // form based
+  'fiori-form': {
+    user: '<user>',
+    pass: '<pass>'
+  }
+  ...or....
+  'sapcloud-form': {
+      user: '<user>',
+      pass: '<pass>'
+  }
 }
 ```
 

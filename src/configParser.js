@@ -16,18 +16,19 @@ ConfigParser.prototype.mergeConfigs = function(config){
   config = _mergeConfig(configFromConfigFile,config);
 
   // resolve profile
+  var profileConfigFileName;
   if (config.profile){
-    var profileConfigFileName = '../conf/' + config.profile + '.profile.conf.js';
+    profileConfigFileName = '../conf/' + config.profile + '.profile.conf.js';
     this.logger.debug('Loading profile config from: ' + profileConfigFileName);
     var configFromProfileConfigFile = require(profileConfigFileName).config;
     config = _mergeConfig(configFromProfileConfigFile,config);
-
-    // apply common profile
-    profileConfigFileName = '../conf/profile.conf.js';
-    this.logger.debug('Loading common profile config from: ' + profileConfigFileName);
-    var configFromDefaultProfileConfigFile = require(profileConfigFileName).config;
-    config = _mergeConfig(configFromDefaultProfileConfigFile,config);
   }
+
+  // apply common profile
+  profileConfigFileName = '../conf/profile.conf.js';
+  this.logger.debug('Loading common profile config from: ' + profileConfigFileName);
+  var configFromDefaultProfileConfigFile = require(profileConfigFileName).config;
+  config = _mergeConfig(configFromDefaultProfileConfigFile,config);
 
   // return new fully merged config
   return config;

@@ -124,7 +124,7 @@ LocalUI5SpecResolver.prototype.resolve = function(){
 
       var spec = {
         name: specName,
-        fullName: suiteNamespace.replace(/\//,'.') + '.' + specName,
+        fullName: suiteNamespace.replace(/\//g,'.') + '.' + specName,
         testPath: suiteBasePath + '/' + specFileName,
         contentUrl: that.baseUrl ?
           (that.baseUrl + '/' + that.contentRootUri + '/' + suiteNamespace + '/' + specName + '.html') :

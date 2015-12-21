@@ -21,11 +21,12 @@ also be generated from the content meta-information. Usually the ID of UI5 contr
 name and a suffix that is the sequential number of this type of control in this app. So the root element
 of a view could have id like "__xmlview1".
 There are several problems with using such generated IDs in application tests.
-1. IDs are mostly static between application runs but they will definitely change when the application is modified.
+1. IDs are static between application runs but are generated and will definitely change when the application is modified.
 Even minor unrelated change like adding one more button in some common area like header could cause a change of
 all IDs. This will require changes in all selectors used in all tests for this application.
 2. IDs are execution-unique and are generated on the runtime. So repetitive ID's require repetitive navigation path
-in the application. This makes it especially hard for a human to develop and support the test.
+in the application. This makes it especially hard for a human to develop and support the test. It is also impossble to
+execute only part of the whole scenario by using disabled or focused specs and suites.
 3. There are cases when the generated IDs will be different depending on the environment the application is running.
 4. Generated IDs are totally not self-documenting and this makes the test harder to understand and maintain.
 
@@ -78,3 +79,6 @@ if('compare two values',function(){
 });
 ```
 
+## Debugging
+
+### use browser.pause()

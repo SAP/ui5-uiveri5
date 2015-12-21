@@ -61,14 +61,14 @@ target/
       ...
 ```
 
-### RemoteLfsStorageProvider
+### RemoteStorageProvider
 
 #### Operation
 * --cache - reads the (applicable for current spec set) ref.lnk files and downloads from imagestore to target/
 * --take - take screenshots
 * --compare - does image comparison ( and diff image generation of different in target/)
 * --update - update/create the .lnk files
-* --upload - upload (changed) reference images to imagestore
+* --upload - upload (changed) ref+act+diff images to imagestore
 
 Upload of pictures is user/password protected so to prevent accidental/unauthorized image uploads.
 

@@ -7,7 +7,7 @@ Runtime is a set of specific os/resolution/browser/theme/direction/mode that is 
 
 #### Local with upload
 A developer creates his new visual test. He runs it locally against his preferred runtime
-( emulated - chrome with mobile emulation and/or standard ) checks the images and corrects whats is necessary.
+( emulated - chrome with mobile emulation and/or standard ) checks the images and corrects what is necessary.
 When happy with the result he runs with --update flag that updates the .lnk files. Then he runs with --upload that will
 __upload the new screenshots__ in the imagestore. Then he commits his changes ( that cover test and .lnk files)
 and pushes his commit to gerrit. If necessary, this sequence could be repeated many times.
@@ -18,9 +18,9 @@ Please continue reading below for the rest of runtimes.
 #### Local with central upload
 Same as above till before the --update step. He misses the --update and --upload steps, then just commits his test and
 pushes to gerrit. When merged, the test will become applicable for central execution.
-Central execution runs with --update and --upload flags and will prepare a commit ( from the name of the developer
-of the test ) and push a gerrit review to his name. He will check the images and ( centrally, locally), he could in theory
-reproduce the test with --compare activated. Then he submits the gerrit review and this way confirms the images
+Central execution runs with --update and --upload flags and will prepare a commit and add responsible as reviewer
+and push a gerrit review. He will check the images and ( centrally, locally), he could in theory
+reproduce the test with --compare activated. Then he submits the gerrit review and this way confirm the images
 are fine. This happens once for every runtime when image comparison finds a difference.
 If the visual difference is real issue, the developer should fix the control and/or test and __do not submit the review__
 till this is done.
@@ -28,16 +28,16 @@ This workflow covers all cases - new test, changes in test and changes in contro
 will be handled like changes in test.
 
 Optimization:
-In case recerence image is not updated imediatelly, on every next execution a new actual image will be generated and
+In case reference image is not updated immediately, on every next execution a new actual image will be generated and
 updated in gerrit+imagestore. Central image generation should recognize the case and explicitly update already existing
-review+imagestore for this test/runtime/commiter.
+review+imagestore for this test/runtime/committer.
 
 ### Image storage
 
 #### Operations
-* Download - downloads a specific image by its uuid
-* Upload - uploads a specific image and store by its uuid
-* Delete - deletes a specific image by uuid
+* Download - download a specific image by its uuid
+* Upload - upload a specific image and store by its uuid
+* Delete - delete a specific image by uuid
 
 Upload and Delete operations are user/password protected
 

@@ -40,7 +40,11 @@ ConfigParser.prototype.mergeConfigs = function(config){
 function _mergeConfig(object,src){
   return _.merge(object,src,function(objectValue,sourceValue){
     if (_.isArray(objectValue)) {
-      return objectValue.concat(sourceValue);
+      if (sourceValue) {
+        return objectValue.concat(sourceValue);
+      } else {
+        return objectValue;
+      }
     }
   });
 };

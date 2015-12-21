@@ -23,9 +23,9 @@ var CONTENT_ROOT_URI = 'testsuite/test-resources';
 /**
  * @typedef LocalUI5SpecResolverInstanceConfig
  * @type {Object}
- * @property {string} LocalUI5SpecResolverConfig.suitesGlob - suites glob, default to all visual.suite.js files in test dirs
- * @property {string} LocalUI5SpecResolverConfig.suitesRegex - suites regex, default to all visual.suite.js files in test dirs
- * @property {string} LocalUI5SpecResolverConfig.contentRootUri - content uri, defaults to: 'testsuite/test-resources'
+ * @property {string} suitesGlob - suites glob, default to all visual.suite.js files in test dirs
+ * @property {string} suitesRegex - suites regex, default to all visual.suite.js files in test dirs
+ * @property {string} contentRootUri - content uri, defaults to: 'testsuite/test-resources'
  */
 
 /**

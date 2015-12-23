@@ -39,7 +39,7 @@ functions.waitForAngular = function(rootSelector, callback) {
         });
 
         // Constants for TestCooperation class
-        TestCooperation.EXECUTE_CALLBACKS_REG_EXP = /_tryToExecuteCallbacks/;
+        TestCooperation.SCHEDULE_CALLBACKS_REG_EXP = /_scheduleCallbackExecution/;
         TestCooperation.MAX_TIMEOUT_DELAY = 5000;
         TestCooperation.MAX_INTERVAL_STEP = 2000;
 
@@ -47,8 +47,10 @@ functions.waitForAngular = function(rootSelector, callback) {
 
           if (this.iPendingTimeouts === 0 && this.iPendingXHRs === 0 && !this.oCore.getUIDirty() && this.aPendingCallbacks.length === 0) {
             fnCallback();
+            this._logDebugMessage('Callback executed immediately:\n' + fnCallback.toString());
           } else {
             this.aPendingCallbacks.push(fnCallback);
+            this._logDebugMessage('Callback scheduled for later:\n' + fnCallback.toString() + '\nPending callbacks: ' + this.aPendingCallbacks.length);
           }
         };
 
@@ -83,19 +85,24 @@ functions.waitForAngular = function(rootSelector, callback) {
             this.addEventListener('readystatechange', function() {
               if (this.readyState == 4 && this.isTracked) {
                 that.iPendingXHRs--;
+                that._logDebugMessage('XHR finished. Pending XHRs: ' + that.iPendingXHRs);
                 that._tryToExecuteCallbacks();
               }
             });
             this.isTracked = true;
             that.iPendingXHRs++;
+            that._logDebugMessage('XHR started. Pending XHRs: ' + that.iPendingXHRs);
             fnOriginalSend.apply(this, arguments);
           };
         };
 
         TestCooperation.prototype._handleTimeoutScheduled = function(id, func, delay) {
+          delay = typeof delay == 'number' ? delay : 0;
+
           if (this._isTimeoutTracked(id, func, delay)) {
             this.oPendingTimeoutIDs[id] = 1;
             this.iPendingTimeouts++;
+            this._logDebugMessage('Timeout scheduled. Pending timeouts: ' + this.iPendingTimeouts + ' Timer ID: ' + id + ' Delay: ' + delay + ' Callback: ' + func.toString());
           }
         };
 
@@ -104,28 +111,29 @@ functions.waitForAngular = function(rootSelector, callback) {
             if (this.oPendingTimeoutIDs.hasOwnProperty(id)) {
               delete this.oPendingTimeoutIDs[id];
               this.iPendingTimeouts--;
+              this._logDebugMessage('Timeout finished. Pending timeouts: ' + this.iPendingTimeouts + ' Timer ID: ' + id);
               this._tryToExecuteCallbacks();
             }
           }
         };
 
         TestCooperation.prototype._isTimeoutTracked = function(id, func, delay) {
-          if (delay === 0 && TestCooperation.EXECUTE_CALLBACKS_REG_EXP.test(func.name)) {
-            this.aDoNotTrack.push(id);
-            return false;
-          }
-
-          if (delay > TestCooperation.MAX_TIMEOUT_DELAY) {
+          if ((delay === 0 && TestCooperation.SCHEDULE_CALLBACKS_REG_EXP.test(_getFunctionName(func))) || delay > TestCooperation.MAX_TIMEOUT_DELAY) {
             this.aDoNotTrack.push(id);
             return false;
           } else {
-            var bAddNewEntry = !this.oTimeoutInfo.hasOwnProperty(func) || this.oTimeoutInfo[func].delay != delay ||
-                Date.now() - this.oTimeoutInfo[func].callTime > TestCooperation.MAX_INTERVAL_STEP;
+            var funcStr = func.toString();
+            var delayStr = delay.toString();
+            var bAddNewEntry = !this.oTimeoutInfo.hasOwnProperty(funcStr) || !this.oTimeoutInfo[funcStr].hasOwnProperty(delayStr) ||
+                Date.now() - this.oTimeoutInfo[funcStr][delayStr]['lastCallTime'] > TestCooperation.MAX_INTERVAL_STEP;
             if (bAddNewEntry) {
-              this.oTimeoutInfo[func] = {'delay': delay, 'callCount': 1, 'callTime': Date.now()};
+              this.oTimeoutInfo[funcStr] = this.oTimeoutInfo[funcStr] || {};
+              this.oTimeoutInfo[funcStr][delayStr] = {'callCount': 1, 'lastCallTime': Date.now()};
               return true;
             } else {
-              if (++this.oTimeoutInfo[func].callCount <= 5) {
+              this.oTimeoutInfo[funcStr][delayStr]['callCount']++;
+              this.oTimeoutInfo[funcStr][delayStr]['lastCallTime'] = Date.now();
+              if (this.oTimeoutInfo[funcStr][delayStr]['callCount'] <= 5) {
                 return true;
               } else {
                 this.aDoNotTrack.push(id);
@@ -139,17 +147,37 @@ functions.waitForAngular = function(rootSelector, callback) {
           if (!this._bSameTick) {
             var that = this;
             this._bSameTick = true;
-            window.setTimeout(function() {
+            window.setTimeout(function _scheduleCallbackExecution() {
+              that._logDebugMessage('Scheduling callback execution with timeout 0, Pending callbacks: ' + that.aPendingCallbacks.length);
               if (that.iPendingTimeouts === 0 && that.iPendingXHRs === 0 && !that.oCore.getUIDirty() && that.aPendingCallbacks.length > 0) {
                 do {
                   var fnCallback = that.aPendingCallbacks.shift();
                   fnCallback();
+                  that._logDebugMessage('Pending callback executed: ' + fnCallback.toString() + '\nPending callbacks: ' + that.aPendingCallbacks.length);
                 } while (that.iPendingTimeouts === 0 && that.iPendingXHRs === 0 && !that.oCore.getUIDirty() && that.aPendingCallbacks.length > 0)
               }
               that._bSameTick = false;
             }, 0);
           }
         };
+
+        TestCooperation.prototype._logDebugMessage = function(message) {
+          if (window.debug === true) {
+            console.debug(message);
+          }
+        };
+
+        function _getFunctionName(func) {
+          var result;
+          if (func.name && typeof func.name == 'string') {
+            result = func.name;
+          } else {
+            var result = func.toString();
+            result = result.substr('function'.length);
+            result = result.substr(0, result.indexOf('('));
+          }
+          return result.trim();
+        }
 
         return TestCooperation;
 

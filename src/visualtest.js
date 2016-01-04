@@ -265,72 +265,81 @@ function run(config) {
 
       //TODO consider several describe() per spec file
       suiteStarted: function(result){
-        var specFullName = result.description;
-        var spec = _getSpecByFullName(specFullName);
-        if (!spec) {
-          fail(new Error('Spec with full name: ' + specFullName + ' not found'));
-          return;
-        }
 
-        // disable waitForUI5() if explicitly requested
-        if(config.ignoreSync) {
-          logger.debug('Disabling client synchronization');
-          browser.ignoreSynchronization = true;
-        }
+        // enclose all WebDriver operations in a new flow so to handle potential failures
+        browser.controlFlow().execute(function() {
 
-        // open content page if required
-        if (!spec.contentUrl) {
-          logger.debug('Skip content page opening');
-          return;
-        }
-
-        // webdriverjs operations are inherently synchronized by webdriver flow
-        // so no need to synchronize manually with callbacks/promises
-
-        logger.debug('Opening: ' + spec.contentUrl);
-        authenticator.get(spec.contentUrl).then(function(){
-          // call storage provider beforeEach hook
-          if (storageProvider && storageProvider.onBeforeEachSpec) {
-            storageProvider.onBeforeEachSpec(spec);
+          var specFullName = result.description;
+          var spec = _getSpecByFullName(specFullName);
+          if (!spec) {
+            fail(new Error('Spec with full name: ' + specFullName + ' not found'));
+            return;
           }
-        });
 
-        // ensure page is fully loaded - wait for window.url to become the same as requested
-        var plainContentUrl = spec.contentUrl.match(/([^\?\#]+)/)[1];
-        browser.driver.wait(function(){
-          return browser.driver.executeScript(function(){
-            return window.location.href;
-          }).then(function(url){
-            // match only host/port/path as app could manipulate request args and fragment
-            var urlMathes = url.match(/([^\?\#]+)/);
-            return urlMathes!==null && urlMathes[1] === plainContentUrl;
-            //return url === spec.contentUrl;
+          // disable waitForUI5() if explicitly requested
+          if (config.ignoreSync) {
+            logger.debug('Disabling client synchronization');
+            browser.ignoreSynchronization = true;
+          }
+
+          // open content page if required
+          if (!spec.contentUrl) {
+            logger.debug('Skip content page opening');
+            return;
+          }
+
+          // webdriverjs operations are inherently synchronized by webdriver flow
+          // so no need to synchronize manually with callbacks/promises
+
+          logger.debug('Opening: ' + spec.contentUrl);
+          authenticator.get(spec.contentUrl).then(function () {
+            // call storage provider beforeEach hook
+            if (storageProvider && storageProvider.onBeforeEachSpec) {
+              storageProvider.onBeforeEachSpec(spec);
+            }
           });
-        },browser.getPageTimeout,'waiting for page to fully load');
 
-        // ensure ui5 is loaded - execute waitForUI5() internally
-        browser.waitForAngular();
+          // ensure page is fully loaded - wait for window.url to become the same as requested
+          var plainContentUrl = spec.contentUrl.match(/([^\?\#]+)/)[1];
+          browser.driver.wait(function () {
+            return browser.driver.executeScript(function () {
+              return window.location.href;
+            }).then(function (url) {
+              // match only host/port/path as app could manipulate request args and fragment
+              var urlMathes = url.match(/([^\?\#]+)/);
+              return urlMathes !== null && urlMathes[1] === plainContentUrl;
+              //return url === spec.contentUrl;
+            });
+          }, browser.getPageTimeout, 'waiting for page to fully load');
 
-        // handle pageLoading options
-        if(config.pageLoading) {
+          // ensure ui5 is loaded - execute waitForUI5() internally
+          browser.waitForAngular();
 
-          // reload the page immediately if required
-          if (config.pageLoading.initialReload) {
-            logger.debug('Initial page reload requested');
-            browser.driver.navigate().refresh();
-          }
+          // handle pageLoading options
+          if (config.pageLoading) {
 
-          // wait some time after page is loaded
-          if (config.pageLoading.wait) {
-            var wait = config.pageLoading.wait;
-            if (_.isString(wait)) {
-              wait = parseInt(wait, 10);
+            // reload the page immediately if required
+            if (config.pageLoading.initialReload) {
+              logger.debug('Initial page reload requested');
+              browser.driver.navigate().refresh();
             }
 
-            logger.debug('Initial page load wait: ' + wait + 'ms');
-            browser.sleep(wait);
+            // wait some time after page is loaded
+            if (config.pageLoading.wait) {
+              var wait = config.pageLoading.wait;
+              if (_.isString(wait)) {
+                wait = parseInt(wait, 10);
+              }
+
+              logger.debug('Initial page load wait: ' + wait + 'ms');
+              browser.sleep(wait);
+            }
           }
-        }
+
+        }).then(null,function(error){
+          // TODO display only once -> https://github.com/jasmine/jasmine/issues/778
+          fail(error);
+        });
       },
 
       suiteDone: function(result){
@@ -382,6 +391,13 @@ function run(config) {
     moduleLoader.loadModule('reporters',[statisticCollector]).forEach(function(reporter){
       reporter.register(jasmineEnv);
     });
+
+    // register flow error handler
+    /*
+    protractor.promise.controlFlow().on('uncaughtException', function(err) {
+      console.log('There was an uncaught exception: ' + err);
+    });
+    */
   };
 
   protractorArgv.afterLaunch = function(){

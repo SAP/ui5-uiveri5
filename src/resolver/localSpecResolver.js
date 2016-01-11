@@ -2,6 +2,7 @@
 
 var path = require('path');
 var glob = require('glob');
+var Q = require('q');
 
 var DEFAULT_SPECS_GLOB = './*.spec.js';
 var DEFAULT_SPEC_REGEX = '(?:\\w\\:)?\\/(?:[\\w\\-\\.]+\\/)*([\\w\\-]+)\\.(?:[\\w\\.]+)';
@@ -38,40 +39,50 @@ function LocalSpecResolver(config,instanceConfig,logger){
   this.specRegex = instanceConfig.specRegex || DEFAULT_SPEC_REGEX;
 }
 
+/**
+ * Resolve all applicable specs
+ * @return {q.promise<{Spec[]},{Error}>}  - all applicable specs
+ */
 LocalSpecResolver.prototype.resolve = function(){
   var that = this;
-
-  /** @type {Spec} */
-  var specs = [];
 
   that.logger.debug('Resolving specs from: ' + this.specGlob);
 
   // resolve glob to array of paths
-  var specPathMask = path.normalize(process.cwd() + '/' + this.specGlob);
-  var specPaths = glob.sync(specPathMask);
-  specPaths.forEach(function(specPath){
+  return Q.Promise(function(resolveFn,rejectFn) {
+    var specPathMask = path.resolve(that.specGlob);
+    glob(specPathMask,function(error,specPaths){
+      if (error){
+        rejectFn(new Error('Error while resolving specs with mask: ' + specPathMask + ' ,details: ' + error));
+      } else {
+        /** @type {Spec} */
+        var specs = [];
 
-    // extract spec file name - no extension, no path
-    var specMatches = specPath.match(that.specRegex);
-    if (specMatches===null){
-      throw new Error('Could not parse spec path: ' + specPath);
-    }
-    var specName = specMatches[1];
+        specPaths.forEach(function(specPath) {
+          // extract spec file name - no extension, no path
+          var specMatches = specPath.match(that.specRegex);
+          if (specMatches === null) {
+            throw new Error('Could not parse spec path: ' + specPath);
+          }
+          var specName = specMatches[1];
 
-    /** @type {Spec} */
-    var spec = {
-      name: specName,
-      fullName: specName,
-      testPath: specPath,
-      contentUrl: that.baseUrl
-    };
+          /** @type {Spec} */
+          var spec = {
+            name: specName,
+            fullName: specName,
+            testPath: specPath,
+            contentUrl: that.baseUrl
+          };
 
-    specs.push(spec);
-    that.logger.debug('Spec found, name: ' + spec.name + ' ,path: ' + spec.testPath + ' ,url:' + spec.contentUrl);
+          specs.push(spec);
+          that.logger.debug('Spec found, name: ' + spec.name + ' ,path: ' + spec.testPath + ' ,url:' + spec.contentUrl);
+        });
+
+        // return the specs
+        resolveFn(specs);
+      }
+    });
   });
-
-  // return the specs
-  return specs;
 };
 
 module.exports = function(config,instanceConfig,logger){

@@ -16,7 +16,8 @@
   },
   "devDependencies": {
     "jasmine": "^2.2.1",
-    "jasminewd2": "0.0.6"
+    "jasminewd2": "0.0.6",
+    "simple-git": "^1.21.0"
   },
   "repository": {
     "type": "git",

@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.2.1",
-    "jasminewd2": "0.0.6" // TODO maybe not needed anymore
+    "jasminewd2": "0.0.6"
   },
   "repository": {
     "type": "git",

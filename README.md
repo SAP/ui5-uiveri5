@@ -92,7 +92,7 @@ masterSection.filterIcon.click();
 ### Run visual tests for openui5
 * Pull grunt support and sample tests from this draft commit:
 ```
-$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/9
+$ git pull ssh://<user>@git.wdf.sap.corp:29418/openui5 refs/changes/45/826745/16
 ```
 * Update dependencies so latest visualtestjs is used:
 ```

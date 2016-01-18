@@ -77,6 +77,61 @@ browsers: [{
 }]
 ```
 
+### Local and remote execution
+If _seleniumAddress_ is provided (either in conf.js or on command line) the tool will connect to this address.
+If not specified, it will try to start local webdriver and download a correct version if not already available.
+By default an automatically resolved free port is used for the locally started webdriver, it could be overwritten
+by _seleniumPort_ configuration. By providing _seleniumHost_ you could specify the local IP/hostname that
+should be used for opening the connection, this could be useful in some network configuration. By default a
+selenium jar is started that controls the local webdriver. If _useSeleniumJar_ with false value is provided,
+the selenium jar will be skipped and local webdriver will be started directly. This could be useful when more
+fine-grained configurations to the webdriver are necessary.
+
+### Automatic download of webdrivers and selenium
+When local webdriver execution is required, the tool tries to download the correct version of selenium jar,
+chromedriver or ie driver executables. Correct versions are specified in conf/profile.conf.js
+If the download failed, please make sure you have proxy settings as environment variables like:
+``` Windows
+set HTTP_PROXY=http://proxy:8080
+set HTTPS_PROXY=http://proxy:8080
+```
+
+### Webdriver options
+Additional to browser options, webdriver options could be provided in the browserCapabilities object,
+browsers array or on command line. They are supplied to the respective webdriver when started locally.
+Please note that chromedriver and iedriver options are considered only when local driver is started directly
+and not over selenium jar.
+
+#### Chromedriver options
+All chromedriver options as could be provided. Please check:  https://github.com/SeleniumHQ/selenium/blob/master/javascript/node/selenium-webdriver/chrome.js
+Option names match the names of ServiceBuilder object methods.
+
+``` chromedriver options in conf.js
+browsers: [{
+  browserName: 'firefox',
+  capabilities: {
+    chromedriverOptions: {
+      'enableVerboseLogging': [],
+      'loggingTo': ['C:\\work\\git\\openui5\\chromedriver.log']
+    }
+  }
+}]
+```
+
+#### Selenium options
+All selenium server command-line argumens could be provided. Please check the available options by running
+selenium-server-standalone.jar with '-h' argument.
+``` selenium options in conf.js
+browsers: [{
+  browserName: 'firefox',
+  capabilities: {
+	  seleniumOptions: {
+	    args: ['-debug', '-log','C:/work/git/openui5/selenium.log']
+	  }
+	}
+}]
+```
+
 ### Passing params to test
 Define in conf.js file
 ``` javascript

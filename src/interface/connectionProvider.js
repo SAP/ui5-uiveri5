@@ -15,6 +15,10 @@ function ConnectionProvider(config,instanceConfig,logger) {
   this.logger = logger;
 }
 
+ConnectionProvider.prototype.buildProtractorArgv = function(){
+  return {};
+};
+
 /**
  * Setup this connection provider environment
  * @return {q.promise} A promise which will resolve when the environment is ready to test.

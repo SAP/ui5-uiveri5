@@ -1,7 +1,34 @@
 exports.config = {
   connection: 'direct',
   connectionConfigs: {
-    'direct': { name : './connection/directConnectionProvider' }//,
+    'direct': {
+      name : './connection/directConnectionProvider',
+      binaries: {
+        selenium: {
+          version: '2.51',
+          patch: '0',
+          filename: 'selenium-server-standalone',
+          url: 'https://selenium-release.storage.googleapis.com/${version}/${filename}-${version}.${patch}.jar',
+          executable: '${filename}-${version}.${patch}.jar'
+        },
+        chromedriver: {
+          version: '2.21',
+          unzip: true,
+          filename: 'chromedriver',
+          url: 'https://chromedriver.storage.googleapis.com/${version}/${filename}_${chromeOsTypeString}.zip',
+          executable: '${filename}-${version}.exe'
+        },
+        // for screenshots to work we need to use 32bit IE even with 64bit system, details:
+        iedriver: {
+          version: '2.51',
+          patch: '0',
+          unzip: true,
+          filename: 'IEDriverServer',
+          url: 'http://selenium-release.storage.googleapis.com/${version}/${filename}_Win32_${version}.${patch}.zip',
+          executable: '${filename}-${version}.${patch}.exe'
+        }
+      }
+    }//,
     //'sauselabs': { name : './connection/sauselabsConnectionProvider' },
     //'browserstack': { name : './connection/browserstackConnectionProvider' },
   },
@@ -16,7 +43,13 @@ exports.config = {
       'windows,mac,linux': {
         chromeOptions: {
           args: ['start-maximized']
+        },
+        /*
+        chromedriverOptions: {
+          'enableVerboseLogging': [],
+          'loggingTo': ['C:\\work\\git\\openui5\\chromedriver.log']
         }
+        */
       }
     },
     'firefox,ie,safari': {
@@ -24,16 +57,21 @@ exports.config = {
         remoteWebDriverOptions: {
           maximized: true//,
           /*
-          size: {
-            width: 800,
-            height: 600
-          },
           position: {
-            x: 100,
-            y: 100
+            x: 0,
+            y: 0
+          },
+          size: {
+            width: 1920,
+            height: 1067
           }
           */
+        },
+        /*
+        seleniumOptions: {
+          args: ['-debug', '-log','C:/work/git/openui5/selenium.log']
         }
+        */
       }
     }
   },

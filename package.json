@@ -2,15 +2,16 @@
   "name": "visualtestjs",
   "version": "0.0.1",
   "dependencies": {
+    "adm-zip": "^0.4.7",
     "glob": "~4.3.5",
     "lodash": "~3.6.0",
     "mkdirp": "^0.5.1",
+    "png-crop": "^0.0.1",
+    "pngjs": "^2.2.0",
     "protractor": "~2.1.0",
     "proxyquire": "~1.4.0",
     "q": "^1.4.1",
     "request": "^2.67.0",
-    "pngjs": "^2.2.0",
-    "png-crop": "^0.0.1",
     "selenium-webdriver": "2.47.0",
     "simple-git": "^1.21.0",
     "yargs": "^3.8.0"

@@ -16,11 +16,6 @@ var DEFAULT_CONNECTION_NAME = 'direct';
  *  no profile resolved if undefined, defaults to: visual if default.conf.js loaded
  * @property {number} verbose - verbose level, 0 shows only info, 1 shows debug,
  *  2 shows waitForUI5 executions,3 shows also waitForUI5 script content, defaults t: 0
- * @property {String} seleniumAddress - Address of remote Selenium server, if missing will start local selenium server
- * TODO seleniumHost
- * TODO seleniumPort
- * TODO selenumLoopback
- * TODO seleniumArgs
  * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive. single word is assumed to
  *  be browserName else is parsed as json, defaults to: 'chrome'
  * @property {Object} params - params object to be passed to the tests
@@ -82,16 +77,13 @@ function run(config) {
     var connectionProvider = moduleLoader.loadNamedModule('connection');
 
     // prepare protractor executor args
-    var protractorArgv = {};
+    var protractorArgv = connectionProvider.buildProtractorArgv();
 
     // enable protractor debug logs
     protractorArgv.troubleshoot = config.verbose>0;
 
     // add baseUrl
     protractorArgv.baseUrl = config.baseUrl;
-
-    // add selenium server address
-    protractorArgv.seleniumAddress = config.seleniumAddress;
 
     // use jasmine 2.0
     protractorArgv.framework = 'jasmine2';
@@ -168,7 +160,7 @@ function run(config) {
 
       var matchers = {};
       var storageProvider;
-      // register a hook to be called once webdriver connection is established
+      // register a hook to be called when webdriver is created ( may not be connected yet )
       browser.getProcessedConfig().then(function(protractorConfig) {
         var currentCapabilities = protractorConfig.capabilities;
         var currentRuntime = runtimeResolver.resolveRuntimeFromCapabilities(currentCapabilities);
@@ -214,7 +206,7 @@ function run(config) {
             browser.driver.manage().window().setSize(width,height);
           }
           if (options.position){
-            if (!options.position.x || !options.position.y){
+            if (typeof options.position.x  == 'undefined' || typeof options.position.y == 'undefined'){
               throw Error('Setting browser window position required but no X and/or Y coordinates specified');
             }
             var x = options.position.x;
@@ -225,7 +217,7 @@ function run(config) {
             if(_.isString(y)){
               width = parseInt(y,10);
             }
-            logger.debug('Setting browser position: ' + x + ' ,y: ' + y);
+            logger.debug('Setting browser position x: ' + x + ' ,y: ' + y);
             browser.driver.manage().window().setPosition(x,y);
           }
         }
@@ -404,7 +396,7 @@ function run(config) {
         var authenticator =  moduleLoader.loadNamedModule(auth);
 
         // open page and login
-        logger.debug('Opening: ' + url);
+        logger.info('Opening: ' + url);
         authenticator.get(url);
 
         // ensure page is fully loaded - wait for window.url to become the same as requested

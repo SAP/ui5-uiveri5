@@ -11,6 +11,12 @@ var argv = require('yargs').
     describe('baseUrl', 'Base url to execute the spec against, defaults to http://localhost:8080').
     string('seleniumAddress').
     describe('seleniumAddress','Address of remote Selenium server, if missing will start local selenium server').
+    string('seleniumHost').
+    describe('seleniumHost','Override the hostname to connect to local webdriver').
+    string('seleniumPort').
+    describe('seleniumPort','Override the default port used by the local webdriver or selenium jar').
+    boolean('useSeleniumJar').default('useSeleniumJar',undefined).
+    describe('useSeleniumJar','Use selenium jar to start local webdrivers, default to true').
     string('browsers').
     describe('browsers', 'Comma separated list of browsers to execute tests, defaults to chrome').
     describe('params', 'Param object to be passed to the tests').

@@ -1,14 +1,15 @@
-var mkdirp = require('mkdirp')
+
 var path = require('path');
+var fs = require('fs');
+
 var Q = require('q');
 var request = require('request');
 var _ = require('lodash');
-var fs = require('fs');
+var mkdirp = require('mkdirp');
 
 var DEFAULT_IMAGE_STORAGE_URI = 'images';
 
 var DEFAULT_REF_LNK_EXT = '.ref.lnk';
-
 var DEFAULT_REF_IMAGE_EXT = '.ref.png';
 var DEFAULT_ACT_IMAGE_EXT = '.act.png';
 var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';

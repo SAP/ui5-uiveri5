@@ -1,6 +1,7 @@
 /node_modules
 /target
 /.idea
+/selenium
 
 npm-debug.log
 

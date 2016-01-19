@@ -3,5 +3,6 @@ exports.config = {
   pageLoading: {
     wait: '20000'//,
     //initialReload: true
-  }
+  },
+  baseUrlQuery: ['sap-ui-debug=true'] // TODO consider activating this with flag
 };

@@ -292,8 +292,20 @@ function run(config) {
             // webdriverjs operations are inherently synchronized by webdriver flow
             // so no need to synchronize manually with callbacks/promises
 
-            logger.debug('Opening: ' + spec.contentUrl);
-            authenticator.get(spec.contentUrl).then(function () {
+            // add request params
+            var specUrl = spec.contentUrl;
+            if (config.baseUrlQuery && config.baseUrlQuery.length >0){
+              specUrl += '?';
+              config.baseUrlQuery.forEach(function(value,index){
+                if (index > 0){
+                  specUrl += '&';
+                }
+                specUrl += value;
+              })
+            }
+
+            logger.debug('Opening: ' + specUrl);
+            authenticator.get(specUrl).then(function () {
               // call storage provider beforeEach hook
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);

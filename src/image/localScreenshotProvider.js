@@ -22,12 +22,14 @@ var DEFAULT_TAKE = true;
  * @param {Logger} logger
  */
 function LocalScreenshotProvider(config,instanceConfig,logger) {
-  this.config = config;
-  this.instanceConfig = instanceConfig;
+  //this.config = config;
+  //this.instanceConfig = instanceConfig;
   this.logger = logger;
 
   // set default for take if not provided
   this.take = typeof config.take !== 'undefined' ? config.take : DEFAULT_TAKE;
+
+  this.screenshotSleep = instanceConfig.screenshotSleep;
 }
 
 /**
@@ -40,6 +42,12 @@ LocalScreenshotProvider.prototype.register = function() {
     if (that.take) {
       // take screenshot once UI5 has settled down
       return browser.waitForAngular().then(function(){
+        // TODO find and fix all offending CSS animations and then remote this sleep
+        // wait a little bit more to work around css animations that could not be disabled easily
+        if (that.screenshotSleep){
+          browser.sleep(that.screenshotSleep);
+        }
+
         // uses browser object and call webdriverjs function takeScreenshot
         that.logger.debug('Taking actual screenshot');
         return browser.takeScreenshot().then(function (screenshot) {

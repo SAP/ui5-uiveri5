@@ -158,15 +158,27 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                           defer.fulfill(false);
                         });
                     } else {
-                      that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
-                      ', difference in percentages: ' + mismatchPercentage + '% (threshold: ' + that.thresholdPercentage
-                      + '%), difference in pixels: ' + mismatchPixelsCount + ' (threshold: ' + resolvedPixelThreshold
-                      + ')');
+                      var resMessage;
+                      if (mismatchPixelsCount == -1) {
+                        that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
+                          ', difference in image size with: W=' + comparisonResult.dimensionDifference.width +
+                          'px, H=' + comparisonResult.dimensionDifference.height + 'px');
+                        resMessage = 'Image comparison failed, reference image: ' + expectedImageName +
+                          ', difference in image size with: W=' + comparisonResult.dimensionDifference.width +
+                          'px, H=' + comparisonResult.dimensionDifference.height + 'px';
+                      } else {
+                        that.logger.debug('Image comparison failed, reference image: ' + expectedImageName +
+                          ', difference in percentages: ' + mismatchPercentage + '% (threshold: ' + that.thresholdPercentage
+                          + '%), difference in pixels: ' + mismatchPixelsCount + ' (threshold: ' + resolvedPixelThreshold
+                          + ')');
+                        resMessage = 'Image comparison failed, reference image: ' + expectedImageName +
+                          ', difference in percentages: ' + mismatchPercentage + '% (threshold: '
+                          + that.thresholdPercentage + '%), difference in pixels: ' + mismatchPixelsCount
+                          + ' (threshold: ' + resolvedPixelThreshold + ')';
+                      }
+
                       var res = {
-                        message: 'Image comparison failed, reference image: ' + expectedImageName +
-                        ', difference in percentages: ' + mismatchPercentage + '% (threshold: '
-                        + that.thresholdPercentage + '%), difference in pixels: ' + mismatchPixelsCount
-                        + ' (threshold: ' + resolvedPixelThreshold + ')',
+                        message: resMessage,
                         details: {
                           refImageUrl: refImageResult.refImageUrl
                         }

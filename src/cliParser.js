@@ -37,61 +37,18 @@ CliParser.prototype.parse = function(argv){
   // TODO research how dot notation works with duplicates ?
   // resolve browsers argument
   if (config.browsers){
-    if(_.isString(config.browsers)){
-      var browsers = config.browsers.split(/,(?=[^\}]*(?:\{|$))/);
-      config.browsers = [];
-      browsers.forEach(function(browser){
-        var confBrowser;
-        /*
-        if (browser.indexOf('{') !== -1 && browser.indexOf('}') !== -1){
-          // JSON formatting found => parse it
-          confBrowser = JSON.parse(browser);
-        } else
-        */
-        if (browser.indexOf(':') !== -1) {
-          // : separator found => split on them
-          var browserParams = browser.split(':');
-          confBrowser = {};
-          if (browserParams[0]) {
-            confBrowser.browserName = browserParams[0];
-          }
-          if (browserParams[1]) {
-            confBrowser.browserVersion = browserParams[1];
-          }
-          if (browserParams[2]) {
-            confBrowser.platformName = browserParams[2];
-          }
-          if (browserParams[3]) {
-            confBrowser.platformVersion = browserParams[3];
-          }
-          if (browserParams[4]) {
-            confBrowser.platformResolution = browserParams[4];
-          }
-		  if (browserParams[5]) {
-            confBrowser.deviceName = browserParams[5];
-          }
-          if (browserParams[6] || browserParams[7] || browserParams[8]) {
-            confBrowser.ui5 = {};
-            if (browserParams[6]) {
-              confBrowser.ui5.theme = browserParams[6];
-            }
-            if (browserParams[7]) {
-              confBrowser.ui5.direction = browserParams[7];
-            }
-            if (browserParams[8]) {
-              confBrowser.ui5.mode = browserParams[8];
-            }
-          }
-          // capabilities could not be given in this notation
-        } else {
-          // no formatting found => only browser name
-          confBrowser = {
-            browserName: browser
-          };
-        }
-        config.browsers.push(confBrowser);
-      });
+    if(!_.isArray(config.browsers)) {
+      config.browsers = [config.browsers];
     }
+    var confBrowsers = [];
+    config.browsers.forEach(function(browser){
+      if(_.isObject(browser)){
+        confBrowsers.push(browser);
+      } else if(_.isString(browser)){
+        confBrowsers = confBrowsers.concat(_parseBrowsersString(browser));
+      }
+    });
+    config.browsers = confBrowsers;
   }
 
   // parse generic configuration from JSON
@@ -113,6 +70,64 @@ CliParser.prototype.parse = function(argv){
   return config;
 };
 
+function _parseBrowsersString(browsersString){
+  var confBrowsers = [];
+
+  var browsers = browsersString.split(/,(?=[^\}]*(?:\{|$))/);
+  browsers.forEach(function(browser){
+    var confBrowser;
+    /*
+     if (browser.indexOf('{') !== -1 && browser.indexOf('}') !== -1){
+     // JSON formatting found => parse it
+     confBrowser = JSON.parse(browser);
+     } else
+     */
+    if (browser.indexOf(':') !== -1) {
+      // : separator found => split on them
+      var browserParams = browser.split(':');
+      confBrowser = {};
+      if (browserParams[0]) {
+        confBrowser.browserName = browserParams[0];
+      }
+      if (browserParams[1]) {
+        confBrowser.browserVersion = browserParams[1];
+      }
+      if (browserParams[2]) {
+        confBrowser.platformName = browserParams[2];
+      }
+      if (browserParams[3]) {
+        confBrowser.platformVersion = browserParams[3];
+      }
+      if (browserParams[4]) {
+        confBrowser.platformResolution = browserParams[4];
+      }
+      if (browserParams[5]) {
+        confBrowser.deviceName = browserParams[5];
+      }
+      if (browserParams[6] || browserParams[7] || browserParams[8]) {
+        confBrowser.ui5 = {};
+        if (browserParams[6]) {
+          confBrowser.ui5.theme = browserParams[6];
+        }
+        if (browserParams[7]) {
+          confBrowser.ui5.direction = browserParams[7];
+        }
+        if (browserParams[8]) {
+          confBrowser.ui5.mode = browserParams[8];
+        }
+      }
+      // capabilities could not be given in this notation
+    } else {
+      // no formatting found => only browser name
+      confBrowser = {
+        browserName: browser
+      };
+    }
+    confBrowsers.push(confBrowser);
+  });
+
+  return confBrowsers;
+}
 /**
  * Merge objects and arrays
  */
@@ -122,7 +137,7 @@ function _mergeConfig(object,src){
       return objectValue.concat(sourceValue);
     }
   });
-};
+}
 
 module.exports = function () {
   return new CliParser();

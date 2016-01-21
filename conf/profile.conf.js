@@ -7,7 +7,7 @@ exports.config = {
   },
 
   browserCapabilities: {
-    'browser': {
+    'browser,chrome': {
       'android': {
         deviceName: 'android'
       }
@@ -24,11 +24,11 @@ exports.config = {
         remoteWebDriverOptions: {
           maximized: true//,
           /*
-          position: {
+          size: {
             width: 800,
             height: 600
           },
-          size: {
+          position: {
             x: 100,
             y: 100
           }

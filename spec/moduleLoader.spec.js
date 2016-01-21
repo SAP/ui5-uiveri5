@@ -3,7 +3,7 @@ describe("RuntimeResolver", function() {
   var ModuleLoader = require('../src/ModuleLoader');
   var logger = require('../src/logger')(3);
 
-  it("Should load modules defined with name", function() {
+  it("Should load module defined with name", function() {
     var config = {test: __dirname + '/moduleLoader/testModule'};
     var param = {key:'value'};
 
@@ -16,7 +16,7 @@ describe("RuntimeResolver", function() {
     expect(module.mockParam).toBe(param);
   });
 
-  it("Should load modules defined with object", function() {
+  it("Should load module defined with object", function() {
     var config = {test: {name: __dirname + '/moduleLoader/testModule',key1:'value1'}};
     var param = {key:'value'};
 
@@ -49,7 +49,7 @@ describe("RuntimeResolver", function() {
     expect(modules[1].mockParam).toBe(param);
   });
 
-  it("Should load named modules", function() {
+  it("Should load named module", function() {
     var config = {test: 'test',testConfigs: {test:{name:__dirname + '/moduleLoader/testModule',key1:'value1'}}};
     var param = {key:'value'};
 
@@ -62,7 +62,20 @@ describe("RuntimeResolver", function() {
     expect(module.mockParam).toBe(param);
   });
 
-  it("Should load named modules and merge params", function() {
+  it("Should load named module defined with object", function() {
+    var config = {testConfigs: {test:{name:__dirname + '/moduleLoader/testModule',key1:'value1'}}};
+    var param = {key:'value'};
+
+    var loader = new ModuleLoader(config,logger);
+    var module = loader.loadNamedModule({'test':{'test':{key2:'value2'}}},[param]);
+
+    expect(module.config).toBe(config);
+    expect(module.instanceConfig).toEqual({key1:'value1',key2:'value2'});
+    expect(module.logger).toBe(logger);
+    expect(module.mockParam).toBe(param);
+  });
+
+  it("Should load named module and merge params", function() {
     var config = {test: {'testModule':{key2:'value2'}},testConfigs: {testModule:{name:__dirname + '/moduleLoader/testModule',key1:'value1'}}};
     var param = {key:'value'};
 

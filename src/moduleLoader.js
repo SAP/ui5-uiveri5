@@ -38,8 +38,9 @@ ModuleLoader.prototype._loadModule = function(moduleDef,args,instanceConfig){
     if (!moduleName){
       throw Error('Module: ' + JSON.stringify(moduleDef) + ' object does not have member "name"');
     }
-    delete moduleDef.name;
-    instanceConfig = _.merge(instanceConfig,moduleDef);
+    var clonedModuleDef = _.clone(moduleDef);
+    delete clonedModuleDef.name;
+    instanceConfig = _.merge(instanceConfig,clonedModuleDef);
   } else if (_.isString(moduleDef)) {
     moduleName = moduleDef;
   } else {
@@ -92,23 +93,69 @@ ModuleLoader.prototype.loadModuleIfAvailable = function(moduleName,args) {
  * @param {string} [modulePath]
  */
 ModuleLoader.prototype.loadNamedModule = function(moduleName,args){
+  /*
+   moduleName = 'auth'
+   OR
+   moduleName = {
+     auth: {
+       'fiori-form': {
+         user: 'user',
+         pass: 'pass'
+       }
+     }
+   }
 
-  // search for module and its configs
-  var moduleDefName = this.config[moduleName];
-  if (typeof moduleDefName == 'undefined'){
-    throw Error('Module: ' + moduleName + ' is not available in config');
-  }
+   moduleInstName = 'fiori-form';
+   OR
+   moduleInstName = {
+     'fiori-form': {
+       user: 'user',
+       pass: 'pass'
+     }
+   }
 
-  // extract module name and args from module object instance
-  var instanceConfig = {};
-  if (_.isObject(moduleDefName)) {
-    var moduleDefNames = Object.keys(moduleDefName);
-    if (moduleDefNames.length>1){
-      throw new Error('More than one module instance definition found under: ' + moduleName);
+   cfg.authConfig = {
+     'fiori-form': {
+       name: './authenticator/formAuthenticator',
+       userFieldSelector: '#USERNAME_FIELD input',
+       passFieldSelector: '#PASSWORD_FIELD input',
+       logonButtonSelector: '#LOGIN_LINK'
+     }
+   }
+   */
+
+  // resolve module name and module instance object
+  var moduleInstName;
+  if (_.isObject(moduleName)) {
+    var moduleNameKeys = Object.keys(moduleName);
+    if (moduleNameKeys.length>1){
+      throw new Error('More than one module name found in: ' + JSON.stringify(moduleName));
     }
-    instanceConfig = moduleDefName[moduleDefNames[0]];
-    moduleDefName = moduleDefNames[0];
+    moduleInstName = moduleName[moduleNameKeys[0]];
+    moduleName = moduleNameKeys[0];
+  } else if (_.isString(moduleName)){
+    moduleInstName = this.config[moduleName];
+    if (typeof moduleName == 'undefined') {
+      throw Error('Module: ' + moduleName + ' is not available in config');
+    }
+  } else {
+    throw Error('Module name: ' + moduleName + ' is not an object or string');
   }
+
+  // moduleName = 'auth'
+
+  // resolve module instance config and module instance name
+  var instanceConfig = {};
+  if (_.isObject(moduleInstName)) {
+    var moduleInstNameKeys = Object.keys(moduleInstName);
+    if (moduleInstNameKeys.length>1){
+      throw new Error('More than one module instance definition found for: ' + moduleName);
+    }
+    instanceConfig = moduleInstName[moduleInstNameKeys[0]];
+    moduleInstName = moduleInstNameKeys[0];
+  }
+
+  // moduleInstName = 'fiori-form'
 
   // resolve module type definition
   var moduleDefs = this.config[moduleName + 'Configs'];
@@ -117,9 +164,9 @@ ModuleLoader.prototype.loadNamedModule = function(moduleName,args){
   }
 
   // resolve required module definition
-  var moduleDef = moduleDefs[moduleDefName];
+  var moduleDef = moduleDefs[moduleInstName];
   if (typeof moduleDef == 'undefined'){
-    throw Error('Module: ' + moduleName + ' does not have instance : ' +  moduleDefName);
+    throw Error('Module: ' + moduleName + ' does not have instance : ' +  moduleInstName);
   }
 
   // load the specific definition

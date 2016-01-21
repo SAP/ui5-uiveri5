@@ -24,6 +24,8 @@ function FormAuthenticator(config,instanceConfig,logger){
  * @returns {promise<>} - resolved when the page is full loaded
  */
 FormAuthenticator.prototype.get = function(url){
+  var that = this;
+
   if (!this.user || !this.pass) {
     return webdriver.promise.rejected(
       new Error('Form auth requested but user or pass is not specified'));
@@ -33,6 +35,11 @@ FormAuthenticator.prototype.get = function(url){
 
   // open the page
   browser.driver.get(url);
+
+  // wait till page is fully rendered
+  browser.driver.wait(function(){
+    return browser.driver.isElementPresent(by.css(that.userFieldSelector));
+  },3000);
 
   // enter user and pass in the respective fields
   browser.driver.findElement(by.css(this.userFieldSelector)).sendKeys(this.user);

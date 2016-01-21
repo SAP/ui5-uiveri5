@@ -304,14 +304,15 @@ function run(config) {
               })
             }
 
-            logger.debug('Opening: ' + specUrl);
-            authenticator.get(specUrl).then(function () {
+            // open test page
+            browser.testrunner.navigation.to(specUrl,'auth').then(function () {
               // call storage provider beforeEach hook
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
               }
             });
 
+            /*
             // ensure page is fully loaded - wait for window.url to become the same as requested
             var plainContentUrl = spec.contentUrl.match(/([^\?\#]+)/)[1];
             browser.driver.wait(function () {
@@ -348,6 +349,7 @@ function run(config) {
                 browser.sleep(wait);
               }
             }
+            */
 
           }).then(null,function(error){
             // TODO display only once -> https://github.com/jasmine/jasmine/issues/778
@@ -396,8 +398,54 @@ function run(config) {
         }
       });
 
-      // TODO initialize authenticator
-      var authenticator =  moduleLoader.loadNamedModule('auth');
+      // expose navigation helpers to tests
+      browser.testrunner.navigation = { to: function(url,auth){
+        var resultPromise;
+        var authenticator =  moduleLoader.loadNamedModule(auth);
+
+        // open page and login
+        logger.debug('Opening: ' + url);
+        authenticator.get(url);
+
+        // ensure page is fully loaded - wait for window.url to become the same as requested
+        var plainContentUrl = url.match(/([^\?\#]+)/)[1];
+        browser.driver.wait(function () {
+          return browser.driver.executeScript(function () {
+            return window.location.href;
+          }).then(function (url) {
+            // match only host/port/path as app could manipulate request args and fragment
+            var urlMathes = url.match(/([^\?\#]+)/);
+            return urlMathes !== null && urlMathes[1] === plainContentUrl;
+            //return url === spec.contentUrl;
+          });
+        }, browser.getPageTimeout, 'waiting for page to fully load');
+
+        // ensure ui5 is loaded - execute waitForUI5() internally
+        resultPromise = browser.waitForAngular();
+
+        // handle pageLoading options
+        if (config.pageLoading) {
+
+          // reload the page immediately if required
+          if (config.pageLoading.initialReload) {
+            logger.debug('Initial page reload requested');
+            resultPromise = browser.driver.navigate().refresh();
+          }
+
+          // wait some time after page is loaded
+          if (config.pageLoading.wait) {
+            var wait = config.pageLoading.wait;
+            if (_.isString(wait)) {
+              wait = parseInt(wait, 10);
+            }
+
+            logger.debug('Initial page load wait: ' + wait + 'ms');
+            resultPromise = browser.sleep(wait);
+          }
+        }
+
+        return resultPromise;
+      }};
 
       // register reporters
       var jasmineEnv = jasmine.getEnv();
@@ -405,7 +453,7 @@ function run(config) {
         reporter.register(jasmineEnv);
       });
 
-      // register flow error handler
+      // register flow error handler - seem not necessary to do this manually as jasminewd2 does it well
       /*
       protractor.promise.controlFlow().on('uncaughtException', function(err) {
         console.log('There was an uncaught exception: ' + err);

@@ -7,7 +7,7 @@ describe("cliParser", function() {
   cliParser = new require('../src/cliParser')();
 
   describe("Should parse browsers from command-line", function() {
-    it('Should parse single browser name', function () {
+    it('Should parse single browser name as string', function () {
       var argvStub = new ArgvStub();
       argvStub.browsers = 'ie';
       var config = cliParser.parse(argvStub);
@@ -15,9 +15,17 @@ describe("cliParser", function() {
       expect(config.browsers).toEqual([{browserName:'ie'}]);
     });
 
-    it('Should parse multiple browser names', function () {
+    it('Should parse multiple browser names as string', function () {
       var argvStub = new ArgvStub();
       argvStub.browsers = 'firefox,ie';
+      var config = cliParser.parse(argvStub);
+
+      expect(config.browsers).toEqual([{browserName:'firefox'},{browserName:'ie'}]);
+    });
+
+    it('Should parse browser name as array of strings', function () {
+      var argvStub = new ArgvStub();
+      argvStub.browsers = ['firefox','ie'];
       var config = cliParser.parse(argvStub);
 
       expect(config.browsers).toEqual([{browserName:'firefox'},{browserName:'ie'}]);

@@ -131,7 +131,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                       }
                     });
                     // pass
-                    defer.fulfill(true);
+                    defer.fulfill({message: result.message});
                   } else {
                     // handle image updates - no need to show error
                     if (that.update) {

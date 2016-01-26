@@ -186,3 +186,19 @@ $ grunt visualtest --browsers=browser:*:android --seleniumAddress=http://127.0.0
 ```
 ___Limitation___ Currently screenshots are not supported on default browser on android emulator so disable
 them with --take=false
+
+### Load page and login from test
+Set 'baseUrl' to 'null' to disable automatic page loading. Then call navigation.to() with required URL. You could override
+the default auth settings by providing an auth object with the same syntax as in conf.js
+```
+browser.testrunner.navigation.to(
+  '<url>',{
+    auth:{
+      'sapcloud-form': {
+        user: '<user>',
+        pass: '<pass>'
+      }
+    }
+  }
+);
+```

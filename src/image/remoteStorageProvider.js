@@ -5,11 +5,9 @@ var request = require('request');
 var _ = require('lodash');
 var fs = require('fs');
 
-var DEFAULT_IMAGE_STORAGE_URI = 'https://testimagestorageui5delivery.neo.ondemand.com/ImageStorage/images/';
+var DEFAULT_IMAGE_STORAGE_URI = 'images';
 
 var DEFAULT_REF_LNK_EXT = '.ref.lnk';
-var DEFAULT_ACT_LNK_EXT = '.act.lnk';
-var DEFAULT_DIFF_LNK_EXT = '.diff.lnk';
 
 var DEFAULT_REF_IMAGE_EXT = '.ref.png';
 var DEFAULT_ACT_IMAGE_EXT = '.act.png';
@@ -25,7 +23,10 @@ var DEFAULT_DIFF_IMAGE_EXT = '.diff.png';
  * @typedef RemoteStorageProviderInstanceConfig
  * @type {Object}
  * @property {string} refImagesRoot - reference images root, defaults to spec.testBasePath
- * @property {string} imageStorageUrl - url to the image storage application
+ * @property {string} imageStorageUrl - image store url
+ * @property {string} imageStorageUri - image store uri
+ * @property {string} username - username for authentication in image storage application
+ * @property {string} password - password for the username
  */
 
 /**
@@ -44,10 +45,11 @@ function RemoteStorageProvider(config,instanceConfig,logger,runtime) {
   this.runtime = runtime;
 
   this.refImagesRoot = instanceConfig.refImagesRoot;
-  this.imageStorageUrl = instanceConfig.imageStorageUrl || DEFAULT_IMAGE_STORAGE_URI;
+  this.imageStorageUrl = instanceConfig.imageStorageUrl +
+    '/' + (instanceConfig.imageStorageUri || DEFAULT_IMAGE_STORAGE_URI);
 
-  this.username = instanceConfig.username;
-  this.password = instanceConfig.password;
+  this.auth = instanceConfig.username ?
+    {user: instanceConfig.username, pass: instanceConfig.password} : undefined;
   this.currentSpecName = null;
   this.currentSpecTestBasePath = null;
 }
@@ -58,28 +60,30 @@ function RemoteStorageProvider(config,instanceConfig,logger,runtime) {
  * @return {q.promise<{refImageBuffer:Buffer,refImageUrl:string},{Error}>} - promise that resolves with data and image url
  */
 RemoteStorageProvider.prototype.readRefImage = function(refImageName){
-  var refImagePath = this._getRefPath(DEFAULT_REF_LNK_EXT, refImageName);
   var that = this;
+  var refImagePath = this._getRefPath(DEFAULT_REF_LNK_EXT, refImageName);
 
+  this.logger.debug('Reading reference image: ' + refImageName);
   return Q.Promise(function(resolveFn,rejectFn) {
     fs.readFile(refImagePath, function(err, data) {
       if(err) {
         rejectFn(err);
       } else {
         var uuid = data.toString('utf8').match(/(uuid)+\W+(\S+)/)[2];
-        var refImageUrl = that.imageStorageUrl + uuid;
-        request({url: refImageUrl, auth: {user: that.username, pass: that.password},
-          encoding: 'binary'}, function (error, response, body) {
+        var refImageUrl = that.imageStorageUrl + '/' + uuid;
+        request({url: refImageUrl,encoding: 'binary'},
+          function (error,response,body) {
             if(error) {
               rejectFn(error);
             } else {
-              response.setEncoding()
+              response.setEncoding();
               resolveFn({
-                refImageBuffer: new Buffer(body, 'binary'),
+                refImageBuffer: new Buffer(body,'binary'),
                 refImageUrl: refImageUrl
               });
             }
-          });
+          }
+        );
       }
     });
   });
@@ -92,10 +96,9 @@ RemoteStorageProvider.prototype.readRefImage = function(refImageName){
  * @return {q.promise<{refImageUrl:Buffer},{Error}>} - promise that resolves with ref image url
  */
 RemoteStorageProvider.prototype.storeRefImage = function(refImageName,refImageBuffer){
-  this.logger.debug('Storing reference image: ' + refImageName);
-  this.meta._meta.type = 'REF';
-
   var that = this;
+  this.meta._meta.type = 'REF';
+  this.logger.debug('Storing reference image: ' + refImageName);
 
   var formData = {
     "image": {
@@ -108,14 +111,20 @@ RemoteStorageProvider.prototype.storeRefImage = function(refImageName,refImageBu
   };
 
   return Q.Promise(function(resolveFn,rejectFn) {
-    request.post({url: that.imageStorageUrl, formData: formData,
-      auth: {user: that.username, pass: that.password}},
-      function (error, response, body) {
+    request.post({url: that.imageStorageUrl, formData: formData,auth: that.auth},
+      function (error,response,body) {
         if (error) {
           rejectFn(error);
         } else {
-          var responseBody = JSON.parse(body);
-          var refImageUrl = that.imageStorageUrl + responseBody.uuid;
+          var responseBody = '';
+          try {
+            responseBody = JSON.parse(body);
+          } catch (error) {
+            that.logger.trace('Response body: ' + body);
+            rejectFn(new Error('Cannot parse response body: ' + error + ", response: " + JSON.stringify(response)));
+          }
+
+          var refImageUrl = that.imageStorageUrl + '/' + responseBody.uuid;
 
           if(response.statusCode === 201 || response.statusCode === 422) {
             that._storeLnkFile(DEFAULT_REF_LNK_EXT, refImageName, responseBody.uuid).then(function() {
@@ -136,10 +145,10 @@ RemoteStorageProvider.prototype.storeRefImage = function(refImageName,refImageBu
  * @return {q.promise<{actImageUrl},{Error}>} - promise that resolves with act image url
  */
 RemoteStorageProvider.prototype.storeActImage = function(actImageName,actImageBuffer){
-  this.logger.debug('Storing actual image: ' + actImageName);
-  this.meta._meta.type = 'ACT';
-
   var that = this;
+  this.meta._meta.type = 'ACT';
+  this.logger.debug('Storing actual image: ' + actImageName);
+
   var metaJson = JSON.stringify(this.meta);
 
   var formData = {
@@ -153,21 +162,25 @@ RemoteStorageProvider.prototype.storeActImage = function(actImageName,actImageBu
   };
 
   return Q.Promise(function(resolveFn,rejectFn) {
-    request.post({url: that.imageStorageUrl, formData: formData,
-      auth: {user: that.username, pass: that.password}},
+    request.post({url: that.imageStorageUrl, formData: formData,auth: that.auth},
       function (error, response, body) {
         if (error) {
           rejectFn(error);
         } else {
-          var responseBody = JSON.parse(body);
-          var actImageUrl = that.imageStorageUrl + responseBody.uuid;
+          var responseBody = '';
+          try {
+            responseBody = JSON.parse(body);
+          } catch (error) {
+            that.logger.trace('Response body: ' + body);
+            rejectFn(new Error('Cannot parse response body: ' + error + ", response: " + JSON.stringify(response)));
+          }
+
+          var actImageUrl = that.imageStorageUrl + '/' + responseBody.uuid;
 
           if(response.statusCode === 201 || response.statusCode === 422) {
-            that._storeLnkFile(DEFAULT_ACT_LNK_EXT, actImageName, responseBody.uuid).then(function() {
-              resolveFn(actImageUrl);
-            });
+            resolveFn(actImageUrl);
           } else {
-            rejectFn('Server responded with status code: ' + response.statusCode);
+            rejectFn(new Error('Server responded with status code: ' + response.statusCode));
           }
         }
       });
@@ -181,7 +194,7 @@ RemoteStorageProvider.prototype.storeActImage = function(actImageName,actImageBu
  * @return {q.promise<{diffImageUrl},{Error}>} - promise that resolves with diff image url
  */
 RemoteStorageProvider.prototype.storeDiffImage = function(diffImageName,diffImageBuffer){
-  this.logger.debug('Storing actual image: ' + diffImageName);
+  this.logger.debug('Storing difference image: ' + diffImageName);
   this.meta._meta.type = 'DIFF';
 
   var that = this;
@@ -199,38 +212,41 @@ RemoteStorageProvider.prototype.storeDiffImage = function(diffImageName,diffImag
 
   return Q.Promise(function(resolveFn,rejectFn) {
     request.post({url: that.imageStorageUrl, formData: formData,
-      auth: {user: that.username, pass: that.password}},
+        auth: that.auth},
       function (error, response, body) {
         if (error) {
           rejectFn(error);
         } else {
-          var responseBody = JSON.parse(body);
-          var diffImageUrl = that.imageStorageUrl + responseBody.uuid;
+          var responseBody = '';
+          try {
+            responseBody = JSON.parse(body);
+          } catch (error) {
+            that.logger.trace('Response body: ' + body);
+            rejectFn(new Error('Cannot parse response body: ' + error + ", response: " + JSON.stringify(response)));
+          }
+
+          var diffImageUrl = that.imageStorageUrl + '/' + responseBody.uuid;
 
           if(response.statusCode === 201 || response.statusCode === 422) {
-            that._storeLnkFile(DEFAULT_DIFF_LNK_EXT, diffImageName, responseBody.uuid).then(function() {
-              resolveFn(diffImageUrl);
-            });
+            resolveFn(diffImageUrl);
           } else {
-            rejectFn('Server responded with status code: ' + response.statusCode);
+            rejectFn(new Error('Server responded with status code: ' + response.statusCode));
           }
         }
       });
   });
 };
 
-RemoteStorageProvider.prototype._storeLnkFile = function(ext, imageName, uuid) {
-  var getDirName = path.dirname;
+RemoteStorageProvider.prototype._storeLnkFile = function(ext,imageName,uuid) {
   var that = this;
-  var refFilePath = that._getRefPath(ext, imageName);
-
+  var refFilePath = that._getRefPath(ext,imageName);
 
   return Q.Promise(function(resolveFn,rejectFn) {
-    mkdirp(getDirName(refFilePath), function (err) {
+    mkdirp(path.dirname(refFilePath),function (err) {
       if(err) {
         rejectFn(err);
       } else {
-        fs.writeFile(refFilePath, 'uuid=' + uuid, function (error) {
+        fs.writeFile(refFilePath,'uuid=' + uuid,function (error) {
           if (error) {
             rejectFn(error);
           } else {
@@ -245,7 +261,7 @@ RemoteStorageProvider.prototype._storeLnkFile = function(ext, imageName, uuid) {
 RemoteStorageProvider.prototype._getRefPath = function(extension, refFileName) {
   var refImagePath = [
     this.refImagesRoot || this.currentSpecTestBasePath,
-    'images',           // TODO consider if this level is really necessary
+    'images',
     this._getRuntimePathSegment(),
     (refFileName + extension)
   ].join('/');

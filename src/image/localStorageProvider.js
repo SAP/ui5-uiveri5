@@ -68,21 +68,28 @@ LocalStorageProvider.prototype.readRefImage = function(refImageName){
     this.refImagesShowRoot + '/' + refImageUri : refImagePath;
   this.logger.debug('Reading reference image: ' + refImagePath);
 
-  var dataRefImage = [];
   return Q.Promise(function(resolveFn,rejectFn){
-    fs.createReadStream(refImagePath)
-      .on('error', function(error) {
-        rejectFn(error);
-      })
-      .on('data', function(chunk) {
-        dataRefImage.push(chunk);
-      })
-      .on('end', function() {
-        resolveFn({
-          refImageBuffer: Buffer.concat(dataRefImage),
-          refImageUrl: refImageShowPath
-        });
-      });
+    fs.stat(refImagePath, function(err, stats) {
+      if (err) {
+        // no such file => return no ref image
+        resolveFn(null);
+      } else {
+        var dataRefImage = [];
+        fs.createReadStream(refImagePath)
+          .on('error', function(error) {
+            rejectFn(new Error('Error while reading: ' + refImagePath + ' ,details: '  + error));
+          })
+          .on('data', function(chunk) {
+            dataRefImage.push(chunk);
+          })
+          .on('end', function() {
+            resolveFn({
+              refImageBuffer: Buffer.concat(dataRefImage),
+              refImageUrl: refImageShowPath
+            });
+          });
+      }
+    });
   })
 };
 

@@ -121,4 +121,17 @@ describe("LocalStorageProvider", function () {
         done();
       });
   });
+
+  it("Should return correctly if image does not exist", function(done) {
+    var storageProvider = new LocalStorageProvider({},{refImagesRoot:__dirname + '/localStorageProvider'},logger,runtime);
+    storageProvider.onBeforeEachSpec(spec);
+
+    storageProvider.readRefImage('not_existing').then(function(result){
+      expect(result).toBeNull();
+      done();
+    }).catch(function(error){
+      fail(error);
+      done();
+    });
+  });
 });

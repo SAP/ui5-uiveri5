@@ -29,11 +29,16 @@ function RemoteStorageMock() {
   this.app.get('/images/:uuid', function(req, res) {
     var uuid = req.params['uuid'];
 
-    res.format({
-      'image/png': function () {
-        res.send(getImage(uuid).buffer);
-      }
-    });
+    var image = getImage(uuid);
+    if (image){
+      res.format({
+        'image/png': function () {
+          res.send(image.buffer);
+        }
+      });
+    } else {
+      res.status(404).send();
+    }
   });
 
   // Delete image with given uuid

@@ -57,7 +57,8 @@ function RemoteStorageProvider(config,instanceConfig,logger,runtime) {
 /**
  * Read ref image
  * @param {string} refImageName - reference image name
- * @return {q.promise<{refImageBuffer:Buffer,refImageUrl:string},{Error}>} - promise that resolves with data and image url
+ * @return {q.promise<{refImageBuffer:Buffer,refImageUrl:string},{Error}>} - promise that resolves with data and image url,
+ *  return null of image is not found
  */
 RemoteStorageProvider.prototype.readRefImage = function(refImageName){
   var that = this;
@@ -65,25 +66,38 @@ RemoteStorageProvider.prototype.readRefImage = function(refImageName){
 
   this.logger.debug('Reading reference image: ' + refImageName);
   return Q.Promise(function(resolveFn,rejectFn) {
-    fs.readFile(refImagePath, function(err, data) {
-      if(err) {
-        rejectFn(err);
+    fs.stat(refImagePath, function(err, stats) {
+      if (err) {
+        // no such file => return no ref image
+        resolveFn(null);
       } else {
-        var uuid = data.toString('utf8').match(/(uuid)+\W+(\S+)/)[2];
-        var refImageUrl = that.imageStorageUrl + '/' + uuid;
-        request({url: refImageUrl,encoding: 'binary'},
-          function (error,response,body) {
-            if(error) {
-              rejectFn(error);
-            } else {
-              response.setEncoding();
-              resolveFn({
-                refImageBuffer: new Buffer(body,'binary'),
-                refImageUrl: refImageUrl
-              });
-            }
+        fs.readFile(refImagePath, function(err, data) {
+          if(err) {
+            rejectFn(new Error('Error while reading: ' + refImagePath + ' ,details: '  + error));
+          } else {
+            var uuid = data.toString('utf8').match(/(uuid)+\W+(\S+)/)[2];
+            var refImageUrl = that.imageStorageUrl + '/' + uuid;
+            request({url: refImageUrl,encoding: 'binary'},
+              function (error,response,body) {
+                if(error) {
+                  rejectFn(new Error('Error while GET to: ' + refImageUrl + ' ,details: '  + error));
+                } else {
+                  if(response.statusCode === 404) {
+                    resolveFn(null);
+                  } else {
+                    response.setEncoding();
+                    resolveFn({
+                      refImageBuffer: new Buffer(body,'binary'),
+                      refImageUrl: refImageUrl
+                    });
+                  }
+
+
+                }
+              }
+            );
           }
-        );
+        });
       }
     });
   });
@@ -114,7 +128,7 @@ RemoteStorageProvider.prototype.storeRefImage = function(refImageName,refImageBu
     request.post({url: that.imageStorageUrl, formData: formData,auth: that.auth},
       function (error,response,body) {
         if (error) {
-          rejectFn(error);
+          rejectFn(new Error('Error while POST to: ' + that.imageStorageUrl + ' ,details: '  + error));
         } else {
           var responseBody = '';
           try {
@@ -127,9 +141,13 @@ RemoteStorageProvider.prototype.storeRefImage = function(refImageName,refImageBu
           var refImageUrl = that.imageStorageUrl + '/' + responseBody.uuid;
 
           if(response.statusCode === 201 || response.statusCode === 422) {
-            that._storeLnkFile(DEFAULT_REF_LNK_EXT, refImageName, responseBody.uuid).then(function() {
-              resolveFn(refImageUrl);
-            });
+            that._storeLnkFile(DEFAULT_REF_LNK_EXT, refImageName, responseBody.uuid).then(
+              function() {
+                resolveFn(refImageUrl);
+              },
+              function(error) {
+                rejectFn(new Error('Error while storing lnk file ,details: '  + error));
+              });
           } else {
             rejectFn(new Error('Server responded with status code: ' + response.statusCode));
           }
@@ -165,7 +183,7 @@ RemoteStorageProvider.prototype.storeActImage = function(actImageName,actImageBu
     request.post({url: that.imageStorageUrl, formData: formData,auth: that.auth},
       function (error, response, body) {
         if (error) {
-          rejectFn(error);
+          rejectFn(new Error('Error while POST to: ' + that.imageStorageUrl + ' ,details: '  + error));
         } else {
           var responseBody = '';
           try {
@@ -215,7 +233,7 @@ RemoteStorageProvider.prototype.storeDiffImage = function(diffImageName,diffImag
         auth: that.auth},
       function (error, response, body) {
         if (error) {
-          rejectFn(error);
+          rejectFn(new Error('Error while POST to: ' + that.imageStorageUrl + ' ,details: '  + error));
         } else {
           var responseBody = '';
           try {
@@ -244,11 +262,11 @@ RemoteStorageProvider.prototype._storeLnkFile = function(ext,imageName,uuid) {
   return Q.Promise(function(resolveFn,rejectFn) {
     mkdirp(path.dirname(refFilePath),function (err) {
       if(err) {
-        rejectFn(err);
+        rejectFn(new Error('Error while creating path for lnk file: ' + refFilePath + ' ,details: ' + error));
       } else {
         fs.writeFile(refFilePath,'uuid=' + uuid,function (error) {
           if (error) {
-            rejectFn(error);
+            rejectFn(new Error('Error while storing lnk file: ' + refFilePath + ' ,details: ' + error));
           } else {
             resolveFn();
           }

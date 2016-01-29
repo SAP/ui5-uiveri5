@@ -24,7 +24,7 @@ describe("RemoteStorageProvider", function () {
   };
 
   var refImageRoot = __dirname + '/../target';
-  var imageBuffer = new Buffer(fs.readFileSync('./spec/remoteStorageProvider/arrow_left.png'));
+  var imageBuffer = new Buffer(fs.readFileSync(__dirname + '/remoteStorageProvider/arrow_left.png'));
   var imageStorageMockUrl = 'http://localhost';
   var initialImgName = 'initial';
   var lnkPath = __dirname + '/../target/images/testSpec/platform/resolution/browser/theme/direction/mode/' +
@@ -102,6 +102,36 @@ describe("RemoteStorageProvider", function () {
       .then(function(result) {
         expect(result).toMatch(
           '.*/images/*');
+        done();
+      }).catch(function(error){
+        fail(error);
+        done()
+      });
+  });
+
+  it("Should correctly return if ref image lnk does not exist", function(done) {
+    var storageProvider = new RemoteStorageProvider({},
+      {refImagesRoot: refImageRoot, imageStorageUrl: imageStorageMockUrl},logger,runtime);
+    storageProvider.onBeforeEachSpec(spec);
+
+    storageProvider.readRefImage('not_existing_lnk')
+      .then(function(result) {
+        expect(result).toBeNull();
+        done();
+      }).catch(function(error){
+        fail(error);
+        done()
+      });
+  });
+
+  it("Should correctly return if ref image uuid does not exist", function(done) {
+    var storageProvider = new RemoteStorageProvider({},
+      {refImagesRoot: __dirname + '/remoteStorageProvider' , imageStorageUrl: imageStorageMockUrl},logger,runtime);
+    storageProvider.onBeforeEachSpec(spec);
+
+    storageProvider.readRefImage('not_existing_uuid')
+      .then(function(result) {
+        expect(result).toBeNull();
         done();
       }).catch(function(error){
         fail(error);

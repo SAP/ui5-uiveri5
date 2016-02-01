@@ -1,6 +1,6 @@
 
 var _ = require('lodash');
-var resemble = require('resemblejs-tolerance');
+var resemble = require('./../../lib/resemblejs/resemble');
 var webdriver = require('selenium-webdriver');
 var Q = require('q');
 
@@ -22,12 +22,8 @@ var DEFAULT_THRESHOLD_PIXELS = 200;
 /**
  * @typedef LocalComparisonProviderInstanceConfig
  * @type {Object}
- * @property {boolean} ignoreColors - enable color ignore in comparison
- * @property {boolean} ignoreAntialiasing - enable antialiasing ignore while image comparison
  * @property {{red: {number}, green: {number}, blue: {number}}} errorColor - object with red, green and blue number value for defining color for diff pixels
  * @property {string} errorType - what type of error will expect (flat or movement)
- * @property {number) transparency - transparency intensity of the diff image
- * @property {[{x: {number}, y: {number}, width: {number}, height: {number}}]} ignoreRectangles - array of coords of rectangles which will be ignored in comparison
  * @property {number) thresholdPercentage - threshold image difference, in % to fail the comparison
  * @property {number) thresholdPixels - threshold image difference, in wrong pixels count to fail the comparison
  */
@@ -116,31 +112,23 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                 // compare two images and add input settings - they are chained and set to resJS object
                 // settings include ignore colors, ignore antialiasing, threshold and ignore rectangle
                 that.logger.debug('Comparing current screenshot to reference image: ' + expectedImageName);
-                resemble(refImageResult.refImageBuffer).compareTo(actualImageBuffer).inputSettings(that.instanceConfig)
-                  .onComplete(function (comparisonResult) {
-
-                    // remove error pixes to avoid trace clutter
-                    var errorPixels = _.clone(comparisonResult.errorPixels);
-                    delete comparisonResult.errorPixels;
-
+                resemble(refImageResult.refImageBuffer).compareTo(actualImageBuffer).onComplete(
+                  function (comparisonResult) {
                     // resolve mismatch percentage and count
                     var mismatchPercentage = parseFloat(comparisonResult.misMatchPercentage);
-                    var mismatchPixelsCount = errorPixels.length;
+                    var mismatchPixelsCount = comparisonResult.mismatchCount;
 
                     // dimension difference is elevated to 100%
                     if (!comparisonResult.isSameDimensions) {
-                      // TODO better error message
                       mismatchPercentage = 100;
                       mismatchPixelsCount = -1;
                     }
 
                     that.logger.trace('Image comparison done ' +
                     ',reference image: ${expectedImageName} ' +
-                    ',results: ${JSON.stringify(comparisonResult)} ' +
-                    ',error pixels: ${JSON.stringify(errorPixels)}', {
+                    ',results: ${JSON.stringify(comparisonResult)} ', {
                       expectedImageName: expectedImageName,
-                      comparisonResult: comparisonResult,
-                      errorPixels: errorPixels
+                      comparisonResult: comparisonResult
                     });
 
                     // resolve pixel threshold from the given threshold percentage

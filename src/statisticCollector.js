@@ -164,6 +164,16 @@ StatisticCollector.prototype.specDone = function(jasmineSpec) {
       matcher: jasmineExpectation.matcherName
     };
 
+    // unpack details if any
+    var message = jasmineExpectation.passed.message;
+    if (message.indexOf('{') === 0 && message.lastIndexOf('}')+1 === message.length) {
+      var messageJSON = JSON.parse(message);
+      expectation.message = messageJSON.message;
+      expectation.details = messageJSON.details;
+    } else {
+      expectation.message = message;
+    }
+
     this.currentSpec.expectations.push(expectation);
   },this);
 

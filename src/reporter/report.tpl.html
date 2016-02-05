@@ -121,16 +121,15 @@
         <td class="<%- spec.status %>"><%- spec.status %></td>
         <td class="name-spec" onclick="expand('<%- spec.name %>', '_expectations');
         showImages('<%- spec.name %>')"><%- spec.name %></td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><%- spec.statistic.expectations.total %></td>
-        <td><%- spec.statistic.expectations.passed %></td>
-        <td><%- spec.statistic.expectations.failed.total %></td>
-        <td><%- spec.statistic.expectations.failed.error %></td>
-        <td><%- spec.statistic.expectations.failed.image %></td>
-        <td><%- Math.round( spec.statistic.duration/1000 * 10 ) / 10 %></td>
-      </tr>
-    <% _.forEach(spec.expectations, function(expectation){
-    if(expectation.status === 'failed') {%>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td><%- spec.statistic.expectations.total %></td>
+      <td><%- spec.statistic.expectations.passed %></td>
+      <td><%- spec.statistic.expectations.failed.total %></td>
+      <td><%- spec.statistic.expectations.failed.error %></td>
+      <td><%- spec.statistic.expectations.failed.image %></td>
+      <td><%- Math.round( spec.statistic.duration/1000 * 10 ) / 10 %></td>
+    </tr>
+    <% _.forEach(spec.expectations, function(expectation){ %>
     <tr class="<%- spec.name.replace(new RegExp(' ', 'g'), '_')%>_expectations hidden">
       <td colspan="13">
         <p class="message"><%- expectation.message %></p>
@@ -140,7 +139,7 @@
       </td>
     </tr>
     <tr class="<%- spec.name.replace(new RegExp(' ', 'g'), '_')%>_expectations hidden exp">
-      <% if(expectation.details) { %>
+      <% if(expectation.details && expectation.status === 'failed') { %>
       <td colspan="13">
         <ul class="pictures-list">
           <li>
@@ -163,9 +162,20 @@
           </li>
         </ul>
       </td>
+      <% } else if (expectation.details && expectation.status === 'passed') { %>
+      <td colspan="13">
+        <ul class="pictures-list">
+          <li>
+            <a href="<%- expectation.details.refImageUrl %>" target="_blank">
+              <p>Reference</p>
+              <img width="300px" data-source="<%- expectation.details.refImageUrl %>"/>
+            </a>
+          </li>
+        </ul>
+      </td>
       <% } %>
     </tr>
-    <% }}); %>
+    <% }); %>
     <% }); %>
     <% }); %>
     <tr id="summary">

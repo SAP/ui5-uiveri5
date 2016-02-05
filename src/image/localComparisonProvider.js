@@ -91,7 +91,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                       res.details = {refImageUrl:refImageUrl};
                       result.message = JSON.stringify(res);
                       //pass
-                      defer.fulfill(true);
+                      defer.fulfill({message: result.message});
                     })
                     .catch(function(error){
                       result.message = error.stack;
@@ -152,7 +152,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                         }
                       });
                       // pass
-                      defer.fulfill(true);
+                      defer.fulfill({message: result.message});
                     } else {
                       // handle image updates - no need to show error
                       if (that.update) {
@@ -171,7 +171,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
                             };
                             result.message = JSON.stringify(res);
                             // pass
-                            defer.fulfill(true);
+                            defer.fulfill({message: result.message});
                           })
                           .catch(function (error) {
                             result.message = error.stack;
@@ -264,7 +264,7 @@ LocalComparisonProvider.prototype.register = function (matchers) {
           result.message = 'Comparison or screenshot taking disabled so skipping comparison';
 
           // pass
-          defer.fulfill(true);
+          defer.fulfill({message: result.message});
         }
 
         return result;

@@ -97,5 +97,30 @@ describe("StatisticCollector", function() {
     var failedExpectation = overview.suites[0].specs[0].expectations[0];
     expect(failedExpectation.message).toBe('message');
     expect(failedExpectation.details.key).toBe('value');
+  });
+
+  it("Should handle passed expectation details", function() {
+    reporter.jasmineStarted();
+    reporter.suiteStarted({description: 'Enabled suite'});
+    reporter.specStarted({fullName: 'should pass'});
+    reporter.specDone({
+      status: 'passed',
+      passedExpectations:[{
+        status: 'passed',
+        matcherName: 'toBe',
+        passed: {
+          message: JSON.stringify({message: 'fine',details: 'url'})
+        }
+      }],
+      failedExpectations:[]
+    });
+    reporter.suiteDone();
+    reporter.jasmineDone();
+
+    // validate
+    var overview = reporter.getOverview();
+    var passedExpectation = overview.suites[0].specs[0].expectations[0];
+    expect(passedExpectation.message).toBe('fine');
+    expect(passedExpectation.details).toBe('url');
   })
 });

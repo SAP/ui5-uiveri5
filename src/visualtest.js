@@ -135,14 +135,16 @@ function run(config) {
     // TODO consider concurrent execution
     protractorArgv.maxSessions = 1;
 
-    // execute before any setup
+    // export protractor module object as global.protractorModule
+    protractorArgv.beforeLaunch = __dirname + '/beforeLaunchHandler';
+
+    /* Consider to restore this if custom connectionProvider could be injected that will work on protractor context
     protractorArgv.beforeLaunch =  function() {
 
       // override angular-specific scripts
       var clientsidesriptsName = config.clientsidescripts;
       logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
       var clientsidescripts = require(clientsidesriptsName);
-      //var protractor = proxyquire('../node_modules/protractor/lib/protractor.js',
       var protractor = proxyquire('protractor/lib/protractor',
         {'./clientsidescripts.js': clientsidescripts});
 
@@ -150,8 +152,9 @@ function run(config) {
       logger.debug('Setting up connection provider environment');
       return connectionProvider.setupEnv();
     };
+    */
 
-    // execute after complete setup and just before test execution starts
+    // execute after test env setup and just before test execution starts
     protractorArgv.onPrepare = function() {
 
       // publish visualtest configs on protractor's browser object
@@ -468,10 +471,21 @@ function run(config) {
       return specs[specIndex];
     }
 
-    // call protractor
-    logger.info('Executing ' + specs.length + ' specs');
-    var protractorLauncher = require('protractor/lib/launcher');
-    protractorLauncher.init(null,protractorArgv);
+    // override angular-specific scripts
+    var clientsidesriptsName = config.clientsidescripts;
+    logger.debug('Loading client side scripts module: ' + clientsidesriptsName);
+    var clientsidescripts = require(clientsidesriptsName);
+    var protractor = proxyquire('protractor/lib/protractor',
+      {'./clientsidescripts.js': clientsidescripts});
+
+    // setup connection provider env
+    logger.debug('Setting up connection provider environment');
+    return connectionProvider.setupEnv().then(function(){
+      // call protractor
+      logger.info('Executing ' + specs.length + ' specs');
+      var protractorLauncher = require('protractor/lib/launcher');
+      protractorLauncher.init(null,protractorArgv);
+    });
   }).catch(function(error){
     logger.error(error);
     process.exit(1);

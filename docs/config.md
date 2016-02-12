@@ -79,6 +79,7 @@ browsers: [{
 
 ### Local and remote execution
 If _seleniumAddress_ is provided (either in conf.js or on command line) the tool will connect to this address.
+The remote connection could use pass over http proxy server specified in _seleniumAddressProxy_.
 If not specified, it will try to start local webdriver and download a correct version if not already available.
 By default an automatically resolved free port is used for the locally started webdriver, it could be overwritten
 by _seleniumPort_ configuration. By providing _seleniumHost_ you could specify the local IP/hostname that

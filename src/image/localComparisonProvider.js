@@ -1,7 +1,7 @@
 
 var _ = require('lodash');
 var resemble = require('./../../lib/resemblejs/resemble');
-var webdriver = require('selenium-webdriver');
+var webdriver = protractorModule.require('selenium-webdriver');
 var Q = require('q');
 
 //default values

@@ -1,5 +1,6 @@
 
 var fs = require('fs');
+global.protractorModule = module;
 var LocalStorageProvider = require('../src/image/localStorageProvider.js');
 var LocalComparisonProvider = require('../src/image/localComparisonProvider.js');
 
@@ -57,7 +58,7 @@ describe("LocalComparisonProvider", function () {
     var result = matchers.toLookAs().compare(takeScreenshotMock('arrow_left'),'arrow_left');
     result.pass.promise.then(
       function(passed){
-        expect(passed).toBe(true);
+        expect(passed).toBeTruthy();
         done();
       }
     );
@@ -86,7 +87,7 @@ describe("LocalComparisonProvider", function () {
     var result = matchers.toLookAs().compare(takeScreenshotMock('drop_down_draw'),'drop_down_clean');
     result.pass.promise.then(
       function(passed){
-        expect(passed).toBe(true);
+        expect(passed).toBeTruthy();
         done();
       }
     );

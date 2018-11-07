@@ -68,7 +68,7 @@ function run(config) {
 
     return osType;
   })();
-  
+
   // resolve runtime and set browsers with capabilities
   var runtimeResolver = require('./runtimeResolver')(config,logger);
   config.runtimes = runtimeResolver.resolveRuntimes();
@@ -177,7 +177,7 @@ function run(config) {
       return connectionProvider.resolveCapabilitiesFromRuntime(runtime);
     });
     logger.debug('Resolved protractor multiCapabilities from runtime: ' + JSON.stringify(protractorArgv.multiCapabilities));
-  
+
     // no way to implement concurrent executions with current driverProvider impl
     protractorArgv.maxSessions = 1;
 
@@ -216,6 +216,10 @@ function run(config) {
         if (comparisonProvider) {
           comparisonProvider.register(matchers);
         }
+
+        moduleLoader.loadModuleIfAvailable('matchers', []).forEach(function(matcher){
+          matcher.register(matchers);
+        });
 
         // process remoteWebDriverOptions
         var isMaximized = _.get(runtime.capabilities.remoteWebDriverOptions, 'maximized');
@@ -334,7 +338,7 @@ function run(config) {
               fail(new Error('Spec with full name: ' + specFullName + ' not found'));
               return;
             }
-
+            
             // disable waitForUI5() if explicitly requested
             if (config.ignoreSync) {
               logger.debug('Disabling client synchronization');

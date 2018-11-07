@@ -4,6 +4,7 @@ var path = require('path');
 var express = require('express');
 var http = require('http');
 var path = require('path');
+var _ = require('lodash');
 
 module.exports = class Runner {
     static findFreePort() {
@@ -20,8 +21,14 @@ module.exports = class Runner {
 
     static startApp(root) {
       return this.findFreePort().then((port) => {
-        let app = express();
-        app.use(express.static(path.join(__dirname + root)));
+        let app;
+        if(!_.isString(root)) {
+          app = root();
+        } else {
+          app = express();
+          app.use(express.static(path.join(__dirname + root)));
+        }
+
         let appServer = http.createServer(app);
         appServer.listen(port);
         let appHost = 'http://localhost:' + port;
@@ -41,7 +48,8 @@ module.exports = class Runner {
           '--browsers=chromeHeadless',
           '--config.specResolver="./resolver/localSpecResolver"',
           '--config.specs=' + opts.specs,
-          '--config.baseUrl=' + opts.baseUrl,
+          opts.baseUrl ? '--config.baseUrl=' + opts.baseUrl : '',
+          opts.params ? buildConfigArgs('--params',opts.params) : '',
           opts.confjs ? opts.confjs : ''
         ].join(" ");
         console.log('Starting cmd: ' + cmdString);
@@ -73,6 +81,11 @@ module.exports = class Runner {
           reject(error);
         });
       });
+
+      function buildConfigArgs(prefix,opts) {
+        return Object.entries(opts).map((opt) => {
+          return prefix + '.' + opt[0] + '=' + opt[1];
+        }).join(' ');
+      }
     }
   };
-  

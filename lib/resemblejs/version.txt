@@ -1,0 +1,2 @@
+"gitHead": "bd72e685b3c53b192c50ae8c17d696e429ad03b5",
+"_id": "node-resemble-js@0.0.5",

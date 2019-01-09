@@ -1,0 +1,28 @@
+{
+    "env": {
+        "node": true,
+        "browser": true,
+        "jasmine": true,
+        "protractor": true,
+        "jquery": true
+    },
+    "extends": "eslint:recommended",
+    "rules": {
+        "indent": [
+            "warn",
+            2
+        ],
+        "quotes": [
+            "warn",
+            "single"
+        ],
+        "semi": "warn",
+        "no-useless-escape": "off",
+        "no-octal": "off"
+    },
+    "globals": {
+        "sap": true,
+        "protractorModule": true,
+        "Reporter": true
+    }
+}

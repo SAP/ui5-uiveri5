@@ -1,0 +1,6 @@
+{
+  "spec_dir": "e2e/scenario",
+  "spec_files": [
+    "*.spec.js"
+  ]
+}

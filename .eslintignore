@@ -1,0 +1,14 @@
+/lib
+/spec
+/e2e
+
+# .gitignore
+
+/node_modules
+/target
+/.idea
+/selenium
+/e2e/**/target
+/.vscode
+
+npm-debug.log

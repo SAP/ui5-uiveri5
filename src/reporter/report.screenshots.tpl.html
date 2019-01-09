@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    .suites-menu {
+      width: 100%;
+      background-color: #add8e6;
+    }
+
+    .suites-menu .name {
+      display: inline-block;
+      padding: 10px;
+    }
+
+    .suites-menu .name.selected {
+      background-color: #90c9dc;
+      font-weight: 600;
+    }
+
+    .suite {
+      position: absolute;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary {
+      padding: 10px 20px;
+    }
+
+    .summary span {
+      padding-right: 20px;
+    }
+
+    .specs {
+      display: flex;
+    }
+
+    .specs-menu {
+      align-self: flex-start;
+      width: 500px;
+      background-color: #add8e6;
+    }
+
+    .specs-menu .selected {
+      background-color: #90c9dc;
+    }
+
+    .specs .name {
+      padding: 10px;
+      border-bottom: 1px solid #ffffff;
+    }
+
+    .name::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 10px;
+      border-radius: 50px;
+    }
+
+    .name.passed::before, .spec.passed .summary {
+      background-color: #3cb371;
+    }
+
+    .name.failed::before, .spec.failed .summary {
+      background-color: #ff6347;
+    }
+
+    .name:hover {
+      cursor: pointer;
+    }
+
+    .spec {
+      width: 100%;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #add8e6;
+    }
+
+    .step.passed {
+      background-color: #3cb37166;
+    }
+
+    .step.failed {
+      background-color: #ff634766;
+    }
+
+    .step .content {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 20px;
+    }
+
+    .step .content.reverse {
+      flex-direction: column-reverse;
+    }
+
+    code {
+      width: 90%;
+      height: 300px;
+      padding: 10px;
+      background-color: #ffffff;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    img {
+      width: 300px;
+      margin: 20px 0;
+    }
+
+    .strong {
+      font-weight: 600;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div class="suites-menu">
+  <% _.forEach(suites, function (suite, suiteIndex) { %>
+  <div class="name" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>
+  <% }); %>
+</div>
+<% _.forEach(suites, function (suite, suiteIndex) { %>
+<div class="suite hidden">
+  <div class="summary">
+    <span class="strong">Specs</span>
+    <span>Total: <%- suite.statistic.specs.total %></span>
+    <span>Passed: <%- suite.statistic.specs.passed %></span>
+    <span>Failed: <%- suite.statistic.specs.failed %></span>
+    <span>Pending: <%- suite.statistic.specs.pending %></span>
+    <span>Disabled: <%- suite.statistic.specs.disabled %></span>
+    <span>Duration: <%- Math.round(suite.statistic.duration / 1000 * 10) / 10 %> sec</span>
+  </div>
+  <div class="specs">
+    <div class="specs-menu">
+      <% _.forEach(suite.specs, function (spec, specIndex) { %>
+      <div class="name <%- spec.status %>" onClick="selectSpec(<%- suiteIndex %>, <%- specIndex %>)"><%- spec.name %></div>
+      <% }); %>
+    </div>
+    <% _.forEach(suite.specs, function (spec, specIndex) { %>
+    <div class="spec <%- spec.status %> <%- specIndex %> hidden">
+      <div class="summary">
+        <div class="strong"><%- spec.name %></div>
+        <% if (!spec.meta || !spec.meta.isAuthentication) { %>
+        <span class="strong">Expectations</span>
+        <span>Total: <%- spec.statistic.expectations.total %></span>
+        <span>Passed: <%- spec.statistic.expectations.passed %></span>
+        <span>Failed: <%- spec.statistic.expectations.failed.total %></span>
+        <span>Duration: <%- Math.round(spec.statistic.duration / 1000 * 10) / 10 %> sec</span>
+        <% } %>
+      </div>
+      <% _.forEach(spec.stepSequence, function (stepType, stepIndex) {
+        var step = _.find(spec[stepType], {stepIndex: stepIndex});
+      %>
+      <% if (step) { %>
+      <div class="step <%- step.status %>">
+        <p class="strong"><%- stepIndex + 1 %>.</p>
+        <div class="content <%- stepType === 'actions' ? 'reverse' : ''%>">
+          <% if (stepType === "expectations") { %>
+          <div>Expectation <%- _.upperCase(step.status) %>: <%- step.message %></div>
+          <% } %>
+          <% if (stepType === "actions") { %>
+          <div>Execute '<%- step.name %>' on element with ID '<%- step.elementId %>'
+            <% if (step.value) { %> with value '<%- step.value %>' <% } %>
+          </div>
+          <% } %>
+          <% if (step.screenshot) { %>
+          <a href="<%- step.screenshot %>" target="_blank">
+            <img data-source="<%- step.screenshot %>"/>
+          </a>
+          <% } %>
+          <% if (step.status === "failed") { %><code><%- step.stack %></code><% } %>
+        </div>
+      </div>
+      <% } %>
+      <% }); %>
+    </div>
+    <% }); %>
+  </div>
+</div>
+<% }); %>
+<script>
+  (function init () {
+    var suiteMenuElement = document.getElementsByClassName("suites-menu")[0];
+    var specMenuElement = document.getElementsByClassName("specs-menu")[0];
+    selectSuite(0);
+  })();
+
+  function selectSuite(suiteIndex) {
+    select(document, suiteIndex, "suites-menu", "suite");
+    selectSpec(suiteIndex, 0);
+  }
+
+  function selectSpec(suiteIndex, specIndex) {
+    var parentElement = document.getElementsByClassName("specs")[suiteIndex];
+    select(parentElement, specIndex, "specs-menu", "spec");
+
+    var specElements = parentElement.getElementsByClassName("spec");
+    var specImageElements = specElements[specIndex].getElementsByTagName("img");
+    Array.prototype.forEach.call(specImageElements, function (img) {
+      img.src = img.getAttribute("data-source");
+    });
+  }
+
+  function select(parentElement, index, menuClassName, itemClassName) {
+    var menuElement = parentElement.getElementsByClassName(menuClassName)[0];
+    var menuElements = menuElement.getElementsByClassName("name");
+    Array.prototype.forEach.call(menuElements, function (el) {
+      el.classList.remove("selected");
+    });
+    menuElements[index].classList.add("selected");
+
+    var itemElements = parentElement.getElementsByClassName(itemClassName);
+    Array.prototype.forEach.call(itemElements, function (el) {
+      el.classList.add("hidden");
+    });
+    itemElements[index].classList.remove("hidden");
+  }
+</script>
+</body>
+</html>

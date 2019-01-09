@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<title>E2E Test</title>
+
+		<script>
+			var url = new URL(window.location.href);
+			var authFlag = url.searchParams.get('auth');
+			// redirect to login if no ?auth=true
+			if (!authFlag || authFlag != 'true') {
+				window.location.replace('./login.html?callback=./app.html');
+			}
+		</script>
+
+		<script src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js"
+			id="sap-ui-bootstrap"
+			data-sap-ui-theme="sap_belize"
+			data-sap-ui-libs="sap.m">
+		</script>
+
+		<script>
+			var app = new sap.m.App("myApp", {initialPage:"page1"});
+
+			var page1 = new sap.m.Page("page1", {
+				title:"Page 1",
+				content : [
+					new sap.m.Button({
+						id : "show-footer-btn",
+						text : "Press me"
+					})
+				]
+			});
+
+			app.addPage(page1);
+			app.placeAt("body");
+		</script>
+
+	</head>
+	<body id="body" class="sapUiBody">
+	</body>
+</html>

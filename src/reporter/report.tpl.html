@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <style>
+    table tr td, table tr th {
+      padding-right: 20px;
+      width: 110px;
+      text-align: left;
+    }
+
+    td.passed {
+      font-weight: bold;
+      color: green;
+    }
+
+    td.failed {
+      font-weight: bold;
+      color: red;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .specs {
+      background-color: rgba(135, 206, 235, 0.25);
+    }
+
+    .name {
+      width: 50%;
+      text-decoration: underline;
+    }
+
+    #result-table {
+      width: 100%;
+      text-aligh: left;
+    }
+
+    .suite {
+      background-color: skyblue;
+    }
+
+    .name:hover, .name-spec:hover {
+      cursor: pointer;
+    }
+
+    .name-spec {
+      padding-left: 20px;
+      text-decoration: underline;
+    }
+
+    .message {
+      padding-left: 110px;
+    }
+
+    .pictures-list {
+      list-style: none;
+      display: flex;
+    }
+
+    .pictures-list li {
+      padding-right: 50px;
+    }
+
+    #suites-summary {
+      float: right;
+      margin-top: 20px;
+    }
+
+    #suites-summary span {
+      padding-left: 10px;
+    }
+
+    p.pre {
+      display: block;
+      unicode-bidi: embed;
+      font-family: monospace;
+      white-space: pre;
+      max-width: 900px;
+    }
+  </style>
+</head>
+<body>
+<section id="wrapper">
+  <table id="result-table" cellspacing="0">
+    <tr>
+      <th>Status</th>
+      <th>Name</th>
+      <th>Specs</th>
+      <th>Specs Passed</th>
+      <th>Specs Failed</th>
+      <th>Specs Pending</th>
+      <th>Specs Disabled</th>
+      <th>Expectations</th>
+      <th>Expectations Passed</th>
+      <th>Expectations Failed</th>
+      <th>Expectations Failed with Error</th>
+      <th>Expectations Failed with Image</th>
+      <th>Duration, s</th>
+    </tr>
+    <% _.forEach(suites, function(suite){ %>
+    <tr class="suite">
+      <td class="<%- suite.status %>"><%- suite.status %></td>
+      <td class="name" onClick="expand('<%- suite.name %>', '_specs')"><%- suite.name %></td>
+      <td><%- suite.statistic.specs.total %></td>
+      <td><%- suite.statistic.specs.passed %></td>
+      <td><%- suite.statistic.specs.failed %></td>
+      <td><%- suite.statistic.specs.pending %></td>
+      <td><%- suite.statistic.specs.disabled %></td>
+      <td><%- suite.statistic.expectations.total %></td>
+      <td><%- suite.statistic.expectations.passed %></td>
+      <td><%- suite.statistic.expectations.failed.total %></td>
+      <td><%- suite.statistic.expectations.failed.error %></td>
+      <td><%- suite.statistic.expectations.failed.image %></td>
+      <td><%- Math.round( suite.statistic.duration/1000 * 10 ) / 10 %></td>
+    </tr>
+      <% _.forEach(suite.specs, function(spec){ %>
+      <tr class="<%-suite.name%>_specs specs hidden">
+        <td class="<%- spec.status %>"><%- spec.status %></td>
+        <td class="name-spec" onclick="expand('<%- suite.name + spec.name %>', '_expectations');
+        showImages('<%- suite.name + spec.name %>')"><%- spec.name %></td>
+      <td></td><td></td><td></td><td></td><td></td>
+      <td><%- spec.statistic.expectations.total %></td>
+      <td><%- spec.statistic.expectations.passed %></td>
+      <td><%- spec.statistic.expectations.failed.total %></td>
+      <td><%- spec.statistic.expectations.failed.error %></td>
+      <td><%- spec.statistic.expectations.failed.image %></td>
+      <td><%- Math.round( spec.statistic.duration/1000 * 10 ) / 10 %></td>
+    </tr>
+    <% _.forEach(spec.expectations, function(expectation){ %>
+    <tr class="<%- (suite.name + spec.name).replace(new RegExp(' ', 'g'), '_')%>_expectations hidden">
+      <td colspan="13">
+        <p class="message"><%- expectation.message %></p>
+        <% if(!expectation.details) {%>
+        <p class="message pre"><%- expectation.stack %></p>
+        <% } %>
+      </td>
+    </tr>
+    <tr class="<%- (suite.name + spec.name).replace(new RegExp(' ', 'g'), '_')%>_expectations hidden exp">
+      <% if(expectation.details && expectation.status === 'failed') { %>
+      <td colspan="13">
+        <ul class="pictures-list">
+          <li>
+            <a href="<%- expectation.details.actImageUrl %>" target="_blank">
+              <p>Actual</p>
+              <img width="300px" data-source="<%- expectation.details.actImageUrl %>"/>
+            </a>
+          </li>
+          <li>
+            <a href="<%- expectation.details.refImageUrl %>" target="_blank">
+              <p>Reference</p>
+              <img width="300px" data-source="<%- expectation.details.refImageUrl %>"/>
+            </a>
+          </li>
+          <li>
+            <a href="<%- expectation.details.diffImageUrl %>" target="_blank">
+              <p>Difference</p>
+              <img width="300px" data-source="<%- expectation.details.diffImageUrl %>"/>
+            </a>
+          </li>
+        </ul>
+      </td>
+      <% } else if (expectation.details && expectation.status === 'passed') { %>
+      <td colspan="13">
+        <ul class="pictures-list">
+          <li>
+            <a href="<%- expectation.details.refImageUrl %>" target="_blank">
+              <p>Reference</p>
+              <img width="300px" data-source="<%- expectation.details.refImageUrl %>"/>
+            </a>
+          </li>
+        </ul>
+      </td>
+      <% } %>
+    </tr>
+    <% }); %>
+    <% }); %>
+    <% }); %>
+    <tr id="summary">
+      <td colspan="2" style="text-align: right">Total</td>
+      <td><%- statistic.specs.total %></td>
+      <td><%- statistic.specs.passed %></td>
+      <td><%- statistic.specs.failed %></td>
+      <td><%- statistic.specs.pending %></td>
+      <td><%- statistic.specs.disabled %></td>
+      <td><%- statistic.expectations.total %></td>
+      <td><%- statistic.expectations.passed %></td>
+      <td><%- statistic.expectations.failed.total %></td>
+      <td><%- statistic.expectations.failed.error %></td>
+      <td><%- statistic.expectations.failed.image %></td>
+      <td><%- Math.round( statistic.duration/1000 * 10 ) / 10 %></td>
+    </tr>
+  </table>
+  <div id="suites-summary">
+    <span>Suites Total: <%- statistic.suites.total %></span>
+    <span>Passed: <%- statistic.suites.passed %></span>
+    <span>Failed: <%- statistic.suites.failed %></span>
+  </div>
+</section>
+<script>
+  function expand(name, suffix) {
+    name = name.replace(new RegExp(' ', 'g'), '_');
+    var elements = document.getElementsByClassName(name + suffix);
+    var elementClass = '';
+    var nameIndex = 0;
+
+    for(var i = 0; i < elements.length; i++) {
+      elementClass = elements[i].className;
+      nameIndex = elementClass.indexOf('hidden');
+
+      if(nameIndex < 0) {
+        elementClass += ' hidden';
+      } else {
+        elementClass = elementClass.substr(0, nameIndex-1) + elementClass.substr(nameIndex + elementClass.length);
+      }
+
+      elements[i].className = elementClass;
+    }
+  }
+
+  function showImages(className) {
+    className = className.replace(new RegExp(' ', 'g'), '_') + '_expectations';
+    // get img elements
+    var trImages = document.getElementsByClassName(className);
+    var imgs = [];
+    for(var i = 0; i < trImages.length; i++) {
+      imgs.push(trImages[i].getElementsByTagName('img'));
+    }
+    // set value to src and load images
+    for(var i = 0; i < imgs.length; i++) {
+      for(var k = 0; k < imgs[i].length; k++) {
+        imgs[i][k].src = imgs[i][k].attributes['data-source'].value;
+      }
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+#!/usr/bin/env node
+
+/*eslint-disable no-console */
+process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+
+var path = require('path');
+var child_process = require('child_process');
+
+var aChildNodeArgs = process.execArgv.slice(0);
+var aChildArgs = process.argv.slice(2);
+
+var bHasDebugArgs = aChildArgs.filter(function (sArgument) {
+  return ['--debug', '--inspect'].indexOf(sArgument) > -1;
+}).length > 0;
+
+if (bHasDebugArgs && requiresInspector()) {
+  // when debug mode is chosen, start node inspector for the child process
+  aChildNodeArgs.push('--inspect');
+}
+
+if (aChildNodeArgs.length) {
+  console.log('Starting uiveri5 with node arguments ' + aChildNodeArgs);
+}
+
+var oChild = child_process.fork(path.join(__dirname, '../src/cli'), aChildArgs, {
+  execArgv: aChildNodeArgs
+});
+
+oChild.on('exit', function (iCode) {
+  process.exit(iCode);
+});
+
+oChild.on('error', function (oError) {
+  console.error(oError);
+  process.exit(1);
+});
+
+// legacy debugger is deprecated since node v7.7.0
+function requiresInspector() {
+  var aNodeVersion = process.version.substring(1).split('.');
+  return aNodeVersion[0] > 7 || (aNodeVersion[0] === 7 && aNodeVersion[1] >= 7);
+}

@@ -1,0 +1,61 @@
+{
+  "name": "@ui5/uiveri5",
+  "version": "1.35.4",
+  "description": "UIVeri5 is an E2E testing framework for UI5-based applications.",
+  "author": "SAP SE (https://www.sap.com)",
+  "license": "Apache-2.0",
+  "keywords": [
+		"openui5",
+		"sapui5",
+		"ui5",
+		"tool"
+	],
+  "dependencies": {
+    "adm-zip": "^0.4.7",
+    "glob": "~4.3.5",
+    "lodash": "^4.17.2",
+    "mkdirp": "^0.5.1",
+    "png-crop": "^0.0.1",
+    "pngjs": "^2.2.0",
+    "protractor": "~5.3.0",
+    "proxyquire": "~1.4.0",
+    "q": "^1.4.1",
+    "request": "^2.67.0",
+    "simple-git": "^1.21.0",
+    "tar": "^4.4.4",
+    "xmlbuilder": "^9.0.4",
+    "yargs": "^3.8.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.2.0",
+    "express": "^4.13.4",
+    "grunt": "^1.0.2",
+    "grunt-contrib-connect": "^1.0.2",
+    "grunt-shell": "^2.1.0",
+    "jasmine": "^2.2.1",
+    "jasminewd2": "0.0.6",
+    "multer": "^1.1.0",
+    "portfinder": "^0.4.0",
+    "sinon": "^3.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/SAP/ui5-uiveri5.git"
+  },
+  "bin": {
+    "uiveri5": "bin/uiveri5"
+  },
+  "engines": {
+		"node": ">= 8.0",
+		"npm": ">= 5"
+	},
+  "scripts": {
+    "uiveri5": "node bin/uiveri5",
+    "test": "npm run test:unit && npm run test:scenario && npm run test:browser",
+    "test:unit": "jasmine JASMINE_CONFIG_PATH=spec/jasmine.json",
+    "test:scenario": "jasmine JASMINE_CONFIG_PATH=e2e/scenario/jasmine.json",
+    "test:browser": "jasmine JASMINE_CONFIG_PATH=e2e/browser/jasmine.json",
+    "lint": "eslint ."
+  },
+  "main": "src/uiveri5.js"
+}

@@ -1,0 +1,32 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8">
+        <title>IDP mock - Login Page</title>
+        <script>
+            // attach form action and redirect to ?callback=<url>. append ?auth=true
+            window.addEventListener('DOMContentLoaded',() => {
+                document.getElementById('logOnFormSubmit').onclick = () => {
+                    let user = document.getElementById('j_username').value;
+                    let pass = document.getElementById('j_password').value;
+                    var url = new URL(window.location.href);
+                    var callback = url.searchParams.get('callback');
+                    var redirectUrl = callback + '?auth=true&user=' + user + '&pass=' + pass;
+                    console.log('RedirectUrl:' + redirectUrl);
+                    window.location.replace(redirectUrl);
+                };
+            });
+        </script>
+    </head>
+	<body>
+        <form>   
+            <div>
+                <input id="j_username" type="text" placeholder="Username" name="username" required>
+                <input id="j_password" type="password" placeholder="Password" name="password" required>
+                <button id="logOnFormSubmit" type="button">Login</button>
+            </div>
+        </form>
+    </body>
+</html>

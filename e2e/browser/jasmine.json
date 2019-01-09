@@ -1,0 +1,6 @@
+{
+  "spec_dir": "e2e/browser",
+  "spec_files": [
+    "browser.spec.js"
+  ]
+}

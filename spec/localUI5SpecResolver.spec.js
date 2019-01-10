@@ -9,7 +9,7 @@ describe("LocalUI5SpecResolver", function () {
     specResolver.resolve().then(function(specs){
       expect(specs[0]).toEqual({name:'Comp1',fullName:'sap.m.Comp1',lib: 'sap.m',branch: 'overwrite',
        testPath: __dirname.replace(/\\/g,'/') + '/localUI5SpecResolver/openui5/src/sap.m/test/sap/m/visual/Comp1.spec.js',
-       contentUrl:'http://localhost:8080/testsuite/test-resources/sap/m/Comp1.html'});
+       contentUrl:'http://localhost:8080/test-resources/sap/m/Comp1.html'});
       done();
     }).catch(function(error){
       fail(error);
@@ -23,7 +23,7 @@ describe("LocalUI5SpecResolver", function () {
     specResolver.resolve().then(function(specs){
       expect(specs[0]).toEqual({name:'Comp1',fullName:'sap.gantt.Comp1',lib: 'sap.gantt',branch: 'overwrite',
         testPath: __dirname.replace(/\\/g,'/') + '/localUI5SpecResolver/sap.gantt/gantt.lib/test/sap/gantt/visual/Comp1.spec.js',
-        contentUrl:'http://localhost:8080/testsuite/test-resources/sap/gantt/Comp1.html'});
+        contentUrl:'http://localhost:8080/test-resources/sap/gantt/Comp1.html'});
       done();
     }).catch(function(error){
       fail(error);

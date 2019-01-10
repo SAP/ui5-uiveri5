@@ -28,7 +28,7 @@ All configuration options are explained in [Configuration](docs/config/config.md
 ## Installation
 Install globally:
 ```
-$ npm install npm install @ui5/uiveri5
+$ npm install @ui5/uiveri5
 ```
 
 ## Usage

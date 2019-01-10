@@ -28,9 +28,8 @@ All configuration options are explained in [Configuration](docs/config/config.md
 ## Installation
 Install globally:
 ```
-$ npm install git://github.com/SAP/ui5-uiveri5.git#<release> -g --no-optional
+$ npm install npm install @ui5/uiveri5
 ```
-Please use the latest release: [releases](releases/latest)
 
 ## Usage
 

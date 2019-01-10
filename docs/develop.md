@@ -7,12 +7,12 @@ Fork a repository from Github UI.
 
 Clone fork locally:
 ```
-git clone git@github.wdf.sap.corp:<i-user>/<reponame>
+git clone https://github.com/<user>/ui5-uiveri5.git
 ```
 
 Configure the origin:
 ```
-git remote add upstream git@github.wdf.sap.corp:<origin org name>/<reponame>
+git remote add upstream https://github.com/<user>/ui5-uiveri5.git
 ```
 
 ### Make changes and push commits
@@ -95,16 +95,9 @@ Increment patch number if this release contains only bugfixes, increment minor v
 git commit -am "chore: update version to 1.xx.v"
 ```
 
-* Prepare release description.
-Check recent commits and prepare a good commit message. Use "Feature: " prefix for new features and "Fix: " for bug fixes.
-Mention explicitly each feature in a new message.
+* Create tag
 ```
-Feature: waitForUI5 handles periodic events
-```
-
-* Create annotated tag
-```
-git tag -a v1.xx.y -m "<message 1>" -m "<message 2>"
+git tag v1.xx.y
 ```
 
 * Push the new tag

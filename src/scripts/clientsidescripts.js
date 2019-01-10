@@ -134,8 +134,13 @@ var mFunctions = {
 
     try {
       var control = uiveri5._ControlFinder._getControlForElement(mScriptParams.elementId);
-      var property = control ? uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property) : null;
-      return {property: property};
+      if (control) {
+        return {
+          property: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
+        };
+      } else {
+        throw new Error('Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree');
+      }
     } catch (oError) {
       return {
         error: 'Failed to get control property. Details: ' + oError

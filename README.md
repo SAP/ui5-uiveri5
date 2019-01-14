@@ -120,7 +120,7 @@ Here we gather few projects that build on uiveri5 and tailor it for specific use
 * Docker container with uiveri5,chrome,jenkins [Link](https://github.com/frumania/docker-uiveri5-jenkins-slave)
 
 ## Automatic Downloads
- By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
+By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
 
 ## Licence
 Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.

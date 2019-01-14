@@ -18,5 +18,5 @@ describe('Browser tests', function() {
             specs: './browser/specs/*.spec.js',
             baseUrl: app.host + '/browser/index.html'
         });
-    }, 40000);
+    }, 80000);
 });

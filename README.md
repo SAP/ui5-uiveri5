@@ -28,7 +28,7 @@ All configuration options are explained in [Configuration](docs/config/config.md
 ## Installation
 Install globally:
 ```
-$ npm install @ui5/uiveri5
+$ npm install @ui5/uiveri5 -g
 ```
 
 ## Usage
@@ -84,6 +84,10 @@ You will see the test execution in the console and an overview when the test com
 By default uiveri5 will discover all tests in current folder and execute them on localy started Chrome.
 All of those defaults could be modified either in conf.js or by providing command-line arguments.
 
+* Enable verbose logging
+```
+-v
+```
 * Run tests on different browser
 ```
 --browsers=firefox
@@ -95,10 +99,6 @@ All of those defaults could be modified either in conf.js or by providing comman
 * Run tests against a remove selenium server
 ```
 --seleniumAddress="<host>:<port>/wd/hub"
-```
-* Enable verbose logging
-```
-`-v`
 ```
 
 ## Learn more
@@ -113,6 +113,11 @@ No major bugs known. To file a bug report, please go to our issues list on GitHu
 
 ## Release plan
 See how we plan to continue in our [TODO](docs/todo.md) 
+
+## Related projects
+Here we gather few projects that build on uiveri5 and tailor it for specific usecases
+
+* Docker container with uiveri5,chrome,jenkins [Link](https://github.com/frumania/docker-uiveri5-jenkins-slave)
 
 ## Automatic Downloads
  By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.

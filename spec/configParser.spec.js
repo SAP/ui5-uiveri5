@@ -51,19 +51,28 @@ describe("Should parse confkey from command-line", function () {
     this._ = [];
   };
 
+  beforeEach(function() {
+    delete require.cache[require.resolve('../src/configParser')];
+    delete require.cache[require.resolve('../conf/default.conf.js')];
+    delete require.cache[require.resolve('../conf/profile.conf.js')];
+    delete require.cache[require.resolve('../conf/visual.profile.conf.js')];
+  });
+
   it('Should parse simple object notation in confkey', function () {
     var argvStub = new ArgvStub();
-    argvStub.confKeys = 'key1.key2:value';
+    argvStub.confKeys = 'key2.key2:value';
     var config = configParser.mergeConfigs(argvStub);
 
-    expect(config.key1).toEqual({key2: 'value'});
-    expect(config.confKeys).toEqual('key1.key2:value');
+    expect(config.key2).toEqual({key2: 'value'});
+    expect(config.confKeys).toEqual('key2.key2:value');
+    expect(config.confKeys).toEqual(argvStub.confKeys)
   });
 
   it('Should parse complex object notation in confkey', function () {
     var argvStub = new ArgvStub();
     argvStub.confKeys = 'key1[0].key2:value';
     var config = configParser.mergeConfigs(argvStub);
+
 
     expect(config.key1).toEqual([{key2: 'value'}]);
     expect(config.confKeys).toEqual('key1[0].key2:value');
@@ -74,7 +83,7 @@ describe("Should parse confkey from command-line", function () {
     argvStub.confKeys = ['key1.key2:value','key1.key3:value1'];
     var config = configParser.mergeConfigs(argvStub);
 
-    expect(config.key1).toContain({key2: 'value',key3: 'value1'});
+    expect(config.key1).toEqual({key2: 'value',key3: 'value1'});
     expect(config.confKeys).toEqual(['key1.key2:value','key1.key3:value1']);
   });
 
@@ -83,7 +92,7 @@ describe("Should parse confkey from command-line", function () {
     argvStub.confKeys = 'key1.key2:value;key1.key3:value1';
     var config = configParser.mergeConfigs(argvStub);
 
-    expect(config.key1).toContain({key2: 'value',key3: 'value1'});
+    expect(config.key1).toEqual({key2: 'value',key3: 'value1'});
     expect(config.confKeys).toContain('key1.key2:value;key1.key3:value1');
   });
 

@@ -475,8 +475,8 @@ function run(config) {
           
           // log UI5 version
           return browser.executeScriptWithDescription(clientsidescripts.getUI5Version, 'browser.getUI5Version').then(function (versionInfo) {
-            logger.info("UI5 Version: " + versionInfo.version);
-+           logger.info("UI5 Timestamp: " + versionInfo.buildTimestamp);
+            logger.info('UI5 Version: ' + versionInfo.version);
+            logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
           });
         },
 

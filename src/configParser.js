@@ -21,6 +21,8 @@ ConfigParser.prototype.mergeConfigs = function (config) {
   // apply common profile
   this._mergeConfig('../conf/profile.conf.js', 'common profile');
 
+  // Changing config via confKeys
+  this._setConfKeys();
   // return new fully merged config
   return this.config;
 };
@@ -46,6 +48,21 @@ ConfigParser.prototype.resolvePlaceholders = function(obj) {
   return obj;
 };
 
+ConfigParser.prototype._setConfKeys =  function() {
+  var confKeys = this.config.confKeys;
+  var config = this.config;
+  if (confKeys) {
+    if (_.isArray(confKeys)) {
+      _.forEach(confKeys,function(key) {
+        _setConfKey(config,key);
+      });
+    } else {
+      _setConfKey(config,confKeys);
+    }
+  }
+  this.config = config;
+};
+
 function _setConfKey(config,confKey) {
   var pairs = confKey.split(';');
   _.forEach(pairs,function(pair) {
@@ -58,17 +75,7 @@ function _setConfKey(config,confKey) {
 }
 
 function _mergeWithArrays(object, src) {
-  var config = src;
-  var confKeys = config.confKeys;
-  if (confKeys) {
-    if (_.isArray(confKeys)) {
-      _.forEach(confKeys,function(confKeys) {
-        _setConfKey(config,confKeys);
-      });
-    } else {
-      _setConfKey(config,confKeys);
-    }
-  }
+  // return _.merge(object, src)
   return _.mergeWith(object, src, function (objectValue, sourceValue) {
     // return undefined to use _.merge default strategy
     if (_.isArray(objectValue) && sourceValue) {

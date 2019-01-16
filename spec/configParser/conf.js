@@ -3,6 +3,7 @@ exports.config = {
   multi: [
     {name: 'option1'}
   ],
+  key1: [{key2: 'changeme'}],
   test: {
     key: {
       param: 'sap-ui-theme=sap_${parameters.test}',

@@ -29,6 +29,11 @@ ConfigParser.prototype._mergeConfig = function (configFile, type) {
   this.logger.debug('Loading ' + type + ' config from: ' + configFile);
   var config = require(configFile).config;
 
+  // if browsers are defined in both *.conf.js and command line, use command line parameters
+  if (this.config.browsers && config.browsers) {
+    this.logger.info('Browsers defined in both *.conf.js and --browsers CLI argument, using --browsers argument.');
+    delete config.browsers;
+  }
   // merge the loaded *.conf.js file with command line parameters
   this.config = _mergeWithArrays(config, this.config);
 };

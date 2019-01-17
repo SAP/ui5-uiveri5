@@ -24,7 +24,7 @@ var argv = require('yargs').
   boolean('seleniumLoopback').
   describe('seleniumLoopback', 'Bind the selenium server listener port to loopback interface.').
   string('browsers').
-  describe('browsers', 'Comma separated list of browsers to execute tests, defaults to chrome').
+  describe('browsers', 'Comma separated list of browsers to execute tests, overwrites *.conf.js values, defaults to chrome').
   describe('params', 'Param object to be passed to the tests').
   describe('timeouts', 'Timeouts').
   string('config').

@@ -21,7 +21,7 @@ var DEFAULT_CONNECTION_NAME = 'direct';
  * @property {number} verbose - verbose level, 0 shows only info, 1 shows debug,
  *  2 shows waitForUI5 executions,3 shows also waitForUI5 script content, defaults t: 0
  * @property {<BrowserCapability|String}>[]} browsers - list of browsers to drive. Single word is assumed to
- *  be browserName, supports column delimited and json formats, defaults to: 'chrome'
+ *  be browserName, supports column delimited and json formats, overwrites *.conf.js values, defaults to: 'chrome'
  * @property {Object} params - params object to be passed to the tests
  * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
  * @property {boolean} useClassicalWaitForUI5 - use classical version of waitForUI5, defaults to: false

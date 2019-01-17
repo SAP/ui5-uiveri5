@@ -46,6 +46,7 @@ describe("configParser", function() {
 describe("Should parse confkey from command-line", function () {
   var logger = require('../src/logger')(3);
   var configParser = require('../src/configParser')(logger);
+  var cliParser = new require('../src/cliParser')();
   var ArgvStub = function () {
     this._ = [];
   };
@@ -84,5 +85,14 @@ describe("Should parse confkey from command-line", function () {
 
     expect(config.key1).toContain({key2: 'value',key3: 'value1'});
     expect(config.confKeys).toContain('key1.key2:value;key1.key3:value1');
+  });
+
+  it('Should overwrite config.browsers with --browsers', () => {
+    var argvStub = new ArgvStub();
+    argvStub.browsers = 'firefox';
+    var parsed = cliParser.parse(argvStub) 
+    var config = configParser.mergeConfigs(parsed)
+    
+    expect(config.browsers).toEqual([{"browserName": "firefox"}])
   });
 });

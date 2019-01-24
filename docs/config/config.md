@@ -71,7 +71,7 @@ In some specific network cases(e.g. multi homed machines), starting webdriver lo
 ## Drivers
 Each browser requires a specific native webdriver. Webdrivers configuration is documented in [Drivers](drivers.md)
 
-## Paramaters 
+## Parameters 
 Parameters are used in the tests scripts. Check how to use them in [Parameters](parameters.md)
 
 ## Authentication

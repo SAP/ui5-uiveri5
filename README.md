@@ -1,6 +1,6 @@
-# UIVeri5 
+![openui5](http://openui5.org/images/OpenUI5_new_big_side.png)
 
-## Introduction
+## What is it
 UIVeri5 is an E2E testing framework for UI5-based applications. It uses
 [webdriverjs](https://code.google.com/p/selenium/wiki/WebDriverJs) to drive a real browser and interacts with your
 application as a real user would. UIVeri5 is heavily inspired by [Protractor](http://www.protractortest.org/)
@@ -106,10 +106,11 @@ Learn how to build your tests in our [Testing Guide](docs/usage/applicationtesti
 
 ## Support
 If you face a problem, please check our list of common [issues](docs/issues.md) 
-If you think you found a bug or have a question, please create a new github issue. 
+If you think you found a bug, please create a new [github issue](https://github.com/SAP/ui5-uiveri5/issues/new). 
+If you have a question, please ask on [StackOverflow](http://stackoverflow.com/questions/tagged/uiveri5)
 
 ## Known Bugs
-No major bugs known. To file a bug report, please go to our issues list on GitHub.
+No major bugs known.
 
 ## Release plan
 See how we plan to continue in our [TODO](docs/todo.md) 

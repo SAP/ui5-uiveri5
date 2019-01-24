@@ -2,7 +2,7 @@
 
 ## What to prefer
 Always work on the highest level of abstraction that is possible in the specific case. 
-* Prefer control selectors instead of DOM-level selecto. 
+* Prefer control locators instead of DOM-level locators. 
 * Prefer ID selectors if you have manually assinged IDs. 
 * Prefer hierarchical class selectors but avoid layout-specific classes and try to stick to semantical classes.
 
@@ -10,7 +10,7 @@ __Try to compose the selector as if you are explaining a manual tester where to 
 
 ## What to avoid
 
-### Avoid ID selectors using generated IDs
+### Avoid ID locators using generated IDs
 Selection a DOM element by ID is the simplest and widely used approach in classical web site testing.
 The classical web page is composed manually and so the important elements are manually assigned nice
 and meaningful IDs. So it is easy to identify those elements in automatic tests.
@@ -37,37 +37,7 @@ This also makes the test much self-documenting and simplifies maintenance.
 ### Minimize use of attribute locators
 These locators are slow and are usually not closely related to the visual representation. Besides, attribute values may often change and may not be specific enough if used on their own.
 
-## DOM locators
-All standart locators from webdriverjs are supported, please check webdirvejs docs for references.
-
-## UIVeri5 locators
-
-### JQuery
-SAPUI5 runtime include and heavily use jquery so we bridge the power of jquery to application tests.
-All [jquery selectors](https://api.jquery.com/category/selectors/) are available,including the powerful pseudo-selectors.
-Select an element by jquery expression:
-```javascript
-element(by.jq('<jguery expression>'));
-```
-
-#### Select and element that contain specific child
-Sometimes it is useful to have a backward selectors e.g. select the parent of an element with specific properties.
-This is easily achieved with jquery [:has()](https://api.jquery.com/has-selector/) pseudo-selector.
-Select a tile from Fiori Launchpad:
-```javascript
-element(by.jq('.sapUshellTile:has(\'.sapMText:contains(\"Track Purchase Order\")\')'))
-```
-
-#### Select an element from list
-Protractor ElementArrayFinder that is returned from element.all() has a .get(<index>) method that will return
-an element by its index. But chaining several levels of .get() could slowdown the test execution as every
-interaction requires a browser roundtrip. Additionally whole expression becomes cumbersome and hard to read.
-Much simpler is to use the jquery [:eq()](https://api.jquery.com/eq-selector/) pseudo-selector.
-```javascript
-element(by.jq('.sapMList > ul > li:eq(1)')),
-```
-
-### Control locator
+## Control locators
 In order to use `control` locator in your tests, the application under test must use a certain version of UI5. All versions newer than 1.55 are acceptable, as well as all patches of 1.52 and 1.54 after and including 1.52.12 and 1.54.4.
 
 In the application testing approach we use hierarchical class locators composed of UI5 control main
@@ -84,10 +54,10 @@ element.all(by.control({id: /test/});
 
 Using `control` locator will give you an `ElementFinder` of the DOM element best representing the found control. Since there can be more than one representation of a control, you can choose which one best fits a desired interaction. This is a common pitfall and is described below in the Interactions section.
 
-#### Syntax
+### Syntax
 Under the hood, control locators rely on [OPA5](https://openui5.hana.ondemand.com/#/api/sap.ui.test.Opa5/overview) functionality. If you are familiar with OPA5's `waitFor` structure, then you will be able to immediately transition to control locators. The difference between a control selector and a typical OPA5 `waitFor` is that some values are not allowed. The unsupported property values are: `matchers` and `actions` object constructions and `check`, `success` and `actions` functions.
 
-`by.control` accepts a plain object specifying the viewName, viewNamespace, ID, controlType, ID suffix, and other properties of the control to look for. The ID can be a string or regular expression. Just like in OPA5, if a viewName is given, the ID is the view-relative ID, otherwise it is the global ID. For most [OPA5 matchers](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers/overview) there is a corresponding selector property. Currently the supported matchers are: `aggregationContainsPropertyEqual`, `aggregationEmpty`, `aggregationFilled`, `aggregationLengthEquals`, `bindingPath`, `I18NText`, `labelFor`, `properties`, `propertyStrictEquals`. In OPA5 you normally create a matcher instance and pass the expected parameters to the constructor as a plain object. In a control selector, you can set the same plain object parameters to the matcher property.
+`by.control` accepts a plain object specifying the viewName, viewNamespace, ID, controlType, ID suffix, and other properties of the control to look for. The ID can be a string or regular expression. Just like in OPA5, if a viewName is given, the ID is the view-relative ID, otherwise it is the global ID. All [OPA5 matchers](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers/overview) are supported with exception of AncestorMatcher that is supported implicitly as documented below. In OPA5 you normally create a matcher instance and pass the expected parameters to the constructor as a plain object. In a control selector, you can set the same plain object parameters to the matcher property.
 
 Matchers syntax:
 ```javascript
@@ -121,7 +91,7 @@ element(by.control({
 }))
 ```
 
-#### Interaction adapters
+### Interaction adapters
 A control DOM tree may include multiple interactable DOM elements. If you need to interact with a specific DOM element of this tree, use an interaction adapter. Interaction adapters are inspired by [Opa5 press adapters](https://openui5.hana.ondemand.com/#/api/sap.ui.test.actions.Press). You specify an adapter using the `interaction` property of the by.control object. The interaction can be any one of: `root`, `focus`, `press`, `auto`, `{idSuffix: "myIDsuffix"}`. the Default is `auto`. This is what the located element will be in each case:
 * root: the root DOM element of the control
 * focus: the DOM element that should typically get the focus
@@ -152,11 +122,39 @@ var objectAttributeText = element(by.control({
 })); // will locate the text inside this ObjectAttribute
 ```
 
-#### Control ancestors
+### Control ancestors
 When you use a control locator to find a child element of a specific parent, IUVeri5 will apply the [ancestor matcher](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers.Ancestor) to the child. The parent element's control ID is used to find child controls. For example, if the parent is a header bar, its control's root element will be the header, so if you then search for child elements, the other header bars might match as well.  Example:
 ```javascript
 element(by.id("page1-intHeader-BarLeft")) // can be any locator
   .element(by.control({
     controlType: "sap.m.Button"
   })); // will look for buttons in the header
+```
+
+## DOM locators
+All standart 'by.' locators from [webdriverjs](https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_By.html) are supported.
+
+## JQuery locators
+SAPUI5 runtime include and heavily use jquery so we bridge the power of jquery to application tests.
+All [jquery selectors](https://api.jquery.com/category/selectors/) are available,including the powerful pseudo-selectors.
+Select an element by jquery expression:
+```javascript
+element(by.jq('<jguery expression>'));
+```
+
+### Select and element that contain specific child
+Sometimes it is useful to have a backward selectors e.g. select the parent of an element with specific properties.
+This is easily achieved with jquery [:has()](https://api.jquery.com/has-selector/) pseudo-selector.
+Select a tile from Fiori Launchpad:
+```javascript
+element(by.jq('.sapUshellTile:has(\'.sapMText:contains(\"Track Purchase Order\")\')'))
+```
+
+### Select an element from list
+ElementArrayFinder that is returned from element.all() has a .get(<index>) method that will return
+an element by its index. But chaining several levels of .get() could slowdown the test execution as every
+interaction requires a browser roundtrip. Additionally whole expression becomes cumbersome and hard to read.
+Much simpler is to use the jquery [:eq()](https://api.jquery.com/eq-selector/) pseudo-selector.
+```javascript
+element(by.jq('.sapMList > ul > li:eq(1)')),
 ```

@@ -96,7 +96,7 @@ All of those defaults could be modified either in conf.js or by providing comman
 ```
 --baseUrl="http://<host>:<port>/app"
 ```
-* Run tests against a remove selenium server
+* Run tests against a remote selenium server
 ```
 --seleniumAddress="<host>:<port>/wd/hub"
 ```

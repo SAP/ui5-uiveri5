@@ -9,5 +9,8 @@ exports.config = {
       param: 'sap-ui-theme=sap_${parameters.test}',
       secondParam: "sap-ui-rtl=${parameters.rtl === 'rtl'}"
     }
-  }
+  },
+  browsers: [{
+    browserName: 'chrome'
+  }]
 };

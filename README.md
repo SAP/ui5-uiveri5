@@ -1,6 +1,6 @@
-# UIVeri5 
+![openui5](http://openui5.org/images/OpenUI5_new_big_side.png)
 
-## Introduction
+## What is it
 UIVeri5 is an E2E testing framework for UI5-based applications. It uses
 [webdriverjs](https://code.google.com/p/selenium/wiki/WebDriverJs) to drive a real browser and interacts with your
 application as a real user would. UIVeri5 is heavily inspired by [Protractor](http://www.protractortest.org/)
@@ -28,7 +28,7 @@ All configuration options are explained in [Configuration](docs/config/config.md
 ## Installation
 Install globally:
 ```
-$ npm install @ui5/uiveri5
+$ npm install @ui5/uiveri5 -g
 ```
 
 ## Usage
@@ -84,6 +84,10 @@ You will see the test execution in the console and an overview when the test com
 By default uiveri5 will discover all tests in current folder and execute them on localy started Chrome.
 All of those defaults could be modified either in conf.js or by providing command-line arguments.
 
+* Enable verbose logging
+```
+-v
+```
 * Run tests on different browser
 ```
 --browsers=firefox
@@ -92,13 +96,9 @@ All of those defaults could be modified either in conf.js or by providing comman
 ```
 --baseUrl="http://<host>:<port>/app"
 ```
-* Run tests against a remove selenium server
+* Run tests against a remote selenium server
 ```
 --seleniumAddress="<host>:<port>/wd/hub"
-```
-* Enable verbose logging
-```
-`-v`
 ```
 
 ## Learn more
@@ -106,16 +106,22 @@ Learn how to build your tests in our [Testing Guide](docs/usage/applicationtesti
 
 ## Support
 If you face a problem, please check our list of common [issues](docs/issues.md) 
-If you think you found a bug or have a question, please create a new github issue. 
+If you think you found a bug, please create a new [github issue](https://github.com/SAP/ui5-uiveri5/issues/new). 
+If you have a question, please ask on [StackOverflow](http://stackoverflow.com/questions/tagged/uiveri5)
 
 ## Known Bugs
-No major bugs known. To file a bug report, please go to our issues list on GitHub.
+No major bugs known.
 
 ## Release plan
 See how we plan to continue in our [TODO](docs/todo.md) 
 
+## Related projects
+Here we gather few projects that build on uiveri5 and tailor it for specific usecases
+
+* Docker container with uiveri5,chrome,jenkins [Link](https://github.com/frumania/docker-uiveri5-jenkins-slave)
+
 ## Automatic Downloads
- By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
+By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
 
 ## Licence
 Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.

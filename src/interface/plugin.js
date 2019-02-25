@@ -10,7 +10,7 @@ function Plugin(config,instanceConfig,logger){
 }
 
 /**
- * Called after uiveri5 is started but before the webdriver connection is opened.
+ * Called after webdriver connection is established but before the test framework has been set up.
  * 
  * @return {Promise<void>|void} Can return a promise that will be waited to 
  * be resolved before uiveri5 continues.
@@ -19,7 +19,7 @@ Plugin.prototype.setup = function() {
 };
 
 /**
- * Called after webdriver connection is established but before tests are started.
+ * Called after test framework is established but before the tests are started
  * 
  * @return {Promise<void>|void} Can return a promise that will be waited to 
  * be resolved before uiveri5 continues.
@@ -67,14 +67,6 @@ Plugin.prototype.suiteDone = function(suite) {
  * @return {Promise<void>|void} Can return a promise that will be waited to 
  * be resolved before uiveri5 continues.
  */
-Plugin.prototype.onComplete = function() {
-};
-
-/**
- * Called after webdriver connection is closed
- * 
- * @return {Promise<void>|void} Can return a promise that will be waited to 
- * be resolved before uiveri5 continues.
- */
 Plugin.prototype.teardown = function() {
 };
+

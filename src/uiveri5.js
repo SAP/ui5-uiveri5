@@ -433,16 +433,16 @@ function run(config) {
       // setup plugin hooks
       jasmine.getEnv().addReporter({
         suiteStarted: function(jasmineSuite){
-          _moduleExec(plugins,'suiteStarted',[{name:jasmineSuite.name}]);
+          _callPlugins('suiteStarted',[{name:jasmineSuite.description}]);
         },
         specStarted: function(jasmineSpec){
-          _moduleExec(plugins,'specStarted',[{name:jasmineSpec.name}]);
+          _callPlugins('specStarted',[{name:jasmineSpec.description}]);
         },
         specDone: function(jasmineSpec){
-          _moduleExec(plugins,'specDone',[{name:jasmineSpec.name}]);
+          _callPlugins('specDone',[{name:jasmineSpec.description}]);
         },
         suiteDone: function(jasmineSuite){
-          _moduleExec(plugins,'suiteDone',[{name:jasmineSuite.name}]);
+          _callPlugins('suiteDone',[{name:jasmineSuite.description}]);
         },
       });
   
@@ -596,10 +596,12 @@ function run(config) {
       return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
     }
 
-    function _moduleExec(modules,method,args) {
+    function _callPlugins(method,args) {
       return Promise.all(
-        modules.map(function(module) {
-          return module[method].apply(null,args)
+        plugins.map(function(module) {
+          if (module[method]) {
+            return module[method].apply(module,args);
+          }
         })
       );
     }
@@ -612,13 +614,13 @@ function run(config) {
     protractorArgv.plugins = [{
       inline: {
         setup: function() {
-          _moduleExec(plugins,'setup');
+          _callPlugins('setup');
         },
         onPrepare: function() {
-          _moduleExec(plugins,'onPrepare');
+          _callPlugins('onPrepare');
         },
         teardown: function() {
-          _moduleExec(plugins,'teardown');
+          _callPlugins('teardown');
         }
       }
     }]

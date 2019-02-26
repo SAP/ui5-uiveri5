@@ -226,5 +226,7 @@ exports.config = {
   ],
   locators: [
     {name: './defaultLocators'}
-  ]
+  ],
+
+  plugins: []
 };

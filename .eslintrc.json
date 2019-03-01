@@ -4,7 +4,8 @@
         "browser": true,
         "jasmine": true,
         "protractor": true,
-        "jquery": true
+        "jquery": true,
+        "es6": true
     },
     "extends": "eslint:recommended",
     "rules": {

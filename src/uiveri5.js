@@ -178,8 +178,7 @@ function run(config) {
     });
     logger.debug('Resolved protractor multiCapabilities from runtime: ' + JSON.stringify(protractorArgv.multiCapabilities));
   
-    // execute runtimes consequently
-    // TODO consider concurrent execution
+    // no way to implement concurrent executions with current driverProvider impl
     protractorArgv.maxSessions = 1;
 
     // export protractor module object as global.protractorModule
@@ -195,7 +194,7 @@ function run(config) {
       var matchers = {};
       var storageProvider;
 
-      // register a hook to be called when webdriver is created ( may not be connected yet )
+      // register a hook to be called after webdriver is created ( may not be connected yet )
       browser.getProcessedConfig().then(function (protractorConfig) {
         var runtime = connectionProvider.resolveRuntimeFromCapabilities(protractorConfig.capabilities);
         logger.debug('Runtime resolved from capabilities: ' + JSON.stringify(runtime));
@@ -431,6 +430,22 @@ function run(config) {
         }
       });
 
+      // setup plugin hooks
+      jasmine.getEnv().addReporter({
+        suiteStarted: function(jasmineSuite){
+          _callPlugins('suiteStarted',[{name:jasmineSuite.description}]);
+        },
+        specStarted: function(jasmineSpec){
+          _callPlugins('specStarted',[{name:jasmineSpec.description}]);
+        },
+        specDone: function(jasmineSpec){
+          _callPlugins('specDone',[{name:jasmineSpec.description}]);
+        },
+        suiteDone: function(jasmineSuite){
+          _callPlugins('suiteDone',[{name:jasmineSuite.description}]);
+        },
+      });
+  
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
         to: function(url,auth) {
@@ -581,9 +596,34 @@ function run(config) {
       return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
     }
 
+    function _callPlugins(method,args) {
+      return Promise.all(
+        plugins.map(function(module) {
+          if (module[method]) {
+            return module[method].apply(module,args);
+          }
+        })
+      );
+    }
+    // register page object factory on global scope
     logger.debug('Loading BDD-style page object factory');
     pageObjectFactory.register(global);
 
+    // load plugins
+    var plugins = moduleLoader.loadModule('plugins');
+    protractorArgv.plugins = [{
+      inline: {
+        setup: function() {
+          _callPlugins('setup');
+        },
+        onPrepare: function() {
+          _callPlugins('onPrepare');
+        },
+        teardown: function() {
+          _callPlugins('teardown');
+        }
+      }
+    }];
     // setup connection provider env
     logger.debug('Setting up connection provider environment');
     return connectionProvider.setupEnv().then(function(){

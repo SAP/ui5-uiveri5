@@ -208,8 +208,8 @@ exports.config = {
     },
     'fiori-form': {
       name: './authenticator/formAuthenticator',
-      userFieldSelector: '#USERNAME_FIELD input',
-      passFieldSelector: '#PASSWORD_FIELD input',
+      userFieldSelector: '#USERNAME_BLOCK input',
+      passFieldSelector: '#PASSWORD_BLOCK input',
       logonButtonSelector: '#LOGIN_LINK'
     },
     'sapcloud-form': {

@@ -120,7 +120,7 @@ describe("Should parse confkey from command-line", function () {
     var argvStub = new ArgvStub();
     argvStub.browsers = 'firefox';
     var parsed = cliParser.parse(argvStub) 
-    parsed.conf = __dirname + '/configParser/api.conf.js';
+    parsed.conf = __dirname + '/configParser/importing.conf.js';
     var config = configParser.mergeConfigs(parsed)
     
     expect(config.browsers).toEqual([{"browserName": "firefox"}])

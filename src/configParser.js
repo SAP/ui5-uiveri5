@@ -31,7 +31,7 @@ ConfigParser.prototype.mergeConfigs = function (config) {
 ConfigParser.prototype._mergeConfig = function (configFile, type) {
   this.logger.debug('Loading ' + type + ' config from: ' + configFile);
   var newConfig = _.clone(require(configFile).config);  // clone so we avoid module cache
-
+  
   // if browsers are defined in both *.conf.js and command line, use command line parameters
   if (this.config.browsers && newConfig.browsers) {
     this.logger.info('Browsers defined in both *.conf.js and --browsers CLI argument, using --browsers argument.');

@@ -1,3 +1,0 @@
-exports.config = {
-  profile: "api"
-};

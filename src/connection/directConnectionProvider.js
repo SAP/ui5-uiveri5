@@ -37,8 +37,8 @@ function DirectConnectionProvider(config,instanceConfig,logger) {
   this.seleniumConfig.address = config.seleniumAddress;
   this.seleniumConfig.host = config.seleniumHost;
   this.seleniumConfig.port = config.seleniumPort;
-  this.seleniumConfig.useSeleniumJarFlag =
-    typeof config.useSeleniumJar !== 'undefined' ? config.useSeleniumJar : true;
+  this.seleniumConfig.useSeleniumJarFlag = 
+    typeof config.useSeleniumJar == 'undefined' ? false : config.useSeleniumJar;
   this.seleniumConfig.addressProxy = config.seleniumAddressProxy;
   this.seleniumConfig.seleniumLoopback =
     typeof config.seleniumLoopback !== 'undefined' ? config.seleniumLoopback : false;

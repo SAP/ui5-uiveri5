@@ -61,7 +61,7 @@ browsers: [{
 ```
 
 ## Selenium
-By default, selenium jar is used to start the respective webdriver that starts the required browser. This could be disabled with the useSeleniumJar option. Selenium command line arguments could be provided in conf.js:
+By default, the respective webdriver that starts the required browser is started directly. It could be started by using selenium jar, just have to enable it with setting _useSeleniumJar_ to true. Then selenium command line arguments could be provided in conf.js:
 ```javascript
 browsers: [{
   browserName: 'chrome',
@@ -119,7 +119,7 @@ Geckodriver expects to find firefox executable on the system path or at the defa
 Internet explorer uses the iedriver which is only available on Windows. Currently, you need to specify an exact version (automatic latest version detection is not implemented).
 All iedriver options from: [ServiceBuilder](https://github.com/SeleniumHQ/selenium/blob/master/javascript/node/selenium-webdriver/ie.js) could be specified under the 'iedriverOptions' key.
 All IE options from: [Options](https://github.com/SeleniumHQ/selenium/blob/master/javascript/node/selenium-webdriver/ie.js) could be specified under the 'ieOptions' key.
-There is a [browser configuration](https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration) that should be followed before you start testing on IE. It is preferable to modify your browser's security settings as described [here](https://github.com/seleniumQuery/seleniumQuery/wiki/seleniumQuery-and-IE-Driver#protected-mode-exception-while-launching-ie-driver). This is the only way to overcome security limitations when selenium jar is used (which is the default case). When you don't use selenium jar, you can enable the 'introduceFlakinessByIgnoringProtectedModeSettings' option, but keep in mind that it is reported to cause driver instability.
+There is a [browser configuration](https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration) that should be followed before you start testing on IE. It is preferable to modify your browser's security settings as described [here](https://github.com/seleniumQuery/seleniumQuery/wiki/seleniumQuery-and-IE-Driver#protected-mode-exception-while-launching-ie-driver). This is the only way to overcome security limitations when selenium jar is used. When you don't use selenium jar, you can enable the 'introduceFlakinessByIgnoringProtectedModeSettings' option, but keep in mind that it is reported to cause driver instability.
 ```javascript
 browsers: [{
   browserName: 'firefox',

@@ -5,11 +5,11 @@
   "author": "SAP SE (https://www.sap.com)",
   "license": "Apache-2.0",
   "keywords": [
-		"openui5",
-		"sapui5",
-		"ui5",
-		"tool"
-	],
+    "openui5",
+    "sapui5",
+    "ui5",
+    "tool"
+  ],
   "dependencies": {
     "adm-zip": "^0.4.7",
     "glob": "~4.3.5",
@@ -46,9 +46,9 @@
     "uiveri5": "bin/uiveri5"
   },
   "engines": {
-		"node": ">= 8.0",
-		"npm": ">= 5"
-	},
+    "node": ">= 8.0",
+    "npm": ">= 5"
+  },
   "scripts": {
     "uiveri5": "node bin/uiveri5",
     "test": "npm run test:unit && npm run test:scenario && npm run test:browser",

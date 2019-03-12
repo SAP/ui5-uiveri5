@@ -11,6 +11,6 @@ exports.config = {
     }
   },
   browsers: [{
-    browserName: 'chrome'
+    browserName: 'chromeHeadless'
   }]
 };

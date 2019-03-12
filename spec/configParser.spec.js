@@ -100,8 +100,30 @@ describe("Should parse confkey from command-line", function () {
     var argvStub = new ArgvStub();
     argvStub.browsers = 'firefox';
     var parsed = cliParser.parse(argvStub) 
+    parsed.conf = __dirname + '/configParser/conf.js';
     var config = configParser.mergeConfigs(parsed)
     
     expect(config.browsers).toEqual([{"browserName": "firefox"}])
   });
+
+  it('Should overwrite config.browsers with --browsers when not specified', () => {
+    var argvStub = new ArgvStub();
+    argvStub.browsers = 'firefox';
+    var parsed = cliParser.parse(argvStub) 
+    parsed.conf = __dirname + '/configParser/empty.conf.js';
+    var config = configParser.mergeConfigs(parsed)
+    
+    expect(config.browsers).toEqual([{"browserName": "firefox"}])
+  });
+
+  it('Should overwrite default config.browsers with --browsers and api profile', () => {
+    var argvStub = new ArgvStub();
+    argvStub.browsers = 'firefox';
+    var parsed = cliParser.parse(argvStub) 
+    parsed.conf = __dirname + '/configParser/api.conf.js';
+    var config = configParser.mergeConfigs(parsed)
+    
+    expect(config.browsers).toEqual([{"browserName": "firefox"}])
+  });
+
 });

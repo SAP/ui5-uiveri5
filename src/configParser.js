@@ -23,21 +23,23 @@ ConfigParser.prototype.mergeConfigs = function (config) {
 
   // Changing config via confKeys
   this._setConfKeys();
+
   // return new fully merged config
   return this.config;
 };
 
 ConfigParser.prototype._mergeConfig = function (configFile, type) {
   this.logger.debug('Loading ' + type + ' config from: ' + configFile);
-  var config = require(configFile).config;
+  var newConfig = _.clone(require(configFile).config);  // clone so we avoid module cache
 
   // if browsers are defined in both *.conf.js and command line, use command line parameters
-  if (this.config.browsers && config.browsers) {
+  if (this.config.browsers && newConfig.browsers) {
     this.logger.info('Browsers defined in both *.conf.js and --browsers CLI argument, using --browsers argument.');
-    delete config.browsers;
+    delete newConfig.browsers;
   }
-  // merge the loaded *.conf.js file with command line parameters
-  this.config = _mergeWithArrays(config, this.config);
+
+  // merge the loaded *.conf.js into glabal config
+  this.config = _mergeWithArrays(newConfig,this.config);
 };
 
 ConfigParser.prototype.resolvePlaceholders = function(obj) {

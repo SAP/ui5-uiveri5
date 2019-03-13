@@ -1,0 +1,3 @@
+exports.config = {
+  profile: "integration"
+};

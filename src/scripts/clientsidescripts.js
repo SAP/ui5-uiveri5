@@ -223,9 +223,9 @@ var mFunctions = {
     }
   },
 
-  collectLogs: function collectLogs (mScriptParams) {
+  startLogCollection: function startLogCollection (mScriptParams) {
     if (!window.sap || !window.sap.ui) {
-      throw new Error('collectLogs: no UI5 on this page.');
+      throw new Error('startLogCollection: no UI5 on this page.');
     }
 
     var sError = 'Your application needs a minimum version of UI5 v1.64 to collect browser logs!';
@@ -247,14 +247,14 @@ var mFunctions = {
 
   getAndClearLogs: function getAndClearLogs () {
     if (!window.uiveri5._BrowserLogCollector) {
-      throw new Error('Log collection is not set up! Call "collectLogs" before "getAndClearLogs"');
+      throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
     }
     return window.uiveri5._BrowserLogCollector.getAndClearLogs().logs;
   },
 
   stopLogsCollection: function stopLogsCollection () {
     if (!window.uiveri5._BrowserLogCollector) {
-      throw new Error('Log collection is not set up! Call "collectLogs" before "stopLogsCollection"');
+      throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
     }
     return window.uiveri5._BrowserLogCollector.stop();
   }

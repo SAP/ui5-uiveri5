@@ -11,7 +11,7 @@ function BrowserLogsPlugin(config, instanceConfig, logger) {
 BrowserLogsPlugin.prototype.suiteStarted = function () {
   var that = this;
   if (that.level) {
-    return browser.executeScript(clientsidescripts.collectLogs, {
+    return browser.executeScript(clientsidescripts.startLogCollection, {
       level: that.level
     }).then(function () {
       that.logger.debug('Collecting browser logs with level ' + that.level);

@@ -57,8 +57,7 @@ $ uiveri5 --browsers=chromeHeadless
 
 ### Local execution
 By default, UIveri5 will download the latest webdriver and start a local browser directly.
-By default _useSeleniumJar_ is set to false, the selenium jar will not be started and local webdriver will be started directly. 
-It is possible to start selenium webdriver to control the local webdriver with setting _useSeleniumJar_ parameter to true. 
+It is possible to start selenium webdriver to control the local webdriver with setting _useSeleniumJar_ parameter to true.
 Automatically resolved free port will be used for the locally started webdriver and it could be overwritten by _seleniumPort_ configuration.
 
 ### Remote execution

@@ -41,5 +41,5 @@ npm config set https-proxy http://proxy:8080
 ```
 
 ## uieri5 fails with java not found
-uiveri5 cloud use webdriverjs and it could start selenium-server-standalone.jar for local usecase. So you either need java so
+uiveri5 uses webdriverjs and it could start selenium-server-standalone.jar for local usecase. So you either need java so
 that selenium standalone could run or you need to run your test against remote selenium hub or remote cloud provider.

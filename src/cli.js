@@ -17,7 +17,7 @@ var argv = require('yargs').
   describe('seleniumHost','Override the hostname to connect to local webdriver or selenium jar').
   string('seleniumPort').
   describe('seleniumPort','Override the default port used by the local webdriver or selenium jar').
-  boolean('useSeleniumJar').default('useSeleniumJar',false).
+  boolean('useSeleniumJar').default('useSeleniumJar',undefined).
   describe('useSeleniumJar','Use selenium jar to start local webdrivers, default to true').
   string('seleniumAddressProxy').
   describe('seleniumAddressProxy','Use this proxy for the WD connection to remote selenium server').

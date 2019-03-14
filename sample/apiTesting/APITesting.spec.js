@@ -4,12 +4,12 @@ describe('APITesting', function() {
   });
 
   it('Should go to second page', function() {
-    element(by.id("__button0")).click();
+    element(by.id('__button0')).click();
     expect(element(by.id('page2-title')).getText()).toBe('Hello Page 2');
   });
 
   it('Should make api call and check response body', function() {
-    var res = request.get(browser.testrunner.config.params.apiURL+ '/HelloWorldServlet').do()
+    request.get(browser.testrunner.config.params.apiURL+ '/HelloWorldServlet').do()
       .catch(function(responseError) {
         expect(responseError.status).toBe(401);
         expect(responseError.message).toBe('Unauthorized');

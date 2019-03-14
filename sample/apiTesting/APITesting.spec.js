@@ -1,3 +1,4 @@
+/*global request*/
 describe('APITesting', function() {
   it('Should check page title', function() {
     expect(element(by.id('page1-title')).getText()).toBe('Hello World');

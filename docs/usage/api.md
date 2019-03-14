@@ -73,3 +73,4 @@ browser.driver.control.flow(somePromise);
 
 ## Async/Await
  In ES2017 environment,the concept of control flow is supported natively with the async/await operators. Async/await operators have a great benefit - make it easy to debug the async executions with browser/node tool. But also have a disadvantage compared to execution flow - the synchrnization is explicit and is responsibility of the test developer. Due to this explicitness, it is not possible to combine flow manager and async/await transparently, the app/test should explicitly synchronize on the interaction points.
+ 

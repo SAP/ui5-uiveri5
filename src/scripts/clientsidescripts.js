@@ -20,7 +20,7 @@ var mFunctions = {
     }
 
     /* global uiveri5 */
-    window.uiveri5 = {};
+    window.uiveri5 = window.uiveri5 || {};
 
     loadOPAControlFinder().then(function () {
       if (mScriptParams.useClassicalWaitForUI5) {
@@ -221,6 +221,42 @@ var mFunctions = {
         });
       });
     }
+  },
+
+  startLogCollection: function startLogCollection (mScriptParams) {
+    if (!window.sap || !window.sap.ui) {
+      throw new Error('startLogCollection: no UI5 on this page.');
+    }
+
+    var sError = 'Your application needs a minimum version of UI5 v1.64 to collect browser logs!';
+
+    try {
+      sap.ui.require([
+        'sap/ui/test/_BrowserLogCollector'
+      ], function (_BrowserLogCollector) {
+        window.uiveri5 = window.uiveri5 || {};
+        window.uiveri5._BrowserLogCollector = _BrowserLogCollector.getInstance();
+        window.uiveri5._BrowserLogCollector.start(mScriptParams.level);
+      }, function (oError) {
+        throw new Error(sError + ' Details: ' + oError);
+      });
+    } catch (oError) {
+      throw new Error(sError + ' Details: ' + oError);
+    }
+  },
+
+  getAndClearLogs: function getAndClearLogs () {
+    if (!window.uiveri5._BrowserLogCollector) {
+      throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
+    }
+    return window.uiveri5._BrowserLogCollector.getAndClearLogs().logs;
+  },
+
+  stopLogsCollection: function stopLogsCollection () {
+    if (!window.uiveri5._BrowserLogCollector) {
+      throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
+    }
+    return window.uiveri5._BrowserLogCollector.stop();
   }
 };
 

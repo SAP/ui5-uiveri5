@@ -228,6 +228,13 @@ exports.config = {
     {name: './defaultLocators'}
   ],
 
-  plugins: [],
-  matchers: []
+  plugins: [{
+    name: './plugins/browserLogsPlugin'
+  }],
+  matchers: [],
+  log: {
+    browser: {
+      level: 'error'
+    }
+  }
 };

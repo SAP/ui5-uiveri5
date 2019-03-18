@@ -338,12 +338,6 @@ function run(config) {
               fail(new Error('Spec with full name: ' + specFullName + ' not found'));
               return;
             }
-            
-            // disable waitForUI5() if explicitly requested
-            if (config.ignoreSync) {
-              logger.debug('Disabling client synchronization');
-              browser.waitForAngularEnabled(false);
-            }
 
             // open content page if required
             if (!spec.contentUrl) {

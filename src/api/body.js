@@ -24,5 +24,5 @@ module.exports = function(){
       };
       matchers.body = body;
     }
-  }
-}
+  };
+};

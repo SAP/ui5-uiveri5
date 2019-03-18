@@ -20,6 +20,6 @@ describe('APITesting', function() {
   it('Should make api call with auth and check response body', function() {
     var res = request.get(browser.testrunner.config.params.apiURL + '/HelloWorldServlet')
       .auth(browser.testrunner.config.params.user, browser.testrunner.config.params.pass).do();
-    expect(res).toHaveHTTPBody({"user":"Hello, " + browser.testrunner.config.params.user });
+    expect(res).toHaveHTTPBody({'user':'Hello, ' + browser.testrunner.config.params.user });
   });
 });

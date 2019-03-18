@@ -18,7 +18,7 @@ describe('API tests', function() {
     it('should execute api tests', () => {
         return Runner.execTest({
             specs: './scenario/fixture/api.spec.js',
-            confjs: './scenario/fixture/api.conf.js',
+            confjs: './scenario/api.conf.js',
             params: {
                 apiUrl: appMock.host
             }

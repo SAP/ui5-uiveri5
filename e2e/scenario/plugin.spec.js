@@ -16,7 +16,7 @@ describe('Plugin scenario test', function() {
     
     it('should load plugin', () => {
         var logInterceptor = new LogInterceptor();
-        logInterceptor.start('uiveri5 console: INFO: Plugin:');
+        logInterceptor.start('INFO: Plugin:');
 
         return Runner.execTest({
             specs: './scenario/fixture/empty.spec.js',

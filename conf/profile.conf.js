@@ -82,7 +82,7 @@ exports.config = {
       }
     },
     /* maximize browser on all desktops to ensure consistent browser size */
-    'firefox,ie,edge,safari': {
+    'firefox,ie,edge,safari,chrome,chromium': {
       'windows,mac,linux': {
         '*': {
           remoteWebDriverOptions: {
@@ -109,8 +109,7 @@ exports.config = {
         '*': {
           chromeOptions: {
             'args': [
-              'disable-infobars',
-              'start-maximized'
+              'disable-infobars'
             ]
           },
           /*

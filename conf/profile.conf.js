@@ -30,7 +30,7 @@ exports.config = {
           baseurl: 'https://chromedriver.storage.googleapis.com',
           url: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/${connectionConfigs.direct.binaries.chromedriver.version}/' +
           'chromedriver_${osTypeString}.zip',
-          latestVersionUrl: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE',
+          latestVersionUrl: 'https://cvakiitho.github.io/ui5-uiveri5/LATEST_RELEASE',
           executable: {
             win32: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}.exe',
             mac64: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}',

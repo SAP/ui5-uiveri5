@@ -1,8 +1,8 @@
-Every library contains one "visual.suite.js" file that enumerates all visual tests.
+Every library contains one `visual.suite.js` file that enumerates all visual tests.
 
 ### File Structure
 
-This diagram show the folder structure for a visual test for a control "SomeControl".
+This diagram shows a visual test folder structure for a `SomeControl` control.
 
 ``` wiki
 some.lib/
@@ -15,9 +15,9 @@ some.lib/
                     SomeControl.spec.js
 ```
 
-### Suite file - NOT IMPLEMENTED YET
+### Suite File - NOT IMPLEMENTED YET
 
-Suite file is actually a node module that is "required" from the uiveri5 runtime so it could contain JS code to evaluate some conditions when preparing the list of specs applicable for this run.
+Suite file is a node module that is required from the UIVeri5 runtime. It can contain JS code to evaluate some conditions when preparing the list of specs applicable for the run.
 
 Suite with logic:
 ``` js
@@ -38,6 +38,6 @@ module.exports = [
 ];
 ```
 
-### Resolving suites
+### Resolving Suites
 
-Each library could contain a visual.suite.js file. Libraries are discovered by reading resources/sap-ui-version.json of sapui5 app pointed by baseUrl.
+Each library can contain a `visual.suite.js` file. Libraries are discovered by reading `resources/sap-ui-version.json` of a UI5 app pointed by `baseUrl`.

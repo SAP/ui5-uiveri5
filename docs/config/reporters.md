@@ -1,6 +1,7 @@
 # Reporters
-We support several testsuite execution report types: JUnit, JSON, HTML, HTML with screenshots and console.
+We support several testsuite execution report types: JUnit, JSON, HTML, and HTML with screenshots and console.
 You can select which reporter to use in the `reporters` config file property.
+
 If you don't need to configure the reporters, you can simply set them as an array of strings, specifying the path to the reporter within the UIVeri5 folder. You can pass along options to the reporter instance when the `reporters` option is a plain object or an array of plain objects. For example, to set the `myProp` property of the reporter `myReporter` to `myValue` use:
 ```javascript
 reporters: [{name: 'myReporter', myProp: 'myValue'}]
@@ -10,12 +11,19 @@ These are the default settings for each testing profile:
 - No other reporters are currently enabled for the visual profile.
 - The screenshot reporter is enabled for the integration profile.
 
-## Console reporter
-The console reporter is activated by including the name `./reporter/consoleReporter` in the `reporters` config file option. It is enabled by default for all testing profiles and has no further configuration. It adds execution summary in the process console logs. The console reporter respects the selected verbosity level. Logs are added on spec end, on suite end and on complete execution end. When a spec ends, the failed expectations status and details are printed and in in `verbose` mode the failure stack trace is included as well. When a suite ends, a statistic of the execution is printed with respect to specs and expectations, e.g. successful and failed spec count, execution times, expectation failure counts by type, etc. When the entire test run completes, an overviall success and failure statistic is printed along with the statistic for each suite.
+## Console Reporter
+The console reporter is activated by including the name `./reporter/consoleReporter` in the `reporters` config file option. It is enabled by default for all testing profiles and has no further configuration. It adds execution summary in the process console logs. The console reporter respects the selected verbosity level.
 
-## JUnit reporter
+Logs are added on spec end, on suite end and on complete execution end. When a spec ends, the failed expectations status and details are printed and in `verbose` mode including the failure stack trace. When a suite ends, a statistic of the execution is printed with respect to specs and expectations, for example, successful and failed spec count, execution times, and expectation failure counts by type. When the entire test run completes, an overall success and failure statistic is printed along with the statistic for each suite.
+
+## JUnit Reporter
 The JUnit reporter is activated by including the name `./reporter/junitReporter` in the `reporters` config file option.
-It creates an XML file in the [JUnit format](http://llg.cubic.org/docs/junit/) which contains testsuite details and info about disabled or failed expectations. This type of report is commonly integrated in various tools, e.g. you can publish it in Jenkins using the [JUnit plugin](https://wiki.jenkins.io/display/JENKINS/JUnit+Plugin). In order to make published results more readable, we've introduced two parameters - `prefix` and `postfix` for the suite name, which are empty strings by default. One use case for them is when you have multiple executions of the same suite with different test data or on different browsers. You can differentiate the executions by having separate config files and setting the prefix and/or postfix. The default location of the report file is `target/report/junitReport.xml`. It can be changed by the `reportName` parameter. Example configuration:
+
+It creates an XML file in the [JUnit format](http://llg.cubic.org/docs/junit/) which contains testsuite details and information about disabled or failed expectations. This type of report is commonly integrated in various tools, for example you can publish it in Jenkins using the [JUnit plugin](https://wiki.jenkins.io/display/JENKINS/JUnit+Plugin).
+
+In order to make published results more readable, we've introduced two parameters - `prefix` and `postfix` for the suite name, which are empty strings by default. One use case for them is when you have multiple executions of the same suite with different test data or on different browsers. You can differentiate the executions by having separate config files and setting the prefix and/or postfix. The default location of the report file is `target/report/junitReport.xml`. It can be changed by the `reportName` parameter.
+
+Example configuration:
 ```javascript
 reporters: [{
   name: './reporter/junitReporter',
@@ -25,7 +33,7 @@ reporters: [{
 }]
 ```
 
-## JSON reporter
+## JSON Reporter
 The JSON reporter is activated by including the name `./reporter/jsonReporter` in the `reporters` config file option.
 It creates a JSON file containing the full overview of test execution. The information is similar to the console reporter output and includes suites and specs statistics and failed expectation details. By default the location of the report file is `target/report/report.json` but it can be changed by setting the `reportName` parameter:
 ```javascript
@@ -34,9 +42,10 @@ reporters: [
 ]
 ```
 
-## HTML reporter
+## HTML Reporter
 The HTML reporter is activated by including the name `./reporter/htmlReporter` in the `reporters` config file option.
-It is inteded to be used with the visual testing profile. It contains suite statistics and failed expectation details similar to the JSON report. In addition, it displays the images for each visual comparison: reference, actual and diff images for each failure and reference image for each success. You can use a different HTML template if you need to visually customize the report. By default the location of the report file is `target/report/report.html` and the template HTML is `./reporter/report.tpl.html`. They can be changed by setting respectively the `reportName` and `templateName` parameters:
+
+It is inteded to be used with the visual testing profile. It contains suite statistics and failed expectation details similar to the JSON report. In addition, it displays the images for each visual comparison: reference, actual and diff images for each failure and reference image for each success. You can use a different HTML template if you need to visually customize the report. By default, the location of the report file is `target/report/report.html` and the template HTML is `./reporter/report.tpl.html`. They can be changed by setting respectively the `reportName` and `templateName` parameters:
 ```javascript
 reporters: [{
   name: './reporter/htmlReporter',
@@ -45,11 +54,11 @@ reporters: [{
 }]
 ```
 
-## HTML screenshot reporter
+## HTML Screenshot Reporter
 The HTML screenshot reporter is activated by including the name `./reporter/screenshotReporter` in the `reporters` config file option. Screenshot reporting is enabled for application testing by default.
 The screenshot reporter creates an HTML file with a simple representation of the test execution flow. It creates and stores screenshots on specified moments of test execution:
 - on expectation completion (either successful or failed)
-- before action execution (after syncing with the application and immediately before interaction). The currently supported actions are: click and sendKeys.
+- before action execution (after syncing with the application and immediately before interaction). The currently supported actions are: `click` and `sendKeys`.
 
 Screenshots are in png format and follow the naming convention:
 - for expectations: fullTestName_indexOfTestExpectation_status_screenshotCreationTime
@@ -61,8 +70,11 @@ reporters: [
   {name: './reporter/screenshotReporter', screenshotsRoot: 'myScreenshots/'}
 ]
 ```
-You can configure when screenshots will be taken. Currently the available options are: on expectation failure, on expectation success and on action (including both click and sendKeys).
-Reports can configured by adding the screenshotReporter and setting the takeScreenshot option, for example:
+You can configure when screenshots are taken. Currently the available options are: on expectation failure, on expectation success, and on action (including both `click` and `sendKeys`).
+
+Reports can be configured by adding the `screenshotReporter` and setting the `takeScreenshot` option.
+
+Example:
 ```javascript
 takeScreenshot: {
   onExpectFailure: true,
@@ -71,8 +83,8 @@ takeScreenshot: {
 }
 ```
 
-## Add reporter from command line:
-* add reporter
+## Reporter from Command Line:
+* add reporter:
 ```
 --confKeys=reporters[1].reportName:"target/report/jsonReport.json";reporters[1].name:"./reporter/jsonReporter";
 ```

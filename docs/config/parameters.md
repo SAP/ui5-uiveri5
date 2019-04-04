@@ -1,8 +1,8 @@
 # Paramaters 
-Parameters are used in the tests scripts.
+Parameters are used in the test scripts.
 
-## Passing params to test
-Define in conf.js file
+## Passing Params to Test
+Define in conf.js file:
 ```javascript
 exports.config = {
   params: {
@@ -14,12 +14,12 @@ exports.config = {
 };
 ```
 
-Override from command line or define new params
+Override from command line or define new params:
 ```
 $ uiveri5 --params.someKey=redefineSomeValue --params.anotherKey.anotherSecondLevelKey=anotherSecondLevelValue
 ```
 
-## Using paramaters in test
+## Using Paramaters in Test
 ```javascript
 if('should check something',function(){
   if(browser.testrunner.config.params.someKey) {

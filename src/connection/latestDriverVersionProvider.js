@@ -1,5 +1,6 @@
 var q = require('q');
 var request = require('request');
+var _ = require('lodash');
 
 function LatestDriverVersionProvider(config, instanceConfig, logger) {
   this.logger = logger;
@@ -10,7 +11,7 @@ LatestDriverVersionProvider.prototype.getLatestVersion = function (binary) {
   return that._getLatestMajorVersion(binary)
     .then(function (result) {
       if (result.latestMajorVersion) {
-        binary.latestVersionUrl = binary.latestVersionUrlForMajor.replace('{majorVersion}', result.latestMajorVersion);
+        binary.latestVersionUrl = binary.latestVersionUrl.replace(/{.*latest}/g, result.latestMajorVersion);
       }
       return that._getLatestDriverVersion(binary);
     });
@@ -21,16 +22,17 @@ LatestDriverVersionProvider.prototype._getLatestMajorVersion = function (binary)
 
   that.logger.info('Check for latest major version of: ' + binary.filename);
   return q.Promise(function (resolveFn, rejectFn) {
-    if (binary.majorVersionUrl) {
+    if (binary.latestVersionFileUrl) {
       request({
-        url: binary.majorVersionUrl
+        url: binary.latestVersionFileUrl
       }, function (error, res, body) {
         if (_hasError(error, res)) {
           rejectFn(_getErrorObject(error, res, binary.filename, 'the latest major version number'));
         } else {
-          that.logger.info('Found latest major version of ' + binary.filename + ': ' + body);
+          var latestMajorVersion = _parseVersionNumber(body, binary.version);
+          that.logger.info('Found latest major version of ' + binary.filename + ': ' + latestMajorVersion);
           resolveFn({
-            latestMajorVersion: _sanitizeBody(body)
+            latestMajorVersion: latestMajorVersion
           });
         }
       });
@@ -86,9 +88,11 @@ function _getErrorObject(error, res, filename, info) {
       (res && res.statusCode ? (', status code: ' + res.statusCode) : '')));
 }
 
-function _sanitizeBody(body) {
+function _parseVersionNumber(body, versionName) {
+  var pathToNumber = versionName.replace(/{|}/g, '');
   if (body && typeof body === 'string') {
-    var number = body.trim();
+    var jsonBody = JSON.parse(body);
+    var number = _.get(jsonBody, pathToNumber, '').toString().trim();
     if (number.match(/^([0-9]+\.*)+$/)) {
       return number;
     }

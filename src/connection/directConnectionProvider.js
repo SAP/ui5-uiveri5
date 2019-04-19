@@ -13,6 +13,8 @@ var tar = require('tar');
 var ConnectionProvider = require('./../interface/connectionProvider');
 var LatestDriverVersionProvider = require('./latestDriverVersionProvider');
 
+var LATEST_VERSION_REGEXP = /{.*latest}/g;
+
 /**
  * @typedef DirectConnectionProviderConfig
  * @type {Object}
@@ -206,15 +208,15 @@ DirectConnectionProvider.prototype._getLatestVersion = function(binary) {
   return this.latestDriverVersionProvider.getLatestVersion(binary)
     .then(function (result) {
       binary.version = result.latestVersion;
-      binary.executable = binary.executable.replace('{latest}', result.latestVersion);
+      binary.executable = binary.executable.replace(LATEST_VERSION_REGEXP, result.latestVersion);
       return binary;
     });
 };
 
 DirectConnectionProvider.prototype._downloadDriver = function(binary) {
   var that = this;
-  binary.url = binary.url.replace(/{latest}/g, binary.version);
-  binary.executable = binary.executable.replace('{latest}', binary.version);
+  binary.url = binary.url.replace(LATEST_VERSION_REGEXP, binary.version);
+  binary.executable = binary.executable.replace(LATEST_VERSION_REGEXP, binary.version);
 
   return q.Promise(function(resolveFn, rejectFn) {
     that.logger.info('Downloading webdriver binary: ' + binary.url);
@@ -305,7 +307,7 @@ DirectConnectionProvider.prototype._downloadBinary = function(binary) {
     binary.executable =  root + '/' + binary.executable;
   }
 
-  if(_.isString(binary.version) && binary.version.indexOf('latest') >= 0){
+  if(_.isString(binary.version) && binary.version.match(LATEST_VERSION_REGEXP)){
     return that._getLatestVersion(binary).then(function(){
       return that._checkIfBinaryExists(binary);
     });

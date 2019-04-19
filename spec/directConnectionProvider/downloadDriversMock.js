@@ -17,6 +17,18 @@ function DownloadDriversMock() {
     res.send('1.0');
   });
 
+  this.app.get('/driverVersions.json', function(req, res) {
+    res.json({
+      chrome: {
+        latest: '73'
+      }
+    });
+  });
+
+  this.app.get('/LATEST_RELEASE_73', function(req, res) {
+    res.send('73.4');
+  });
+
   // response for geckodriver
   this.app.get('/latest', function(req, res) {
     res.redirect('/geckodriver/2.0');

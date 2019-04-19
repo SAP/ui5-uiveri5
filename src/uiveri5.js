@@ -270,31 +270,51 @@ function run(config) {
 
       });
 
-      // override with added logging and parameter manipulation
+      // used in protractor for many scripts and notably for waitForAngular
+      // override with added logging
       var origExecuteAsyncScript_= browser.executeAsyncScript_;
       browser.executeAsyncScript_ = function() {
+        var code = arguments[0];
+        var scriptName = arguments[1];
+        var params = arguments[2];
         // log script execution
-        logger.trace('Execute async script: ${name}, code:\n ${JSON.stringify(code)}',
-          {name:  arguments[1], code: arguments[0]});
-        // override the timeout used by waitForAngular
-        arguments[2] = JSON.stringify({
-          waitForUI5Timeout: waitForUI5Timeout
-        });
+        logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params) + ' with code: \n' + JSON.stringify(code));
         //call original function in its context
-        return origExecuteAsyncScript_.apply(browser, arguments);
+        return origExecuteAsyncScript_.apply(browser, arguments)
+          .then(function(res) {
+            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res));
+            return res;
+          },function(error) {
+            logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(error));
+            throw error;
+          })
+      };
+
+      browser.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName,params) {
+        var code = clientsidescripts[scriptName];
+        logger.debug('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+        logger.trace('Execute async script code: \n' + JSON.stringify(code));
+        params = params || {};
+        return browser.executeAsyncScript(code,params)
+          .then(function (res) {
+            if (res.log) {
+              logger.debug('Async script: ' + scriptName + ' logs: \n' + res.log);
+            }
+            if (res.error) {
+              logger.debug('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
+              throw new Error(scriptName + ': ' + res.error);
+            }
+            logger.debug('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
+            return res.value;
+          });
       };
 
       browser.loadUI5Dependencies = function () {
-        return browser.executeAsyncScript(clientsidescripts.loadUI5Dependencies, {
+        return browser.executeAsyncScriptHandleErrors('loadUI5Dependencies', {
           waitForUI5Timeout: waitForUI5Timeout,
           waitForUI5PollingInterval: config.timeouts.waitForUI5PollingInterval,
           ClassicalWaitForUI5: ClassicalWaitForUI5,
           useClassicalWaitForUI5: config.useClassicalWaitForUI5
-        }).then(function (res) {
-          logger.debug('loadUI5Dependencies: ' + res.log);
-          if (res.error) {
-            throw new Error('loadUI5Dependencies: ' + res.error);
-          }
         });
       };
 

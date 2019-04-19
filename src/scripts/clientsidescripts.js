@@ -10,10 +10,7 @@ var mFunctions = {
   // fnCallback will be called with an object argument
   // which will always have a 'log' and will have 'error' only when loading of dependensies was unsuccessful
   loadUI5Dependencies: function loadUI5Dependencies (mScriptParams, fnCallback) {
-    var sDebugLog = 'Loading waitForUI5 implementation, params: ' +
-      'useClassicalWaitForUI5: '  +  mScriptParams.useClassicalWaitForUI5 +
-      ' ,waitForUI5Timeout: ' + mScriptParams.waitForUI5Timeout + 'ms' +
-      ' ,waitForUI5PollingInterval: ' + mScriptParams.waitForUI5PollingInterval + 'ms';
+    var sDebugLog = 'Loading waitForUI5 implementation';
 
     if (!window.sap || !window.sap.ui) {
       fnCallback({log: sDebugLog, error: 'No UI5 on this page'});
@@ -194,32 +191,45 @@ var mFunctions = {
     };
   },
 
-  hideScrollbars: function hideScrollbars () {
-    if ($) {
+  hideScrollbars: function hideScrollbars (mScriptParams,fnCallback) {   
+    if (window.$) {
       hideScrollbars();
     } else if (window.sap && window.sap.ui) {
       sap.ui.require([
         'sap/ui/thirdparty/jquery'
       ], function (jQuery) {
-        window.$ = jQuery;
-        hideScrollbars();
+          window.$ = jQuery;
+          hideScrollbars();
+      }, function (error) {
+        fnCallback({error: 'Error while loading jquery module, details: ' + error});
       });
     }
 
     function hideScrollbars() {
-      $('*').each(function (iIndex, oDOMElement) {
-        var oElement = $(oDOMElement);
-        ['overflow', 'overflow-x', 'overflow-y'].forEach(function (sAttribute) {
-          // force style and layout recalculations
-          /* eslint no-unused-vars: 0 */
-          var scrollTop = oDOMElement.clientTop;
-          var sValue = oElement.css(sAttribute);
-          while (sValue && ['hidden', 'visible'].indexOf(sValue) < 0) {
-            oElement.css(sAttribute, 'hidden');
-            sValue = window.getComputedStyle(oDOMElement)[sAttribute];
-          }
+      try {
+        var elements = $('*');
+        var log = 'Processing: ' + elements.length + ' elements';
+        elements.each(function (iIndex, oDOMElement) {
+          var oElement = $(oDOMElement);
+          ['overflow', 'overflow-x', 'overflow-y'].forEach(function (sAttribute) {
+            // force style and layout recalculations
+            /* eslint no-unused-vars: 0 */
+            var scrollTop = oDOMElement.clientTop;
+            var sValue = oElement.css(sAttribute);
+            while (sValue && (['hidden', 'visible'].indexOf(sValue) < 0)) {
+              oElement.css(sAttribute, 'hidden');
+              sValue = window.getComputedStyle(oDOMElement)[sAttribute];
+              if (sValue === 'auto') {
+                log += '\nElement with id: ' + oDOMElement.id + ' has attribute: ' + sAttribute + ' that stays: ' + sValue;
+                break;
+              }
+            }
+          });
         });
-      });
+        fnCallback({log: log});
+      } catch (error) {
+        fnCallback({error: 'Error while processing dom, details: ' + error});
+      }
     }
   },
 

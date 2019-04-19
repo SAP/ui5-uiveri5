@@ -27,10 +27,7 @@ function ScreenshotSetup(config, logger) {
   this._hideScrollbars = function () {
     if (config.hideScrollbars) {
       logger.debug('Hide page scrollbars');
-      return browser.executeScript(clientsidescripts.hideScrollbars)
-        .catch(function (oError) {
-          logger.debug('Could not hide scrollbars. Details: ' + oError);
-        });
+      return browser.executeAsyncScriptHandleErrors('hideScrollbars');
     } else {
       return webdriver.promise.fulfilled();
     }

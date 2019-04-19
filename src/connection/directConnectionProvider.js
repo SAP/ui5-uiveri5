@@ -11,6 +11,7 @@ var AdmZip = require('adm-zip');
 var tar = require('tar');
 
 var ConnectionProvider = require('./../interface/connectionProvider');
+var LatestDriverVersionProvider = require('./latestDriverVersionProvider');
 
 /**
  * @typedef DirectConnectionProviderConfig
@@ -45,6 +46,7 @@ function DirectConnectionProvider(config,instanceConfig,logger) {
   this.binaries = instanceConfig.binaries;
 
   this.runtimes = [];
+  this.latestDriverVersionProvider = new LatestDriverVersionProvider(config, instanceConfig, logger);
 }
 DirectConnectionProvider.prototype = _.create(ConnectionProvider.prototype,{
   'constructor': DirectConnectionProvider
@@ -201,39 +203,12 @@ DirectConnectionProvider.prototype.setupEnv = function() {
 };
 
 DirectConnectionProvider.prototype._getLatestVersion = function(binary) {
-  var that = this;
-
-  that.logger.info('Check for latest version of: ' + binary.filename);
-  return q.Promise(function(resolveFn, rejectFn) {
-    request({url: binary.latestVersionUrlRedirect || binary.latestVersionUrl}, function(error, res, body) {
-      if(error || res.statusCode != 200) {
-        rejectFn(new Error('Error while getting the latest version number for ' + binary.filename +  
-          (error ? (', error: ' + error) : 
-            (res && res.statusCode ? (', status code: ' + res.statusCode) : ''))));
-      } else {
-        var latestVersion;
-
-        // resolve latest version
-        if(binary.latestVersionUrl) {
-          latestVersion = body;
-        } else if(binary.latestVersionUrlRedirect) {
-          // request to the latest version is redirected to the latest release, so get the version from req.path
-          var redirectPath = res.req.path.split('/');
-          latestVersion = redirectPath[redirectPath.length - 1];
-        } 
-
-        if (!latestVersion) {
-          rejectFn(new Error('Latest version resolving is not configured correctly, one of latestVersionUrl: ' + binary.latestVersionUrl + 
-          ' or latestVersionUrlRedirect: ' + binary.latestVersionUrlRedirect + ' should be provided'));
-        } else {
-          that.logger.info('Found latest webdriver version: ' + latestVersion);
-          binary.version = latestVersion;
-          binary.executable = binary.executable.replace('{latest}',latestVersion);
-          resolveFn(binary);
-        }
-      }
+  return this.latestDriverVersionProvider.getLatestVersion(binary)
+    .then(function (result) {
+      binary.version = result.latestVersion;
+      binary.executable = binary.executable.replace('{latest}', result.latestVersion);
+      return binary;
     });
-  });
 };
 
 DirectConnectionProvider.prototype._downloadDriver = function(binary) {

@@ -31,6 +31,8 @@ exports.config = {
           url: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/${connectionConfigs.direct.binaries.chromedriver.version}/' +
           'chromedriver_${osTypeString}.zip',
           latestVersionUrl: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE',
+          majorVersionUrl: 'https://raw.githubusercontent.com/SAP/ui5-uiveri5/e406bd297a6a4eb95775f17e39bf3bddd7b9da0b/chromedriver.version',
+          latestVersionUrlForMajor: '${connectionConfigs.direct.binaries.chromedriver.latestVersionUrl}_{majorVersion}',
           executable: {
             win32: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}.exe',
             mac64: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}',

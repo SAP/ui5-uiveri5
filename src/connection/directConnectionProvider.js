@@ -11,7 +11,7 @@ var AdmZip = require('adm-zip');
 var tar = require('tar');
 
 var ConnectionProvider = require('./../interface/connectionProvider');
-var LatestDriverVersionProvider = require('./latestDriverVersionProvider');
+var LatestDriverVersionResolver = require('./latestDriverVersionResolver');
 
 var LATEST_VERSION_REGEXP = /{.*latest}/g;
 
@@ -48,7 +48,9 @@ function DirectConnectionProvider(config,instanceConfig,logger) {
   this.binaries = instanceConfig.binaries;
 
   this.runtimes = [];
-  this.latestDriverVersionProvider = new LatestDriverVersionProvider(config, instanceConfig, logger);
+  this.latestDriverVersionResolver = new LatestDriverVersionResolver(config, {
+    latestVersionRegexp: LATEST_VERSION_REGEXP
+  }, logger);
 }
 DirectConnectionProvider.prototype = _.create(ConnectionProvider.prototype,{
   'constructor': DirectConnectionProvider
@@ -205,7 +207,7 @@ DirectConnectionProvider.prototype.setupEnv = function() {
 };
 
 DirectConnectionProvider.prototype._getLatestVersion = function(binary) {
-  return this.latestDriverVersionProvider.getLatestVersion(binary)
+  return this.latestDriverVersionResolver.getLatestVersion(binary)
     .then(function (result) {
       binary.version = result.latestVersion;
       binary.executable = binary.executable.replace(LATEST_VERSION_REGEXP, result.latestVersion);

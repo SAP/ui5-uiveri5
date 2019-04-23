@@ -1,5 +1,4 @@
 var webdriver = require('selenium-webdriver');
-var clientsidescripts = require('../scripts/clientsidescripts');
 
 // "environment" setup on different stages of a screenshot creation
 // has methods to modify element state, browser state, etc
@@ -27,10 +26,7 @@ function ScreenshotSetup(config, logger) {
   this._hideScrollbars = function () {
     if (config.hideScrollbars) {
       logger.debug('Hide page scrollbars');
-      return browser.executeScript(clientsidescripts.hideScrollbars)
-        .catch(function (oError) {
-          logger.debug('Could not hide scrollbars. Details: ' + oError);
-        });
+      return browser.executeAsyncScriptHandleErrors('hideScrollbars');
     } else {
       return webdriver.promise.fulfilled();
     }

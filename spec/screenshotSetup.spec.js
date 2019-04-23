@@ -31,7 +31,7 @@ describe('ScreenshotSetup', function() {
 
   it('Should hide scrollbars before screenshot', function (done) {
     var screenshotSetup = new ScreenshotSetup({hideScrollbars: 1000}, logger);
-    var scriptSpy = spyOnBrowser('executeScript');
+    var scriptSpy = spyOnBrowser('executeAsyncScriptHandleErrors');
     screenshotSetup.beforeScreenshot()
         .then(function () {
             expect(scriptSpy.calledOnce).toBeTruthy();
@@ -42,7 +42,7 @@ describe('ScreenshotSetup', function() {
   it('Should skip steps if none configured', function (done) {
     var screenshotSetup = new ScreenshotSetup({}, logger);
     var sleepSpy = spyOnBrowser('sleep');
-    var scriptSpy = spyOnBrowser('executeScript');
+    var scriptSpy = spyOnBrowser('executeAsyncScriptHandleErrors');
     screenshotSetup.beforeScreenshot()
         .then(function () {
             expect(sleepSpy.calledOnce).toBeFalsy();

@@ -198,8 +198,8 @@ var mFunctions = {
       sap.ui.require([
         'sap/ui/thirdparty/jquery'
       ], function (jQuery) {
-          window.$ = jQuery;
-          hideScrollbars();
+        window.$ = jQuery;
+        hideScrollbars();
       }, function (error) {
         fnCallback({error: 'Error while loading jquery module, details: ' + error});
       });

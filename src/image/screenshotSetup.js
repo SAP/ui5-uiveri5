@@ -1,5 +1,4 @@
 var webdriver = require('selenium-webdriver');
-var clientsidescripts = require('../scripts/clientsidescripts');
 
 // "environment" setup on different stages of a screenshot creation
 // has methods to modify element state, browser state, etc

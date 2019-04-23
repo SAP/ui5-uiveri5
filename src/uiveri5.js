@@ -287,7 +287,7 @@ function run(config) {
           },function(error) {
             logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(error));
             throw error;
-          })
+          });
       };
 
       browser.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName,params) {

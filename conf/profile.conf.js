@@ -24,13 +24,14 @@ exports.config = {
           '${connectionConfigs.direct.binaries.selenium.patch}.jar'
         },
         chromedriver: {
-          version: '{latest}',
+          version: '{chrome.latest}',
           unzip: true,
           filename: '${osTypeString == "win32" ? "chromedriver.exe" : "chromedriver"}',
           baseurl: 'https://chromedriver.storage.googleapis.com',
           url: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/${connectionConfigs.direct.binaries.chromedriver.version}/' +
           'chromedriver_${osTypeString}.zip',
-          latestVersionUrl: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE',
+          latestVersionUrl: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE_${connectionConfigs.direct.binaries.chromedriver.version}',
+          latestVersionFileUrl: 'https://raw.githubusercontent.com/SAP/ui5-uiveri5/master/driverVersions.json',
           executable: {
             win32: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}.exe',
             mac64: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}',

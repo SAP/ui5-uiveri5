@@ -21,6 +21,15 @@ describe('DirectConnectionProvider', function() {
             baseurl: mockUrl,
             latestVersionUrl: mockUrl + '/LATEST_RELEASE'
           },
+          chromedriverGHConfig:
+          {
+            version: '{chrome.latest}',
+            latestVersionFileUrl: mockUrl + '/driverVersions.json',
+            filename: 'chromedriver',
+            executable: 'chromedriver-{chrome.latest}',
+            baseurl: mockUrl,
+            latestVersionUrl: mockUrl + '/LATEST_RELEASE_{chrome.latest}'
+          },
         geckodriver:
           {
             version: '{latest}',
@@ -42,6 +51,16 @@ describe('DirectConnectionProvider', function() {
     version.then(function(result){
       expect(directConnectionProvider.binaries.chromedriver.version).toBe('1.0');
       expect(directConnectionProvider.binaries.chromedriver.executable).toBe('chromedriver-1.0');
+      done();
+    })
+  });
+
+  it('Should get the latest chromedriver version for a given chrome major version', function(done) {
+    var version = directConnectionProvider._getLatestVersion(binaries.chromedriverGHConfig);
+    version.then(function(result){
+      expect(directConnectionProvider.binaries.chromedriverGHConfig.version).toBe('73.4');
+      expect(directConnectionProvider.binaries.chromedriverGHConfig.executable).toBe('chromedriver-73.4');
+      expect(directConnectionProvider.binaries.chromedriverGHConfig.latestVersionUrl).toBe(mockUrl + '/LATEST_RELEASE_73');
       done();
     })
   });

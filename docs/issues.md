@@ -1,21 +1,21 @@
-# Installation issues
+# Installation Issues
 
-## npm show errors mentioning node-gyp and PYTHON but tool is installed
+## npm shows errors mentioning node-gyp and PYTHON but tool is installed
 ### Short:
-If overall installation status is success, you could safely ignore them.
+If overall installation status is successful, you can safely ignore them.
 ### Long:
-uiveri5 depends on some modules that themselves depend on native code like bufferutils.
-During installation npm calls node-gyp that tries to build the native code to executable. But this usually
+UIVeri5 depends on some modules that themselves depend on native code-like BufferUtils.
+During installation, npm calls node-gyp while it tries to build the native code to executable. This usually
 fails because build tools line python and VC++ are not installed. Anyway, the native code is only optional and is used
-to speedup the execution and all the relevant modules have pure js implementations. Thats why the overall installation
-succeeds and uiveri5 works fine.
+to speed up the execution and all the relevant modules have pure js implementations. That's why the overall installation
+succeeds and UIVeri5 works fine.
 
-## npm show errors mentioning node-gyp and PYTHON, tool is not installed
-Some versions of npm have issues with failures in optional dependencies. So you could retry the installation with
+## npm shows errors mentioning node-gyp and PYTHON, tool is not installed
+Some versions of npm have issues with failures in optional dependencies. So you could retry the installation by using the
 '--no-optional' argument.
 
 ## npm shows error mentioning "code ECONNRESET"
-If your have a proxy configuration but the proxy is not working for internet access you could get
+If you have a proxy configuration but the proxy is not working for internet access you could get
 a network error similar to: "network tunneling socket could not be established, cause=connect ECONNREFUSED <ip>:<port>
 where <ip> and <port> are the ones of your proxy. To solve it, just remove your proxy settings.
 ``` Windows
@@ -28,9 +28,9 @@ npm config delete https-proxy
 ```
 
 ## npm downloads dependecies really slow and fails randomly with git errors
-Please ensure you have git installed. Be sure to install Git for windows to run in the __regular command prompt__ also.
-Make sure you have proxy configured for both git and npm. You could copy the following commands to proxy.bat and execute
-it in the same console before operations requiring public internet access from git or npm.
+Please ensure you have Git installed. Also, be sure to install Git for windows to run in the __regular command prompt__ also.
+Make sure you have proxy configured for both Git and npm. You could copy the following commands to the proxy.bat file and execute
+it in the same console before operations requiring public internet access from Git or npm.
 ``` Windows
 REM configure git
 set HTTP_PROXY=http://proxy:8080
@@ -40,6 +40,6 @@ npm config set proxy http://proxy:8080
 npm config set https-proxy http://proxy:8080
 ```
 
-## uieri5 fails with java not found
-uiveri5 uses webdriverjs and it could start selenium-server-standalone.jar for local usecase. So you either need java so
-that selenium standalone could run or you need to run your test against remote selenium hub or remote cloud provider.
+## UIVeri5 fails with Java not found
+UIVeri5 uses WebDriverJs and it could start selenium-server-standalone.jar for local use case. So, you either need Java so
+that Selenium Standalone could run, or you need to run your test against a remote Selenium hub or a remote cloud provider.

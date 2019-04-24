@@ -102,5 +102,12 @@ git tag v1.xx.y
 
 * Push the new tag
 ```
-git push --follow-tags upstream release:master
+git push --tags upstream release:master
+```
+
+* Create new release in Github UI
+
+* Push the new release to npm
+```
+npm publish
 ```

@@ -1,7 +1,7 @@
 ### Page Objects (PO)
-Frequently there is advantage in gathering selectors in a semantical objects that describe the structure of the
-page to be tested. This approach have many benefits, like simplifying the understanding of the test, simplifying
-potential modifications. Object literal notation in JavaScript gives allowys simple and expressive syntax for PO
+Frequently, there'a an advantage in gathering selectors in a semantical objects that describe the structure of the
+page to be tested. This approach has many benefits, such as simplifying the understanding of the test and simplifying
+potential modifications. Object literal notation in JavaScript gives allways simple and expressive syntax for PO
 declaration and usage.
 
 Declare POs:
@@ -27,11 +27,11 @@ it('should load the Start Screen', function () {
 });
 ```
 
-#### POs in common file
+#### POs in Common File
 If several test scripts interact with a single page, it would be nice to extract the POs to separate files.
 They could be referenced from every test script that needs them. Test scripts are effectively
-[node modules](https://nodejs.org/api/modules.html) and could use arbitrary [nodejs](https://nodejs.org/en/about/)
-functinality.
+[node modules](https://nodejs.org/api/modules.html) and could use arbitrary [Node.js](https://nodejs.org/en/about/)
+functinalities.
 
 Declare PO:
 ```javascript
@@ -62,7 +62,8 @@ describe('Fiori_MM', function () {
 });
 ```
 #### Heavyweight POs
-Sometimes you can go further in logic isolation by moving all the interaction and assertions to page object methods, leaving only the step sequence in the spec. This leads to self-explanatory test code and improved reusability and separation of concerns.
+Sometimes, you can go further in logic isolation by moving all the interactions and assertions to PO methods leaving only the step sequence in the spec. This leads to self-explanatory test code and improved reusability and separation of concerns.
+
 Write page interactions:
 ```javascript
 // pages/shell.view.js:
@@ -92,8 +93,13 @@ describe('Fiori_MM', function () {
 ```
 
 #### BDD
-From heavyweight POs you can move on to writing BDD-style tests that read as a description of the user experience with the application. UIVeri5 provides a basis for writing BDD style tests using the Given-When-Then formula. It is an example implementation that is easy and ready to use. All you need to do is separate your PO into `arrangements`, `actions` and `assertions` sections and add it to the framework using `createPageObjects`, preferably in `beforeAll`. CreatePageObjects accepts a map of multiple page object definitions. Then for example, you can access the method 'iClickTheButton' of the page with name 'start' using When.onTheStartPage.iClickTheButton(). The structure is kept close to the idea of OPA5's [page objects](https://openui5.hana.ondemand.com/#/topic/ce4b180d97064ad088a901b53ed48b21)
-Create page object:
+From heavyweight POs, you can move on to writing BDD-style tests that read as a description of the user experience with the application.
+
+UIVeri5 provides a basis for writing BDD-style tests using the Given-When-Then formula. It is an example implementation that is easy and ready to use. All you need to do is separate your PO into `arrangements`, `actions`, and `assertions` sections and add it to the framework using `createPageObjects`, preferably in `beforeAll`.
+
+`createPageObjects` accepts a map of multiple page object definitions. Then, for example, you can access the method `iClickTheButton` of the page with name `start` by using `When.onTheStartPage.iClickTheButton()`. The structure is kept close to the idea of OPA5's [page objects](https://openui5.hana.ondemand.com/#/topic/ce4b180d97064ad088a901b53ed48b21).
+
+Create PO:
 ```javascript
 // pages/shell.view.js:
 var userName = element(by.css('.sapUshellShell .sapUShellShellHeader .sapUShellShellHeadUsrItmName'));
@@ -119,7 +125,7 @@ module.exports = createPageObjects({
   }
 });
 ```
-Include page objects and describe test steps:
+Include POs and describe test steps:
 ```javascript
 // purchaseOrder.spec.js
 var shellPageObject = require('./pages/shell.view');

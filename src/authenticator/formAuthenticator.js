@@ -40,6 +40,17 @@ FormAuthenticator.prototype.get = function(url){
   // open the page
   browser.driver.get(url);
 
+  // handle tenanat selection step
+  if (this.tenantSelector) {
+    browser.driver.wait(function(){
+      return browser.driver.findElements(by.css(that.tenantSelector)).then(function (elements) {
+        return !!elements.length;
+      });
+    },browser.getPageTimeout,'Waiting for tenant select page to fully load');
+
+    browser.driver.findElement(by.css(this.tenantLink).click());
+  } 
+
   // wait till redirection is complete and page is fully rendered
   var switchedToFrame = false;
   browser.driver.wait(function(){

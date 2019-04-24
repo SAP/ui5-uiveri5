@@ -1,22 +1,23 @@
 # Configuration
 
-## Config file
-Config file is a node module that exports a single 'config' object.
-Config file could reference a profile that contains a meaningfull defaults for this usecase. If missing, the default profile 'integration' is used. 
+## Config File
+Config file is a node module that exports a single `config` object.
+Config file could reference a profile that contains a meaningfull defaults for this usecase. If missing, the default `integration` profile is used.
+
 Available profiles are:
-* integration - default profile for e2e tests
+* integration - default profile for E2E tests
 * visual - profile for visual tests
 
-If config file is not provided on command line, a file with name 'conf.js' is looked up in the current working directory.
-If found, it is used. If not found, the default conf/default.conf.js file is used.
+If config file is not provided on command line, a file with name `conf.js` is looked up in the current working directory.
+If found, it is used, otherwise the default conf/default.conf.js file is used.
 
-## Command-line arguments
-Command-line arguments override options from config file. 
-Check how to specify them in [Command-line arguments](console.md)
+## Command-line Arguments
+Command-line arguments override options from the config file. 
+For more information on how to specify them, see [Command-line arguments](console.md).
 
 ## Browsers
 Browser runtime is an object that specifies the browser and platform on which to execute the test. 
-You could specify only few of the properties of a runtime. The rest will be derived if possible or wildcards will be assumed. 
+You can specify only a few of the properties of a runtime. The rest are derived if possible or wildcards are assumed.
 
 Values and defaults:
 * browserName - one of (chrome|firefox|ie|safari|edge), browser name, default: chrome
@@ -46,7 +47,7 @@ Specify chrome mobile emulator:
 ```
 $ uiveri5 --browsers=chromeMobileEmulation
 ```
-This will start yor deskyop chrome with mobile emulation (default screen confoiguration is matching “Samsung Galaxy S7”).
+This starts your desktop chrome with mobile emulation (default screen configuration is matching “Samsung Galaxy S7”).
 
 Specify chrome headless:
 ```
@@ -55,34 +56,32 @@ $ uiveri5 --browsers=chromeHeadless
 
 ## Execution
 
-### Local execution
-By default, UIveri5 will download the latest webdriver and start a local browser directly.
-It is possible to start selenium jar webdriver to control the local webdriver with setting _useSeleniumJar_ parameter to true.
-Automatically resolved free port will be used for the locally started webdriver and it could be overwritten by _seleniumPort_ configuration.
+### Local Execution
+By default, UIveri5 downloads the latest WebDriver and starts a local browser directly.
+It is possible to start Selenium jar WebDriver to control the local WebDriver with setting `useSeleniumJar` parameter to `true`.
+Automatically resolved free port is used for the locally started WebDriver and it can be overwritten by the `seleniumPort` configuration.
 
-### Remote execution
-If _seleniumAddress_ is provided (either in conf.js or on command line) uiveri5 will connect to this address.
-The remote connection could use http proxy server specified in _seleniumAddressProxy_.
+### Remote Execution
+If `seleniumAddress` is provided (either in conf.js or on command line), UIVeri5 connects to this address.
+The remote connection could use HTTP proxy server specified in `seleniumAddressProxy`.
 
-#### Timeout starting webdriver
-In some specific network cases(e.g. multi homed machines), starting webdriver locally may fail with a timeout. The timeout is caused by the fact that selenium by default binds to first/primary IP. But if the machine has several IPs like in the case of active VPN, the webdriver may wrongly try to connect to some of the other adresses and never succeeds. The workaround for this case is to set the _seleniumLoopback_ parameter to _true_.
+#### Timeout Starting WebDriver
+In some specific network cases (e.g. multi homed machines), starting WebDriver locally may fail with a timeout. The timeout is caused by the fact that Selenium binds to first/primary IP by default. But if the machine has several IPs, such as in the case of active VPN, the WebDriver may incorrectly try to connect to some of the other adresses and never succeed. The workaround for this case is to set the `seleniumLoopback` parameter to `true`.
 
 ## Drivers
-Each browser requires a specific native webdriver. Webdrivers configuration is documented in [Drivers](drivers.md)
+Each browser requires a specific native WebDriver. For more information on configuring WebDriver, see [Drivers](drivers.md).
 
 ## Parameters 
-Parameters are used in the tests scripts. Check how to use them in [Parameters](parameters.md)
+Parameters are used in the test scripts. For more information on how to use them, see [Parameters](parameters.md).
 
 ## Authentication
-UIveri5 support authentication for accessing the test pages with declarative configuration. The most common authentication scenarious like SAP Cloud, SAP IDM and Fiori Launchpad are support out of the box. Custom authentication schemes are also supported. For advanced setups, programatic authentication is also supported.
-Check how to configure authentication in [Authentication](authentication.md)
+UIveri5 support authentication for accessing the test pages with declarative configuration. The most common authentication scenarious, such as SAP Cloud, SAP IDM and SAP Fiori Launchpad are supported out of the box. Custom authentication schemes are also supported. For advanced setups, programatic authentication is also supported. For more information, see [Authentication](authentication.md).
 
 ## Reporters
-Test execution results can be summarized in a report. We support several report formats, e.g. JUnit, JSON, HTML. The config file defines the reporters to use and their options.
-Check how to configure reports in [Reporters](reporters.md)
+Test execution results can be summarized in a report. We support several report formats, such as JUnit, JSON, and HTML. The config file defines the reporters to use and their options. For more information, see [Reporters](reporters.md).
 
 ## Timeouts
-Override default timeout values in config file:
+Override default timeout values in the config file:
 ```javascript
 timeouts: {
   getPageTimeout: '10000',
@@ -91,19 +90,19 @@ timeouts: {
 }
 ```
 
-Override timeouts from command-line:
+Override timeouts from the command-line:
 ```
 --timeouts.defaultTmeoutInterval=50000
 ```
 Please check [protractor timeouts](https://github.com/angular/protractor/blob/master/docs/timeouts.md)
 for their meaning.
 
-## Run against android emulator
-Start appium
+## Run Against an Android Emulator
+Start appium:
 ```
 $ appium --device-name=android
 ```
-Execute the visual test
+Execute the visual test:
 ```
 $ uiveri5 --browsers=browser:*:android --seleniumAddress=http://127.0.0.1:4723/wd/hub --baseUrl=http://10.0.2.2:8080
 ```

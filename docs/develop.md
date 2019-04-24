@@ -51,7 +51,7 @@ And delete the local branch:
 git branch -d <local branch>
 ```
 
-### [More info](https://2buntu.com/articles/1459/keeping-your-forked-repo-synced-with-the-upstream-source/)
+For more information, see [Keeping your forked repo synced with the upstream source](https://2buntu.com/articles/1459/keeping-your-forked-repo-synced-with-the-upstream-source/).
 
 ## Testing
 
@@ -69,7 +69,7 @@ $ npm run test:unit --specs spec/StatisticsCollector.spec.js
 ```
 $ npm run test:e2e
 ```
-By default UI5 tests are executed against the latest OpenUI5 release.
+By default, UI5 tests are executed against the latest OpenUI5 release.
 To change the version, modify the UI5 bootstrap script in `uiveri5/e2e/UI5/index.html`.
 
 ### Run all tests (unit and E2E)
@@ -80,7 +80,7 @@ $ npm run test
 ## Release
 ### Release new version
 
-Assuming you have local copy of a fork with `upstream` and `origin` remotes setup correctly.
+Make sure you have set up correctly your local copy of a fork with `upstream` and `origin` remotes.
 
 * Create a local branch over an up-to-date master branch
 ```
@@ -88,7 +88,7 @@ git checkout -b release
 ```
 
 * Increment version in package.json.
-Increment patch number if this release contains only bugfixes, increment minor version number if contains features.
+Increment patch number if this release contains only bugfixes or increment minor version number if it contains features.
 
 * Commit version increment change
 ```

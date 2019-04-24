@@ -1,16 +1,16 @@
 
-### Execution flow
+### Execution Flow
 
 #### Operation
-* --cache - download reference images from imagestore, default: true
+* --cache - downloads reference images from imagestore, default: true
   * --imageStoreUrl, default to: http://imagestore.hana.ondemand.com
-* --take - take screenshots, default: true
-* --compare - execute image comparison, default: true
-* --update - update reference images (if differ) with actual images on LOCAL file system, default: false
-* --upload - upload reference images to imagestore
+* --take - takes screenshots, default: `true`
+* --compare - executes image comparison, default: `true`
+* --update - updates reference images (if different) with actual images on LOCAL file system, default: false
+* --upload - uploads reference images to imagestore
   * --imageStoreUrl, default to: http://imagestore.hana.ondemand.com
 
-### Runtime structure
+### Runtime Structure
 ```wiki
 <TestName>/
     +---<Platform>/
@@ -26,18 +26,18 @@
 #### Operation
 * --cache - nothing to do as the images are already in src/
   * not used
-* --take - take screenshots
-  * if false => no take act
-  * if true => take act
-* --compare - does image comparison ( and diff image generation of different in target/)
-  * if ( compare && take ) => run compare => take act && resolve ref
-  * else => no compare => no take act && no resolve ref
+* --take - takes screenshots
+  * if false => doesn't take act
+  * if true => takes act
+* --compare - does image comparison (and diff image generation of different in target/)
+  * if ( compare && take ) => runs compare => takes act && resolves ref
+  * else => doesn't compare => doesn't take act && doesn't resolve ref
 * --update - copies the different actual images as reference in the src/
-  * if ( update && take && compare  ) => take act -> compare -> if diff => save act as ref
+  * if (update && take && compare) => takes act -> compares -> if different => saves act as ref
 * --upload - nothing to do
   * not used
 
-#### Reference image structure
+#### Reference Image Structure
 ```wiki
 some.lib/
 +---test
@@ -51,7 +51,7 @@ some.lib/
                     +---<runtime structure>/
                         +---initial.ref.png
 ```
-#### Runtime image structure
+#### Runtime Image Structure
 ```wiki
 target/
 +---images/
@@ -65,14 +65,14 @@ target/
 
 #### Operation
 * --cache - reads the (applicable for current spec set) ref.lnk files and downloads from imagestore to target/
-* --take - take screenshots
-* --compare - does image comparison ( and diff image generation of different in target/)
-* --update - update/create the .lnk files
-* --upload - upload (changed) ref+act+diff images to imagestore
+* --take - takes screenshots
+* --compare - does image comparison (and diff image generation of different in target/)
+* --update - updates/creates the .lnk files
+* --upload - uploads (changed) ref+act+diff images to imagestore
 
-Upload of pictures is user/password protected so to prevent accidental/unauthorized image uploads.
+Upload of pictures is user/password protected to prevent accidental/unauthorized image uploads.
 
-#### Reference image structure
+#### Reference Image Structure
 ```wiki
 some.lib/
 +---test
@@ -87,7 +87,7 @@ some.lib/
                         +----initial.ref.lnk
 ```
 
-#### Runtime image structure
+#### Runtime Image Structure
 ```wiki
 target/
 +---images/

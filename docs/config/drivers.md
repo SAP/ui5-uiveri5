@@ -83,7 +83,23 @@ $ java -jar selenium-server-standalone-3.0.1.jar -help
 ```
 
 ## Chrome
-Chrome uses the ChromeDriver that is updated regularly, so by default, we use the latest version.
+Chrome uses the ChromeDriver which is updated regularly. By default, we use the latest ChromeDriver version suitable
+for the latest stable Chrome release. If you need to use a different version of Chrome or ChromeDriver, you can explicitly
+set the path of a locally downloaded ChromeDriver:
+- from the command line:
+```
+$ uiveri5 --config.connectionConfigs.direct.binaries.chromedriver.localPath=C:/chromedriver.exe
+```
+- from conf.js:
+```javascript
+connectionConfigs: {
+    direct: {
+      chromedriver: {
+        localPath: 'C:/chromedriver.exe'
+      }
+    }
+}
+```
 
 All ChromeDriver options from [ServiceBuilder](https://github.com/SeleniumHQ/selenium/blob/selenium-3.6.0/javascript/node/selenium-webdriver/chrome.js) can be specified under the `chromedriverOptions` key.
 

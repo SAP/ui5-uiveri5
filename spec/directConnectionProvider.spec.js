@@ -1,34 +1,41 @@
 describe('DirectConnectionProvider', function() {
+  var path = require('path');
   var ConnectionProvider = require('../src/connection/directConnectionProvider');
   var logger = require('../src/logger')(3);
 
   var downloadDriversMock = require('./directConnectionProvider/downloadDriversMock')();
   var mockUrl = 'http://localhost';
   var directConnectionProvider;
-  var binaries;
+  var testBinaries;
   beforeAll(function(done) {
     process.env.NO_PROXY = process.env.NO_PROXY || 'localhost';
     downloadDriversMock.start().then(function(port) {
 
       mockUrl += ':' + port;
 
-      binaries = {
+      testBinaries = {
         chromedriver:
           {
             version: '{latest}',
             filename: 'chromedriver',
             executable: 'chromedriver-{latest}',
             baseurl: mockUrl,
-            latestVersionUrl: mockUrl + '/LATEST_RELEASE'
+            latestVersionUrl: mockUrl + '/LATEST_RELEASE',
+            url: mockUrl + '/{latest}/chromedriver_win32.zip',
           },
-          chromedriverGHConfig:
+        chromedriverGHConfig:
           {
             version: '{chrome.latest}',
             latestVersionFileUrl: mockUrl + '/driverVersions.json',
             filename: 'chromedriver',
             executable: 'chromedriver-{chrome.latest}',
             baseurl: mockUrl,
-            latestVersionUrl: mockUrl + '/LATEST_RELEASE_{chrome.latest}'
+            latestVersionUrl: mockUrl + '/LATEST_RELEASE_{chrome.latest}',
+            url: mockUrl + '/{chrome.latest}/chromedriver_win32.zip',
+          },
+        chromedriverLocal:
+          {
+            localPath: path.join(__dirname, "directConnectionProvider/mockChromeDriver.js")
           },
         geckodriver:
           {
@@ -36,41 +43,54 @@ describe('DirectConnectionProvider', function() {
             filename: 'geckodriver',
             executable: 'geckodriver-{latest}',
             baseurl: mockUrl,
-            latestVersionUrlRedirect: mockUrl + '/latest'
+            latestVersionUrlRedirect: mockUrl + '/latest',
+            url: mockUrl + '/download/{latest}/geckodriver-{latest}-win32.zip',
           }
       };
 
-      directConnectionProvider = new ConnectionProvider({}, {binaries: binaries}, logger);
+      directConnectionProvider = new ConnectionProvider({}, {binaries: testBinaries}, logger);
       done();
     });
 
   });
 
   it('Should get the lestest chromedriver version', function(done) {
-    var version = directConnectionProvider._getLatestVersion(binaries.chromedriver);
+    var version = directConnectionProvider._getLatestVersion(testBinaries.chromedriver);
     version.then(function(result){
       expect(directConnectionProvider.binaries.chromedriver.version).toBe('1.0');
       expect(directConnectionProvider.binaries.chromedriver.executable).toBe('chromedriver-1.0');
+      expect(directConnectionProvider.binaries.chromedriver.url).toBe(mockUrl + '/1.0/chromedriver_win32.zip');
       done();
     })
   });
 
   it('Should get the latest chromedriver version for a given chrome major version', function(done) {
-    var version = directConnectionProvider._getLatestVersion(binaries.chromedriverGHConfig);
+    var version = directConnectionProvider._getLatestVersion(testBinaries.chromedriverGHConfig);
     version.then(function(result){
       expect(directConnectionProvider.binaries.chromedriverGHConfig.version).toBe('73.4');
       expect(directConnectionProvider.binaries.chromedriverGHConfig.executable).toBe('chromedriver-73.4');
       expect(directConnectionProvider.binaries.chromedriverGHConfig.latestVersionUrl).toBe(mockUrl + '/LATEST_RELEASE_73');
+      expect(directConnectionProvider.binaries.chromedriverGHConfig.latestVersionUrl).toBe(mockUrl + '/LATEST_RELEASE_73');
+      expect(directConnectionProvider.binaries.chromedriverGHConfig.url).toBe(mockUrl + '/73.4/chromedriver_win32.zip');
       done();
     })
   });
 
   it('Should get the latest geckodriver version', function(done) {
-    var version = directConnectionProvider._getLatestVersion(binaries.geckodriver);
+    var version = directConnectionProvider._getLatestVersion(testBinaries.geckodriver);
     version.then(function(result){
       expect(directConnectionProvider.binaries.geckodriver.version).toBe('2.0');
       expect(directConnectionProvider.binaries.geckodriver.executable).toBe('geckodriver-2.0');
+      expect(directConnectionProvider.binaries.geckodriver.url).toBe(mockUrl + '/download/2.0/geckodriver-2.0-win32.zip',);
+      done();
+    });
+  });
+
+  it('Should use local chromedriver when local path is provided', function(done) {
+    var version = directConnectionProvider._getBinaryFileName('chromedriverLocal');
+    version.then(function (filename) {
+      expect(filename).toBe(testBinaries.chromedriverLocal.localPath);
       done();
     })
-  })
+  });
 });

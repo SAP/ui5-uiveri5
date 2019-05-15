@@ -9,15 +9,15 @@ describe("by_control", function () {
 		utils.injectPageContent(browser, "app");
 	});
 
-	it("should match control's aggregation with 'aggregationLengthEquals'", function () {
+	fit("should match control's aggregation length with 'aggregationLengthEquals'", function () {
     var oList = element(by.control({
       id: "ListPage1",
       aggregationLengthEquals: {
         name: "items",
-        value: 3
+        length: 3
       }
     }));
-    expect(oList.getAttribute("id")).toEqual("ListPage1");
+    expect(oList.getAttribute("id")).toContain("ListPage1");
   });
 
 	it("should get matching control ref", function () {

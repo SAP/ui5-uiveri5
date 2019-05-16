@@ -9,7 +9,7 @@ describe("by_control", function () {
 		utils.injectPageContent(browser, "app");
 	});
 
-	fit("should match control's aggregation length with 'aggregationLengthEquals'", function () {
+	it("should match control's aggregation length with 'aggregationLengthEquals'", function () {
     var oList = element(by.control({
       id: "ListPage1",
       aggregationLengthEquals: {

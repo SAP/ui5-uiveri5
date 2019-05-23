@@ -318,6 +318,25 @@ function run(config) {
         });
       };
 
+      browser.get = function (sUrl, iTimeout) {
+        iTimeout = iTimeout || browser.getPageTimeout;
+        return browser.driver.get(sUrl, iTimeout).then(function () {
+          return browser.loadUI5Dependencies();
+        }).then(function () {
+          return browser.waitForAngular();
+        });
+      };
+
+      browser.setLocation = function (sHash) {
+        return browser.executeAsyncScriptHandleErrors('setLocation', {
+          hash: sHash
+        }).then(function () {
+          return browser.loadUI5Dependencies();
+        }).then(function () {
+          return browser.waitForAngular();
+        });
+      };
+
       browser.setViewportSize = function (viewportSize) {
         return browser.executeScriptWithDescription(clientsidescripts.getWindowToolbarSize, 'browser.setViewportSize').then(function (toolbarSize) {
           browser.driver.manage().window().setSize(viewportSize.width * 1 + toolbarSize.width, viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly

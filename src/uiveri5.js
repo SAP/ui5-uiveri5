@@ -310,6 +310,12 @@ function run(config) {
       };
 
       browser.loadUI5Dependencies = function () {
+        return browser._loadUI5Dependencies().then(function () {
+          return browser.waitForAngular();
+        })
+      };
+
+      browser._loadUI5Dependencies = function () {
         return browser.executeAsyncScriptHandleErrors('loadUI5Dependencies', {
           waitForUI5Timeout: waitForUI5Timeout,
           waitForUI5PollingInterval: config.timeouts.waitForUI5PollingInterval,
@@ -322,19 +328,22 @@ function run(config) {
         iTimeout = iTimeout || browser.getPageTimeout;
         return browser.driver.get(sUrl, iTimeout).then(function () {
           return browser.loadUI5Dependencies();
-        }).then(function () {
-          return browser.waitForAngular();
         });
       };
 
-      browser.setLocation = function (sHash) {
-        return browser.executeAsyncScriptHandleErrors('setLocation', {
-          hash: sHash
-        }).then(function () {
-          return browser.loadUI5Dependencies();
-        }).then(function () {
-          return browser.waitForAngular();
+      browser.getProtected = function (sUrl, vAuth) {
+        vAuth = vAuth || 'auth';
+        // auth can be object with config
+        var authenticator =  moduleLoader.loadNamedModule(vAuth, [statisticCollector]);
+        // open page and login
+        browser.controlFlow().execute(function () {
+          logger.info('Opening: ' + sUrl);
         });
+        authenticator.get(sUrl);
+
+        // load waitForUI5 logic on client and
+        // ensure app is fully loaded before starting the interactions
+        return browser.loadUI5Dependencies();
       };
 
       browser.setViewportSize = function (viewportSize) {
@@ -519,12 +528,10 @@ function run(config) {
             }
           }
 
-          // load waitForUI5 logic on client
+          // load waitForUI5 logic on client and
+          // ensure app is fully loaded before starting the interactions
           browser.loadUI5Dependencies();
 
-          // ensure app is fully loaded before starting the interactions
-          browser.waitForAngular();
-          
           // log UI5 version
           return browser.executeScriptWithDescription(clientsidescripts.getUI5Version, 'browser.getUI5Version').then(function (versionInfo) {
             logger.info('UI5 Version: ' + versionInfo.version);

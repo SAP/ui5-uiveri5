@@ -267,14 +267,6 @@ var mFunctions = {
       throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
     }
     return window.uiveri5._BrowserLogCollector.stop();
-  },
-
-  setLocation: function setLocation (mScriptParams, fnCallback) {
-    var sCurrentHash = window.location.hash.substring(2);
-    if (sCurrentHash !== mScriptParams.hash) {
-      window.location.hash = '#/' + mScriptParams.hash;
-    }
-    fnCallback({value: true})
   }
 };
 

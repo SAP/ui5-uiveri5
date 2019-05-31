@@ -587,6 +587,10 @@ function run(config) {
       moduleLoader.loadModule('reporters',[statisticCollector]).forEach(function(reporter){
         reporter.register(jasmineEnv);
       });
+	  
+	  if(config.onPrepare && typeof config.onPrepare === "function"){
+		  config.onPrepare.apply(this, logger);
+	  }
     };
 
     protractorArgv.afterLaunch = function(){

@@ -588,6 +588,7 @@ function run(config) {
         reporter.register(jasmineEnv);
       });
 	  
+	  // call onPrepare, given from conf.js
 	  if(config.onPrepare && typeof config.onPrepare === "function"){
 		  config.onPrepare.apply(this, logger);
 	  }

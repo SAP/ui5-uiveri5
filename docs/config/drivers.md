@@ -5,20 +5,40 @@ The respective WebDriver version is specified in basic profile and can be overwr
 
 - from the command line:
 ```
-$ uiveri5 --config.connectionConfigs.direct.binaries.selenium.version=3.11
+$ uiveri5 --config.connectionConfigs.direct.binaries.chromedriver.version=74.0.3729.6
 ```
 - from conf.js:
  ```javascript
 connectionConfigs: {
     direct: {
         binaries: {
-            selenium: {
-                version: "3.11"
+            chromedriver: {
+                version: "74.0.3729.6"
             }
         }
     }
 }
 ```
+
+You can also configure the use of local webdriver and thus disable the automatic download:
+
+- from the command line:
+```
+$ uiveri5 --config.connectionConfigs.direct.binaries.chromedriver.localPath=C:/chromedriver.exe
+```
+- from conf.js:
+```javascript
+connectionConfigs: {
+  direct: {
+    binaries: {
+      chromedriver: {
+        localPath: 'C:/chromedriver.exe'
+      }
+    }
+  }
+}
+```
+
 ## Generic WebDriver Options
 Browser size and location can be specified in `browsers.capabilities.remoteWebDriverOptions`. The following options are listed in descending priority:
 * maximized - maximizes the browser window
@@ -84,22 +104,7 @@ $ java -jar selenium-server-standalone-3.0.1.jar -help
 
 ## Chrome
 Chrome uses the ChromeDriver which is updated regularly. By default, we use the latest ChromeDriver version suitable
-for the latest stable Chrome release. If you need to use a different version of Chrome or ChromeDriver, you can explicitly
-set the path of a locally downloaded ChromeDriver:
-- from the command line:
-```
-$ uiveri5 --config.connectionConfigs.direct.binaries.chromedriver.localPath=C:/chromedriver.exe
-```
-- from conf.js:
-```javascript
-connectionConfigs: {
-    direct: {
-      chromedriver: {
-        localPath: 'C:/chromedriver.exe'
-      }
-    }
-}
-```
+for the latest stable Chrome release. The exact version of the latest stable release of Chrome is resolved from uiveri5 github repo. 
 
 All ChromeDriver options from [ServiceBuilder](https://github.com/SeleniumHQ/selenium/blob/selenium-3.6.0/javascript/node/selenium-webdriver/chrome.js) can be specified under the `chromedriverOptions` key.
 
@@ -117,7 +122,6 @@ browsers: [{
   }
 }]
 ```
-
 
 ## Firefox
 Firefox uses the geckodriver that is updated regularly, so by default, we use the latest version.

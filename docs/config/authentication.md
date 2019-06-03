@@ -114,11 +114,11 @@ If you have an application that uses a custom authentication scheme, you can imp
 If your authenticator has wider usage, consider contributing it by creating a pull request against this repo.
 
 ## Programatic Authentication
-Set `baseUrl` to `null` to disable automatic page loading and declartive authentication configuration. From the test, call  `browser.testrunner.navigation.to()` with the required URL.
+Set `baseUrl` to `null` to disable automatic page loading and declartive authentication configuration. From the test, call  `browser.get()` with the required URL.
 
 You can override the default auth settings by providing an options object with the same syntax as in the conf.js file.
 ```javascript
-browser.testrunner.navigation.to(
+browser.get(
   '<url>',{
     auth:{
       'sapcloud-form': {

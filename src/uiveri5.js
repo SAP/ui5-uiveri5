@@ -8,6 +8,7 @@ var Control = require('./control');
 var pageObjectFactory = require('./pageObjectFactory');
 
 var DEFAULT_CONNECTION_NAME = 'direct';
+var AUTH_CONFIG_NAME = 'auth';
 
 /**
  * @typedef Config
@@ -324,26 +325,35 @@ function run(config) {
         });
       };
 
-      browser.get = function (sUrl, iTimeout) {
-        iTimeout = iTimeout || browser.getPageTimeout;
-        return browser.driver.get(sUrl, iTimeout).then(function () {
+      browser.get = function (sUrl, vOptions) {
+        var authModule;
+        if (_.isPlainObject(vOptions)) {
+          if (_.isPlainObject(vOptions.auth) && !_.isEmpty(vOptions.auth)) {
+            // use configured authentication
+            authModule = _.pick(vOptions, AUTH_CONFIG_NAME);
+          } else if (vOptions.auth) {
+            // use default plain authentication
+            authModule = AUTH_CONFIG_NAME;
+          }
+        }
+
+        var getPromise;
+        if (authModule) {
+          var authenticator =  moduleLoader.loadNamedModule(authModule, [statisticCollector]);
+          // open page and login
+          browser.controlFlow().execute(function () {
+            logger.info('Opening: ' + sUrl);
+          });
+          getPromise = authenticator.get(sUrl);
+        } else {
+          getPromise = browser.driver.get(sUrl);
+        }
+
+        return getPromise.then(function () {
+          // load waitForUI5 logic on client and
+          // ensure app is fully loaded before starting the interactions
           return browser.loadUI5Dependencies();
         });
-      };
-
-      browser.getProtected = function (sUrl, vAuth) {
-        vAuth = vAuth || 'auth';
-        // auth can be object with config
-        var authenticator =  moduleLoader.loadNamedModule(vAuth, [statisticCollector]);
-        // open page and login
-        browser.controlFlow().execute(function () {
-          logger.info('Opening: ' + sUrl);
-        });
-        authenticator.get(sUrl);
-
-        // load waitForUI5 logic on client and
-        // ensure app is fully loaded before starting the interactions
-        return browser.loadUI5Dependencies();
       };
 
       browser.setViewportSize = function (viewportSize) {
@@ -412,7 +422,7 @@ function run(config) {
 
             // open test page
             var specUrlString = url.format(specUrl);
-            browser.testrunner.navigation.to(specUrlString,'auth').then(function () {
+            browser.testrunner.navigation.to(specUrlString, AUTH_CONFIG_NAME).then(function () {
               // call storage provider beforeEach hook
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);

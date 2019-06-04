@@ -16,7 +16,7 @@ describe('navigation_auth', function() {
 
     it('should get protected url - deafault config', function () {
         browser.driver.getCurrentUrl().then(function (sUrl) {
-            browser.get(sUrl, {auth: true});
+            browser.get(sUrl);
             expect(browser.getTitle()).toBe('E2E Test');
         });
     });

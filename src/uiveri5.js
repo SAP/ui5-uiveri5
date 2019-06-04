@@ -326,34 +326,7 @@ function run(config) {
       };
 
       browser.get = function (sUrl, vOptions) {
-        var authModule;
-        if (_.isPlainObject(vOptions)) {
-          if (_.isPlainObject(vOptions.auth) && !_.isEmpty(vOptions.auth)) {
-            // use configured authentication
-            authModule = _.pick(vOptions, AUTH_CONFIG_NAME);
-          } else if (vOptions.auth) {
-            // use default plain authentication
-            authModule = AUTH_CONFIG_NAME;
-          }
-        }
-
-        var getPromise;
-        if (authModule) {
-          var authenticator =  moduleLoader.loadNamedModule(authModule, [statisticCollector]);
-          // open page and login
-          browser.controlFlow().execute(function () {
-            logger.info('Opening: ' + sUrl);
-          });
-          getPromise = authenticator.get(sUrl);
-        } else {
-          getPromise = browser.driver.get(sUrl);
-        }
-
-        return getPromise.then(function () {
-          // load waitForUI5 logic on client and
-          // ensure app is fully loaded before starting the interactions
-          return browser.loadUI5Dependencies();
-        });
+        return browser.testrunner.navigation.to(sUrl, _.pick(vOptions, AUTH_CONFIG_NAME));
       };
 
       browser.setViewportSize = function (viewportSize) {
@@ -422,7 +395,7 @@ function run(config) {
 
             // open test page
             var specUrlString = url.format(specUrl);
-            browser.testrunner.navigation.to(specUrlString, AUTH_CONFIG_NAME).then(function () {
+            browser.testrunner.navigation.to(specUrlString).then(function () {
               // call storage provider beforeEach hook
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
@@ -504,7 +477,16 @@ function run(config) {
   
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
-        to: function(url,auth) {
+        to: function(url, authConfig) {
+          var auth;
+          if (_.isPlainObject(_.get(authConfig, AUTH_CONFIG_NAME)) && !_.isEmpty(authConfig[AUTH_CONFIG_NAME])) {
+            // use configured authentication
+            auth = authConfig;
+          } else {
+            // use default plain authentication
+            auth = AUTH_CONFIG_NAME;
+          }
+
           var authenticator =  moduleLoader.loadNamedModule(auth, [statisticCollector]);
 
           // open page and login

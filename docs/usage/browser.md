@@ -2,7 +2,6 @@
 You can use all the methods that directly wrap the driver navigation API, such as
 `browser.driver.get()` and the `browser.navigate()` API. Note that methods of `browser.driver`
 don't automatically synchronize with UI5 and using them can result in test failures.
-
 In case of a page reload or redirect, you will receive an error stating that UIVeri5 dependencies are not loaded:
 `Failed: javascript error: uiveri5 is not defined`
 It is recommended to use the API provided by UIVeri5. The API is kept very similar to Protractor API
@@ -44,7 +43,7 @@ browser.get('<url>');
 ```
 
 ## Synchronization
-If you have a very advanced navigation or authentication scenario, you can explicitly
-load UIVeri5 browser dependencies and synchronize with UI5 using the method `browser.loadUI5Dependencies()`.
-It returns a promise and is synchronized with the control flow. Call this method only once after a page is loaded.
-In standard scenarios this is not necessary and we recommend against using it.
+If the application does a page reload or redirect, you will have an issue as UIVeri5 scripts
+are not loaded in the new UI5 page. Use `browser.loadUI5Dependencies()` to explicitly load UIVeri5
+browser dependencies. It returns a promise and is synchronized with the control flow. Call this method
+only once after a page is loaded. In standard scenarios this is not necessary and we recommend against using it.

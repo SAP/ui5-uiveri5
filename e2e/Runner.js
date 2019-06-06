@@ -50,7 +50,7 @@ module.exports = class Runner {
           '--config.specs=' + opts.specs,
           opts.baseUrl ? '--config.baseUrl=' + opts.baseUrl : '',
           opts.params ? buildConfigArgs('--params',opts.params) : '',
-          opts.confjs ? opts.confjs : '--config.profile=integration',
+          opts.confjs ? opts.confjs : '--config.profile=base'
         ].join(" ");
         console.log('Starting cmd: ' + cmdString);
         var proc = child_process.exec(cmdString,{

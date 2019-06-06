@@ -313,7 +313,7 @@ function run(config) {
       browser.loadUI5Dependencies = function () {
         return browser._loadUI5Dependencies().then(function () {
           return browser.waitForAngular();
-        })
+        });
       };
 
       browser._loadUI5Dependencies = function () {

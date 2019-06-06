@@ -45,6 +45,7 @@ describe("client_logs", function () {
                 });
 
                 element(by.id("page1-intHeader")).isPresent().then(function (isPresent) {
+                    // should not get here
                     expect(true).toBeFalsy();
                 }, function (oError) {
                     expect(oError).toMatch('Polling stopped because the timeout of 200 milliseconds has been reached ' +

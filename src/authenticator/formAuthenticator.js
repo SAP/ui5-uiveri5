@@ -17,6 +17,7 @@ function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.userFieldSelector = instanceConfig.userFieldSelector;
   this.passFieldSelector = instanceConfig.passFieldSelector;
   this.logonButtonSelector = instanceConfig.logonButtonSelector;
+  this.idpSelector = instanceConfig.idpSelector;
   this.redirectUrl = instanceConfig.redirectUrl;
   this.statisticsCollector = statisticsCollector;
 }
@@ -40,6 +41,22 @@ FormAuthenticator.prototype.get = function(url){
   // open the page
   browser.driver.get(url);
 
+  // collect login actions separately
+  this.statisticsCollector.authStarted();
+
+  // handle idp selection
+  if (this.idpSelector) {
+    browser.driver.wait(function(){
+      return browser.driver.findElements(by.css(that.idpSelector)).then(function (elements) {
+        return !!elements.length;
+      });
+    }, browser.getPageTimeout, 'Waiting for default IDP auth page to fully load');
+
+    browser.driver.findElement(by.css(this.idpSelector)).click().then(function () {
+      that.logger.debug('Opening custom IDP auth page');
+    });
+  }
+
   // wait till redirection is complete and page is fully rendered
   var switchedToFrame = false;
   browser.driver.wait(function(){
@@ -56,10 +73,8 @@ FormAuthenticator.prototype.get = function(url){
     return browser.driver.findElements(by.css(that.userFieldSelector)).then(function (elements) {
       return !!elements.length;
     });
-  },browser.getPageTimeout,'Waiting for auth page to fully load');
+  },browser.getPageTimeout,'Waiting for' + (this.idpSelector ? ' custom IDP' : '') + ' auth page to fully load');
 
-  // collect login actions separately
-  this.statisticsCollector.authStarted();
   // enter user and pass in the respective fields
   browser.driver.findElement(by.css(this.userFieldSelector)).sendKeys(this.user);
   browser.driver.findElement(by.css(this.passFieldSelector)).sendKeys(this.pass);

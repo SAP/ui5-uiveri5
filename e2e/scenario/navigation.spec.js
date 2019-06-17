@@ -16,7 +16,7 @@ describe('Navigation scenario test', function() {
     it('should navigate in browser', () => {
         return Runner.execTest({
             specs: './scenario/fixture/navigation.spec.js',
-            baseUrl: null,
+            confjs: './scenario/navigation.conf.js',
             params: {
                 url: app.host + '/formauth/app.html?auth=true'  // skip auth
             }
@@ -26,7 +26,7 @@ describe('Navigation scenario test', function() {
     it('should navigate in browser with auth', () => {
         return Runner.execTest({
             specs: './scenario/fixture/navigation_auth.spec.js',
-            baseUrl: null,
+            confjs: './scenario/navigation.conf.js',
             params: {
                 url: app.host + '/formauth/app.html'
             }

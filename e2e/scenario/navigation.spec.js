@@ -16,16 +16,20 @@ describe('Navigation scenario test', function() {
     it('should navigate in browser', () => {
         return Runner.execTest({
             specs: './scenario/fixture/navigation.spec.js',
-            baseUrl: 'https://openui5nightly.hana.ondemand.com/test-resources/sap/m/demokit/master-detail/webapp/test/mockServer.html',
+            baseUrl: null,
+            params: {
+                url: app.host + '/formauth/app.html?auth=true'  // skip auth
+            }
         });
     }, 60000);
 
     it('should navigate in browser with auth', () => {
         return Runner.execTest({
             specs: './scenario/fixture/navigation_auth.spec.js',
-            // skip authentication on start
-            baseUrl: app.host + '/formauth/app.html?auth=true'
+            baseUrl: null,
+            params: {
+                url: app.host + '/formauth/app.html'
+            }
         });
     }, 60000);
-
 });

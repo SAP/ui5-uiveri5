@@ -52,6 +52,7 @@ auth: {
       userFieldSelector: '<CSS selector of user input field>',
       passFieldSelector: '<CSS selector of password input field>',
       logonButtonSelector: '<CSS selector of submit button>',
+      idpSelector: '<CSS selector of login link>',
       user: '<user>',
       pass: '<pass>'
     }
@@ -82,6 +83,7 @@ Implemented in [formAuthenticator.js](../../src/authenticator/formAuthenticator.
 * userFieldSelector - the CSS selctor for the user input field
 * passFieldSelector  - the CSS selector for the password input field
 * logonButtonSelector - the CSS selector for the submit button
+* idpSelector - the CSS selector for the link to log in with a different ID provider
 * frameSelector - if provided, the inoput fields are searched in this iFrame
 * redirectUrl - if provided, it overides the basicUrl that is used to synchronize on page redirect that the identitty provider
   initiates after successfull authentication. Request arguments and fragment are removed when matching, RegExp is supported.

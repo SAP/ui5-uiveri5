@@ -8,6 +8,7 @@ var Control = require('./control');
 var pageObjectFactory = require('./pageObjectFactory');
 
 var DEFAULT_CONNECTION_NAME = 'direct';
+var AUTH_CONFIG_NAME = 'auth';
 
 /**
  * @typedef Config
@@ -310,12 +311,22 @@ function run(config) {
       };
 
       browser.loadUI5Dependencies = function () {
+        return browser._loadUI5Dependencies().then(function () {
+          return browser.waitForAngular();
+        });
+      };
+
+      browser._loadUI5Dependencies = function () {
         return browser.executeAsyncScriptHandleErrors('loadUI5Dependencies', {
           waitForUI5Timeout: waitForUI5Timeout,
           waitForUI5PollingInterval: config.timeouts.waitForUI5PollingInterval,
           ClassicalWaitForUI5: ClassicalWaitForUI5,
           useClassicalWaitForUI5: config.useClassicalWaitForUI5
         });
+      };
+
+      browser.get = function (sUrl, vOptions) {
+        return browser.testrunner.navigation.to(sUrl, _.pick(vOptions, AUTH_CONFIG_NAME));
       };
 
       browser.setViewportSize = function (viewportSize) {
@@ -384,7 +395,7 @@ function run(config) {
 
             // open test page
             var specUrlString = url.format(specUrl);
-            browser.testrunner.navigation.to(specUrlString,'auth').then(function () {
+            browser.testrunner.navigation.to(specUrlString).then(function () {
               // call storage provider beforeEach hook
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
@@ -466,7 +477,16 @@ function run(config) {
   
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
-        to: function(url,auth) {
+        to: function(url, authConfig) {
+          var auth;
+          if (_.isPlainObject(_.get(authConfig, AUTH_CONFIG_NAME)) && !_.isEmpty(authConfig[AUTH_CONFIG_NAME])) {
+            // use configured authentication
+            auth = authConfig;
+          } else {
+            // use default plain authentication
+            auth = AUTH_CONFIG_NAME;
+          }
+
           var authenticator =  moduleLoader.loadNamedModule(auth, [statisticCollector]);
 
           // open page and login
@@ -500,12 +520,10 @@ function run(config) {
             }
           }
 
-          // load waitForUI5 logic on client
+          // load waitForUI5 logic on client and
+          // ensure app is fully loaded before starting the interactions
           browser.loadUI5Dependencies();
 
-          // ensure app is fully loaded before starting the interactions
-          browser.waitForAngular();
-          
           // log UI5 version
           return browser.executeScriptWithDescription(clientsidescripts.getUI5Version, 'browser.getUI5Version').then(function (versionInfo) {
             logger.info('UI5 Version: ' + versionInfo.version);

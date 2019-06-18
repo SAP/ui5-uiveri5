@@ -12,6 +12,9 @@ Control locators can be very handy to the control lеvel of abstraction and not 
 ### Page Objects
 We recommend using the page object pattern in integration tests. For page object examples, see [Page Objects](pageobjects.md).
 
+### Navigation
+Browser navigation should always be followed by synchronization with UI5. See what methods are available in [Browser](browser.md).
+
 ### Debugging
 The test is running in the Node.js environment and drives the browser. Check how to debug your test in [Debug](debug.md). Once you hit a breakppoint in the test, you can open DevTools in the browser and inspect the application state. Do not forget to close the DevTools before resuming the test.
 

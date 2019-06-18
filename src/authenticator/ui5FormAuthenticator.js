@@ -40,7 +40,6 @@ UI5FormAuthenticator.prototype.get = function(url){
 
   // synchronize with UI5 on credentials page
   browser.loadUI5Dependencies();
-  browser.waitForAngular();
 
   // collect login actions separately
   this.statisticsCollector.authStarted();

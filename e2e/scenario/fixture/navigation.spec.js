@@ -9,6 +9,11 @@ describe('navigation', function() {
         expect(browser.getTitle()).toBe('E2E Test');
     });
 
-    // TODO load non-ui5 page and redirect to app.html and inject our scripts
+    it("should load browser dependencies", function () {
+        browser.driver.get(browser.testrunner.config.params.url);
+        expect(browser.driver.getTitle()).toBe('E2E Test');
+        browser.loadUI5Dependencies();
+        expect(browser.getTitle()).toBe('E2E Test');
+    });
 
 });

@@ -3,8 +3,7 @@ exports.config = {
         'sapcloud-form': {
             user: 'user',
             pass: 'pass',
-            idpSelector: "#saml-login-link",
-            redirectUrl: /app.html/
+            idpSelector: "#saml-login-link"
         }
     }
 };

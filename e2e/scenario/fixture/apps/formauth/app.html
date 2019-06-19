@@ -7,9 +7,10 @@
 		<script>
 			var url = new URL(window.location.href);
 			var authFlag = url.searchParams.get('auth');
+			var idpFlag = url.searchParams.get('idp');
 			// redirect to login if no ?auth=true
 			if (!authFlag || authFlag != 'true') {
-				window.location.replace('./login.html?callback=./app.html');
+				window.location.replace('./login.html?redirect=app.html&idp=' + idpFlag);
 			}
 		</script>
 

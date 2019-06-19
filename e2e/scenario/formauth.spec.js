@@ -28,4 +28,12 @@ describe('FormAuth scenario test', function() {
             confjs: './scenario/formauth_regexp.conf.js'
         });
     },40000);
+
+    it('should execute auth with custom idp link', () => {
+        return Runner.execTest({
+            specs: './scenario/fixture/empty.spec.js',
+            baseUrl: app.host + '/formauth/app.html?idp=true',
+            confjs: './scenario/formauth_idp.conf.js'
+        });
+    },40000);
 });

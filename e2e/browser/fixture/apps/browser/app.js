@@ -11,6 +11,14 @@ module.exports = {
     var page1 = new sap.m.Page("page1", {
       title: "Page 1",
       content : [
+        new sap.m.List({
+          id: "ListPage1",
+          items: [
+            new sap.m.StandardListItem({title:"1"}),
+            new sap.m.StandardListItem({title:"2"}),
+            new sap.m.StandardListItem({title:"3"})
+          ]
+        }),
         new sap.m.Button({
           id : "show-footer-btn",
           text : "Show footer",

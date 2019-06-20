@@ -76,7 +76,7 @@ element(by.control({
   labelFor: {text: "myText"}
   properties: {text: "My Header Text"}
   aggregationContainsPropertyEqual: {aggregationName: "myAggregation", propertyName: "enabled", propertyValue: true}
-  aggregationLengthEquals: {name: "myAggregation", value: 1}
+  aggregationLengthEquals: {name: "myAggregation", length: 1}
   aggregationEmpty: {name: "myAggregation"}
   aggregationFilled: {name: "myAggregation"}
 ```

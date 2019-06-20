@@ -10,6 +10,19 @@ PageObjectFactory.prototype.createPageObjects = function (pageObjects) {
   var that = this;
 
   _.each(pageObjects, function (definition, page) {
+    // merge baseClass' arrangements, actions, assertions
+    if (definition.baseClass && _.isObject(definition.baseClass)) {
+      if (definition.baseClass.actions && _.isObject(definition.baseClass.actions)) {
+        _.extend(definition.actions, definition.baseClass.actions);
+      }
+      if (definition.baseClass.assertions && _.isObject(definition.baseClass.assertions)) {
+        _.extend(definition.assertions, definition.baseClass.assertions);
+      }
+      if (definition.baseClass.arrangements && _.isObject(definition.baseClass.arrangements)) {
+        _.extend(that.Given, definition.baseClass.arrangements);
+      }
+    }
+
     var name = 'onThe' + page + 'Page';
 
     that.When[name] = _.extend(that.When[name], definition.actions);

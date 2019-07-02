@@ -37,6 +37,10 @@ describe('DirectConnectionProvider', function() {
           {
             localPath: path.join(__dirname, "directConnectionProvider/mockChromeDriver.js")
           },
+        chromedriverSpecificVersion:
+          {
+            version: '73'
+          },
         geckodriver:
           {
             version: '{latest}',
@@ -84,6 +88,15 @@ describe('DirectConnectionProvider', function() {
       expect(directConnectionProvider.binaries.geckodriver.url).toBe(mockUrl + '/download/2.0/geckodriver-2.0-win32.zip',);
       done();
     });
+  });
+
+  it('Should get the specified chromedriver version', function (done) {
+    var version = directConnectionProvider._getLatestVersion(testBinaries.chromedriverSpecificVersion);
+    version.then(function (result) {
+      expect(result).toBeFalsy();
+      expect(directConnectionProvider.binaries.chromedriverSpecificVersion.version).toBe('73');
+      done();
+    })
   });
 
   it('Should use local chromedriver when local path is provided', function(done) {

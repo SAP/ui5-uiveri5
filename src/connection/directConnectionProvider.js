@@ -232,7 +232,8 @@ DirectConnectionProvider.prototype._getLatestVersion = function (binary) {
       });
   } else {
     var deferred = q.defer();
-    return deferred.resolve();
+    deferred.resolve();
+    return deferred.promise;
   }
 };
 

@@ -138,3 +138,41 @@ describe('Fiori_MM', function () {
   });
 });
 ```
+
+##### baseClass Page
+If you apply a BDD style approach you quickly run in situations where you want to share common behaviour between your page objects, e.g. a click on a button with a certain text. Therefore you can define a common base blass like the following:
+
+```javascript
+// pages/base.class.js:
+module.exports = {
+  arrangements: {
+    // you can also define common arrangements
+  },
+  actions: {
+    iClickTheButtonWithI18nText function (sI18nText) {
+      var button = element(by.control({
+        controlType: "sap.m.Button",
+        I18NText: {propertyName: "text", key: sI18nText}
+      }));
+      button.click();
+});
+    }
+  },
+  assertions: {
+    // you can also define common actions
+  }
+});
+```
+
+And load it in your specific pages like this:
+
+```javascript
+// pages/shell.view.js:
+var myBaseClass = require("./base.class.js");
+
+module.exports = createPageObjects({
+  Shell: {
+    baseClass: myBaseClass
+    arrangements: {
+...
+```

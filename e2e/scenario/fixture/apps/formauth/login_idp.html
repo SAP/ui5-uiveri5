@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8">
+        <title>IDP login page mock</title>
+        <script>
+            window.addEventListener('DOMContentLoaded',() => {
+                let url = new URL(window.location.href);
+                let redirectParam = url.searchParams.get('redirect');
+                let link = document.getElementById('saml-login-link');
+                link.href = "./login.html?redirect=" + redirectParam;
+            });
+        </script>
+    </head>
+	<body>
+        <form>
+            <div>
+                <input id="j_username" type="text" placeholder="Username" name="username" required>
+                <input id="j_password" type="password" placeholder="Password" name="password" required>
+                <a id="saml-login-link" href="#">Login with SAML</a>
+            </div>
+        </form>
+    </body>
+</html>

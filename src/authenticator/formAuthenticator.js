@@ -79,7 +79,9 @@ FormAuthenticator.prototype.get = function(url){
   // first a user identifier is entered,
   // then, the id provider is chosen depending on predefined rules for this user
   if (this.conditional) {
-    this._getField(this.logonButtonSelector).click();
+    this._getField(this.logonButtonSelector).click().then(function () {
+      that.logger.debug('Opening conditional IDP auth page');
+    });
     this._waitForField(this.passFieldSelector, 'redirect to conditional auth page');
   }
 

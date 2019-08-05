@@ -567,7 +567,7 @@ function run(config) {
                 throw new Error('Could not match target url that is neither string nor regexp');
               }
             });
-          }, browser.getPageTimeout - 100,'Waiting for redirection to complete, target url: ' + targetUrl);
+          }, browser.getPageTimeout - 100,'Waiting for redirection to complete, target url: ' + targetUrl); 
           // 10ms delta is necessary or webdriver crashes and the process stops without exit status
         }
       };

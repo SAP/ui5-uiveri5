@@ -3,7 +3,7 @@ exports.config = {
         'sapcloud-form': {
             user: 'user',
             pass: 'pass',
-            conditional: true
+            conditionalLogonButtonSelector: "#logOnFormSubmit"
         }
     }
 };

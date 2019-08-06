@@ -52,8 +52,8 @@ auth: {
       userFieldSelector: '<CSS selector of user input field>',
       passFieldSelector: '<CSS selector of password input field>',
       logonButtonSelector: '<CSS selector of submit button>',
+      conditionalLogonButtonSelector: '<CSS selector of the first submit button, in case of conditional authentication>',
       idpSelector: '<CSS selector of login link>',
-      conditional: '<boolean indicating whether to expect conditional steps>',
       user: '<user>',
       pass: '<pass>'
     }
@@ -84,8 +84,10 @@ Implemented in [formAuthenticator.js](../../src/authenticator/formAuthenticator.
 * userFieldSelector - the CSS selctor for the user input field
 * passFieldSelector  - the CSS selector for the password input field
 * logonButtonSelector - the CSS selector for the submit button
+* conditionalLogonButtonSelector - indicates use of conditional authentication. Authentication is performed in several steps,
+  as described in the [help portal](https://help.sap.com/viewer/6d6d63354d1242d185ab4830fc04feb1/Cloud/en-US/0143dce88a604533ab5ab17e639fec09.html?q=conditional%20authentication), In this case, `conditionalLogonButtonSelector` is the CSS
+  selector for the first submit button and `logonButtonSelector` is the CSS selector for the second submit button.
 * idpSelector - the CSS selector for the link to log in with a different ID provider
-* conditional - is the authentication conditional. If set to true, authentication is performed in several steps, as described in the [help portal](https://help.sap.com/viewer/6d6d63354d1242d185ab4830fc04feb1/Cloud/en-US/0143dce88a604533ab5ab17e639fec09.html?q=conditional%20authentication)
 * frameSelector - if provided, the inoput fields are searched in this iFrame
 * redirectUrl - if provided, it overides the basicUrl that is used to synchronize on page redirect that the identitty provider
   initiates after successfull authentication. Request arguments and fragment are removed when matching, RegExp is supported.

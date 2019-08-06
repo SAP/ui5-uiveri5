@@ -17,9 +17,9 @@ function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.userFieldSelector = instanceConfig.userFieldSelector;
   this.passFieldSelector = instanceConfig.passFieldSelector;
   this.logonButtonSelector = instanceConfig.logonButtonSelector;
+  this.conditionalLogonButtonSelector = instanceConfig.conditionalLogonButtonSelector;
   this.idpSelector = instanceConfig.idpSelector;
   this.redirectUrl = instanceConfig.redirectUrl;
-  this.conditional = instanceConfig.conditional;
   this.statisticsCollector = statisticsCollector;
 }
 
@@ -78,8 +78,8 @@ FormAuthenticator.prototype.get = function(url){
   // handle conditional login:
   // first a user identifier is entered,
   // then, the id provider is chosen depending on predefined rules for this user
-  if (this.conditional) {
-    this._getField(this.logonButtonSelector).click().then(function () {
+  if (this.conditionalLogonButtonSelector) {
+    this._getField(this.conditionalLogonButtonSelector).click().then(function () {
       that.logger.debug('Opening conditional IDP auth page');
     });
     this._waitForField(this.passFieldSelector, 'redirect to conditional auth page');

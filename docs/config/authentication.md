@@ -20,7 +20,7 @@ The user and password parameters can be placeholders and the values can be passe
 ```javascript
 auth: {
   // form based
-  'fiori-form': {
+  'sapcloud-form': {
     user: '${params.user}',
     pass: '${params.pass}'
   }
@@ -51,9 +51,6 @@ auth: {
       name: './authenticator/formAuthenticator',
       userFieldSelector: '<CSS selector of user input field>',
       passFieldSelector: '<CSS selector of password input field>',
-      logonButtonSelector: '<CSS selector of submit button>',
-      conditionalLogonButtonSelector: '<CSS selector of the first submit button, in case of conditional authentication>',
-      idpSelector: '<CSS selector of login link>',
       user: '<user>',
       pass: '<pass>'
     }

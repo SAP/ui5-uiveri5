@@ -214,7 +214,6 @@ exports.config = {
     },
     'sapcloud-form': {
       name: './authenticator/formAuthenticator',
-      frameSelector: '#IDS_UI_Window',
       userFieldSelector: '#j_username',
       passFieldSelector: '#j_password',
       logonButtonSelector: '#logOnFormSubmit'

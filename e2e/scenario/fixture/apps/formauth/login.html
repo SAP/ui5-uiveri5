@@ -4,43 +4,31 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta charset="utf-8">
-        <title>IDP mock - Login Page</title>
+        <title>Basic login page mock</title>
         <script>
             // attach form action and redirect to ?redirect=<url>. append ?auth=true
             window.addEventListener('DOMContentLoaded',() => {
-                var loginForm = document.getElementsByTagName('form')[0];
-                var url = new URL(window.location.href);
-                var idpFlag = url.searchParams.get('idp');
-                var redirectParam = url.searchParams.get('redirect');
+                let url = new URL(window.location.href);
+                let redirectParam = url.searchParams.get('redirect');
 
-                if (idpFlag === 'true') {
-                    var link = document.createElement('a');
-                    link.id = 'saml-login-link';
-                    link.href = './login.html?redirect=' + redirectParam;
-                    link.textContent = 'Login with SAML';
-                    loginForm.append(link);
-                } else {
-                    var loginBtn = document.createElement('button');
-                    loginBtn.id = 'logOnFormSubmit';
-                    loginBtn.textContent = 'Login';
-                    loginBtn.onclick = (e) => {
-                        e.preventDefault();
-                        let user = document.getElementById('j_username').value;
-                        let pass = document.getElementById('j_password').value;
-                        var redirectUrl = redirectParam + '?auth=true&user=' + user + '&pass=' + pass;
-                        console.log('RedirectUrl:' + redirectUrl);
-                        window.location.replace(redirectUrl);
-                    };
-                    loginForm.append(loginBtn);
-                }
+                let loginBtn = document.getElementById('logOnFormSubmit');
+                loginBtn.onclick = (e) => {
+                    e.preventDefault();
+                    let user = document.getElementById('j_username').value;
+                    let pass = document.getElementById('j_password').value;
+                    let redirectUrl = redirectParam + '?auth=true&user=' + user + '&pass=' + pass;
+                    console.log('RedirectUrl:' + redirectUrl);
+                    window.location.replace(redirectUrl);
+                };
             });
         </script>
     </head>
 	<body>
-        <form>   
+        <form>
             <div>
                 <input id="j_username" type="text" placeholder="Username" name="username" required>
                 <input id="j_password" type="password" placeholder="Password" name="password" required>
+                <button id="logOnFormSubmit">Login</button>
             </div>
         </form>
     </body>

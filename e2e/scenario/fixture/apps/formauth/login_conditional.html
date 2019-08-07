@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta charset="utf-8">
+        <title>Conditional login page mock</title>
+        <script>
+            window.addEventListener('DOMContentLoaded',() => {
+                let url = new URL(window.location.href);
+                let isUserEntered= false;
+                let redirectParam = url.searchParams.get('redirect');
+
+                let loginBtn = document.getElementById('logOnFormSubmit');
+                loginBtn.onclick = (e) => {
+                    e.preventDefault();
+                    if (isUserEntered) {
+                        let user = document.getElementById('j_username').value;
+                        let pass = document.getElementById('j_password').value;
+                        let redirectUrl = redirectParam + '?auth=true&user=' + user + '&pass=' + pass;
+                        console.log('RedirectUrl:' + redirectUrl);
+                        window.location.replace(redirectUrl);
+                    } else {
+                        let user = document.getElementById('j_username').value;
+                        if (user) {
+                            isUserEntered = true;
+                            let passField = document.getElementById('j_password');
+                            passField.style.display = 'inline-block';
+                        }
+                    }
+                };
+            });
+        </script>
+    </head>
+	<body>
+        <form>
+            <div>
+                <input id="j_username" type="text" placeholder="Username" name="username" required>
+                <input id="j_password" type="password" placeholder="Password" name="password" required style="display: none">
+                <button id="logOnFormSubmit">Login</button>
+            </div>
+        </form>
+    </body>
+</html>

@@ -36,4 +36,12 @@ describe('FormAuth scenario test', function() {
             confjs: './scenario/formauth_idp.conf.js'
         });
     },40000);
+
+    it('should execute auth with conditional id provider', () => {
+        return Runner.execTest({
+            specs: './scenario/fixture/empty.spec.js',
+            baseUrl: app.host + '/formauth/app.html?conditional=true',
+            confjs: './scenario/formauth_conditional.conf.js'
+        });
+    },40000);
 });

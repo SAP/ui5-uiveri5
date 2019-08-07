@@ -17,6 +17,7 @@ function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.userFieldSelector = instanceConfig.userFieldSelector;
   this.passFieldSelector = instanceConfig.passFieldSelector;
   this.logonButtonSelector = instanceConfig.logonButtonSelector;
+  this.conditionalLogonButtonSelector = instanceConfig.conditionalLogonButtonSelector;
   this.idpSelector = instanceConfig.idpSelector;
   this.redirectUrl = instanceConfig.redirectUrl;
   this.statisticsCollector = statisticsCollector;
@@ -46,45 +47,79 @@ FormAuthenticator.prototype.get = function(url){
 
   // handle idp selection
   if (this.idpSelector) {
-    browser.driver.wait(function(){
-      return browser.driver.findElements(by.css(that.idpSelector)).then(function (elements) {
-        return !!elements.length;
-      });
-    }, browser.getPageTimeout, 'Waiting for default IDP auth page to fully load');
+    this._waitForField(this.idpSelector, 'redirect to default IDP login page');
 
-    browser.driver.findElement(by.css(this.idpSelector)).click().then(function () {
+    this._getField(this.idpSelector).click().then(function () {
       that.logger.debug('Opening custom IDP auth page');
     });
   }
 
   // wait till redirection is complete and page is fully rendered
   var switchedToFrame = false;
-  browser.driver.wait(function(){
+  this._wait(function () {
     // if auth is in frame => switch inside
     if (that.frameSelector) {
-      browser.driver.findElements(by.css(that.frameSelector)).then(function (elements) {
-        if (!!elements.length && !switchedToFrame) {
-          browser.driver.switchTo().frame(browser.driver.findElement(by.css(that.frameSelector))).then(function () {
+      that._getFields(that.frameSelector).then(that._checkDisplayed).then(function (isDisplayed) {
+        if (isDisplayed && !switchedToFrame) {
+          browser.driver.switchTo().frame(that._getFields(that.frameSelector)).then(function () {
             switchedToFrame = true;
           });
         }
       });
     }
-    return browser.driver.findElements(by.css(that.userFieldSelector)).then(function (elements) {
-      return !!elements.length;
-    });
-  },browser.getPageTimeout,'Waiting for' + (this.idpSelector ? ' custom IDP' : '') + ' auth page to fully load');
+    return that._getFields(that.userFieldSelector).then(that._checkDisplayed);
+  }, this.idpSelector ? 'redirect to custom IDP login page' : 'redirect to login page');
 
-  // enter user and pass in the respective fields
-  browser.driver.findElement(by.css(this.userFieldSelector)).sendKeys(this.user);
-  browser.driver.findElement(by.css(this.passFieldSelector)).sendKeys(this.pass);
-  browser.driver.findElement(by.css(this.logonButtonSelector)).click().then(function () {
+  // enter credentials in the respective fields
+
+  // enter user identifier (email, ID or login name)
+  this._getField(this.userFieldSelector).sendKeys(this.user);
+
+  // handle conditional login:
+  // first a user identifier is entered,
+  // then, the id provider is chosen depending on predefined rules for this user
+  if (this.conditionalLogonButtonSelector) {
+    this._getField(this.conditionalLogonButtonSelector).click().then(function () {
+      that.logger.debug('Opening conditional IDP auth page');
+    });
+    this._waitForField(this.passFieldSelector, 'redirect to conditional auth page');
+  }
+
+  this._getField(this.passFieldSelector).sendKeys(this.pass);
+  this._getField(this.logonButtonSelector).click().then(function () {
     // wait for all login actions to complete
     that.statisticsCollector.authDone();
   });
 
   // ensure redirect is completed
   return browser.testrunner.navigation.waitForRedirect(this.redirectUrl || url);
+};
+
+FormAuthenticator.prototype._wait = function (fnCondition, sTimeoutMessage) {
+  return browser.driver.wait(fnCondition, browser.getPageTimeout, 'Waiting for auth page to fully load. Step: ' + sTimeoutMessage);
+};
+
+FormAuthenticator.prototype._waitForField = function (sSelector, sTimeoutMessage) {
+  var that = this;
+  return this._wait(function () {
+    return that._getFields(sSelector).then(that._checkDisplayed);
+  }, sTimeoutMessage);
+};
+
+FormAuthenticator.prototype._getFields = function (sSelector) {
+  return browser.driver.findElements(by.css(sSelector));
+};
+
+FormAuthenticator.prototype._getField = function (sSelector) {
+  return browser.driver.findElement(by.css(sSelector));
+};
+
+FormAuthenticator.prototype._checkDisplayed = function (aFields) {
+  if (aFields.length) {
+    return aFields[0].isDisplayed().then(function (isDisplayed) {
+      return isDisplayed;
+    });
+  }
 };
 
 module.exports = function (config,instanceConfig,logger,statisticsCollector) {

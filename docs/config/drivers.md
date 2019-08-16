@@ -48,6 +48,7 @@ Browser size and location can be specified in `browsers.capabilities.remoteWebDr
 
 ```javascript
 browsers: [{
+  browserName: 'chrome',
   capabilities: {
     remoteWebDriverOptions: {
       maximized: true,
@@ -73,6 +74,7 @@ The maximize option might not be supported for all browsers. In such case, the `
 Example:
 ```javascript
 browsers: [{
+  browserName: 'chrome',
   capabilities: {
     remoteWebDriverOptions: {
       maximized: false,

@@ -1,8 +1,8 @@
 ![openui5](http://openui5.org/images/OpenUI5_new_big_side.png)
 
 ## What is it
-UIVeri5 is an E2E testing framework for UI5-based applications. It uses
-[webdriverjs](https://code.google.com/p/selenium/wiki/WebDriverJs) to drive a real browser and interacts with your
+UIVeri5 is an E2E testing framework for [UI5](https://ui5.sap.com)-based applications. It uses
+[WebDriverJS](https://code.google.com/p/selenium/wiki/WebDriverJs) to drive a real browser and interacts with your
 application as a real user would. UIVeri5 is heavily inspired by [Protractor](http://www.protractortest.org/)
 and brings most (and more) of its benefits to UI5 applications.
 
@@ -116,9 +116,9 @@ No major bugs known.
 See how we plan to continue in our [TODO](docs/todo.md) .
 
 ## Related projects
-Here we gather few projects that build on uiveri5 and tailor it for specific usecases
+Here we gather few projects that build on UIVeri5 and tailor it for specific usecases.
 
-* Docker container with uiveri5,chrome,jenkins [Link](https://github.com/frumania/docker-uiveri5-jenkins-slave)
+* Docker container with UIVeri5, Chrome, Jenkins: [Link](https://github.com/frumania/docker-uiveri5-jenkins-slave)
 
 ## Automatic Downloads
 By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.

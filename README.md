@@ -14,7 +14,7 @@ and brings most (and more) of its benefits to UI5 applications.
 * Does not depend on testability support in applications - works with autorefreshing views, resizing elements, animated transitions.
 * Declarative authentications - authentication flow over OAuth2 providers, etc.
 * Console operation, CI ready, fully configurable, no need for java (comming soon) or IDE.
-* Covers full ui5 browser matrix - Chrome,Firefox,IE,Edge,Safari,iOS,Android.
+* Covers full UI5 browser matrix: Chrome, Firefox, IE, Edge, Safari, iOS, Android.
 * Open-source, modify to suite your specific neeeds.
 
 ## Requirements
@@ -34,7 +34,7 @@ $ npm install @ui5/uiveri5 -g
 ## Usage
 
 ### Create a test
-Create a clean folder that will contain your test and configuration files. UIVeri5 uses [jasmine](https://jasmine.github.io/) as a test runner so the test resides in a spec.js file.
+Create a clean folder that will contain your test and configuration files. UIVeri5 uses [Jasmine](https://jasmine.github.io/) as a test runner so the test resides in a spec.js file.
 Put the declarative configuration in the conf.js file.
 
 * conf.js
@@ -102,18 +102,18 @@ All of those defaults could be modified either in conf.js or by providing comman
 ```
 
 ## Learn more
-Learn how to build your tests in our [Testing Guide](docs/usage/applicationtesting.md)
+Learn how to build your tests in our [Testing Guide](docs/usage/applicationtesting.md).
 
 ## Support
-If you face a problem, please check our list of common [issues](docs/issues.md) 
+If you face a problem, please check our list of common [issues](docs/issues.md).
 If you think you found a bug, please create a new [github issue](https://github.com/SAP/ui5-uiveri5/issues/new). 
-If you have a question, please ask on [StackOverflow](http://stackoverflow.com/questions/tagged/uiveri5)
+If you have a question, please ask on [StackOverflow](http://stackoverflow.com/questions/tagged/uiveri5).
 
 ## Known Bugs
 No major bugs known.
 
 ## Release plan
-See how we plan to continue in our [TODO](docs/todo.md) 
+See how we plan to continue in our [TODO](docs/todo.md) .
 
 ## Related projects
 Here we gather few projects that build on uiveri5 and tailor it for specific usecases

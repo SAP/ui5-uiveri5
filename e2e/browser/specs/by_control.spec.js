@@ -144,7 +144,11 @@ describe("by_control", function () {
 			controlType: "sap.m.StandardListItem",
 			properties: {title: "2"},
 			ancestor: {
-				id: "ListPage1"
+				id: "ListPage1",
+				descendant: {
+					controlType: "sap.m.StandardListItem",
+					properties: {title: "2"}
+				}
 			}
 		}));
 
@@ -154,7 +158,7 @@ describe("by_control", function () {
 			controlType: "sap.m.List",
 			descendant: {
 				controlType: "sap.m.StandardListItem",
-				properties: {title: "2"}
+				properties: {title: "3"}
 			}
 		}));
 

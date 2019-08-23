@@ -138,7 +138,6 @@ describe("by_control", function () {
 	});
 
 	it("should use ancestor and descendant as selector keys", function () {
-		browser.sleep(20000);
 		element(by.id("show-nav-btn")).click();
 
 		var listItem = element(by.control({

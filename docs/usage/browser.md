@@ -1,17 +1,5 @@
-# Browser Navigation
-You can use all the methods that directly wrap the driver navigation API, such as
-`browser.driver.get()` and the `browser.navigate()` API. Note that methods of `browser.driver`
-don't automatically synchronize with UI5 and using them can result in test failures.
-In case of a page reload or redirect, you will receive an error stating that UIVeri5 dependencies are not loaded:
-`Failed: javascript error: uiveri5 is not defined`
-It is recommended to use the API provided by UIVeri5. The API is kept very similar to Protractor API
-so it is easy and familiar to most users.
-
 ## Loading a page
-To reload the current page, use `browser.refresh()`. To load a new page, use `browser.get()`.
-Both methods return a webdriver promise and are synchronized with the control flow.
-Both methods will automatically load UIVeri5 dependencies on the new page and wait for the
-application to load before test execution continues.
+To load a new page, use `browser.get()`. This method will load the new page and will automatically load UIVeri5 instrumentation in the new UI5 runtime and will wait for the application to fully load before proceeding with test execution.
 ```javascript
 browser.get("https://openui5.hana.ondemand.com/test-resources/sap/m/demokit/master-detail/webapp/test/mockServer.html");
 // the application is loaded and now we can interact with the page
@@ -19,7 +7,7 @@ expect(browser.getTitle()).toBe('Master-Detail');
 ```
 
 ## Loading a protected page
-With `browser.get()` you can also get a page that requires authentication. You can pass
+With `browser.get()` you can also load a page that requires authentication. You can pass
 authentication parameters directly as an inline object to the `auth` property.
 The plain authenticator is applied by default. It simply waits for the requested page to be loaded
 and doesn't perform any authentication.
@@ -42,8 +30,27 @@ Example with plain authentication:
 browser.get('<url>');
 ```
 
-## Synchronization
-If the application does a page reload or redirect, you will have an issue as UIVeri5 scripts
-are not loaded in the new UI5 page. Use `browser.loadUI5Dependencies()` to explicitly load UIVeri5
-browser dependencies. It returns a promise and is synchronized with the control flow. Call this method
-only once after a page is loaded. In standard scenarios this is not necessary and we recommend against using it.
+## Reload the app
+To reload the current page, use `browser.refresh()`. This method will reload the current page, will automatically load UIVeri5 instrumentation in the new UI5 runtime and will wait for the application to fully load before proceeding with test execution.
+
+## Application initiated page reload
+If the application initiates a page reload with location.reload() or window.location modification or HTTP redirect, you will get the 
+`Failed: javascript error: uiveri5 is not defined` error on first interaction with the page because the UIVeri5 instrumentation is missing in the new UI5 runtime. 
+To work around this, you first need to wait for the page reload to finish. You should use `browser.driver` API and poll for existence of some specific element that would indicate the page is fully loaded:
+```javascript
+browser.driver.wait(function(){
+      return browser.driver.findElements(by.css('<css selector>')).then(function (elements) {
+        return !!elements.length;
+      });
+    }, browser.getPageTimeout, 'Waiting for page reload to finish');
+```
+Please note you can't use element() call and by.control() locators because they require the misising instrumentation.
+Once the UI5 runtime is loaded, you can inject the UIVeri5 instrumentation by calling:
+```javascript
+browser.loadUI5Dependencies()`. 
+```
+After this call, the UI5 synchronization and control locators will work again in the new UI5 runtime.
+
+If the application opens the new UI5 page in a new window (popup or tab) or IFrame, you will first need to focus it by using the `browse.driver.switchTo()` [API](https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_TargetLocator.html) and just then synchronize with it and inject the instrumentation.
+
+

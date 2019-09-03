@@ -35,13 +35,13 @@ uiveri5 --params.user=<user> --params.pass=<pass>
 This is the default authentication that is used whenever authentication is not configured explicitly.
 
 ### Basic auth Configuration
-This configuration uses the `Basic-URL-Authenticator` and targets systems that use basic auth in the URL.
+This configuration uses the `Basic-URL-Authenticator` authenticator and targets systems that use basic auth in the URL.
 
 ### Fiori-form auth Configuration
-This configuration uses the `UI5-Form-Authenticator` and targets applications started from SAP Fiori Launchpad.
+This configuration uses the `UI5-Form-Authenticator` authenticator and targets applications started from SAP Fiori Launchpad.
 
 ### Sapcp-form auth Configuration
-This configuration uses the `Form-Authenticator` and targets applications behind SAP Cloud, SAP IDM or any other OAuth2.0 or plain form authentication. 
+This configuration uses the `Form-Authenticator` authenticator and targets applications behind SAP Cloud, SAP IDM or any other OAuth2.0 or plain form authentication. 
 
 ## Customize auth Configuration
 It's possible to override an arbitrary authenticator parameter from the authentication configuration.
@@ -86,7 +86,7 @@ Implemented in [formAuthenticator.js](../../src/authenticator/formAuthenticator.
   selector for the first submit button and `logonButtonSelector` is the CSS selector for the second submit button.
 * idpSelector - the CSS selector for the link to log in with a different ID provider
 * frameSelector - if provided, the inoput fields are searched in this iFrame
-* redirectUrl - if provided, it overides the basicUrl that is used to synchronize on page redirect that the identitty provider
+* redirectUrl - if provided, it overides the basicUrl that is used to synchronize on page redirect that the identity provider
   initiates after successfull authentication. Request arguments and fragment are removed when matching, RegExp is supported.
 
 Redirect to URLs that are matched with regex:
@@ -113,8 +113,24 @@ Implemented in [ui5FormAuthenticator.js](../../src/authenticator/ui5FormAuthenti
 
 ### Custom Authenticator
 If you have an application that uses a custom authentication scheme, you can implement a custom authenticator. You can use one of the existing authenticators as a base and extend it with the required behavior. Then, reference it in the `name` parameter of your auth configuration.
+```javascript
+var myAuthenticator = require.resolve('./src/myAuthenticator')
 
-If your authenticator has wider usage, consider contributing it by creating a pull request against this repo.
+exports.config = {
+  authConfigs: {
+    'myauthconfig': {
+      name: myAuthenticator,
+      someField: 'someValue'
+    }
+  },
+  auth: {
+    'myauthconfig': {
+      anotherField: '${params.anotherValue}',
+    }
+  }
+};
+```
+If think your authenticator would be usefull for others, please consider contributing it by creating a pull request against this repo.
 
 ## Programatic Authentication
 Set `baseUrl` to `null` to disable automatic page loading and declartive authentication configuration. From the test, call  `browser.get()` with the required URL.

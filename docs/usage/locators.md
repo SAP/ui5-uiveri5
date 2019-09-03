@@ -49,9 +49,9 @@ The `control` locator is closely tied to the control level of abstraction and th
 
 The locator is created using the `by` collection of factory functions:
 ```javascript
-element(by.control({id: "testID"});
+element(by.control({id: "testID"}));
 // or to find multiple elements:
-element.all(by.control({id: /test/});
+element.all(by.control({id: /test/}));
 ```
 
 Using the `control` locator gives you an `ElementFinder` of the DOM element best representing the found control. Since there can be more than one representation of a control, you can choose which one fits best a desired interaction. This is a common pitfall and is described below in the Interactions section.

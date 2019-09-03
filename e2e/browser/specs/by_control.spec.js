@@ -136,4 +136,32 @@ describe("by_control", function () {
 			expect(showNavButton.getText()).toEqual("show Nav Button");
 		});
 	});
+
+	it("should use ancestor and descendant as selector keys", function () {
+		element(by.id("show-nav-btn")).click();
+
+		var listItem = element(by.control({
+			controlType: "sap.m.StandardListItem",
+			properties: {title: "2"},
+			ancestor: {
+				id: "ListPage1",
+				descendant: {
+					controlType: "sap.m.StandardListItem",
+					properties: {title: "2"}
+				}
+			}
+		}));
+
+		expect(listItem.getText()).toEqual("2");
+
+		var list = element(by.control({
+			controlType: "sap.m.List",
+			descendant: {
+				controlType: "sap.m.StandardListItem",
+				properties: {title: "3"}
+			}
+		}));
+
+		expect(list.getAttribute("id")).toContain("ListPage1");
+	})
 });

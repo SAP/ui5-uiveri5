@@ -59,7 +59,7 @@ Using the `control` locator gives you an `ElementFinder` of the DOM element best
 ### Syntax
 Under the hood, control locators rely on [OPA5](https://openui5.hana.ondemand.com/#/api/sap.ui.test.Opa5/overview) functionality. If you are familiar with OPA5's `waitFor` structure, then you will be able to immediately transition to control locators. The difference between a control selector and a typical OPA5 `waitFor` is that some values are not allowed. The unsupported property values are: `matchers` and `actions` object constructions and `check`, `success` and `actions` functions.
 
-`by.control` accepts a plain object specifying the `viewName`, `viewNamespace`, ID, `controlType`, ID suffix, and other properties of the control to look for. The ID can be a string or a regular expression. Just like in OPA5, if a `viewName` is given, the ID is the view-relative ID, otherwise it is the global ID. All [OPA5 matchers](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers/overview) are supported with exception of `AncestorMatcher` that is supported implicitly as documented below. In OPA5, you normally create a matcher instance and pass the expected parameters to the constructor as a plain object. In a control selector, you can set the same plain object parameters to the matcher property.
+`by.control` accepts a plain object specifying the `viewName`, `viewNamespace`, ID, `controlType`, ID suffix, and other properties of the control to look for. The ID can be a string or a regular expression. Just like in OPA5, if a `viewName` is given, the ID is the view-relative ID, otherwise it is the global ID. All [OPA5 matchers](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers/overview) are supported. In OPA5, you normally create a matcher instance and pass the expected parameters to the constructor as a plain object. In a control selector, you can set the same plain object parameters to the matcher property.
 
 Matchers syntax:
 ```javascript
@@ -78,7 +78,9 @@ element(by.control({
   aggregationContainsPropertyEqual: {aggregationName: "myAggregation", propertyName: "enabled", propertyValue: true}
   aggregationLengthEquals: {name: "myAggregation", length: 1}
   aggregationEmpty: {name: "myAggregation"}
-  aggregationFilled: {name: "myAggregation"}
+  aggregationFilled: {name: "myAggregation"},
+  ancestor: {id: /^foo/, properties: {text: "My Ancestor Text"}},
+  descendant: {id: /^bar/, properties: {text: "My Descendant Text"}}
 ```
 
 Multiple uses of one type of matcher in a single selector:
@@ -135,7 +137,7 @@ var objectAttributeText = element(by.control({
 ```
 
 ### Control Ancestors
-When you use a control locator to find a child element of a specific parent, IUVeri5 applies the [ancestor matcher](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers.Ancestor) to the child. The ID of the parent element is used to find child controls. For example, if the parent is a header bar, its control's root element is the header. If you then search for child elements, the other header bars might match as well.
+When you use a control locator to find a child element of a specific parent, UIVeri5 applies the [ancestor matcher](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers.Ancestor) to the child. The ID of the parent element is used to find child controls. For example, if the parent is a header bar, its control's root element is the header. If you then search for child elements, the other header bars might match as well.
 
 Example:
 ```javascript
@@ -143,6 +145,26 @@ element(by.id("page1-intHeader-BarLeft")) // can be any locator
   .element(by.control({
     controlType: "sap.m.Button"
   })); // will look for buttons in the header
+```
+
+You can explicitly declare an ancestor or descendant using the common matchers syntax. In this case, the ancestor (or descendant) is declared as a plain object, which can contain any combination of matchers.
+Essentially, the ancestor (descendant) object is another control selector used in recursion.
+Ancestors (and descendants) can be nested and they can include other ancestor (or descendant) matchers themselves.
+
+Example:
+```javascript
+// looks for a link with specific text, then finds its parent header bar
+// and finally finds all buttons in that header bar (all siblings of the link, which are of type Button)
+element(by.control({
+  controlType: "sap.m.Button",
+  ancestor: {
+    id: /BarLeft/,
+    descendant: {
+      controlType: "sap.m.Link",
+      properties: {text: "Sibling"}
+    }
+  }
+}));
 ```
 
 ## DOM Locators

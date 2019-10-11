@@ -308,10 +308,17 @@ DirectConnectionProvider.prototype._downloadBinary = function (binary) {
   } else {
     binary.executable =  root + '/' + binary.executable;
   }
+  binary.executable = path.resolve(binary.executable);
 
   return that._getLatestVersion(binary).then(function () {
-    return that._checkIfBinaryExists(binary.executable, true).then(function () {
-      return that._downloadDriver(binary);
+    return that._checkIfBinaryExists(binary.executable, true).then(function (pathToExistingBinary) {
+      if (pathToExistingBinary) {
+        var deferred = q.defer();
+        deferred.resolve(pathToExistingBinary);
+        return deferred.promise;
+      } else {
+        return that._downloadDriver(binary);
+      }
     });
   });
 };

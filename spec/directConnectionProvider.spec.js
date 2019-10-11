@@ -7,6 +7,7 @@ describe('DirectConnectionProvider', function() {
   var mockUrl = 'http://localhost';
   var directConnectionProvider;
   var testBinaries;
+
   beforeAll(function(done) {
     process.env.NO_PROXY = process.env.NO_PROXY || 'localhost';
     downloadDriversMock.start().then(function(port) {
@@ -35,7 +36,7 @@ describe('DirectConnectionProvider', function() {
           },
         chromedriverLocal:
           {
-            localPath: path.join(__dirname, "directConnectionProvider/mockChromeDriver.js")
+            localPath: path.join(__dirname, 'directConnectionProvider/mockChromeDriver.js')
           },
         chromedriverSpecificVersion:
           {
@@ -49,6 +50,10 @@ describe('DirectConnectionProvider', function() {
             baseurl: mockUrl,
             latestVersionUrlRedirect: mockUrl + '/latest',
             url: mockUrl + '/download/{latest}/geckodriver-{latest}-win32.zip',
+          },
+        chromedriverExisting:
+          {
+            executable: '../spec/directConnectionProvider/mockChromeDriver.js'
           }
       };
 
@@ -106,4 +111,13 @@ describe('DirectConnectionProvider', function() {
       done();
     })
   });
+
+  it('Should not download chromedriver if already available', function (done) {
+    var version = directConnectionProvider._downloadBinary(testBinaries.chromedriverExisting);
+    version.then(function (result) {
+      expect(result).toBe(__dirname + '/directConnectionProvider/mockChromeDriver.js');
+      done();
+    })
+  });
+
 });

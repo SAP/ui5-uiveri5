@@ -25,7 +25,7 @@ Values and defaults:
 * platformName - one of (windows|mac|linux|android|ios|winphone)} - platform name, default: windows
 * platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
 * platformResolution - format: /\d+x\d+/- platform resolution, WIDTHxHEIGHT, default: resolved from available
-* ui5.theme - one of (bluecrystal|belize|hcp) - UI5 theme, default belize
+* ui5.theme - one of (bluecrystal|belize|fiori_3) - UI5 theme, default belize
 * ui5.direction - one of (rtl|ltr) - UI5 direction, default: ltr
 * ui5.mode - one of (cosy|compact) - UI5 mode, default: cosy
 
@@ -39,9 +39,11 @@ browsers:[{
 Specify on command line in ':' -separated notation:
 ```
 $ uiveri5 --browsers=ie:11
+$ uiveri5 --browsers=chrome::::::fiori_3
+$ uiveri5 --browsers=chrome:::::::rtl
+$ uiveri5 --browsers=chrome::::::::compact
 ```
 Runtime attributes are extracted sequentially in the order they are defined above.
-
 
 Specify chrome mobile emulator:
 ```

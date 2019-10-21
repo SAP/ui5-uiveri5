@@ -8,4 +8,6 @@ profile.matchers = profile.matchers.concat(
 
 profile.plugins.push({name: '../src/api/requestPlugin'});
 
+profile.specResolver = './resolver/localSpecResolver';
+
 exports.config = profile;

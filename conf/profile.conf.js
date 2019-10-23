@@ -166,7 +166,7 @@ exports.config = {
         }
       }
     }
-
+    
     /* WARNING: ignoring protected mode may introduce errors
      * A better solution would be to configure your IE browser:
      * https://github.com/seleniumQuery/seleniumQuery/wiki/seleniumQuery-and-IE-Driver#protected-mode-exception-while-launching-ie-driver

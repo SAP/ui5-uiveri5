@@ -89,22 +89,22 @@ GithubAuthenticator.prototype.get = function (url) {
           if (enabled) {
             //click Authorize button after only after it is enabled
             that._getField(that.conditionalLogonButtonSelector).click().then(function () {
-              that.logger.debug('Clicking authorize button.');
+              that.logger.debug('Clicking conditionalLogonButton.');
             });
             stopProcessing = true;
           }
         }).catch(function () {
-          that.logger.debug("Authorize button cannot be found!");
+          that.logger.debug("conditionalLogonButton cannot be found!");
           stopProcessing = true;
         })
       };
     }
 
     // handle conditional login:
-    // first a user credentials are entered and sing in button is pressed
-    // then you Authorize the oAuth application
+    // first a user credentials are entered and sign in button is pressed
+    // then you authorize the oAuth application
     if (that.conditionalLogonButtonSelector) {
-      browser.driver.wait(_pressConditionalButton(), browser.getPageTimeout).then(function () {
+      that._wait(_pressConditionalButton()).then(function () {
         that.statisticsCollector.authDone();
       });
     } else {

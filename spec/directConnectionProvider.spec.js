@@ -115,7 +115,7 @@ describe('DirectConnectionProvider', function() {
   it('Should not download chromedriver if already available', function (done) {
     var version = directConnectionProvider._downloadBinary(testBinaries.chromedriverExisting);
     version.then(function (result) {
-      expect(result).toBe(__dirname + '/directConnectionProvider/mockChromeDriver.js');
+      expect(result).toBe(path.join(__dirname, '/directConnectionProvider/mockChromeDriver.js'));
       done();
     })
   });

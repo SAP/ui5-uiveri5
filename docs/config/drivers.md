@@ -136,10 +136,11 @@ browsers: [{
   browserName: 'firefox',
   capabilities: {
     geckodriverOptions: {
-      setFirefoxBinary: ['/path/to/firefox']
+      enableVerboseLogging: true
     },
     firefoxOptions: {
       addArguments: ['-private']
+      setBinary: ['/path/to/firefox']
     }
   }
 }]

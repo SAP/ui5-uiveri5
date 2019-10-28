@@ -18,6 +18,7 @@ function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.passFieldSelector = instanceConfig.passFieldSelector;
   this.logonButtonSelector = instanceConfig.logonButtonSelector;
   this.conditionalLogonButtonSelector = instanceConfig.conditionalLogonButtonSelector;
+  this.authorizationButtonSelector = instanceConfig.authorizationButtonSelector;
   this.idpSelector = instanceConfig.idpSelector;
   this.redirectUrl = instanceConfig.redirectUrl;
   this.statisticsCollector = statisticsCollector;
@@ -88,7 +89,40 @@ FormAuthenticator.prototype.get = function(url){
   this._getField(this.passFieldSelector).sendKeys(this.pass);
   this._getField(this.logonButtonSelector).click().then(function () {
     // wait for all login actions to complete
-    that.statisticsCollector.authDone();
+    var stopProcessing = false;
+
+    function _pressAuthorizationButtonSelector() {
+      return function () {
+        if (stopProcessing) {
+          that.logger.debug("Stop waiting for authorizationButtonSelector.");
+          return true;
+        }
+        that._getField(that.authorizationButtonSelector).isEnabled().then(function (enabled) {
+          that.logger.debug("Is authorizationButtonSelector enabled: (" + enabled + ")");
+          if (enabled) {
+            //click Authorize button only after it is enabled
+            that._getField(that.authorizationButtonSelector).click().then(function () {
+              that.logger.debug('Clicking authorizationButtonSelector.');
+            });
+            stopProcessing = true;
+          }
+        }).catch(function () {
+          that.logger.debug("authorizationButtonSelector cannot be found!");
+          stopProcessing = true;
+        })
+      };
+    }
+
+    // handle conditional login:
+    // first a user credentials are entered and sign in button is pressed
+    // then you authorize the oAuth application
+    if (that.authorizationButtonSelector) {
+      that._wait(_pressAuthorizationButtonSelector()).then(function () {
+        that.statisticsCollector.authDone();
+      });
+    } else {
+      that.statisticsCollector.authDone();
+    }
   });
 
   // ensure redirect is completed

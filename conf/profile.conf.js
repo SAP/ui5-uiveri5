@@ -166,7 +166,7 @@ exports.config = {
         }
       }
     }
-    
+
     /* WARNING: ignoring protected mode may introduce errors
      * A better solution would be to configure your IE browser:
      * https://github.com/seleniumQuery/seleniumQuery/wiki/seleniumQuery-and-IE-Driver#protected-mode-exception-while-launching-ie-driver
@@ -219,11 +219,11 @@ exports.config = {
       logonButtonSelector: '#logOnFormSubmit'
     },
     'github-form': {
-      name: './authenticator/githubAuthenticator',
+      name: './authenticator/formAuthenticator',
       userFieldSelector: '#login_field',
       passFieldSelector: '#password',
       logonButtonSelector: 'input[type=submit]',
-      conditionalLogonButtonSelector: 'button[type=submit]'
+      authorizationButtonSelector: 'button[type=submit]'
     }
   },
 

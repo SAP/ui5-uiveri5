@@ -145,7 +145,7 @@ browsers: [{
   }
 }]
 ```
-Geckodriver expects to find Firefox executable on the system path or at the default location for the respective platform. In some installation or upgrade scnearios, it is possible that the Firefox binary is placed in a different location and geckodriver is not able to find it. One workaround is to add the path to the binary in the PATH environment variable. Another workaround is to provide the path to the Firefox binary in the `geckodriverOptions`.
+Geckodriver expects to find Firefox executable on the system path or at the default location for the respective platform. In some installation or upgrade scnearios, it is possible that the Firefox binary is placed in a different location and geckodriver is not able to find it. One workaround is to add the path to the binary in the PATH environment variable. Another workaround is to provide the path to the Firefox binary in the `firefoxOptions`.
 
 ## Internet Explorer (IE)
 IE uses the iedriver which is only available for Windows. Currently, you need to specify an exact version (automatic latest version detection is not implemented).

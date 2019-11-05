@@ -1,3 +1,4 @@
+
 var webdriver = require('selenium-webdriver');
 
 /**
@@ -7,7 +8,7 @@ var webdriver = require('selenium-webdriver');
  * @param {Object} instanceConfig
  * @param {Logger} logger
  */
-function FormAuthenticator(config, instanceConfig, logger, statisticsCollector) {
+function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.logger = logger;
 
   this.user = instanceConfig.user;
@@ -28,7 +29,7 @@ function FormAuthenticator(config, instanceConfig, logger, statisticsCollector) 
  * @param {string} url - url to get
  * @returns {promise<>} - resolved when the page is full loaded
  */
-FormAuthenticator.prototype.get = function (url) {
+FormAuthenticator.prototype.get = function(url){
 
   var that = this;
 
@@ -149,6 +150,6 @@ FormAuthenticator.prototype._checkDisplayed = function (aFields) {
   }
 };
 
-module.exports = function (config, instanceConfig, logger, statisticsCollector) {
-  return new FormAuthenticator(config, instanceConfig, logger, statisticsCollector);
+module.exports = function (config,instanceConfig,logger,statisticsCollector) {
+  return new FormAuthenticator(config,instanceConfig,logger,statisticsCollector);
 };

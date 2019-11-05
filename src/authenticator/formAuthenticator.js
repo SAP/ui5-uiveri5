@@ -105,15 +105,15 @@ FormAuthenticator.prototype.get = function (url) {
     this._wait(_waitForAuthorizationButtonEnabled);
     this._getField(this.authorizationButtonSelector)
       .click()
-      .catch(function () {
-        that.logger.debug("authorizationButtonSelector cannot be found!");
-      })
       .then(function () {
         that.logger.debug('Clicking authorizationButtonSelector.');
       })
-      .then(function () {
-        that.statisticsCollector.authDone();
+      .catch(function () {
+        that.logger.debug("authorizationButtonSelector cannot be found!");
       });
+    browser.controlFlow().execute(function () {
+      that.statisticsCollector.authDone();
+    });
   } else {
     this.statisticsCollector.authDone();
   }

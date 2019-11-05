@@ -20,7 +20,7 @@ describe('FormAuth scenario test', function() {
             confjs: './scenario/formauth_url.conf.js'
         });
     },40000);
-    
+
     it('should execute auth with redirect and regex for redirectUrl', () => {
         return Runner.execTest({
             specs: './scenario/fixture/empty.spec.js',

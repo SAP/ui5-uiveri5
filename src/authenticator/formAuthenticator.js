@@ -112,13 +112,11 @@ FormAuthenticator.prototype.get = function(url){
       .catch(function () {
         that.logger.debug("authorizationButtonSelector cannot be found!");
       });
-    browser.controlFlow().execute(function () {
-      that.statisticsCollector.authDone();
-    });
-  } else {
-    this.statisticsCollector.authDone();
   }
-
+  browser.controlFlow().execute(function () {
+    that.statisticsCollector.authDone();
+  });
+  
   // ensure redirect is completed
   return browser.testrunner.navigation.waitForRedirect(this.redirectUrl || url);
 };

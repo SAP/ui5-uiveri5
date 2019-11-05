@@ -19,7 +19,6 @@ and brings most (and more) of its benefits to UI5 applications.
 
 ## Requirements
 * [NodeJS](https://nodejs.org/en/download/), version 8.0 or higher
-* [Java JRE](https://openjdk.java.net/install/), version 1.8 or higher
 
 ## Configuration
 UIVeri5 accepts a declarative configuration in a conf.js file. Configuration could be overriten with command-line arguments.

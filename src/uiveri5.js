@@ -326,7 +326,7 @@ function run(config) {
       };
 
       browser.get = function (sUrl, vOptions) {
-        return browser.testrunner.navigation.to(sUrl, _.pick(vOptions, AUTH_CONFIG_NAME));
+        return browser.testrunner.navigation.to(sUrl, vOptions);
       };
 
       browser.setViewportSize = function (viewportSize) {
@@ -478,16 +478,8 @@ function run(config) {
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
         to: function(url, authConfig) {
-          var auth;
-          if (_.isPlainObject(_.get(authConfig, AUTH_CONFIG_NAME)) && !_.isEmpty(authConfig[AUTH_CONFIG_NAME])) {
-            // use configured authentication
-            auth = authConfig;
-          } else {
-            // use default plain authentication
-            auth = AUTH_CONFIG_NAME;
-          }
-
-          var authenticator =  moduleLoader.loadNamedModule(auth, [statisticCollector]);
+          authConfig = authConfig || AUTH_CONFIG_NAME;
+          var authenticator =  moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
 
           // open page and login
           browser.controlFlow().execute(function () {

@@ -478,7 +478,7 @@ function run(config) {
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
         to: function(url, authConfig) {
-          var authConfig = authConfig || AUTH_CONFIG_NAME;
+          authConfig = authConfig || AUTH_CONFIG_NAME;
           var authenticator =  moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
 
           // open page and login

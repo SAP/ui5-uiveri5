@@ -88,3 +88,52 @@ takeScreenshot: {
 ```
 --confKeys=reporters[1].reportName:"target/report/jsonReport.json";reporters[1].name:"./reporter/jsonReporter";
 ```
+
+## Combining reporters
+You can add, modify and remove reporters. The examples so far showed how to add a new reporter. To modify a reporter, added in a different config level, simply declare the reporter again - with the same name. The instance config of the reporter will be updated with the new definition. Example:
+```javascript
+/* in profile config file */
+reporters: [
+  {name: './reporter/screenshotReporter', screenshotsRoot: 'myScreenshots/', reportName: 'myReport.html'}
+]
+
+/* in project config file */
+reporters: [
+  {name: './reporter/screenshotReporter', screenshotsRoot: 'newScreenshots/'}
+]
+
+/* result will be */
+reporters: [
+  {name: './reporter/screenshotReporter', screenshotsRoot: 'newScreenshots/', reportName: 'myReport.html'}
+]
+```
+
+If you need two instances of a reporter, add an ID instance config property. Existing reporters with the same name will remain unchanged.
+```javascript
+reporters: [
+  {name: './reporter/screenshotReporter', ID: "my-report", screenshotsRoot: 'myScreenshots/', reportName: 'myReport.html'}
+]
+```
+
+The `reporters` property can be have an object value with expected keys `enabled` and `disabled`. As the names suggest, reporters in the `enabled` collection will be executed, while the ones in the `disabled` collection will not. The following two lines produce the same result:
+```javascript
+reporters: [
+  {name: './reporter/jsonReporter', reportName: 'target/report/myReport.json'}
+]
+/* is the same as */
+reporters: {
+  disabled: [],
+  enabled: [
+    {name: './reporter/jsonReporter', reportName: 'target/report/myReport.json'}
+  ]
+}
+```
+The following example disables a reporter, even if it was added earlier in a configuration file with lower priority:
+```javascript
+reporters: {
+  disabled: [
+    {name: './reporter/jsonReporter'}
+  ]
+}
+```
+Note that if an ID is provided to the enabled or disabled reporter, only existing reporters with the matching ID will be modified.

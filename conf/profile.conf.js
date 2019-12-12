@@ -224,7 +224,7 @@ exports.config = {
     {name: './reporter/consoleReporter'}
   ],
   locators: [
-    {name: './defaultLocators'}
+    {name: './locators/defaultLocators'}
   ],
 
   plugins: [

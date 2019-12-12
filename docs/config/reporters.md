@@ -111,7 +111,7 @@ reporters: [
 If you need two instances of a reporter, add an ID instance config property. Existing reporters with the same name will remain unchanged.
 ```javascript
 reporters: [
-  {name: './reporter/screenshotReporter', ID: "my-report", screenshotsRoot: 'myScreenshots/', reportName: 'myReport.html'}
+  {name: './reporter/screenshotReporter', id: "my-report", screenshotsRoot: 'myScreenshots/', reportName: 'myReport.html'}
 ]
 ```
 

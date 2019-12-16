@@ -1,7 +1,7 @@
 # Application Testing
 
 ### Test Runtime
-UIVeri5 is inspired from [Protractor](https://www.protractortest.org) and builds on many of its ideas. Most of the answers you may find for Protractor apply for UIVeri5. Please note that under the hood we use an older version of Protractor (v5.6), so some of the most recent functionalities, such as await/async and disabling control flow are not available yet. For an overview of UIVeri5's test runtime, see [Runtime](runtime.md).
+UIVeri5 is inspired from [Protractor](https://www.protractortest.org) and builds on many of its ideas. Most of the answers you may find for Protractor apply for UIVeri5. Please note that under the hood we use an older version of Protractor (v5.6), so some of the most recent functionalities like disabling control flow are not supported. You can structure your test with async/await to simplify the debugging even with enabled control flow. For an overview of UIVeri5's test runtime, see [Runtime](runtime.md).
 
 ### Expectations
 To assert the state of your application, use [Expectations](expectations.md).

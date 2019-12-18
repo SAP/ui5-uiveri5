@@ -1,18 +1,13 @@
+var clientsidescripts = require('../scripts/clientsidescripts');
 var webdriver = require('selenium-webdriver');
 var _ = require('lodash');
 
 /**
- * Control locator public class
- * @param {object} clientsidescripts object containing defnition of functions to be executed in the browser
- * Expected functions are findByControl and getLatestLog.
+ * Control locator
  * @param {object} logger optional logger object with methods: debug, info, error, trace. if not defined, no logs will be produced
  * @public
  */
-function ControlLocator(clientsidescripts, logger) {
-  this.clientsidescripts = _.assign({
-    findByControl: _.noop,
-    getLatestLog: _.noop
-  }, clientsidescripts);
+function ControlLocator(config, instanceConfig, logger) {
   this.logger = _.assign({
     debug: _.noop,
     info: _.noop,
@@ -24,22 +19,22 @@ function ControlLocator(clientsidescripts, logger) {
 /**
  * Register control locator
  * @param {ProtractorBy} by protractor By object on which to add the new locator
- * @param {string} name name of the new locator (e.g. if name is "control", find elements with "by.control()")
  * @public
  */
-ControlLocator.prototype.register = function (by, name) {
-  by[name] = function (mMatchers) {
-    var locator = new _ControlLocator(mMatchers, this.clientsidescripts, this.logger);
+ControlLocator.prototype.register = function (by) {
+  this.logger.debug('Registering control locator');
+  by.control = function (mMatchers) {
+    var locator = new _ControlLocator(mMatchers, this.logger);
     return locator;
   }.bind(this);
 };
 
 /**
- * Apply control locator logic inside a registered locator
+ * Apply control locator logic inside a registered locator.
  * @param {object} mMatchers JSON object containing OPA5-style control search conditions and matchers
  */
 ControlLocator.prototype.apply = function (mMatchers) {
-  var locator = new _ControlLocator(mMatchers, this.clientsidescripts, this.logger);
+  var locator = new _ControlLocator(mMatchers, this.logger);
   return locator;
 };
 
@@ -48,9 +43,8 @@ ControlLocator.prototype.apply = function (mMatchers) {
  * @param {object} mMatchers JSON object containing OPA5-style control search conditions and matchers
  * @implements {ProtractorLocator}
  */
-function _ControlLocator(mMatchers, clientsidescripts, logger) {
+function _ControlLocator(mMatchers, logger) {
   this.matchers = mMatchers;
-  this.clientsidescripts = clientsidescripts;
   this.logger = logger;
 }
 
@@ -86,12 +80,12 @@ _ControlLocator.prototype.findElementsOverride = function (driver, using, rootSe
 
   var sMatchers = JSON.stringify(this.matchers);
 
-  return driver.findElements(webdriver.By.js(this.clientsidescripts.findByControl, sMatchers, using, rootSelector))
+  return driver.findElements(webdriver.By.js(clientsidescripts.findByControl, sMatchers, using, rootSelector))
     .then(function (vResult) {
       if (vResult.length) {
         return vResult;
       } else {
-        return driver.executeScript(this.clientsidescripts.getLatestLog)
+        return driver.executeScript(clientsidescripts.getLatestLog)
           .then(function (sLatestLog) {
             this.logger.debug('No elements found using by.control locator. This is what control locator last logged: ' + sLatestLog);
             return vResult;
@@ -109,4 +103,6 @@ _ControlLocator.prototype.toString = function toString() {
   return 'by.control(' + sMatchers + ')';
 };
 
-module.exports = ControlLocator;
+module.exports = function (config, instanceConfig, logger) {
+  return new ControlLocator(config, instanceConfig, logger);
+};

@@ -166,6 +166,30 @@ element(by.control({
   }
 }));
 ```
+### Common usecases
+
+#### Working with responsive toolbars
+A responsive toolbar may have overflowing content, depending on the screen size.
+This content will be moved to a popover which is open by pressing a toggle button in the toolbar.
+A toggle button will be shown only when there is overflowing content. This is a problem for tests because they should only try to press the button when it's visible and interactable. One way to solve this is to always start the application under test with with a fixed screen size. Another way is to first look for any toggle button - with no restriction on visibility, and then press on it only if it exists:
+```javascript
+var button = element(by.control({
+  controlType: "sap.m.ToggleButton",
+  ancestor: {
+    viewNamespace: "appUnderTest.view.",
+    viewName : "Main",
+    id: "toolbar-overflow"
+  }
+}));
+
+button.getCssValue("visibility").then(function (visibility) {
+  if (visibility === "visible") {
+    button.click();
+  }
+}).catch(function () {
+  // button is not found
+});
+```
 
 ## DOM Locators
 All standart `by.` locators from [WebDriverJs](https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_By.html) are supported.

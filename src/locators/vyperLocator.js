@@ -8,7 +8,7 @@ var ControlLocator = require('./controlLocator');
  * @param {Object} instanceConfig
  * @param {Logger} logger
  */
-function CustomLocator(config, instanceConfig, logger) {
+function VyperLocator(config, instanceConfig, logger) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
@@ -18,7 +18,7 @@ function CustomLocator(config, instanceConfig, logger) {
  * Register custom locator
  * @param {ProtractorBy} by protractor By object on which to add the new locator
  */
-CustomLocator.prototype.register = function (by) {
+VyperLocator.prototype.register = function (by) {
   this.logger.debug('Registering custom locator');
   by.ui5 = function (mMatchers) {
     // mMatchers = {elementProperties:{metadata: "sap.m.Button"}}
@@ -28,10 +28,12 @@ CustomLocator.prototype.register = function (by) {
       mOPA5Matchers.controlType = mMatchers.elementProperties.metadata;
     }
     var byControlLocator = new ControlLocator(this.logger);
+    // the new locator will find elements by the OPA5 control locator.
+    // if an element is not found, the selector will be logged as a stringified JSON
     return byControlLocator.apply(mOPA5Matchers);
   };
 };
 
 module.exports = function (config, instanceConfig, logger) {
-  return new CustomLocator(config, instanceConfig, logger);
+  return new VyperLocator(config, instanceConfig, logger);
 };

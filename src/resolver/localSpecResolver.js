@@ -15,7 +15,7 @@ var LIST_SEPARATOR = ',';
  * @typedef LocalSpecResolverConfig
  * @type {Object}
  * @extends {Config}
- * @property {array} specs - blob patterns to resolve specs, defaults to: ['./*.spec.js']
+ * @property {string|array|object} specs - blob patterns to resolve specs, defaults to: ['./*.spec.js']
  * @property {string} baseUrl - base url to reference, falsy disables page loading, defaults to: falsy
  * @property {string} specExclude - comma separated list of spec names, '' means nothing to be excluded, defaults to ''
  * @property {string} specFilter - comma separated list of spec names, '*' means all, defaults to '*'
@@ -86,7 +86,7 @@ LocalSpecResolver.prototype.resolve = function () {
 
 // suite = array of globs
 LocalSpecResolver.prototype._resolveSuite = function (suite) {
-  // resolve glob to array of paths
+  // resolve each glob to array of paths
   return Q.Promise.all(suite.map(this._resolveGlob.bind(this))).then(this._flatten);
 };
 

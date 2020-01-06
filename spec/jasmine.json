@@ -1,6 +1,6 @@
 {
   "spec_dir": "spec",
   "spec_files": [
-    "**/localSpec*[sS]pec.js"
+    "**/*[sS]pec.js"
   ]
 }

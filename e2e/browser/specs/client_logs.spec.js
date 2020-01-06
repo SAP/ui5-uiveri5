@@ -3,7 +3,8 @@
 var utils = require('./utils');
 var LogInterceptor = require('../../LogInterceptor');
 
-describe("client_logs", function () {
+// TODO stabilize and reenable
+xdescribe("client_logs", function () {
 	"use strict";
 
 	beforeAll(function () {

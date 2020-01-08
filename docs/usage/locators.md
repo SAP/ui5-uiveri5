@@ -182,12 +182,10 @@ var button = element(by.control({
   }
 }));
 
-button.getCssValue("visibility").then(function (visibility) {
-  if (visibility === "visible") {
+button.isPresent().then(function (isPresent) {
+  if (isPresent) {
     button.click();
   }
-}).catch(function () {
-  // button is not found
 });
 ```
 

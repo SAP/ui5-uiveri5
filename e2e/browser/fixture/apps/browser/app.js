@@ -7,7 +7,6 @@ module.exports = {
     search.attachSearch(function (oEvent) {
       searchQuery.setText(oEvent.getSource().getValue());
     });
-
     var page1 = new sap.m.Page("page1", {
       title: "Page 1",
       content : [
@@ -50,11 +49,77 @@ module.exports = {
         new sap.m.Button({
           id : "hide-nav-btn",
           text : "hide Nav Button",
-            press : function() {
-              page1.setShowNavButton(false);
-            }
+          press : function() {
+            page1.setShowNavButton(false);
+          }
+        }),
+        searchQuery,
+        new sap.m.OverflowToolbar({
+          id: "toolbar-fit",
+          width: "600px",
+          content: [
+            new sap.m.Button({
+              text: "Always Visible",
+              press: "onToolbarButtonPress",
+              layoutData: [
+                new sap.m.OverflowToolbarLayoutData({
+                  priority: "NeverOverflow"
+                })
+              ]
+            }),
+            new sap.m.Button({
+              text: "Mostly Visible",
+              press: "onToolbarButtonPress",
+              layoutData: [
+                new sap.m.OverflowToolbarLayoutData({
+                  priority: "High"
+                })
+              ]
+            }),
+            new sap.m.Button({
+              text: "Should Overflow",
+              press: "onToolbarButtonPress",
+              layoutData: [
+                new sap.m.OverflowToolbarLayoutData({
+                  priority: "Low"
+                })
+              ]
+            })
+          ]
+      }),
+      new sap.m.OverflowToolbar({
+        id: "toolbar-overflow",
+        width: "300px",
+        content: [
+          new sap.m.Button({
+            text: "Always Visible",
+            press: "onToolbarButtonPress",
+            layoutData: [
+              new sap.m.OverflowToolbarLayoutData({
+                priority: "NeverOverflow"
+              })
+            ]
           }),
-          searchQuery
+          new sap.m.Button({
+            text: "Mostly Visible",
+            press: "onToolbarButtonPress",
+            layoutData: [
+              new sap.m.OverflowToolbarLayoutData({
+                priority: "High"
+              })
+            ]
+          }),
+          new sap.m.Button({
+            text: "Overflowing",
+            press: "onToolbarButtonPress",
+            layoutData: [
+              new sap.m.OverflowToolbarLayoutData({
+                priority: "Low"
+              })
+            ]
+          })
+        ]
+      })
       ],
       subHeader: new sap.m.Bar({
         contentMiddle: [search]

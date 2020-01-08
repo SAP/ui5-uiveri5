@@ -163,5 +163,55 @@ describe("by_control", function () {
 		}));
 
 		expect(list.getAttribute("id")).toContain("ListPage1");
-	})
+	});
+
+	it("should interact with overflow toolbars", function () {
+		var presentToggleButton = element(by.control({
+			controlType: "sap.m.ToggleButton",
+			ancestor: {
+				id: "toolbar-overflow"
+			},
+			visible: false
+		}));
+		var overflowingButton = element(by.control({
+			controlType: "sap.m.Button",
+			properties: {
+				text: "Overflowing"
+			}
+		}));
+
+		presentToggleButton.isPresent().then(function (isPresent) {
+			if (isPresent) {
+				presentToggleButton.click();
+			}
+		});
+
+		// toggle button should be pressed and overflowing buttons should be shown
+		expect(overflowingButton.isPresent()).toBeTruthy();
+
+		var hiddenToggleButton = element(by.control({
+			controlType: "sap.m.ToggleButton",
+			ancestor: {
+				id: "toolbar-fit"
+			},
+			visible: false
+		}));
+		var toolbarButton = element(by.control({
+			controlType: "sap.m.Button",
+			properties: {
+				text: "Always Visible"
+			}
+		}));
+
+		hiddenToggleButton.isPresent().then(function (isPresent) {
+			if (isPresent) {
+				// should not get here as the button is not present
+				hiddenToggleButton.click();
+			}
+		});
+
+		// toggle button should not be visible and therefore not pressed. non-overflowing buttons should be shown
+		expect(toolbarButton.isPresent()).toBeTruthy();
+
+	});
 });

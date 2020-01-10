@@ -133,7 +133,7 @@ var mFunctions = {
       var control = uiveri5._ControlFinder._getControlForElement(mScriptParams.elementId);
       if (control) {
         return {
-          property: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
+          value: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
         };
       } else {
         throw new Error('Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree');
@@ -181,9 +181,13 @@ var mFunctions = {
   },
 
   getUI5Version: function() {
-    return sap.ui.getVersionInfo();
+    var versionInfo = sap.ui.getVersionInfo();
+    return {
+      version: versionInfo.version,
+      buildTimestamp: versionInfo.buildTimestamp
+    };
   },
-
+  
   getWindowToolbarSize: function getWindowToolbarSize () {
     return {
       width: window.outerWidth - window.innerWidth,

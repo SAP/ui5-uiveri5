@@ -110,8 +110,20 @@ reporters: [
 
 If you need two instances of a reporter, add an ID instance config property. Existing reporters with the same name will remain unchanged.
 ```javascript
+/* in profile config file */
 reporters: [
   {name: './reporter/screenshotReporter', id: "my-report", screenshotsRoot: 'myScreenshots/', reportName: 'myReport.html'}
+]
+
+/* in project config file */
+reporters: [
+  {name: './reporter/screenshotReporter', id: "new-report", reportName: 'newReport.html'}
+]
+
+/* result will be */
+reporters: [
+  {name: './reporter/screenshotReporter', id: "my-report", screenshotsRoot: 'myScreenshots/', reportName: 'myReport.html'},
+  {name: './reporter/screenshotReporter', id: "new-report", reportName: 'newReport.html'}
 ]
 ```
 

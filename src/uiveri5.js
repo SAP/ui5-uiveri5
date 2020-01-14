@@ -293,11 +293,9 @@ function run(config) {
 
       browser.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName,params) {
         var code = clientsidescripts[scriptName];
+        logger.debug('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+        logger.trace('Execute async script code: \n' + JSON.stringify(code));
         params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.debug('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.trace('Execute async script code: \n' + JSON.stringify(code));
-        });
         return browser.executeAsyncScript(code,params)
           .then(function (res) {
             if (res.log) {
@@ -309,41 +307,6 @@ function run(config) {
             }
             logger.debug('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
             return res.value;
-          });
-      };
-
-      browser.executeScriptHandleErrors = function executeScriptHandleErrors(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.debug('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.trace('Execute script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeScript(code,params)
-          .then(function (res) {
-            if (res.log) {
-              logger.debug('Script: ' + scriptName + ' logs: \n' + res.log);
-            }
-            if (res.error) {
-              logger.debug('Script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
-              throw new Error(scriptName + ': ' + res.error);
-            }
-            logger.debug('Script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
-            return res.value;
-          });
-      };
-
-      browser.executeScriptLogResult = function executeScriptLogResult(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.debug('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.trace('Execute script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeScript(code,params)
-          .then(function (res) {
-            logger.debug('Script: ' + scriptName + ' result: ' + JSON.stringify(res));
-            return res;
           });
       };
 
@@ -367,12 +330,9 @@ function run(config) {
       };
 
       browser.setViewportSize = function (viewportSize) {
-        return browser.executeScriptLogResult('getWindowToolbarSize')
-          .then(function (toolbarSize) {
-            browser.driver.manage().window().setSize(
-              viewportSize.width * 1 + toolbarSize.width,
-              viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly
-          });
+        return browser.executeScriptWithDescription(clientsidescripts.getWindowToolbarSize, 'browser.setViewportSize').then(function (toolbarSize) {
+          browser.driver.manage().window().setSize(viewportSize.width * 1 + toolbarSize.width, viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly
+        });
       };
 
       // add global matchers
@@ -557,7 +517,7 @@ function run(config) {
           browser.loadUI5Dependencies();
 
           // log UI5 version
-          return browser.executeScriptLogResult('getUI5Version').then(function (versionInfo) {
+          return browser.executeScriptWithDescription(clientsidescripts.getUI5Version, 'browser.getUI5Version').then(function (versionInfo) {
             logger.info('UI5 Version: ' + versionInfo.version);
             logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
           });

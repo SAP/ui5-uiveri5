@@ -1,6 +1,8 @@
 /* eslint no-console: */
 
 var _ = require('lodash');
+const chalk = require('chalk');
+
 
 // 0 - INFO,ERROR
 // 1 - +DEBUG
@@ -16,23 +18,38 @@ ConsoleLogger.prototype.setLevel = function(newLevel){
 };
 
 ConsoleLogger.prototype.info = function(msg,args) {
-  console.log('INFO: ' + _.template(msg)(args));
+  let color = chalk.cyan;
+  
+  if (msg.includes('FAIL')){
+    color = chalk.redBright;
+  }
+  if (msg.includes('PASSED')){
+    color = chalk.greenBright;
+  }
+  if (msg.includes('started')){
+    color = chalk.white;
+  }
+  if (msg.includes('summary')){
+    color = chalk.yellowBright;
+  }
+
+  console.log(color('INFO: ' + _.template(msg)(args)));
 };
 
 ConsoleLogger.prototype.error = function(msg,args) {
-  console.log('ERROR: ' + _.template(msg)(args));
+  console.log(chalk.redBright('ERROR: ' + _.template(msg)(args)));
 };
 
 ConsoleLogger.prototype.debug = function(msg,args) {
   if(this.level>0) {
-    console.log('DEBUG: ' + _.template(msg)(args));
+    console.log(chalk.yellowBright('DEBUG: ' + _.template(msg)(args)));
   }
 };
 
 //TODO stringify for objects and arrays
 ConsoleLogger.prototype.trace = function(msg,args) {
   if(this.level>1) {
-    console.log('TRACE: ' + _.template(msg)(args));
+    console.log(chalk.yellowBright('TRACE: ' + _.template(msg)(args)));
   }
 };
 

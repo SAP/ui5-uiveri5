@@ -189,13 +189,7 @@ describe("by_control", function () {
 		// toggle button should be pressed and overflowing buttons should be shown
 		expect(overflowingButton.isPresent()).toBeTruthy();
 
-		var hiddenToggleButton = element(by.control({
-			controlType: "sap.m.ToggleButton",
-			ancestor: {
-				id: "toolbar-fit"
-			},
-			visible: false
-		}));
+		var hiddenToggleButton = element(by.css("#toolbar-fit button[title='More']"));
 		var toolbarButton = element(by.control({
 			controlType: "sap.m.Button",
 			properties: {

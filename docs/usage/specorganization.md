@@ -3,7 +3,7 @@
 ## Specs
 You can decide which specs to run for every config profile and for each execution.
 Spec files can also be grouped in suites, which is useful for large projects.
-In the following points, a spec means a single jasmine suite deifned in a single file,
+In the following points, a spec means a single jasmine suite defined in a single file,
 and a suite means a group of specs (or a group of jasmine suites).
 A spec should be declared by its jasmine suite name (the file name without the `spec.js` suffix).
 
@@ -41,7 +41,7 @@ specs: {
     './detail.spec.js',
     './todo.spec.js'
   ],
-  other: '*-test'
+  other: '*-test.spec.js'
 }
 ```
 

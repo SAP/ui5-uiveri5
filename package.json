@@ -12,6 +12,7 @@
   ],
   "dependencies": {
     "adm-zip": "^0.4.7",
+    "chalk": "^3.0.0",
     "glob": "~4.3.5",
     "lodash": "^4.17.2",
     "mkdirp": "^0.5.1",

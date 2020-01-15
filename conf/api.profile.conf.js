@@ -1,13 +1,13 @@
-var profile = require('./profile.conf').config;
+var baseProfile = require('./integration.profile.conf').config;
 
-profile.matchers = profile.matchers.concat(
+baseProfile.matchers = [
   {name: './api/toHaveHttpBody'},
   {name: './api/toHaveHttpHeader'},
   {name: './api/body'}
-);
+];
 
-profile.plugins.push({name: '../src/api/requestPlugin'});
+baseProfile.plugins = [
+  {name: '../src/api/requestPlugin'}
+];
 
-profile.specResolver = './resolver/localSpecResolver';
-
-exports.config = profile;
+exports.config = baseProfile;

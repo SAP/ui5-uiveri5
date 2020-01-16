@@ -332,21 +332,7 @@ function run(config) {
             return res.value;
           });
       };
-
-      browser.executeScriptLogResult = function executeScriptLogResult(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.debug('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.trace('Execute script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeScript(code,params)
-          .then(function (res) {
-            logger.debug('Script: ' + scriptName + ' result: ' + JSON.stringify(res));
-            return res;
-          });
-      };
-
+      
       browser.loadUI5Dependencies = function () {
         return browser._loadUI5Dependencies().then(function () {
           return browser.waitForAngular();
@@ -367,7 +353,7 @@ function run(config) {
       };
 
       browser.setViewportSize = function (viewportSize) {
-        return browser.executeScriptLogResult('getWindowToolbarSize')
+        return browser.executeScriptHandleErrors('getWindowToolbarSize')
           .then(function (toolbarSize) {
             browser.driver.manage().window().setSize(
               viewportSize.width * 1 + toolbarSize.width,
@@ -557,10 +543,11 @@ function run(config) {
           browser.loadUI5Dependencies();
 
           // log UI5 version
-          return browser.executeScriptLogResult('getUI5Version').then(function (versionInfo) {
-            logger.info('UI5 Version: ' + versionInfo.version);
-            logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
-          });
+          return browser.executeScriptHandleErrors('getUI5Version')
+            .then(function (versionInfo) {
+              logger.info('UI5 Version: ' + versionInfo.version);
+              logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
+            });
         },
 
         waitForRedirect: function(targetUrl){

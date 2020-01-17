@@ -19,22 +19,26 @@ var mFunctions = {
     /* global uiveri5 */
     window.uiveri5 = window.uiveri5 || {};
 
-    loadOPAControlFinder().then(function () {
-      if (mScriptParams.useClassicalWaitForUI5) {
-        sDebugLog += '\nLoading classical waitForUI5 implementation.';
-        return loadClassicalWaitForUI5();
-      } else {
-        sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
-        return loadOPAWaitForUI5().catch(function (sError) {
-          sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+    loadControlFinder()
+      .then(function(){
+        return loadBrowserLogCollector();
+      })
+      .then(function () {
+        if (mScriptParams.useClassicalWaitForUI5) {
+          sDebugLog += '\nLoading classical waitForUI5 implementation.';
           return loadClassicalWaitForUI5();
-        });
-      }
-    }).then(function (sLog) {
-      fnCallback({log: sDebugLog + (sLog || '')});
-    }).catch(function (sError, sLog) {
-      fnCallback({error: sError, log: sDebugLog + (sLog || '')});
-    });
+        } else {
+          sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
+          return loadOPAWaitForUI5().catch(function (sError) {
+            sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+            return loadClassicalWaitForUI5();
+          });
+        }
+      }).then(function (sLog) {
+        fnCallback({log: sDebugLog + (sLog || '')});
+      }).catch(function (sError, sLog) {
+        fnCallback({error: sError, log: sDebugLog + (sLog || '')});
+      });
 
     // --- helper function declarations below ---
 
@@ -83,7 +87,7 @@ var mFunctions = {
       });
     }
 
-    function loadOPAControlFinder() {
+    function loadControlFinder() {
       return new Promise(function (resolve) {
         if (uiveri5._ControlFinder) {
           resolve();
@@ -107,6 +111,31 @@ var mFunctions = {
         }
       });
     }
+
+    function loadBrowserLogCollector() {
+      return new Promise(function (resolve) {
+        if (uiveri5._BrowserLogCollector) {
+          resolve();
+        } else {
+          sDebugLog += '\nLoading OPA5 browser log collector.';
+          var onError = function (oError) {
+            // only throw error if dependency is missing when a control locator is actually used
+            resolve('Browser log collector will not be enabled.' +
+            ' Minimum UI5 versions supporting nrowser log collector: 1.64 and up. Details: ' + oError);
+          };
+          try {
+            sap.ui.require([
+              'sap/ui/test/_BrowserLogCollector'
+            ], function (_BrowserLogCollector) {
+              window.uiveri5._BrowserLogCollector =  _BrowserLogCollector.getInstance();
+              resolve();
+            }, onError);
+          } catch (oError) {
+            onError(oError);
+          }
+        }
+      });
+    }    
   },
 
   waitForAngular: function waitForAngular (mScriptParams, fnCallback) {
@@ -138,7 +167,9 @@ var mFunctions = {
           value: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
         };
       } else {
-        throw new Error('Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree');
+        return {
+          error: 'Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree'
+        };
       }
     } catch (oError) {
       return {
@@ -242,29 +273,6 @@ var mFunctions = {
       } catch (error) {
         fnCallback({error: 'Error while processing dom, details: ' + error});
       }
-    }
-  },
-
-  loadLogDependencies: function loadLogDependencies (mScriptParams, fnCallback) {
-    if (!window.sap || !window.sap.ui) {
-      fnCallback({error: 'No UI5 on this page'});
-    }
-
-    if (!window.uiveri5) {
-      fnCallback({error: 'UI5 dependencies are not loaded'});
-    }
-
-    var sError = 'Your application needs a minimum version of UI5 v1.64 to collect browser logs!';
-    try {
-      sap.ui.require([
-        'sap/ui/test/_BrowserLogCollector'
-      ], function (_BrowserLogCollector) {
-        window.uiveri5._BrowserLogCollector = _BrowserLogCollector.getInstance();
-      }, function (oError) {
-        fnCallback({error: 'Cannot load _BrowserLogCollector, ' + sError + ', Details: ' + oError});
-      });
-    } catch (oError) {
-      fnCallback({error: 'Cannot require _BrowserLogCollector, ' + sError + ', Details: ' + oError});
     }
   },
 

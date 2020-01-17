@@ -3,5 +3,8 @@ exports.config = {
         browser: {
             level: "debug"
         }
-    }
+    },
+    plugins: [
+        {name: './plugins/browserLogsPlugin'}
+    ],
 };

@@ -279,7 +279,8 @@ function run(config) {
         var scriptName = arguments[1];
         var params = arguments[2];
         // log script execution
-        logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params) + ' with code: \n' + JSON.stringify(code));
+        logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+        //logger.trace('Execute async script code: \n' + JSON.stringify(code));
         //call original function in its context
         return origExecuteAsyncScript_.apply(browser, arguments)
           .then(function(res) {
@@ -295,19 +296,19 @@ function run(config) {
         var code = clientsidescripts[scriptName];
         params = params || {};
         browser.controlFlow().execute(function () {
-          logger.debug('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.trace('Execute async script code: \n' + JSON.stringify(code));
+          logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+          //logger.trace('Execute async script code: \n' + JSON.stringify(code));
         });
         return browser.executeAsyncScript(code,params)
           .then(function (res) {
             if (res.log) {
-              logger.debug('Async script: ' + scriptName + ' logs: \n' + res.log);
+              logger.trace('Async script: ' + scriptName + ' logs: \n' + res.log);
             }
             if (res.error) {
-              logger.debug('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
+              logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
               throw new Error(scriptName + ': ' + res.error);
             }
-            logger.debug('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
+            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
             return res.value;
           });
       };
@@ -316,19 +317,19 @@ function run(config) {
         var code = clientsidescripts[scriptName];
         params = params || {};
         browser.controlFlow().execute(function () {
-          logger.debug('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.trace('Execute script code: \n' + JSON.stringify(code));
+          logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+         // logger.trace('Execute script code: \n' + JSON.stringify(code));
         });
         return browser.executeScript(code,params)
           .then(function (res) {
             if (res.log) {
-              logger.debug('Script: ' + scriptName + ' logs: \n' + res.log);
+              logger.trace('Script: ' + scriptName + ' logs: \n' + res.log);
             }
             if (res.error) {
-              logger.debug('Script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
+              logger.trace('Script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
               throw new Error(scriptName + ': ' + res.error);
             }
-            logger.debug('Script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
+            logger.trace('Script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
             return res.value;
           });
       };
@@ -669,13 +670,13 @@ function run(config) {
     protractorArgv.plugins = [{
       inline: {
         setup: function() {
-          _callPlugins('setup');
+          return _callPlugins('setup');
         },
         onPrepare: function() {
-          _callPlugins('onPrepare');
+          return _callPlugins('onPrepare');
         },
         teardown: function() {
-          _callPlugins('teardown');
+          return _callPlugins('teardown');
         }
       }
     }];

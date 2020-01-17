@@ -6,13 +6,6 @@ function BrowserLogsPlugin(config, instanceConfig, logger) {
   this.logger = logger;
 }
 
-BrowserLogsPlugin.prototype.onPrepare = function() {
-  return browser.executeAsyncScriptHandleErrors('loadLogDependencies')
-    .catch(function () {
-      // swallow error, already logged on debug level, avoid double logs
-    });
-};
-
 BrowserLogsPlugin.prototype.suiteStarted = function () {
   var that = this;
   if (that.level) {

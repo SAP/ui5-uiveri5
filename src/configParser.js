@@ -45,28 +45,31 @@ ConfigParser.prototype._mergeConfig = function (configFile, type) {
 
   for (var key in newConfig) {
     var modulesToEnable = [];
-    if (_.isArray(newConfig[key]) && newConfig[key]) {
-      modulesToEnable = newConfig[key];
-    } else if (_.isArray(newConfig[key].enabled) && newConfig[key].enabled) {
-      modulesToEnable = newConfig[key].enabled;
+    if (newConfig[key]) {
+      if (_.isArray(newConfig[key])) {
+        modulesToEnable = newConfig[key];
+      } else if (_.isArray(newConfig[key].enabled)) {
+        modulesToEnable = newConfig[key].enabled;
+      }
     }
+
     if (_.isArray(priorityConfig[key])) {
       // if existing (high prio) config has data about the current key -> update it
       modulesToEnable.forEach(this._updateExistingKey(priorityConfig, key));
+      // remove the already processed modules (to ensure compact values in final merge)
+      _clearEnabledModules(newConfig, key);
     } else if (modulesToEnable && modulesToEnable.length) {
       // if existing (high prio) config doesn't have data about the current key -> add the new modules from the new (low prio) config
       modulesToEnable.forEach(function (moduleDef) {
         logger.debug('Adding module with ID "' + moduleDef.id + '" and name "' + moduleDef.name + '"' + 'under key "' + key + '"');
       });
       priorityConfig[key] = modulesToEnable;
+      _clearEnabledModules(newConfig, key);
     }
 
     // if the new (low prio) config enables a module, but the existing (high prio) config disables it ->
     // delete the module from the new config
     this._disableModules(modulesToDisable, modulesToEnable, key);
-
-    // finally, remove the already processed enabled modules, before merging with the high priority config
-    _clearEnabledModules(newConfig, key);
   }
 
   // merge the loaded *.conf.js into glabal config
@@ -164,9 +167,9 @@ function _flattenEnabledModules(config) {
 }
 
 function _clearEnabledModules(config, key) {
-  if (_.isArray(config[key]) && config[key]) {
+  if (_.isArray(config[key])) {
     delete config[key];
-  } else if (_.isArray(config[key].enabled) && config[key].enabled) {
+  } else if (_.isArray(config[key].enabled)) {
     delete config[key].enabled;
   }
   if (_.isEmpty(config[key])) {

@@ -8,12 +8,11 @@ function regExpEscape (s) {
 
 function covertToUiveri5BindingInfo(bindingPath, bindingProperty){
   var prop = {};
-  prop.bindingPath = {};
   if(bindingPath) {
-    prop.bindingPath.path = bindingPath;
+    prop.path = bindingPath;
   }
-  prop.bindingPath.propertyPath = bindingProperty;
-  // prop.bindingPath.modelName = bindingProperty;
+  prop.propertyPath = bindingProperty;
+  // prop.bindingPath.modelName = bindingProperty;?
   return prop;
 }
 

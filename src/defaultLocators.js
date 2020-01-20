@@ -69,25 +69,22 @@ DefaultLocators.prototype.register = function(by) {
   by.addLocator('ui5All', function(mParams, index, rootSelector) {
     return {
       findElementsOverride: function (driver, using, rootSelector) {
-      var vyperParserUtil = vyperParser(mParams, index, rootSelector);
-      var oElementMatchers;
-      var oAncestorMatchers;
-      var oDescentantMatchers;
-      var oSiblingMatchers;
-      var sVeri5Matchers;
+        var vyperParserUtil = vyperParser(mParams, index, rootSelector);
+        var oElementMatchers;
+        var oAncestorMatchers;
+        var oDescentantMatchers;
+        var oSiblingMatchers;
+        var sVeri5Matchers;
 
-      if(mParams){
-        oElementMatchers = vyperParserUtil.parseProperties();
-        //oAncestorMatchers = vyperParserUtil.ancestorPropertiesParser();
-        //oDescentantMatchers = vyperParserUtil.childrenPropertiesParser();
-        //oSiblingMatchers = vyperParserUtil.siblingPropertiesParser();
+        if(mParams){
+          oElementMatchers = vyperParserUtil.parseElementProperties(mParams);
+          oAncestorMatchers = vyperParserUtil.ancestorPropertiesParser(mParams);
+          oDescentantMatchers = vyperParserUtil.childrenPropertiesParser(mParams);
+          //oSiblingMatchers = vyperParserUtil.siblingPropertiesParser();
 
-        sVeri5Matchers = {
-          oElementMatchers
-          //ancestor: oAncestorMatchers,
-          //descendant: oDescentantMatchers,
-        };
-        return driver.findElements(webdriver.By.js(clientsidescripts.findByControl, sVeri5Matchers, using, rootSelector))
+          oElementMatchers.ancestor = oAncestorMatchers;
+          oElementMatchers.descendant = oDescentantMatchers;
+          return driver.findElements(webdriver.By.js(clientsidescripts.findByControl, sVeri5Matchers, using, rootSelector))
             .then(function (vResult) {
               if (vResult.length) {
                 return vResult;
@@ -100,51 +97,11 @@ DefaultLocators.prototype.register = function(by) {
               }
             });
 
-      } else{
+        } else{
         //Exception
-      }
-    }
-  }
-    /*
-    
-    if(oParams.elementProperties) {
-      var param = {};
-      
-      if(oParams.elementProperties.metadata) {
-        param.controlType = oParams.elementProperties.metadata;
-      }
-
-      if(oParams.elementProperties.mProperties) {
-        if(oParams.elementProperties.mProperties.id) {
-          var regex = RegExp(wildcardToRegExp(oParams.elementProperties.mProperties.id));
-          param.id = regex;
-        }
-        delete oParams.elementProperties.mProperties.id;
-
-        param.bindingPath = {};
-
-        if(oParams.elementProperties.bindingContextPath) {
-          // wildcards not usable currently
-          param.bindingPath['path'] = oParams.elementProperties.bindingContextPath;
-          //Iterate through object/array properties
-          // ...
-          var mProps = oParams.elementProperties.mProperties;
-          for(var key in mProps) {
-            var value = mProps[key];
-            if(value && typeof value === "object") {
-              param.bindingPath['propertyPath'] = value;
-            } else if(value && Array.isArray(value)) {
-              value.map(function(locatorBindingData){
-                compareBindingPathAndModelProperty(key, locatorBindingData, oControl);
-              });
-            }
-          }
-          //param.properties = oParams.elementProperties.mProperties;
         }
       }
-        
-      return by.control(param);
-    }*/
+    };
     
   });
 };

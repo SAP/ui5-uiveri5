@@ -1,4 +1,11 @@
 # Configuration
+There are three main levels of configuraton, from highest to lowest priority:
+* command line arguments
+* project config file
+* default configuration for the built-in profile, declared in the project config file
+If there are properties with the same name or ID on two config levels:
+* primitive values from the config with higher priority overrides other values
+* arrays from both configs are merged
 
 ## Config File
 Config file is a node module that exports a single `config` object.

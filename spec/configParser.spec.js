@@ -5,6 +5,10 @@ describe("configParser", function() {
   var logger = require('../src/logger')(3);
   var configParser = require('../src/configParser')(logger);
 
+  beforeEach(function () {
+    configParser.config = {};
+  });
+
   it('Should override basic types and objects',function(){
     var config = {
       conf: __dirname + '/configParser/conf.js',  // cofig file with data to override
@@ -22,7 +26,7 @@ describe("configParser", function() {
 
     var mergedConfig = configParser.mergeConfigs(config);
 
-    expect(mergedConfig.multi).toEqual([{name: 'option1'}, {name: 'option2'}]);
+    expect(mergedConfig.multi).toEqual([{name: 'option2'}, {name: 'option1'}]);
   });
 
   it('Should resolve placeholders in config', function () {
@@ -102,7 +106,7 @@ describe("Should parse confkey from command-line", function () {
     var parsed = cliParser.parse(argvStub) 
     parsed.conf = __dirname + '/configParser/conf.js';
     var config = configParser.mergeConfigs(parsed)
-    
+
     expect(config.browsers).toEqual([{"browserName": "firefox"}])
   });
 
@@ -112,7 +116,7 @@ describe("Should parse confkey from command-line", function () {
     var parsed = cliParser.parse(argvStub) 
     parsed.conf = __dirname + '/configParser/empty.conf.js';
     var config = configParser.mergeConfigs(parsed)
-    
+
     expect(config.browsers).toEqual([{"browserName": "firefox"}])
   });
 
@@ -122,8 +126,80 @@ describe("Should parse confkey from command-line", function () {
     var parsed = cliParser.parse(argvStub) 
     parsed.conf = __dirname + '/configParser/importing.conf.js';
     var config = configParser.mergeConfigs(parsed)
-    
+
     expect(config.browsers).toEqual([{"browserName": "firefox"}])
+  });
+
+  it('Should combine enabled modules', function () {
+    var config = {
+      conf: __dirname + '/configParser/modulecrud.conf.js',
+      enableKey: {
+        enabled: [{name: 'optionToEnable-key'}] // keys in both configs
+      },
+      enableArr: [{name: 'optionToEnable-arr'}], // arrays in both configs
+      enableMix1: {
+        enabled: [{name: 'optionToEnable-key'}] // key in high prio, array in low prio
+      },
+      enableMix2: [{name: 'optionToEnable-arr'}] // array in high prio, key in low prio
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+
+    expect(mergedConfig.enableKey).toEqual([{name: 'optionToEnable-key'}, {name: 'optionToEnable-file'}]);
+    expect(mergedConfig.enableArr).toEqual([{name: 'optionToEnable-arr'}, {name: 'optionToEnable-file'}]);
+    expect(mergedConfig.enableMix1).toEqual([{name: 'optionToEnable-key'}, {name: 'optionToEnable-file'}]);
+    expect(mergedConfig.enableMix2).toEqual([{name: 'optionToEnable-arr'}, {name: 'optionToEnable-file'}]);
+  });
+
+  it('Should disable modules', function () {
+    var config = {
+      conf: __dirname + '/configParser/modulecrud.conf.js',
+      disableArr: {
+        disabled: [{name: 'optionToDisable'}]
+      },
+      disableKey: {
+        disabled: [{name: 'optionToDisable'}]
+      }
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+
+    expect(mergedConfig.disableArr).toEqual([{name: 'optionToRemain'}]);
+    expect(mergedConfig.disableKey).toEqual([{name: 'optionToRemain'}]);
+  });
+
+  it('Should update existing modules', function () {
+    var config = {
+      conf: __dirname + '/configParser/modulecrud.conf.js',
+      updateArr: [{name: 'optionToUpdate', newKey: "value1", updateKey: "newValue"}],
+      updateKey: {
+        enabled: [{name: 'optionToUpdate', newKey: "value1", updateKey: "newValue"}]
+      }
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+    expect(mergedConfig.updateArr).toEqual([{name: 'optionToUpdate', updateKey: "newValue", newKey: "value1", existingKey: "value2"}]);
+    expect(mergedConfig.updateKey).toEqual([{name: 'optionToUpdate', updateKey: "newValue", newKey: "value1", existingKey: "value2"}]);
+  });
+
+  it('Should not update existing module with different ID', function () {
+    var config = {
+      conf: __dirname + '/configParser/modulecrud.conf.js',
+      updateArrID: [{name: 'optionWithID1', newKey: "value1", updateKey: "newValue", id: "newID"}],
+      updateKeyID: {
+        enabled: [{name: 'optionWithID2', newKey: "value1", updateKey: "newValue", id: "newID"}]
+      }
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+    expect(mergedConfig.updateArrID).toEqual([
+      {name: 'optionWithID1', updateKey: "newValue", newKey: "value1", id: "newID"},
+      {name: 'optionWithID1', updateKey: "prevValue", existingKey: "value2", id: "prevID"}
+    ]);
+    expect(mergedConfig.updateKeyID).toEqual([
+      {name: 'optionWithID2', updateKey: "newValue", newKey: "value1", id: "newID"},
+      {name: 'optionWithID2', updateKey: "prevValue", existingKey: "value2", id: "prevID"}
+    ]);
   });
 
 });

@@ -217,6 +217,13 @@ exports.config = {
       userFieldSelector: '#j_username',
       passFieldSelector: '#j_password',
       logonButtonSelector: '#logOnFormSubmit'
+    },
+    'github-form': {
+      name: './authenticator/formAuthenticator',
+      userFieldSelector: '#login_field',
+      passFieldSelector: '#password',
+      logonButtonSelector: 'input[type=submit]',
+      authorizationButtonSelector: 'button[type=submit]'
     }
   },
 

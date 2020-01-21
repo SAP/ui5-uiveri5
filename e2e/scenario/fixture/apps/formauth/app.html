@@ -13,6 +13,8 @@
 					window.location.replace('./login_idp.html?redirect=app.html');
 				} else if (url.searchParams.get('conditional')) {
 					window.location.replace('./login_conditional.html?redirect=app.html');
+				} else if (url.searchParams.get('authorize')) {
+				  window.location.replace('./login_authorize.html?redirect=app.html');
 				} else {
 					window.location.replace('./login.html?redirect=app.html');
 				}

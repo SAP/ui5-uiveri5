@@ -18,6 +18,7 @@ function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.passFieldSelector = instanceConfig.passFieldSelector;
   this.logonButtonSelector = instanceConfig.logonButtonSelector;
   this.conditionalLogonButtonSelector = instanceConfig.conditionalLogonButtonSelector;
+  this.authorizationButtonSelector = instanceConfig.authorizationButtonSelector;
   this.idpSelector = instanceConfig.idpSelector;
   this.redirectUrl = instanceConfig.redirectUrl;
   this.statisticsCollector = statisticsCollector;
@@ -86,11 +87,36 @@ FormAuthenticator.prototype.get = function(url){
   }
 
   this._getField(this.passFieldSelector).sendKeys(this.pass);
-  this._getField(this.logonButtonSelector).click().then(function () {
-    // wait for all login actions to complete
+  this._getField(this.logonButtonSelector).click();
+
+  function _waitForAuthorizationButtonEnabled() {
+    return that._getField(that.authorizationButtonSelector).isEnabled().then(function (enabled) {
+      that.logger.debug("Is authorizationButtonSelector enabled: (" + enabled + ")");
+      return enabled;
+    }).catch(function () {
+      that.logger.debug("authorizationButtonSelector cannot be found!");
+      return true;
+    })
+  }
+
+  // handle conditional login:
+  // first a user credentials are entered and sign in button is pressed
+  // then you authorize the oAuth application
+  if (this.authorizationButtonSelector) {
+    this._wait(_waitForAuthorizationButtonEnabled);
+    this._getField(this.authorizationButtonSelector)
+      .click()
+      .then(function () {
+        that.logger.debug('Clicking authorizationButtonSelector.');
+      })
+      .catch(function () {
+        that.logger.debug("authorizationButtonSelector cannot be found!");
+      });
+  }
+  browser.controlFlow().execute(function () {
     that.statisticsCollector.authDone();
   });
-
+  
   // ensure redirect is completed
   return browser.testrunner.navigation.waitForRedirect(this.redirectUrl || url);
 };

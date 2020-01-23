@@ -43,6 +43,9 @@ This configuration uses the `UI5-Form-Authenticator` authenticator and targets a
 ### Sapcp-form auth Configuration
 This configuration uses the `Form-Authenticator` authenticator and targets applications behind SAP Cloud, SAP IDM or any other OAuth2.0 or plain form authentication. 
 
+### Github-form auth Configuration
+This configuration uses the `Form-Authenticator` authenticator and targets applications behind GitHub OAuth2.0 authentication and handles the authorize confirmation.
+
 ## Customize auth Configuration
 It's possible to override an arbitrary authenticator parameter from the authentication configuration.
 ```javascript
@@ -88,6 +91,8 @@ Implemented in [formAuthenticator.js](../../src/authenticator/formAuthenticator.
 * frameSelector - if provided, the inoput fields are searched in this iFrame
 * redirectUrl - if provided, it overides the basicUrl that is used to synchronize on page redirect that the identity provider
   initiates after successfull authentication. Request arguments and fragment are removed when matching, RegExp is supported.
+* authorizationButtonSelector - the css selector of the authorize button
+* authorizationButtonTimeout - authorize button appear timeout
 
 Redirect to URLs that are matched with regex:
 ```javascript

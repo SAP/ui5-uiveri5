@@ -14,14 +14,18 @@
 				} else if (url.searchParams.get('conditional')) {
 					window.location.replace('./login_conditional.html?redirect=app.html');
 				} else if (url.searchParams.get('authorize')) {
-				  window.location.replace('./login_authorize.html?redirect=app.html');
+					if (url.searchParams.has('delay')) {
+						window.location.replace('./login_authorize.html?redirect=app.html&delay');
+					} else {
+						window.location.replace('./login_authorize.html?redirect=app.html');
+					}
 				} else {
 					window.location.replace('./login.html?redirect=app.html');
 				}
 			}
 		</script>
 
-		<script src="https://openui5nightly.hana.ondemand.com/resources/sap-ui-core.js"
+		<script src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js"
 			id="sap-ui-bootstrap"
 			data-sap-ui-theme="sap_fiori_3"
 			data-sap-ui-libs="sap.m">

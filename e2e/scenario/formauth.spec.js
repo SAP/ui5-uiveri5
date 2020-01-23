@@ -45,10 +45,18 @@ describe('FormAuth scenario test', function() {
         });
     },40000);
 
-    it('should execute auth with authentication button', () => {
+    it('should execute auth with authorization button', () => {
         return Runner.execTest({
             specs: './scenario/fixture/empty.spec.js',
             baseUrl: app.host + '/formauth/app.html?authorize=true',
+            confjs: './scenario/formauth_authorize.conf.js'
+        });
+    },60000);
+
+    it('should execute auth with authorization button', () => {
+        return Runner.execTest({
+            specs: './scenario/fixture/empty.spec.js',
+            baseUrl: app.host + '/formauth/app.html?authorize=true\\&delay',
             confjs: './scenario/formauth_authorize.conf.js'
         });
     },60000);

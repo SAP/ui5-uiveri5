@@ -6,25 +6,34 @@
   <title>Basic login page with authorize button mock</title>
   <script>
       window.addEventListener('DOMContentLoaded', () => {
-          let loginBtn = document.getElementById('logOnFormSubmit');
-          loginBtn.onclick = (e) => {
-              e.preventDefault();
-              //create form with button that is dynamically added to the page
-              let form = document.createElement("form");
-              let button = document.createElement("button");
-              button.setAttribute("type", "submit");
-              button.innerText = "Authorize";
-              form.appendChild(button);
+        let loginBtn = document.getElementById('logOnFormSubmit');
+        loginBtn.onclick = (e) => {
+          e.preventDefault();
+          //create form with button that is dynamically added to the page
+          let url = new URL(window.location.href);
+          let delay = url.searchParams.has('delay') ? 1000 : 0;
+          let form = document.createElement("form");
+          let button = document.createElement("button");
+          button.setAttribute("type", "submit");
+          button.disabled = true;
+          button.innerText = "Authorize";
+          setTimeout(() => {
+            form.appendChild(button);
+            setTimeout(() => {
+              button.disabled = false;
               button.onclick = (e) => {
                   e.preventDefault();
-                  let url = new URL(window.location.href);
                   let redirectParam = url.searchParams.get('redirect');
                   let redirectUrl = redirectParam + '?auth=true';
                   console.log('RedirectUrl:' + redirectUrl);
                   window.location.replace(redirectUrl);
               };
-              document.body.insertBefore(form, document.body.childNodes[0]);
-          };
+            },delay);
+          },delay);
+          let newBody = document.createElement("body");
+          newBody.appendChild(form);
+          document.body = newBody;
+        };
       });
   </script>
 </head>

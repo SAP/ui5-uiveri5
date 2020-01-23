@@ -48,10 +48,10 @@ FormAuthenticator.prototype.get = function(url){
 
   // handle idp selection
   if (this.idpSelector) {
-    this._waitForField(this.idpSelector, 'redirect to default IDP login page');
+    this._waitForField(this.idpSelector, 'Waiting to redirect to IDP selection page');
 
     this._getField(this.idpSelector).click().then(function () {
-      that.logger.debug('Opening custom IDP auth page');
+      that.logger.debug('Opening custom login page');
     });
   }
 
@@ -60,16 +60,16 @@ FormAuthenticator.prototype.get = function(url){
   this._wait(function () {
     // if auth is in frame => switch inside
     if (that.frameSelector) {
-      that._getFields(that.frameSelector).then(that._checkDisplayed).then(function (isDisplayed) {
+      that._isPresent(that.frameSelector).then(function (isDisplayed) {
         if (isDisplayed && !switchedToFrame) {
-          browser.driver.switchTo().frame(that._getFields(that.frameSelector)).then(function () {
+          browser.driver.switchTo().frame(that._getField(that.frameSelector)).then(function () {
             switchedToFrame = true;
           });
         }
       });
     }
-    return that._getFields(that.userFieldSelector).then(that._checkDisplayed);
-  }, this.idpSelector ? 'redirect to custom IDP login page' : 'redirect to login page');
+    return that._isPresent(that.userFieldSelector);
+  }, 'Waiting to redirect to login page');
 
   // enter credentials in the respective fields
 
@@ -83,36 +83,30 @@ FormAuthenticator.prototype.get = function(url){
     this._getField(this.conditionalLogonButtonSelector).click().then(function () {
       that.logger.debug('Opening conditional IDP auth page');
     });
-    this._waitForField(this.passFieldSelector, 'redirect to conditional auth page');
+    this._waitForField(this.passFieldSelector, 'Wating to redirect to conditional auth page');
   }
 
   this._getField(this.passFieldSelector).sendKeys(this.pass);
   this._getField(this.logonButtonSelector).click();
 
-  function _waitForAuthorizationButtonEnabled() {
-    return that._getField(that.authorizationButtonSelector).isEnabled().then(function (enabled) {
-      that.logger.debug("Is authorizationButtonSelector enabled: (" + enabled + ")");
-      return enabled;
-    }).catch(function () {
-      that.logger.debug("authorizationButtonSelector cannot be found!");
-      return true;
-    })
-  }
-
-  // handle conditional login:
+  // handle reauthorization in github
   // first a user credentials are entered and sign in button is pressed
   // then you authorize the oAuth application
   if (this.authorizationButtonSelector) {
-    this._wait(_waitForAuthorizationButtonEnabled);
-    this._getField(this.authorizationButtonSelector)
-      .click()
-      .then(function () {
-        that.logger.debug('Clicking authorizationButtonSelector.');
-      })
-      .catch(function () {
-        that.logger.debug("authorizationButtonSelector cannot be found!");
+    //this._wait(_waitForAuthorizationButtonEnabled);
+    this._wait(function() {
+      return that._isPresent(that.authorizationButtonSelector).then(function(isPresent) {
+        if (isPresent) {
+          return that._getField(that.authorizationButtonSelector).click().then(function() {
+            return true;
+          });
+        }
       });
+    },'Explicit authorization was not requested',this.authorizationButtonTimeout).catch(function () {
+      // swallow the timeout error as reauthorization is only displayed sometimes
+    });
   }
+  
   browser.controlFlow().execute(function () {
     that.statisticsCollector.authDone();
   });
@@ -121,31 +115,31 @@ FormAuthenticator.prototype.get = function(url){
   return browser.testrunner.navigation.waitForRedirect(this.redirectUrl || url);
 };
 
-FormAuthenticator.prototype._wait = function (fnCondition, sTimeoutMessage) {
-  return browser.driver.wait(fnCondition, browser.getPageTimeout, 'Waiting for auth page to fully load. Step: ' + sTimeoutMessage);
+FormAuthenticator.prototype._wait = function (fnCondition, sTimeoutMessage,iTimeout) {
+  return browser.driver.wait(fnCondition, iTimeout || browser.getPageTimeout, sTimeoutMessage);
 };
 
 FormAuthenticator.prototype._waitForField = function (sSelector, sTimeoutMessage) {
   var that = this;
   return this._wait(function () {
-    return that._getFields(sSelector).then(that._checkDisplayed);
+    return that._isPresent(sSelector);
   }, sTimeoutMessage);
-};
-
-FormAuthenticator.prototype._getFields = function (sSelector) {
-  return browser.driver.findElements(by.css(sSelector));
 };
 
 FormAuthenticator.prototype._getField = function (sSelector) {
   return browser.driver.findElement(by.css(sSelector));
 };
 
-FormAuthenticator.prototype._checkDisplayed = function (aFields) {
-  if (aFields.length) {
-    return aFields[0].isDisplayed().then(function (isDisplayed) {
-      return isDisplayed;
-    });
-  }
+FormAuthenticator.prototype._isPresent = function (sSelector) {
+  return browser.driver.findElements(by.css(sSelector)).then(function (aFields) {
+    if (aFields.length) {
+      return aFields[0].isDisplayed().then(function (isDisplayed) {
+        if (isDisplayed) {
+          return aFields[0].isEnabled();
+        }
+      });
+    }
+  });
 };
 
 module.exports = function (config,instanceConfig,logger,statisticsCollector) {

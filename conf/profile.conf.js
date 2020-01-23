@@ -223,7 +223,8 @@ exports.config = {
       userFieldSelector: '#login_field',
       passFieldSelector: '#password',
       logonButtonSelector: 'input[type=submit]',
-      authorizationButtonSelector: 'button[type=submit]'
+      authorizationButtonSelector: 'button[type=submit]',
+      authorizationButtonTimeout: 10000
     }
   },
 

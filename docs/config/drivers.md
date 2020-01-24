@@ -157,7 +157,7 @@ All IE options from [Options](https://github.com/SeleniumHQ/selenium/blob/master
 There is a [browser configuration](https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration) that has to be followed before you start testing on IE. It is preferable to modify your browser's security settings as described [here](https://github.com/seleniumQuery/seleniumQuery/wiki/seleniumQuery-and-IE-Driver#protected-mode-exception-while-launching-ie-driver). This is the only way to overcome security limitations when Selenium jar is used. When you don't use Selenium jar, you can enable the `introduceFlakinessByIgnoringProtectedModeSettings` option, but keep in mind that it is reported to cause driver instability.
 ```javascript
 browsers: [{
-  browserName: 'firefox',
+  browserName: 'ie',
   capabilities: {
     iedriverOptions: {
       introduceFlakinessByIgnoringProtectedModeSettings: ['true']

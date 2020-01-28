@@ -202,4 +202,17 @@ describe("Should parse confkey from command-line", function () {
     ]);
   });
 
+  it('Should refer to another profile', function () {
+    var config = {
+      conf: __dirname + '/configParser/referring.conf.js'
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+    // with decreasing prio: refering -> referred -> api -> integration
+    expect(mergedConfig.profile).toContain('referred');
+    expect(mergedConfig.prop).toEqual([{name: 'optionToUpdate', updateKey: "newValue", newKey: "value1", existingKey: "value2"}])
+    expect(mergedConfig.plugins).toEqual([{name: '../src/api/requestPlugin'}]);
+    expect(mergedConfig.specResolver).toEqual('./resolver/localSpecResolver');
+  });
+
 });

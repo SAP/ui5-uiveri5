@@ -1,8 +1,10 @@
 var _ = require('lodash');
+var path = require('path');
+var fs = require('fs');
 
 var CONFIG_DIR = '../conf/';
-var DEFAULT_CONF = CONFIG_DIR + 'default.conf.js';
-var COMMON_CONF = CONFIG_DIR + 'profile.conf.js';
+var DEFAULT_CONF = path.join(CONFIG_DIR, 'default.conf.js');
+var COMMON_CONF = path.join(CONFIG_DIR, 'profile.conf.js');
 
 function ConfigParser(logger) {
   this.logger = logger;
@@ -29,8 +31,7 @@ ConfigParser.prototype.mergeConfigs = function (config) {
 };
 
 ConfigParser.prototype._mergeConfigFile = function (path, type) {
-  this.logger.debug('Loading ' + type + ' config from: ' + path);
-  this._mergeConfig(_readConfig(path));
+  this._mergeConfig(this._readConfig(path, type));
 };
 
 ConfigParser.prototype._mergeConfig = function (newConfig) {
@@ -79,23 +80,26 @@ ConfigParser.prototype._mergeConfig = function (newConfig) {
   this.config = _mergeWithArrays(newConfig, priorityConfig);
 };
 
-ConfigParser.prototype._resolveProfile = function (profile, fullConfig) {
-  fullConfig = fullConfig || [];
+ConfigParser.prototype._resolveProfile = function (profile, resolvedConfig) {
+  resolvedConfig = resolvedConfig || [];
   if (!profile) {
     return [];
   }
+  var builtInFilePath = path.join(__dirname, CONFIG_DIR, profile + '.profile.conf.js');
   var fileConfig;
-  try {
-    fileConfig = _readConfig(CONFIG_DIR + profile + '.profile.conf.js');
-  } catch (e) {
-    fileConfig = _readConfig(profile); // don't handle exception - user should fix the path
+
+  if (fs.existsSync(builtInFilePath)) {
+    fileConfig = this._readConfig(builtInFilePath);
+  } else {
+    fileConfig = this._readConfig(profile);
   }
 
-  fullConfig.push(fileConfig);
+  resolvedConfig.push(fileConfig);
+
   if (fileConfig.profile) {
-    return this._resolveProfile(fileConfig.profile, fullConfig);
+    return this._resolveProfile(fileConfig.profile, resolvedConfig);
   } else {
-    return fullConfig;
+    return resolvedConfig;
   }
 };
 
@@ -158,10 +162,11 @@ ConfigParser.prototype._disableModules = function (modulesToDisable, modules, ke
   }
 };
 
-function _readConfig(configPath) {
+ConfigParser.prototype._readConfig = function (configPath, type) {
+  this.logger.debug('Loading ' + (type ? type + ' ': '') + 'config from: ' + configPath);
   // clone so we avoid module cache
   return _.cloneDeep(require(configPath).config);
-}
+};
 
 function _setConfKey(config,confKey) {
   var pairs = confKey.split(';');

@@ -23,3 +23,20 @@ For more details, see:
 * https://github.com/angular/protractor/blob/master/docs/debugging.md
 * https://github.com/angular/protractor/issues/4307
 * https://nodejs.org/en/docs/guides/debugging-getting-started/
+
+### VSCode
+You can use debugger in VSCode, as stated above in protractor debugging guide,
+but because UIVeri5 executable uses child_process.fork() instead of require(), you can't use it directly on it.
+You have to target `uiveri5/src/cli.js`.
+```javascript
+{
+      "type": "node",
+      "request": "launch",
+      "name": "debug uiveri5",
+      "program": "/usr/local/lib/node_modules/@ui5/uiveri5/src/cli",
+      "cwd": "${workspaceFolder}/",
+      "args": [
+         "conf.js"
+      ]
+  }
+```

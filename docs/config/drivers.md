@@ -169,8 +169,8 @@ browsers: [{
 }]
 ```
 
-## Edge
-Microsoft Edge requires a WebDriver that is distributed as a native installation. Please make sure you have the correct version installed as explained in [Microsoft Edge WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/). The release version should match the first part of your OS build, for example, for OS build number 15063.0000, choose driver Release 15063. The downloaded driver should be moved to <uiveri5-installation-folder>/selenium/ without renaming.
+## Edge (based on Chromium)
+Microsoft Edge (based on Chromium) requires a WebDriver. Please make sure you have the correct version installed as explained in [Microsoft Edge WebDriver](https://developer.microsoft.com/en-us/microsoft-edge/tools/webdriver/). The WebDriver release version should match browser version, for example, for Microsoft Edge (based on Chromium) Release 79, choose WebDriver Release 79. The downloaded driver should be moved to <uiveri5-installation-folder>/selenium/ without renaming.
 
 ## Safari
 Safari10 includes native webdriver that is bundled with the Safari browser. Please make sure you have enabled it as explained in [Testing with WebDriver in Safari](https://developer.apple.com/documentation/webkit/testing_with_webdriver_in_safari).

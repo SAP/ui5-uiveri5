@@ -197,7 +197,7 @@ DirectConnectionProvider.prototype.setupEnv = function() {
       } else if (browserName == 'edge') {
         promises.push((function() {
           var deferred = q.defer();
-          var filename = path.join(that._getSeleniumRoot(), 'MicrosoftWebDriver.exe');
+          var filename = path.join(that._getSeleniumRoot(), 'msedgedriver.exe');
           that.seleniumConfig.executables.edgedriver = filename;
           deferred.resolve(filename);
           return deferred.promise;

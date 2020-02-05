@@ -1,6 +1,10 @@
 var _ = require('lodash');
+var path = require('path');
+var fs = require('fs');
 
-var DEFAULT_CONF = '../conf/default.conf.js';
+var CONFIG_DIR = '../conf/';
+var DEFAULT_CONF = path.join(CONFIG_DIR, 'default.conf.js');
+var COMMON_CONF = path.join(CONFIG_DIR, 'profile.conf.js');
 
 function ConfigParser(logger) {
   this.logger = logger;
@@ -11,15 +15,13 @@ ConfigParser.prototype.mergeConfigs = function (config) {
   this.config = config;
 
   // load config file
-  this._mergeConfig(this.config.conf || DEFAULT_CONF, 'default');
+  this._mergeConfigFile(this.config.conf || DEFAULT_CONF, 'default');
 
-  // resolve profile
-  if (this.config.profile) {
-    this._mergeConfig('../conf/' + this.config.profile + '.profile.conf.js', 'profile config');
-  }
+  // resolve profiles
+  this._resolveProfile(this.config.profile).forEach(this._mergeConfig.bind(this));
 
   // apply common profile
-  this._mergeConfig('../conf/profile.conf.js', 'common profile');
+  this._mergeConfigFile(COMMON_CONF, 'common profile');
 
   // Changing config via confKeys
   this._setConfKeys();
@@ -28,10 +30,12 @@ ConfigParser.prototype.mergeConfigs = function (config) {
   return this.config;
 };
 
-ConfigParser.prototype._mergeConfig = function (configFile, type) {
+ConfigParser.prototype._mergeConfigFile = function (path, type) {
+  this._mergeConfig(this._readConfig(path, type));
+};
+
+ConfigParser.prototype._mergeConfig = function (newConfig) {
   var logger = this.logger;
-  logger.debug('Loading ' + type + ' config from: ' + configFile);
-  var newConfig = _.cloneDeep(require(configFile).config);  // clone so we avoid module cache
   // this.config has higher priority than newConfig (we merge new low prio into exisiting high prio config)
   var priorityConfig = _flattenEnabledModules(this.config);
   var modulesToDisable = _extractModulesToDisable(priorityConfig);
@@ -74,6 +78,29 @@ ConfigParser.prototype._mergeConfig = function (configFile, type) {
 
   // merge the loaded *.conf.js into glabal config
   this.config = _mergeWithArrays(newConfig, priorityConfig);
+};
+
+ConfigParser.prototype._resolveProfile = function (profile, resolvedConfig) {
+  resolvedConfig = resolvedConfig || [];
+  if (!profile) {
+    return [];
+  }
+  var builtInFilePath = path.join(__dirname, CONFIG_DIR, profile + '.profile.conf.js');
+  var fileConfig;
+
+  if (fs.existsSync(builtInFilePath)) {
+    fileConfig = this._readConfig(builtInFilePath);
+  } else {
+    fileConfig = this._readConfig(profile);
+  }
+
+  resolvedConfig.push(fileConfig);
+
+  if (fileConfig.profile) {
+    return this._resolveProfile(fileConfig.profile, resolvedConfig);
+  } else {
+    return resolvedConfig;
+  }
 };
 
 ConfigParser.prototype.resolvePlaceholders = function(obj) {
@@ -133,6 +160,12 @@ ConfigParser.prototype._disableModules = function (modulesToDisable, modules, ke
       }
     }.bind(this));
   }
+};
+
+ConfigParser.prototype._readConfig = function (configPath, type) {
+  this.logger.debug('Loading ' + (type ? type + ' ': '') + 'config from: ' + configPath);
+  // clone so we avoid module cache
+  return _.cloneDeep(require(configPath).config);
 };
 
 function _setConfKey(config,confKey) {

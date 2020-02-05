@@ -9,11 +9,22 @@ If there are properties with the same name or ID on two config levels:
 
 ## Config File
 Config file is a node module that exports a single `config` object.
-Config file could reference a profile that contains a meaningfull defaults for this usecase. If missing, the default `integration` profile is used.
+Config file could reference a profile that contains meaningful defaults for this usecase. If missing, the default `integration` profile is used.
 
 Available profiles are:
 * integration - default profile for E2E tests
 * visual - profile for visual tests
+* api - profile for API tests
+
+`profile` can also point to a file. The configuration in the referred file will have a lower priority.
+Profiles will be applied recursively from the referred file, its own profile reference and so on.
+Note that the paths will be relative to the UIVeri5 module. Use absolute paths for your project directory:
+```javascript
+exports.config = {
+  profile: path.join(__dirname, 'base/config.js'),
+  baseUrl: 'http://localhost:8080/'
+}
+```
 
 If config file is not provided on command line, a file with name `conf.js` is looked up in the current working directory.
 If found, it is used, otherwise the default conf/default.conf.js file is used.

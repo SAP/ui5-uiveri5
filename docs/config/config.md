@@ -38,7 +38,7 @@ Browser runtime is an object that specifies the browser and platform on which to
 You can specify only a few of the properties of a runtime. The rest are derived if possible or wildcards are assumed.
 
 Values and defaults:
-* browserName - one of (chrome|firefox|ie|safari|edge), browser name, default: chrome
+* browserName - one of (chrome|firefox|ie|safari|edge|edgelagacy), browser name, default: chrome
 * browserVersion - browser version, default: *
 * platformName - one of (windows|mac|linux|android|ios|winphone)} - platform name, default: windows
 * platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *

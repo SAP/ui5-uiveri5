@@ -85,6 +85,8 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
       capabilities.browserName = 'internet explorer';
     } else if (runtime.browserName === 'edge') {
       capabilities.browserName = 'MicrosoftEdge';
+    } else if (runtime.browserName === 'edgelagacy') {
+      capabilities.browserName = 'MicrosoftEdgeLagacy';
     } else {
       capabilities.browserName = runtime.browserName;
     }
@@ -197,8 +199,16 @@ DirectConnectionProvider.prototype.setupEnv = function() {
       } else if (browserName == 'edge') {
         promises.push((function() {
           var deferred = q.defer();
-          var filename = path.join(that._getSeleniumRoot(), 'MicrosoftWebDriver.exe');
+          var filename = path.join(that._getSeleniumRoot(), 'msedgedriver.exe');
           that.seleniumConfig.executables.edgedriver = filename;
+          deferred.resolve(filename);
+          return deferred.promise;
+        })());
+      } else if (browserName == 'edgelagacy') {
+        promises.push((function() {
+          var deferred = q.defer();
+          var filename = path.join(that._getSeleniumRoot(), 'MicrosoftWebDriver.exe');
+          that.seleniumConfig.executables.edgelagacydriver = filename;
           deferred.resolve(filename);
           return deferred.promise;
         })());
@@ -469,6 +479,8 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         opts.jvmArgs.push('-Dwebdriver.ie.driver=' + that.seleniumConfig.executables.iedriver);
       } else if (browserName == 'MicrosoftEdge') {
         opts.jvmArgs.push('-Dwebdriver.edge.driver=' + that.seleniumConfig.executables.edgedriver);
+      } else if (browserName == 'MicrosoftEdgeLagacy') {
+        opts.jvmArgs.push('-Dwebdriver.edgelagacy.driver=' + that.seleniumConfig.executables.edgelagacydriver);
       }
 
       var seleniumServer = new that.deps.remote.SeleniumServer(that.seleniumConfig.executables.selenium,opts);
@@ -578,6 +590,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var allIECapabilities = driverOptions.toCapabilities(browserOptions.toCapabilities());
         // start the local iedriver and connect to it
         driver = that.deps.ie.Driver.createSession(that.deps.ie.Options.fromCapabilities(allIECapabilities));
+      
       } else if (browserName == 'MicrosoftEdge') {
         that.deps.edge = protractorModule.require('selenium-webdriver/edge');
 
@@ -596,6 +609,24 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         // start the local edgedriver and connect to it
         var edgeServiceBuilder = new that.deps.edge.ServiceBuilder(that.seleniumConfig.executables.edgedriver);
         driver =  that.deps.edge.Driver.createSession(allEdgeCapabilities, edgeServiceBuilder.build());
+      } else if (browserName == 'MicrosoftEdgeLagacy') {
+        that.deps.edgelagacy = protractorModule.require('selenium-webdriver/edge');
+
+        that.logger.debug('Starting local edgelagacydriver with executable: ' +
+          that.seleniumConfig.executables.edgelagacydriver);
+
+        var edgelagacyOptions = [new that.deps.edgelagacy.Options(), new that.deps.edgelagacy.Options()];
+        _.forEach(['edgelagacydriverOptions', 'edgelagacyOptions'], function (capabilitiesKey, index) {
+          _.forIn(that.protConfig.capabilities[capabilitiesKey], function (value, key) {
+            that.deps.edgelagacy.Options.prototype[key].apply(edgelagacyOptions[index], value);
+          });
+        });
+        // merge capabilities
+        var allEdgeLagacyCapabilities = edgelagacyOptions[0].toCapabilities(edgelagacyOptions[1].toCapabilities());
+
+        // start the local edgelagacdriver and connect to it
+        var edgeLagacyServiceBuilder = new that.deps.edgelagacy.ServiceBuilder(that.seleniumConfig.executables.edgelagacydriver);
+        driver =  that.deps.edgelagacy.Driver.createSession(allEdgeLagacyCapabilities, edgeLagacyServiceBuilder.build());
       } else if (browserName == 'safari') {
         that.deps.safari = protractorModule.require('selenium-webdriver/safari');
 

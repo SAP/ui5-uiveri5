@@ -18,7 +18,8 @@ var BINARIES = {
   SELENIUM: 'selenium',
   CHROMEDRIVER: 'chromedriver',
   IEDRIVER: 'iedriver',
-  GECKODRIVER: 'geckodriver'
+  GECKODRIVER: 'geckodriver',
+  EDGEDRIVER: 'edgedriver'
 };
 
 /**
@@ -197,13 +198,11 @@ DirectConnectionProvider.prototype.setupEnv = function() {
           })
         );
       } else if (browserName == 'edge') {
-        promises.push((function() {
-          var deferred = q.defer();
-          var filename = path.join(that._getSeleniumRoot(), 'msedgedriver.exe');
-          that.seleniumConfig.executables.edgedriver = filename;
-          deferred.resolve(filename);
-          return deferred.promise;
-        })());
+        promises.push(that._getBinaryFileName(BINARIES.EDGEDRIVER).then(
+          function(filename){
+            that.seleniumConfig.executables.edgedriver = filename;
+          })
+        );
       } else if (browserName == 'edgelagacy') {
         promises.push((function() {
           var deferred = q.defer();

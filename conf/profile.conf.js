@@ -59,9 +59,9 @@ exports.config = {
           baseurl: 'https://msedgedriver.azureedge.net',
           url: '${connectionConfigs.direct.binaries.edgedriver.baseurl}/${connectionConfigs.direct.binaries.edgedriver.version}'+'/edgedriver_${osTypeString}.zip',
           executable: {
-            win32: 'edgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
-            win64: 'edgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
-            mac64: 'edgedriver-${connectionConfigs.direct.binaries.edgedriver.version}'
+            win32: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
+            win64: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
+            mac64: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}'
           }
         },
         geckodriver: {

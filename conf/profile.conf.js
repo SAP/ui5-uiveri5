@@ -50,12 +50,19 @@ exports.config = {
           executable: 'IEDriverServer.exe'
         },
         // edge based on chromium; Note: If on a Windows 64bit system the variable osTypeString returns win32 string (see uiveri5.js), then maintain the url below with e.g. edgedriver_win64.zip 
+        // TODO implement auto-update edge.latest
         edgedriver: {
+          //version: '{edge.latest}',
           version: '80.0.361.50',
           unzip: true,
-          filename: 'msedgedriver.exe',
-          url: 'https://msedgedriver.azureedge.net/'+'${connectionConfigs.direct.binaries.edgedriver.version}'+'/edgedriver_'+'${osTypeString}'+'.zip',
-          executable: 'msedgedriver.exe'
+          filename: '${osTypeString == "win32" || osTypeString == "win64" ? "msedgedriver.exe" : "msedgedriver"}',
+          baseurl: 'https://msedgedriver.azureedge.net',
+          url: '${connectionConfigs.direct.binaries.edgedriver.baseurl}/${connectionConfigs.direct.binaries.edgedriver.version}'+'/edgedriver_${osTypeString}.zip',
+          executable: {
+            win32: 'edgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
+            win64: 'edgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
+            mac64: 'edgedriver-${connectionConfigs.direct.binaries.edgedriver.version}'
+          }
         },
         geckodriver: {
           version: '{latest}',

@@ -198,6 +198,7 @@ LocalScreenshotProvider.prototype._cropScreenshot = function(browserScreenshot, 
             if (err) {
               deferCropScreenshot.reject(new Error('Cannot crop the screenshot: ' + err));
             } else {
+              that.logger.debug('View port in display pixels: width=' + data.width + ', height=' + data.height);
               // check if the element is completely outside the view port
               if (elementDimensions.left > data.width || elementDimensions.top > data.height ||
                 ((elementDimensions.width + elementDimensions.left) < 0) ||
@@ -263,6 +264,11 @@ LocalScreenshotProvider.prototype._crop = function(originalImageBuffer, cropConf
   var that = this;
   var deferCrop = webdriver.promise.defer();
 
+  // Round values for correct calculations in cropping
+  cropConfig.top = Math.round(cropConfig.top);
+  cropConfig.left = Math.round(cropConfig.left);
+  cropConfig.width = Math.round(cropConfig.width);
+  cropConfig.height = Math.round(cropConfig.height);
   that.logger.debug('Cropping the screenshot with parameters in display pixels: width=' + cropConfig.width +
     ', height=' + cropConfig.height + ', top=' + cropConfig.top + ', left=' + cropConfig.left);
 

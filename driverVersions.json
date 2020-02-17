@@ -1,8 +1,5 @@
 {
   "chrome": {
-    "latest": 79
-  },
-  "edge": {
     "latest": 80
   }
 }

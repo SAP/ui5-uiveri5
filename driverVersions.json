@@ -1,5 +1,8 @@
 {
   "chrome": {
     "latest": 80
+  },
+  "edge": {
+    "latest": "80.0.361.50"
   }
 }

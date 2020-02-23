@@ -36,7 +36,7 @@ LatestDriverVersionResolver.prototype._getLatestCompleteVersionFromFile = functi
         url: binary.latestCompleteVersionFileUrl
       }, function (error, res, body) {
         if (_hasError(error, res)) {
-          rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest major version number'));
+          rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest version number'));
         } else {
           that.logger.info('Check latest version file url: ' + binary.latestCompleteVersionFileUrl);
           var latestVersion = _parseVersionNumber(body, binary.version);

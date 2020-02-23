@@ -57,7 +57,6 @@ exports.config = {
           baseurl: 'https://msedgedriver.azureedge.net',
           url: '${connectionConfigs.direct.binaries.edgedriver.baseurl}/${connectionConfigs.direct.binaries.edgedriver.version}'+'/edgedriver_${osTypeString}.zip',
           latestCompleteVersionFileUrl: 'https://raw.githubusercontent.com/SAP/ui5-uiveri5/master/driverVersions.json',
-          //latestCompleteVersionFileUrl: 'https://raw.githubusercontent.com/danieljtag/ui5-uiveri5/master/driverVersions.json',
           executable: {
             win32: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
             win64: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',

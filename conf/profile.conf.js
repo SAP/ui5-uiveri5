@@ -50,14 +50,14 @@ exports.config = {
           executable: 'IEDriverServer.exe'
         },
         // edge based on chromium; Note: If on a Windows 64bit system the variable osTypeString returns win32 string (see uiveri5.js), then maintain the url below with e.g. edgedriver_win64.zip 
-        // TODO implement auto-update edge.latest
         edgedriver: {
-          //version: '{edge.latest}',
-          version: '80.0.361.50',
+          version: '{edge.latest}',
           unzip: true,
           filename: '${osTypeString == "win32" || osTypeString == "win64" ? "msedgedriver.exe" : "msedgedriver"}',
           baseurl: 'https://msedgedriver.azureedge.net',
           url: '${connectionConfigs.direct.binaries.edgedriver.baseurl}/${connectionConfigs.direct.binaries.edgedriver.version}'+'/edgedriver_${osTypeString}.zip',
+          latestCompleteVersionFileUrl: 'https://raw.githubusercontent.com/SAP/ui5-uiveri5/master/driverVersions.json',
+          //latestCompleteVersionFileUrl: 'https://raw.githubusercontent.com/danieljtag/ui5-uiveri5/master/driverVersions.json',
           executable: {
             win32: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
             win64: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',

@@ -9,16 +9,46 @@ function LatestDriverVersionResolver(config, instanceConfig, logger) {
 
 LatestDriverVersionResolver.prototype.getLatestVersion = function (binary) {
   var that = this;
-  return that._getLatestMajorVersion(binary)
-    .then(function (result) {
-      if (result.latestMajorVersion) {
-        binary.latestVersionUrl = binary.latestVersionUrl.replace(that.latestVersionRegexp, result.latestMajorVersion);
-      }
-      return that._getLatestDriverVersion(binary);
-    });
+  if (binary.latestVersionFileUrl) {
+    return that._getLatestMajorVersionFromFile(binary)
+      .then(function (result) {
+        if (result.latestMajorVersion) {
+          binary.latestVersionUrl = binary.latestVersionUrl.replace(that.latestVersionRegexp, result.latestMajorVersion);
+        }
+        return that._getLatestDriverVersion(binary);
+      });
+  } else if (binary.latestCompleteVersionFileUrl)  {
+    return that._getLatestCompleteVersionFromFile(binary);
+  }
 };
 
-LatestDriverVersionResolver.prototype._getLatestMajorVersion = function (binary) {
+LatestDriverVersionResolver.prototype._getLatestCompleteVersionFromFile = function (binary) {
+  var that = this;
+
+  that.logger.info('Check for latest complete version of: ' + binary.filename);
+  return q.Promise(function (resolveFn, rejectFn) {
+    if (binary.latestCompleteVersionFileUrl) {
+      request({
+        url: binary.latestCompleteVersionFileUrl
+      }, function (error, res, body) {
+        if (_hasError(error, res)) {
+          rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest major version number'));
+        } else {
+          that.logger.info('Check latest version file url: ' + binary.latestCompleteVersionFileUrl);
+          var latestVersion = _parseVersionNumber(body, binary.version);
+          that.logger.info('Found latest complete version of ' + binary.filename + ': ' + latestVersion);
+          resolveFn({
+            latestVersion: latestVersion
+          });
+        }
+      });
+    } else {
+      resolveFn({});
+    }
+  });
+};
+
+LatestDriverVersionResolver.prototype._getLatestMajorVersionFromFile = function (binary) {
   var that = this;
 
   that.logger.info('Check for latest major version of: ' + binary.filename);
@@ -30,6 +60,7 @@ LatestDriverVersionResolver.prototype._getLatestMajorVersion = function (binary)
         if (_hasError(error, res)) {
           rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest major version number'));
         } else {
+          that.logger.info('Check latest version file url: ' + binary.latestVersionFileUrl);
           var latestMajorVersion = _parseVersionNumber(body, binary.version);
           that.logger.info('Found latest major version of ' + binary.filename + ': ' + latestMajorVersion);
           resolveFn({

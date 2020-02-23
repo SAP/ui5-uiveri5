@@ -9,7 +9,7 @@ function LatestDriverVersionResolver(config, instanceConfig, logger) {
 
 LatestDriverVersionResolver.prototype.getLatestVersion = function (binary) {
   var that = this;
-  if (binary.latestVersionFileUrl) {
+  if (binary.latestVersionFileUrl || binary.latestVersionUrlRedirect) {
     return that._getLatestMajorVersionFromFile(binary)
       .then(function (result) {
         if (result.latestMajorVersion) {

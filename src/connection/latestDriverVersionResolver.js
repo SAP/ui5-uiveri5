@@ -9,7 +9,7 @@ function LatestDriverVersionResolver(config, instanceConfig, logger) {
 
 LatestDriverVersionResolver.prototype.getLatestVersion = function (binary) {
   var that = this;
-  if (binary.latestVersionFileUrl || binary.latestVersionUrlRedirect) {
+  if (binary.latestVersionFileUrl) {
     return that._getLatestMajorVersionFromFile(binary)
       .then(function (result) {
         if (result.latestMajorVersion) {
@@ -17,8 +17,12 @@ LatestDriverVersionResolver.prototype.getLatestVersion = function (binary) {
         }
         return that._getLatestDriverVersion(binary);
       });
+  } else if (binary.latestVersionUrlRedirect)  {
+    return that._getLatestDriverVersion(binary);
   } else if (binary.latestCompleteVersionFileUrl)  {
     return that._getLatestCompleteVersionFromFile(binary);
+  } else {
+    that.logger.error('Please maintain profile.conf file!');
   }
 };
 

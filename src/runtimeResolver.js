@@ -33,7 +33,7 @@ var supportedPlatformNames = [
   'windows','mac','linux','android','ios','winphone'
 ];
 var supportedUI5Themes = [
-  'bluecrystal','belize','fiori_3'
+  'bluecrystal','belize','fiori_3','fiori_3_dark'
 ];
 var supportedUI5Directions = [
   'ltr','rtl'
@@ -51,7 +51,7 @@ var supportedUI5Modes = [
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
  * @param {string(default|/\d+x\d+/)} platformResolution - platform resolution, WIDTHxHEIGHT, default: resolved from available
  * @param {string} deviceName - device name, default: *
- * @param {string(bluecrystal|belize|fiori_3)} ui5.theme - UI5 theme, default belize
+ * @param {string(bluecrystal|belize|fiori_3|fiori_3_dark)} ui5.theme - UI5 theme, default belize
  * @param {string(rtl|ltr)} ui5.direction - UI5 direction, default: ltr
  * @param {string(cozy|compact)} ui5.mode - UI5 mode, default: cozy
  * @param {Object} capabilities - additional browser capabilities object

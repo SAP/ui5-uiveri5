@@ -67,7 +67,7 @@ VyperToUiveri5.prototype.parseElementProperties = function(mParams) {
   return params;
 };
 
-VyperToUiveri5.prototype.ancestorPropertiesParser = function(mParams) {
+VyperToUiveri5.prototype.parseAncestorProperties = function(mParams) {
   var ancestor = {};
   if(mParams.parentProperties) {
     ancestor = this.parseElementProperties(mParams.parentProperties.mProperties);
@@ -83,7 +83,7 @@ VyperToUiveri5.prototype.ancestorPropertiesParser = function(mParams) {
   return ancestor;
 };
 
-VyperToUiveri5.prototype.siblingPropertiesParser = function(mParams) {
+VyperToUiveri5.prototype.parseSiblingProperties = function(mParams) {
   if(mParams.prevSiblingProperties || 
         mParams.nextSiblingProperties || 
         mParams.siblingProperties) {
@@ -92,12 +92,18 @@ VyperToUiveri5.prototype.siblingPropertiesParser = function(mParams) {
 };
 
 
-VyperToUiveri5.prototype.childrenPropertiesParser = function(mParams) {
+VyperToUiveri5.prototype.parseDescendantProperties = function(mParams) {
   var descendant = {};
   if(mParams.childProperties) {
     descendant = this.parseElementProperties(mParams.childProperties.mProperties);
     if(mParams.childProperties.metadata) {
       descendant.controlType = mParams.childProperties.metadata;
+    }
+  }
+  if(mParams.descendantProperties) {
+    descendant = this.parseElementProperties(mParams.descendantProperties.mProperties);
+    if(mParams.descendantProperties.metadata) {
+      descendant.controlType = mParams.descendantProperties.metadata;
     }
   }
   return descendant; 

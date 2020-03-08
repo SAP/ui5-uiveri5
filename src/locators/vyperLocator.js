@@ -25,16 +25,13 @@ VyperLocator.prototype.register = function (by) {
     if(!mMatchers){ 
       //Error
     }
-    var vyperParserUtil = VyperParser(mMatchers); //index, rootSelector);
-    var mElementMatchers;
-    var mAncestorMatchers;
-    var mDescentantMatchers;
-    //var oSiblingMatchers; ??
+    const vyperParserUtil = VyperParser(mMatchers); //index, rootSelector);
+    
 
-    mElementMatchers = vyperParserUtil.parseProperties();
-    mAncestorMatchers = vyperParserUtil.ancestorPropertiesParser();
-    mDescentantMatchers = vyperParserUtil.childrenPropertiesParser();
-    //oSiblingMatchers = vyperParserUtil.siblingPropertiesParser();???
+    const mElementMatchers = vyperParserUtil.parseElementProperties();
+    const mAncestorMatchers = vyperParserUtil.parseAncestorProperties();
+    const mDescentantMatchers = vyperParserUtil.parseDescendantProperties();
+    //const mSiblingMatchers = vyperParserUtil.parseSiblingProperties(); //TODO: how to map?
 
     mElementMatchers.ancestor = mAncestorMatchers;
     mElementMatchers.descendant = mDescentantMatchers;

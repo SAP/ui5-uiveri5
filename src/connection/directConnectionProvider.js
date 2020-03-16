@@ -515,12 +515,9 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var chromeServiceBuilder = new that.deps.chrome.ServiceBuilder(that.seleniumConfig.executables.chromedriver);
 
         // set chromedriverOptions
-        var chromedriverOptions = this.protConfig.capabilities.chromedriverOptions;
-        if (chromedriverOptions){
-          _.forIn(chromedriverOptions,function(value,key){
-            chromeServiceBuilder[key].apply(chromeServiceBuilder,value);
-          });
-        }
+        _.forIn(this.protConfig.capabilities.chromedriverOptions, function (value, key) {
+          chromeServiceBuilder[key].apply(chromeServiceBuilder, _asArray(value));
+        });
 
         // build chromeOptions from capabilities
         var chromeOptions = that.deps.chrome.Options.fromCapabilities(capabilities);
@@ -539,21 +536,15 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var firefoxServiceBuilder = new that.deps.firefox.ServiceBuilder(that.seleniumConfig.executables.geckodriver);
 
         // set geckodriverOptions
-        var geckodriverOptions = this.protConfig.capabilities.geckodriverOptions;
-        if (geckodriverOptions){
-          _.forIn(geckodriverOptions,function(value,key){
-            firefoxServiceBuilder[key].apply(firefoxServiceBuilder,value);
-          });
-        }
-        
-        // no firefox.Options.fromCapabilities() so need to build firefoxOptions manually 
+        _.forIn(this.protConfig.capabilities.geckodriverOptions, function (value, key) {
+          firefoxServiceBuilder[key].apply(firefoxServiceBuilder, _asArray(value));
+        });
+
+        // no firefox.Options.fromCapabilities() so need to build firefoxOptions manually
         var firefoxOptions = new that.deps.firefox.Options();
-        var capabilitiesFirefoxOptions = this.protConfig.capabilities.firefoxOptions;
-        if (capabilitiesFirefoxOptions){
-          _.forIn(capabilitiesFirefoxOptions,function(value,key){
-            firefoxOptions[key].apply(firefoxOptions,value);
-          });
-        }
+        _.forIn(this.protConfig.capabilities.firefoxOptions, function (value, key) {
+          firefoxOptions[key].apply(firefoxOptions, _asArray(value));
+        });
 
         // start the local geckodriver and connect to it
         var firefoxService = firefoxServiceBuilder.build();
@@ -570,21 +561,18 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         process.env.PATH = process.env.PATH + path.delimiter + path.dirname(that.seleniumConfig.executables.iedriver);
 
         var driverOptions = new that.deps.ie.Options();
-        if (this.protConfig.capabilities.iedriverOptions) {
-          _.forIn(this.protConfig.capabilities.iedriverOptions, function (value, key) {
-            var funcName = key;
-            if (funcName.startsWith('ie.')) {
-              funcName = funcName.substring(3);
-            }
-            that.deps.ie.Options.prototype[funcName].apply(driverOptions, value);
-          });
-        }
+        _.forIn(this.protConfig.capabilities.iedriverOptions, function (value, key) {
+          var funcName = key;
+          if (funcName.startsWith('ie.')) {
+            funcName = funcName.substring(3);
+          }
+          that.deps.ie.Options.prototype[funcName].apply(driverOptions, _asArray(value));
+        });
         var browserOptions = new that.deps.ie.Options();
-        if (this.protConfig.capabilities.ieOptions) {
-          _.forIn(this.protConfig.capabilities.ieOptions, function (value, key) {
-            that.deps.ie.Options.prototype[key].apply(browserOptions, value);
-          });
-        }
+        _.forIn(this.protConfig.capabilities.ieOptions, function (value, key) {
+          that.deps.ie.Options.prototype[key].apply(browserOptions, _asArray(value));
+        });
+
         // merge capabilities
         var allIECapabilities = driverOptions.toCapabilities(browserOptions.toCapabilities());
         // start the local iedriver and connect to it
@@ -599,7 +587,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var edgeOptions = [new that.deps.edge.Options(), new that.deps.edge.Options()];
         _.forEach(['edgedriverOptions', 'edgeOptions'], function (capabilitiesKey, index) {
           _.forIn(that.protConfig.capabilities[capabilitiesKey], function (value, key) {
-            that.deps.edge.Options.prototype[key].apply(edgeOptions[index], value);
+            that.deps.edge.Options.prototype[key].apply(edgeOptions[index], _asArray(value));
           });
         });
         // merge capabilities
@@ -636,12 +624,9 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var safariServiceBuilder = new that.deps.safari.ServiceBuilder();
 
         // set safaridriverOptions
-        var saferidriverOptions = this.protConfig.capabilities.safaridriverOptions;
-        if (saferidriverOptions){
-          _.forIn(saferidriverOptions,function(value,key){
-            safariServiceBuilder[key].apply(safariServiceBuilder,value);
-          });
-        }
+        _.forIn(this.protConfig.capabilities.safaridriverOptions, function (value, key) {
+          safariServiceBuilder[key].apply(safariServiceBuilder, _asArray(value));
+        });
 
         // build safariOptions from capabilities
         var safariOptions = that.deps.safari.Options.fromCapabilities(capabilities);
@@ -683,6 +668,10 @@ DirectDriverProvider.prototype.quitDriver = function(driver) {
 DirectDriverProvider.prototype.teardownEnv = function() {
   return q.all(this.drivers.map(this.quitDriver.bind(this)));
 };
+
+function _asArray(value) {
+  return _.isArray(value) ? value : [value];
+}
 
 module.exports = function(config,instanceConfig,logger){
   return new DirectConnectionProvider(config,instanceConfig,logger);

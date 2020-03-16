@@ -89,6 +89,7 @@ browsers: [{
 
 ## Selenium
 By default, the respective WebDriver that starts the required browser is started directly. To start it by using Selenium jar, you have to enable it with setting `useSeleniumJar` to `true`. Then, Selenium command line arguments can be provided in the conf.js file:
+
 ```javascript
 browsers: [{
   browserName: 'chrome',
@@ -99,6 +100,7 @@ browsers: [{
   }
 }]
 ```
+
 List the available arguments by executing:
 ```
 $ java -jar selenium-server-standalone-3.0.1.jar -help
@@ -111,15 +113,18 @@ for the latest stable Chrome release. The exact version of the latest stable rel
 All ChromeDriver options from [ServiceBuilder](https://github.com/SeleniumHQ/selenium/blob/selenium-3.6.0/javascript/node/selenium-webdriver/chrome.js) can be specified under the `chromedriverOptions` key.
 
 All chrome options from [Options](https://github.com/SeleniumHQ/selenium/blob/selenium-3.6.0/javascript/node/selenium-webdriver/chrome.js) can be specified under the `chromeOptions` key.
+
+The values can be of type string or array of strings.
+
 ```javascript
 browsers: [{
   browserName: 'chrome',
   capabilities: {
     chromedriverOptions: {
-      loggingTo: ['chromedriver.log']
+      loggingTo: 'chromedriver.log'
     },
     chromeOptions: {
-      args: ['start-maximized']
+      args: 'start-maximized'
     }
   }
 }]
@@ -144,6 +149,9 @@ Firefox uses the geckodriver that is updated regularly, so by default, we use th
 All geckodriverdriver options from [ServiceBuilder](https://github.com/SeleniumHQ/selenium/blob/selenium-3.6.0/javascript/node/selenium-webdriver/firefox/index.js) can be specified under the `geckodriverOptions` key.
 
 All Firefox options from [Options](https://github.com/SeleniumHQ/selenium/blob/selenium-3.6.0/javascript/node/selenium-webdriver/firefox/index.js) can be specified under the `firefoxOptions` key.
+
+The values can be of type string or array of strings.
+
 ```javascript
 browsers: [{
   browserName: 'firefox',
@@ -152,12 +160,13 @@ browsers: [{
       enableVerboseLogging: true
     },
     firefoxOptions: {
-      addArguments: ['-private'],
-      setBinary: ['/path/to/firefox']
+      addArguments: '-private',
+      setBinary: '/path/to/firefox'
     }
   }
 }]
 ```
+
 Geckodriver expects to find Firefox executable on the system path or at the default location for the respective platform. In some installation or upgrade scnearios, it is possible that the Firefox binary is placed in a different location and geckodriver is not able to find it. One workaround is to add the path to the binary in the PATH environment variable. Another workaround is to provide the path to the Firefox binary in the `firefoxOptions`.
 
 ## Internet Explorer (IE)
@@ -167,16 +176,19 @@ All iedriver options from [ServiceBuilder](https://github.com/SeleniumHQ/seleniu
 
 All IE options from [Options](https://github.com/SeleniumHQ/selenium/blob/master/javascript/node/selenium-webdriver/ie.js) can be specified under the `ieOptions` key.
 
+The values can be of type string or array of strings.
+
 There is a [browser configuration](https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration) that has to be followed before you start testing on IE. It is preferable to modify your browser's security settings as described [here](https://github.com/seleniumQuery/seleniumQuery/wiki/seleniumQuery-and-IE-Driver#protected-mode-exception-while-launching-ie-driver). This is the only way to overcome security limitations when Selenium jar is used. When you don't use Selenium jar, you can enable the `introduceFlakinessByIgnoringProtectedModeSettings` option, but keep in mind that it is reported to cause driver instability.
+
 ```javascript
 browsers: [{
   browserName: 'ie',
   capabilities: {
     iedriverOptions: {
-      introduceFlakinessByIgnoringProtectedModeSettings: ['true']
+      introduceFlakinessByIgnoringProtectedModeSettings: 'true'
     },
     ieOptions: {
-      addArguments: ['-foreground']
+      addArguments: '-foreground'
     }
   }
 }]
@@ -190,6 +202,9 @@ Safari10 includes native webdriver that is bundled with the Safari browser. Plea
 At this time, there are no meaningfull `safaridriverOptions` that can be provided under the `safaridriverOptions` key. If you wish to override the `addArguments` anyway, please make sure not to remove the `-legacy` argument as the WebDriverJs version we use requires it.
 
 All Safari options from [Options](https://github.com/SeleniumHQ/selenium/blob/master/javascript/node/selenium-webdriver/safari.js) can be specified under the `safariOptions` key.
+
+The values can be of type string or array of strings.
+
 ```javascript
 browsers: [{
   browserName: 'safari',

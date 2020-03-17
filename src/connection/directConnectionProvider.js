@@ -613,7 +613,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
 
         // start the local edgelegacy driver and connect to it
         var edgeLegacyServiceBuilder = new that.deps.edgelegacy.ServiceBuilder(that.seleniumConfig.executables.edgelegacydriver);
-        driver =  that.deps.edgelegacy.Driver.createSession(allEdgeLegacyCapabilities, edgelegacyServiceBuilder.build());
+        driver =  that.deps.edgelegacy.Driver.createSession(allEdgeLegacyCapabilities, edgeLegacyServiceBuilder.build());
       } else if (browserName == 'safari') {
         that.deps.safari = protractorModule.require('selenium-webdriver/safari');
 

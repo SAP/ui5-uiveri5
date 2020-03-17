@@ -14,7 +14,7 @@ and brings most (and more) of its benefits to UI5 applications.
 * Does not depend on testability support in applications - works with autorefreshing views, resizing elements, animated transitions.
 * Declarative authentications - authentication flow over OAuth2 providers, etc.
 * Console operation, CI ready, fully configurable, no need for java (comming soon) or IDE.
-* Covers full UI5 browser matrix: Chrome, Firefox, IE, Edge, EdgeLagacy, Safari, iOS, Android.
+* Covers full UI5 browser matrix: Chrome, Firefox, IE, Edge, EdgeLegacy, Safari, iOS, Android.
 * Open-source, modify to suite your specific neeeds.
 
 ## Requirements

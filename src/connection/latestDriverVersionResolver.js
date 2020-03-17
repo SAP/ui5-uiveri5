@@ -37,7 +37,6 @@ LatestDriverVersionResolver.prototype._getLatestCompleteVersionFromFile = functi
         if (_hasError(error, res)) {
           rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest version number'));
         } else {
-          that.logger.info('Check latest version file url: ' + binary.latestCompleteVersionFileUrl);
           var latestVersion = _parseVersionNumber(body, binary.version);
           that.logger.info('Found latest complete version of ' + binary.filename + ': ' + latestVersion);
           resolveFn({
@@ -63,7 +62,6 @@ LatestDriverVersionResolver.prototype._getLatestMajorVersionFromFile = function 
         if (_hasError(error, res)) {
           rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest major version number'));
         } else {
-          that.logger.info('Check latest version file url: ' + binary.latestVersionFileUrl);
           var latestMajorVersion = _parseVersionNumber(body, binary.version);
           that.logger.info('Found latest major version of ' + binary.filename + ': ' + latestMajorVersion);
           resolveFn({

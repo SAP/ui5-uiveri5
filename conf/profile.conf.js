@@ -97,7 +97,7 @@ exports.config = {
       }
     },
     /* maximize browser on all desktops to ensure consistent browser size */
-    'firefox,ie,edge,edgelagacy,safari,chrome,chromium': {
+    'firefox,ie,edge,edgelegacy,safari,chrome,chromium': {
       'windows,mac,linux': {
         '*': {
           remoteWebDriverOptions: {
@@ -200,10 +200,10 @@ exports.config = {
     },
     */
     /*
-    'edgelagacy': {
+    'edgelegacy': {
       '*': {
         '*': {
-          edgelagacydriverOptions: {
+          edgelegacydriverOptions: {
             'setPageLoadStrategy': ['normal'],
           }
         }

@@ -10,18 +10,16 @@ function LatestDriverVersionResolver(config, instanceConfig, logger) {
 LatestDriverVersionResolver.prototype.getLatestVersion = function (binary) {
   var that = this;
   
-  if (binary.latestVersionUrlRedirect) {
-    return that._getLatestDriverVersion(binary);
-  } else if (binary.latestCompleteVersionFileUrl) {
+  if (binary.latestCompleteVersionFileUrl) {
     return that._getLatestCompleteVersionFromFile(binary);
   } else {
     return that._getLatestMajorVersionFromFile(binary)
-    .then(function (result) {
-      if (result.latestMajorVersion) {
-        binary.latestVersionUrl = binary.latestVersionUrl.replace(that.latestVersionRegexp, result.latestMajorVersion);
-      }
-      return that._getLatestDriverVersion(binary);
-    });
+      .then(function (result) {
+        if (result.latestMajorVersion) {
+          binary.latestVersionUrl = binary.latestVersionUrl.replace(that.latestVersionRegexp, result.latestMajorVersion);
+        }
+        return that._getLatestDriverVersion(binary);
+      });
   }
 };
 

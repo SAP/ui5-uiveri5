@@ -8,7 +8,7 @@ var _ = require('lodash');
  * @public
  */
 function ControlLocator(config, instanceConfig, logger) {
-  this.logger = _.assign({
+  this.logger = _.extend({
     debug: _.noop,
     info: _.noop,
     error: _.noop,

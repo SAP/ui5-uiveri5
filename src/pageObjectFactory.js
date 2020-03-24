@@ -1,5 +1,5 @@
 var _ = require('lodash');
-var logger = require('./logger')(3);
+var logger = require('./logger');
 
 var PageObjectFactory = function () {
   this.Given = {};

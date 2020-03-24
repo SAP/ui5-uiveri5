@@ -1,6 +1,6 @@
 var fs = require('fs');
 var Q = require('q');
-var logger = require('../src/logger')(2);
+var logger = require('../src/logger');
 protractorModule = {
   require: function() {
     return require('../node_modules/selenium-webdriver');

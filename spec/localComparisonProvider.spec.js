@@ -4,7 +4,7 @@ var LocalStorageProvider = require('../src/image/localStorageProvider.js');
 var LocalComparisonProvider = require('../src/image/localComparisonProvider.js');
 
 describe("LocalComparisonProvider", function () {
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
   var matchers = {};
   var imagePath = '/localComparisonProvider/images/testSpec/platform/resolution/browser/theme/direction/mode';
 

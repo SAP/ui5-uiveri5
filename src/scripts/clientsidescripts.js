@@ -118,7 +118,7 @@ var mFunctions = {
     }
   },
 
-  waitForAngular: function waitForAngular (mScriptParams, fnCallback) {
+  waitForUI5: function waitForUI5 (fnCallback) {
     if (!window.sap || !window.sap.ui) {
       fnCallback('waitForUI5: no UI5 on this page.');
     } else {

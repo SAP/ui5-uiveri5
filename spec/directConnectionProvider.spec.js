@@ -1,7 +1,7 @@
 describe('DirectConnectionProvider', function() {
   var path = require('path');
   var ConnectionProvider = require('../src/connection/directConnectionProvider');
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
 
   var downloadDriversMock = require('./directConnectionProvider/downloadDriversMock')();
   var mockUrl = 'http://localhost';

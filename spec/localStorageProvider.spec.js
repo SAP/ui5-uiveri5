@@ -5,7 +5,7 @@ Q.longStackSupport = true;
 
 describe("LocalStorageProvider", function () {
   var LocalStorageProvider = require('../src/image/localStorageProvider');
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
   var runtime = {
     platformName: 'platform',
     platformResolution: 'resolution',

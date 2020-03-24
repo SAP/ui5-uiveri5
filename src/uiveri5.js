@@ -3,11 +3,12 @@ var fs = require('fs');
 var _ = require('lodash');
 var proxyquire =  require('proxyquire');
 var url = require('url');
+var UIVeri5Browser = require('./browser/browser');
 var clientsidescripts = require('./scripts/clientsidescripts');
 var ClassicalWaitForUI5 = require('./scripts/classicalWaitForUI5');
-var Control = require('./control');
 var pageObjectFactory = require('./pageObjectFactory');
 var Plugins = require('./plugins/plugins');
+var logger = require('./logger');
 
 var DEFAULT_CONNECTION_NAME = 'direct';
 var AUTH_CONFIG_NAME = 'auth';
@@ -37,8 +38,17 @@ var AUTH_CONFIG_NAME = 'auth';
  */
 function run(config) {
 
-  // configure logger
-  var logger = require('./logger')(config.verbose);
+  logger.setLevel(config.verbose);
+
+  proxyquire('protractor/built/ptor', {
+    './browser': UIVeri5Browser
+  });
+  proxyquire('protractor/built/runner', {
+    './browser': UIVeri5Browser
+  });
+  proxyquire('protractor/built/index', {
+    './browser': UIVeri5Browser
+  });
 
   // log framework version
   var pjson = require('../package.json');
@@ -162,16 +172,6 @@ function run(config) {
     var ui5SyncDelta = config.timeouts && config.timeouts.waitForUI5Delta;
     var waitForUI5Timeout = ui5SyncDelta > 0 ? (config.timeouts.allScriptsTimeout - ui5SyncDelta) : 0;
 
-    proxyquire('protractor/built/browser', {
-      './clientsidescripts': clientsidescripts
-    });
-    proxyquire('protractor/built/element', {
-      './clientsidescripts': clientsidescripts
-    });
-    proxyquire('protractor/built/locators', {
-      './clientsidescripts': clientsidescripts
-    });
-
     // set specs
     protractorArgv.specs = [];
     specs.forEach(function(spec){
@@ -263,10 +263,6 @@ function run(config) {
           }
         }
 
-        protractorModule.parent.exports.ElementFinder.prototype.asControl = function () {
-          return new Control(this.elementArrayFinder_);
-        };
-
         // add WebDriver overrides
         var enableClickWithActions = _.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions');
         if (enableClickWithActions) {
@@ -280,72 +276,9 @@ function run(config) {
 
       });
 
-      // used in protractor for many scripts and notably for waitForAngular
-      // override with added logging
-      var origExecuteAsyncScript_= browser.executeAsyncScript_;
-      browser.executeAsyncScript_ = function() {
-        var code = arguments[0];
-        var scriptName = arguments[1];
-        var params = arguments[2];
-        // log script execution
-        logger.trace('Execute protractor async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-        logger.dump('Execute protractor async script code: \n' + JSON.stringify(code));
-        //call original function in its context
-        return origExecuteAsyncScript_.apply(browser, arguments)
-          .then(function(res) {
-            logger.trace('Protractor async script: ' + scriptName + ' result: ' + JSON.stringify(res));
-            return res;
-          },function(error) {
-            logger.trace('Protractor async script: ' + scriptName + ' error: ' + JSON.stringify(error));
-            throw error;
-          });
-      };
-
-      browser.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.dump('Execute async script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeAsyncScript(code,params)
-          .then(function (res) {
-            if (res.log) {
-              logger.trace('Async script: ' + scriptName + ' logs: \n' + res.log);
-            }
-            if (res.error) {
-              logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
-              throw new Error(scriptName + ': ' + res.error);
-            }
-            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
-            return res.value;
-          });
-      };
-
-      browser.executeScriptHandleErrors = function executeScriptHandleErrors(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.dump('Execute script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeScript(code,params)
-          .then(function (res) {
-            if (res.log) {
-              logger.trace('Script: ' + scriptName + ' logs: \n' + res.log);
-            }
-            if (res.error) {
-              logger.trace('Script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
-              throw new Error(scriptName + ': ' + res.error);
-            }
-            logger.trace('Script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
-            return res.value;
-          });
-      };
-
       browser.loadUI5Dependencies = function () {
         return browser._loadUI5Dependencies().then(function () {
-          return browser.waitForAngular();
+          return browser.waitForUI5();
         });
       };
 

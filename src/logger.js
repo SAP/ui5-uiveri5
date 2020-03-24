@@ -7,42 +7,42 @@ var _ = require('lodash');
 // 2 - +TRACE
 // 3 - +DUMP
 
-function ConsoleLogger(level){
-  this.level = level;
+function ConsoleLogger() {
 }
 
-ConsoleLogger.prototype.setLevel = function(newLevel){
+ConsoleLogger.prototype.setLevel = function (newLevel) {
   this.level = newLevel;
 };
 
-ConsoleLogger.prototype.info = function(msg,args) {
+ConsoleLogger.prototype.info = function (msg, args) {
   console.log('INFO: ' + _.template(msg)(args));
 };
 
-ConsoleLogger.prototype.error = function(msg,args) {
+ConsoleLogger.prototype.error = function (msg, args) {
   console.log('ERROR: ' + _.template(msg)(args));
 };
 
-ConsoleLogger.prototype.debug = function(msg,args) {
-  if(this.level>0) {
+ConsoleLogger.prototype.debug = function (msg, args) {
+  if (this.level > 0) {
     console.log('DEBUG: ' + _.template(msg)(args));
   }
 };
 
-ConsoleLogger.prototype.trace = function(msg,args) {
-  if(this.level>1) {
+ConsoleLogger.prototype.trace = function (msg, args) {
+  if (this.level > 1) {
     console.log('TRACE: ' + _.template(msg)(args));
   }
 };
 
-ConsoleLogger.prototype.dump = function(msg,args) {
-  if(this.level>2) {
+ConsoleLogger.prototype.dump = function (msg, args) {
+  if (this.level > 2) {
     console.log('DUMP: ' + _.template(msg)(args));
   }
 };
-module.exports = function (level) {
-  return new ConsoleLogger(level);
-};
+
+// rely on module caching to create a singleton,
+// so that we have the same log level across all modules
+module.exports = new ConsoleLogger();
 
 /*
 exports.setLevel = setLevel;

@@ -16,4 +16,4 @@ Control.prototype.getProperty = function (property) {
     });
 };
 
-module.exports = Control;
+module.exports = ControlAPI;

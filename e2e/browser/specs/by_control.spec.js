@@ -10,15 +10,15 @@ describe("by_control", function () {
 	});
 
 	it("should match control's aggregation length with 'aggregationLengthEquals'", function () {
-    var oList = element(by.control({
-      id: "ListPage1",
-      aggregationLengthEquals: {
-        name: "items",
-        length: 3
-      }
-    }));
-    expect(oList.getAttribute("id")).toContain("ListPage1");
-  });
+		var oList = element(by.control({
+			id: "ListPage1",
+			aggregationLengthEquals: {
+				name: "items",
+				length: 3
+			}
+		}));
+		expect(oList.getAttribute("id")).toContain("ListPage1");
+	});
 
 	it("should get matching control ref", function () {
 		var navButton = element(by.control({

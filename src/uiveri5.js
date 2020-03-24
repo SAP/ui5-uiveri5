@@ -5,7 +5,6 @@ var proxyquire =  require('proxyquire');
 var url = require('url');
 var clientsidescripts = require('./scripts/clientsidescripts');
 var ClassicalWaitForUI5 = require('./scripts/classicalWaitForUI5');
-var Control = require('./control');
 var pageObjectFactory = require('./pageObjectFactory');
 
 var DEFAULT_CONNECTION_NAME = 'direct';
@@ -158,13 +157,11 @@ function run(config) {
     var waitForUI5Timeout = ui5SyncDelta > 0 ? (config.timeouts.allScriptsTimeout - ui5SyncDelta) : 0;
 
     proxyquire('protractor/built/browser', {
-      './clientsidescripts': clientsidescripts
-    });
-    proxyquire('protractor/built/element', {
-      './clientsidescripts': clientsidescripts
-    });
-    proxyquire('protractor/built/locators', {
-      './clientsidescripts': clientsidescripts
+      './clientsidescripts': clientsidescripts, // used in browser.js
+      './element': {
+        ElementArrayFinder: require('./element/elementArrayFinder'),
+        ElementFinder: require('./element/elementFinder')
+      }
     });
 
     // set specs
@@ -256,10 +253,6 @@ function run(config) {
             browser.driver.manage().window().setSize(remoteBrowserSize.width * 1, remoteBrowserSize.height * 1); // convert to integer implicitly
           }
         }
-
-        protractorModule.parent.exports.ElementFinder.prototype.asControl = function () {
-          return new Control(this.elementArrayFinder_);
-        };
 
         // add WebDriver overrides
         var enableClickWithActions = _.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions');

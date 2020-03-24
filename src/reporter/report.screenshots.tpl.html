@@ -130,6 +130,20 @@
     .hidden {
       display: none;
     }
+
+    .comparedImages {
+      margin-top: 16px;
+      display: flex;
+    }
+
+    .comparedImages > div:not(:first-child) {
+      margin-left: 16px;
+    }
+
+    .comparedImages > div {
+      display: flex;
+      flex-direction: column;
+    }
   </style>
 </head>
 <body>
@@ -182,7 +196,28 @@
             <% if (step.value) { %> with value '<%- step.value %>' <% } %>
           </div>
           <% } %>
-          <% if (step.screenshot) { %>
+          <% if (step.status === "failed" && step.matcher === 'toLookAs' && !!step.details) { %>
+          <div class="comparedImages">
+            <div>
+              Current Image
+              <a href="<%- step.details.actImageUrl %>" target="_blank">
+                <img data-source="<%- step.details.actImageUrl %>"/>
+              </a>
+            </div>
+            <div>
+              Reference Image
+              <a href="<%- step.details.refImageUrl %>" target="_blank">
+                <img data-source="<%- step.details.refImageUrl %>"/>
+              </a>
+            </div>
+            <div>
+              Diff Image
+              <a href="<%- step.details.diffImageUrl %>" target="_blank">
+                <img data-source="<%- step.details.diffImageUrl %>"/>
+              </a>
+            </div>
+          </div>
+          <% } else if (step.screenshot) { %>
           <a href="<%- step.screenshot %>" target="_blank">
             <img data-source="<%- step.screenshot %>"/>
           </a>

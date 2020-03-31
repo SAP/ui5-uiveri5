@@ -167,6 +167,20 @@ element(by.control({
 }));
 ```
 
+### Interactable, Visible, Enabled
+In contrast to OPA5 (with enabled autoWaiter), the control locator in UIVeri5 will find controls even if they are not visible, not enabled or not interactable. This is a basic limitation, comming from the fact that "auto waiting" in UIVeri5 is global and happens before the element location. To limit the search to visible controls, add `visible: true', to limit to enabled controls add 'enabled: true' and to limit to interactable controls add 'interactable: true'. The interactable check is the most extensive, it makes sure that the control is visible on the screen, there is no busy indicator on this control or any of its parents, the control is not scheduled for rerendering and
+is not hidden behind a blocking layer of an opened dialog.
+It is not necessary to add interactable flag to every selector as UIVeri5 synchronization will prevent serching in 
+a page that is not ready and is still rendering. Add the flag only when you face exceptions like "WebDriverError: element click intercepted ..."
+
+```javascript
+element(by.control({
+  id: 'myButton',
+  viewName: 'myView',
+  interactable: true
+}));
+```
+
 ## DOM Locators
 All standart `by.` locators from [WebDriverJs](https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_By.html) are supported.
 

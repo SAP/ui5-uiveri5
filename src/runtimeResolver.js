@@ -82,6 +82,7 @@ function RuntimeResolver(config,logger){
 RuntimeResolver.prototype.resolveRuntimes = function(){
   var that = this;
   var runtimes = this.config.browsers;
+  var runningAgainstSeleniumHub = !!this.config.seleniumAddress;
 
   // no runtimes => run on chrome
   if (!runtimes) {
@@ -94,16 +95,22 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
     if (!runtime.browserName){
       throw Error('Browser name not specified');
     }
-    if(supportedBrowserNames.indexOf(runtime.browserName)==-1){
+    if(!runningAgainstSeleniumHub && supportedBrowserNames.indexOf(runtime.browserName)==-1){
+      // NOTE: when running against Selenium Hub, it doesn't matter what UIveri5 supports,
+      // but what the Selenium Hub supports
       throw Error('Browser: ' + runtime.browserName + ' is not supported, use one of: ' +
         JSON.stringify(supportedBrowserNames));
     }
 
     // handle platformName
-    if(!runtime.platformName){
+    if(!runningAgainstSeleniumHub && !runtime.platformName){
+      // NOTE: when running against Selenium Hub, it doesn't make sens to derive the platformName
+      // from the host OS
       runtime.platformName = platformNamePerOsTypeString[that.config.osTypeString];
     }
-    if(supportedPlatformNames.indexOf(runtime.platformName)==-1){
+    if(!runningAgainstSeleniumHub && supportedPlatformNames.indexOf(runtime.platformName)==-1){
+      // NOTE: when running against Selenium Hub, it doesn't matter what UIveri5 supports,
+      // but what the Selenium Hub supports
       throw Error('Platform: ' + runtime.platformName + ' is not supported, use one of: ' +
         JSON.stringify(supportedPlatformNames));
     }

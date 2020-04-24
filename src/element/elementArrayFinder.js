@@ -1,6 +1,6 @@
 /**
  * ==========================================================
- * Copied from protractor, with excluded angular-only methods
+ * Copied from protractor, with excluded angular-only methods and added UI5-related methods
  * ==========================================================
  */
 var selenium_webdriver = require('selenium-webdriver');
@@ -32,7 +32,7 @@ var WEB_ELEMENT_FUNCTIONS = require('./elementFunctions').webElementFunctions;
  * array of the results; the array has length equal to the length of the
  * elements found by the ElementArrayFinder and each result represents the
  * result of performing the action on the element. Unlike a WebElement, an
- * ElementArrayFinder will wait for the angular app to settle before
+ * ElementArrayFinder will wait for the UI5 app to settle before
  * performing finds or actions.
  *
  * @alias element.all(locator)
@@ -142,7 +142,7 @@ ElementArrayFinder.prototype.all = function (locator) {
     if (this.getWebElements === null) {
       // This is the first time we are looking for an element
       // TODO: do own wait
-      return this.browser_.waitForAngular('Locator: ' + locator)
+      return this.browser_.waitForUI5('Locator: ' + locator)
         .then(function () {
           if (locators.isProtractorLocator(locator)) {
             return locator.findElementsOverride(this.browser_.driver, null, this.browser_.rootEl);

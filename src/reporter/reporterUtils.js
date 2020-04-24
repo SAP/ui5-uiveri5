@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
-var logger = require('../logger')();
+var logger = require('../logger');
 
 module.exports = {
   saveReport: function (reportName, content) {

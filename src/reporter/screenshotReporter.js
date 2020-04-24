@@ -86,9 +86,9 @@ JasmineScreenshotReporter.prototype._registerOnSync = function () {
       });
     };
 
-    var originalWaitForAngular = browser.waitForAngular;
-    browser.waitForAngular = function () {
-      return originalWaitForAngular.apply(this, arguments).then(onSync, onSync);
+    var originalWaitForUI5 = browser.waitForUI5;
+    browser.waitForUI5 = function () {
+      return originalWaitForUI5.apply(this, arguments).then(onSync, onSync);
     };
   }
 };

@@ -5,7 +5,7 @@
  * ==========================================================
  */
 var selenium_webdriver = require('selenium-webdriver');
-var logger = require('../logger')();
+var logger = require('../logger');
 var util = require('./util');
 var ElementArrayFinder = require('./elementArrayFinder');
 var ControlAPI = require('./controlAPI');

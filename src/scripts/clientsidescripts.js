@@ -83,26 +83,54 @@ var mFunctions = {
       });
     }
 
+    function isSapUI5Ready () {
+      return typeof sap !== 'undefined' && sap.ui && sap.ui.getCore;
+    }
+
+    function requireOPAControlFinder (resolve) {
+      sDebugLog += '\nLoading OPA5 control locator utilities.';
+      var onError = function (oError) {
+        // only throw error if dependency is missing when a control locator is actually used
+        resolve('Control locators will not be enabled.' +
+        ' Minimum UI5 versions supporting control locators: 1.52.12; 1.54.4; 1.55 and up. Details: ' + oError);
+      };
+      try {
+        sap.ui.require([
+          'sap/ui/test/_ControlFinder'
+        ], function (_ControlFinder) {
+          window.uiveri5._ControlFinder = _ControlFinder;
+          resolve();
+        }, onError);
+      } catch (oError) {
+        onError(oError);
+      }
+    }
+
+    function waitForUI5AndRequireOPAControlFinder (resolve) {
+      var nWaited = 0;
+      function wait () {
+        if (isSapUI5Ready()) {
+          requireOPAControlFinder(resolve);
+        } else if (nWaited < mScriptParams.waitForUI5Timeout) {
+          nWaited += mScriptParams.waitForUI5PollingInterval;
+          setTimeout(wait, mScriptParams.waitForUI5PollingInterval);
+        } else {
+          resolve('Control locators will not be enabled. Waited too long for UI5');
+        }
+      }
+      wait();
+    }
+
     function loadOPAControlFinder() {
       return new Promise(function (resolve) {
         if (uiveri5._ControlFinder) {
           resolve();
         } else {
-          sDebugLog += '\nLoading OPA5 control locator utilities.';
-          var onError = function (oError) {
-            // only throw error if dependency is missing when a control locator is actually used
-            resolve('Control locators will not be enabled.' +
-            ' Minimum UI5 versions supporting control locators: 1.52.12; 1.54.4; 1.55 and up. Details: ' + oError);
-          };
-          try {
-            sap.ui.require([
-              'sap/ui/test/_ControlFinder'
-            ], function (_ControlFinder) {
-              window.uiveri5._ControlFinder = _ControlFinder;
-              resolve();
-            }, onError);
-          } catch (oError) {
-            onError(oError);
+          if (!isSapUI5Ready()) {
+            sDebugLog += '\nWaiting for SapUI5 to be ready...';
+            waitForUI5AndRequireOPAControlFinder(resolve);
+          } else {
+            requireOPAControlFinder(resolve);
           }
         }
       });

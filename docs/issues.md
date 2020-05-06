@@ -44,7 +44,7 @@ npm config set https-proxy http://proxy:8080
 UIVeri5 uses WebDriverJs and it could start selenium-server-standalone.jar for local use case. So, you either need Java so
 that Selenium Standalone could run, or you need to run your test against a remote Selenium hub or a remote cloud provider.
 
-# Common problems
+# Configuration Issues
 
 ## Failed: Spec with full name: Spec name not found
 

@@ -100,6 +100,16 @@ describe("Should parse confkey from command-line", function () {
     expect(config.confKeys).toContain('key1.key2:value;key1.key3:value1');
   });
 
+  it('Should parse array values in confkey string', function () {
+    var argvStub = new ArgvStub();
+    argvStub.confKeys = 'key1[0].key2:[opt1, opt2];browsers[0].capabilities.chromeOptions.args:[--window-size=700,800, --headless]';
+    var config = configParser.mergeConfigs(argvStub);
+
+    expect(config.key1).toEqual([{key2: ["opt1", "opt2"]}]);
+    expect(config.browsers).toEqual([{capabilities: {chromeOptions: {args: ["--window-size=700,800", "--headless"]}}}]);
+    expect(config.confKeys).toEqual(argvStub.confKeys);
+  });
+
   it('Should overwrite config.browsers with --browsers', () => {
     var argvStub = new ArgvStub();
     argvStub.browsers = 'firefox';

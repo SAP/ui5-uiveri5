@@ -279,15 +279,15 @@ function run(config) {
         var scriptName = arguments[1];
         var params = arguments[2];
         // log script execution
-        logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+        logger.trace('Execute protractor async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
         //logger.trace('Execute async script code: \n' + JSON.stringify(code));
         //call original function in its context
         return origExecuteAsyncScript_.apply(browser, arguments)
           .then(function(res) {
-            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res));
+            logger.trace('Protractor async script: ' + scriptName + ' result: ' + JSON.stringify(res));
             return res;
           },function(error) {
-            logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(error));
+            logger.trace('Protractor async script: ' + scriptName + ' error: ' + JSON.stringify(error));
             throw error;
           });
       };

@@ -109,7 +109,10 @@ exports.config = {
       '*': {
         '*': {
           chromeOptions: {
-            'args': [
+            args: [
+              '--no-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
               'disable-infobars'
             ]
           },
@@ -151,7 +154,13 @@ exports.config = {
                 height: 560,
                 pixelRatio: 4
               }
-            }
+            },
+            args: [
+              '--no-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+              'disable-infobars'
+            ]
           }
         }
       }
@@ -161,7 +170,13 @@ exports.config = {
         '*': {
           browserName: 'chrome',
           chromeOptions: {
-            args: ['--headless', '--no-sandbox']
+            args: [
+              '--headless',
+              '--no-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+              'disable-infobars'
+            ]
           }
         }
       }

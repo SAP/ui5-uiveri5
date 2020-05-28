@@ -178,7 +178,7 @@ var mFunctions = {
     }
   },
 
-  // called directly from webdriver.by so does not comply ith executeScriptHandleErrors result structure
+  // called directly from webdriver.by so does not comply with executeScriptHandleErrors result structure
   findByControl: function findByControl (sMatchers, oParentElement) {
     if (!uiveri5._ControlFinder) {
       throw new Error('Your application needs a newer version of UI5 to use control locators!' +
@@ -206,7 +206,7 @@ var mFunctions = {
     return uiveri5._ControlFinder._findElements(mMatchers);
   },
 
-  // called with driver.executScript so does not comply ith executeScriptHandleErrors result structure
+  // called with driver.executScript from findElements overrideso so does not comply ith executeScriptHandleErrors result structure
   getLatestLog: function getLatestLog () {
     var sLog = '';
     if (uiveri5._ControlFinder && uiveri5._ControlFinder._getLatestLog) {

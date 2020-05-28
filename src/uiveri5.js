@@ -279,37 +279,61 @@ function run(config) {
         var scriptName = arguments[1];
         var params = arguments[2];
         // log script execution
-        logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params) + ' with code: \n' + JSON.stringify(code));
+        logger.trace('Execute protractor async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+        logger.dump('Execute protractor async script code: \n' + JSON.stringify(code));
         //call original function in its context
         return origExecuteAsyncScript_.apply(browser, arguments)
           .then(function(res) {
-            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res));
+            logger.trace('Protractor async script: ' + scriptName + ' result: ' + JSON.stringify(res));
             return res;
           },function(error) {
-            logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(error));
+            logger.trace('Protractor async script: ' + scriptName + ' error: ' + JSON.stringify(error));
             throw error;
           });
       };
 
       browser.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName,params) {
         var code = clientsidescripts[scriptName];
-        logger.debug('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-        logger.trace('Execute async script code: \n' + JSON.stringify(code));
         params = params || {};
+        browser.controlFlow().execute(function () {
+          logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+          logger.dump('Execute async script code: \n' + JSON.stringify(code));
+        });
         return browser.executeAsyncScript(code,params)
           .then(function (res) {
             if (res.log) {
-              logger.debug('Async script: ' + scriptName + ' logs: \n' + res.log);
+              logger.trace('Async script: ' + scriptName + ' logs: \n' + res.log);
             }
             if (res.error) {
-              logger.debug('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
+              logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
               throw new Error(scriptName + ': ' + res.error);
             }
-            logger.debug('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
+            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
             return res.value;
           });
       };
 
+      browser.executeScriptHandleErrors = function executeScriptHandleErrors(scriptName,params) {
+        var code = clientsidescripts[scriptName];
+        params = params || {};
+        browser.controlFlow().execute(function () {
+          logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
+          logger.dump('Execute script code: \n' + JSON.stringify(code));
+        });
+        return browser.executeScript(code,params)
+          .then(function (res) {
+            if (res.log) {
+              logger.trace('Script: ' + scriptName + ' logs: \n' + res.log);
+            }
+            if (res.error) {
+              logger.trace('Script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
+              throw new Error(scriptName + ': ' + res.error);
+            }
+            logger.trace('Script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
+            return res.value;
+          });
+      };
+      
       browser.loadUI5Dependencies = function () {
         return browser._loadUI5Dependencies().then(function () {
           return browser.waitForAngular();
@@ -330,9 +354,12 @@ function run(config) {
       };
 
       browser.setViewportSize = function (viewportSize) {
-        return browser.executeScriptWithDescription(clientsidescripts.getWindowToolbarSize, 'browser.setViewportSize').then(function (toolbarSize) {
-          browser.driver.manage().window().setSize(viewportSize.width * 1 + toolbarSize.width, viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly
-        });
+        return browser.executeScriptHandleErrors('getWindowToolbarSize')
+          .then(function (toolbarSize) {
+            browser.driver.manage().window().setSize(
+              viewportSize.width * 1 + toolbarSize.width,
+              viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly
+          });
       };
 
       // add global matchers
@@ -517,10 +544,11 @@ function run(config) {
           browser.loadUI5Dependencies();
 
           // log UI5 version
-          return browser.executeScriptWithDescription(clientsidescripts.getUI5Version, 'browser.getUI5Version').then(function (versionInfo) {
-            logger.info('UI5 Version: ' + versionInfo.version);
-            logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
-          });
+          return browser.executeScriptHandleErrors('getUI5Version')
+            .then(function (versionInfo) {
+              logger.info('UI5 Version: ' + versionInfo.version);
+              logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
+            });
         },
 
         waitForRedirect: function(targetUrl){
@@ -642,13 +670,13 @@ function run(config) {
     protractorArgv.plugins = [{
       inline: {
         setup: function() {
-          _callPlugins('setup');
+          return _callPlugins('setup');
         },
         onPrepare: function() {
-          _callPlugins('onPrepare');
+          return _callPlugins('onPrepare');
         },
         teardown: function() {
-          _callPlugins('teardown');
+          return _callPlugins('teardown');
         }
       }
     }];

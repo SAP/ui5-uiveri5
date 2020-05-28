@@ -4,7 +4,7 @@ describe('logs', function() {
         browser.executeScript(function () {
             console.error("Error-browserLogsScenarioTest");
             console.warn("Warning-browserLogsScenarioTest");
-            console.log("Basic log-browserLogsScenarioTest");
+            console.log("Log-browserLogsScenarioTest");
             console.info("Info-browserLogsScenarioTest");
             console.debug("Debug-browserLogsScenarioTest");
             console.trace("Trace-browserLogsScenarioTest");

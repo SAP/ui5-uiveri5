@@ -19,22 +19,26 @@ var mFunctions = {
     /* global uiveri5 */
     window.uiveri5 = window.uiveri5 || {};
 
-    loadOPAControlFinder().then(function () {
-      if (mScriptParams.useClassicalWaitForUI5) {
-        sDebugLog += '\nLoading classical waitForUI5 implementation.';
-        return loadClassicalWaitForUI5();
-      } else {
-        sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
-        return loadOPAWaitForUI5().catch(function (sError) {
-          sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+    loadControlFinder()
+      .then(function(){
+        return loadBrowserLogCollector();
+      })
+      .then(function () {
+        if (mScriptParams.useClassicalWaitForUI5) {
+          sDebugLog += '\nLoading classical waitForUI5 implementation.';
           return loadClassicalWaitForUI5();
-        });
-      }
-    }).then(function (sLog) {
-      fnCallback({log: sDebugLog + (sLog || '')});
-    }).catch(function (sError, sLog) {
-      fnCallback({error: sError, log: sDebugLog + (sLog || '')});
-    });
+        } else {
+          sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
+          return loadOPAWaitForUI5().catch(function (sError) {
+            sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+            return loadClassicalWaitForUI5();
+          });
+        }
+      }).then(function (sLog) {
+        fnCallback({log: sDebugLog + (sLog || '')});
+      }).catch(function (sError, sLog) {
+        fnCallback({error: sError, log: sDebugLog + (sLog || '')});
+      });
 
     // --- helper function declarations below ---
 
@@ -83,7 +87,7 @@ var mFunctions = {
       });
     }
 
-    function loadOPAControlFinder() {
+    function loadControlFinder() {
       return new Promise(function (resolve) {
         if (uiveri5._ControlFinder) {
           resolve();
@@ -107,6 +111,31 @@ var mFunctions = {
         }
       });
     }
+
+    function loadBrowserLogCollector() {
+      return new Promise(function (resolve) {
+        if (uiveri5._BrowserLogCollector) {
+          resolve();
+        } else {
+          sDebugLog += '\nLoading OPA5 browser log collector.';
+          var onError = function (oError) {
+            // only throw error if dependency is missing when a control locator is actually used
+            resolve('Browser log collector will not be enabled.' +
+            ' Minimum UI5 versions supporting nrowser log collector: 1.64 and up. Details: ' + oError);
+          };
+          try {
+            sap.ui.require([
+              'sap/ui/test/_BrowserLogCollector'
+            ], function (_BrowserLogCollector) {
+              window.uiveri5._BrowserLogCollector =  _BrowserLogCollector.getInstance();
+              resolve();
+            }, onError);
+          } catch (oError) {
+            onError(oError);
+          }
+        }
+      });
+    }    
   },
 
   waitForAngular: function waitForAngular (mScriptParams, fnCallback) {
@@ -125,18 +154,22 @@ var mFunctions = {
 
   getControlProperty: function getControlProperty (mScriptParams) {
     if (!uiveri5._ControlFinder) {
-      throw new Error('Your application needs a newer version of UI5 to use control locators!' +
-      ' Minimum versions supported: 1.52.12; 1.54.4; 1.55 and up.');
+      return {
+        error: 'Your application needs a newer version of UI5 to use control locators!' +
+          ' Minimum versions supported: 1.52.12; 1.54.4; 1.55 and up.'
+      };
     }
 
     try {
       var control = uiveri5._ControlFinder._getControlForElement(mScriptParams.elementId);
       if (control) {
         return {
-          property: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
+          value: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
         };
       } else {
-        throw new Error('Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree');
+        return {
+          error: 'Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree'
+        };
       }
     } catch (oError) {
       return {
@@ -145,6 +178,7 @@ var mFunctions = {
     }
   },
 
+  // called directly from webdriver.by so does not comply with executeScriptHandleErrors result structure
   findByControl: function findByControl (sMatchers, oParentElement) {
     if (!uiveri5._ControlFinder) {
       throw new Error('Your application needs a newer version of UI5 to use control locators!' +
@@ -172,22 +206,31 @@ var mFunctions = {
     return uiveri5._ControlFinder._findElements(mMatchers);
   },
 
+  // called with driver.executScript from findElements overrideso so does not comply ith executeScriptHandleErrors result structure
   getLatestLog: function getLatestLog () {
     var sLog = '';
     if (uiveri5._ControlFinder && uiveri5._ControlFinder._getLatestLog) {
       sLog = uiveri5._ControlFinder._getLatestLog();
     }
-    return  sLog;
+    return sLog;
   },
 
   getUI5Version: function() {
-    return sap.ui.getVersionInfo();
+    var versionInfo = sap.ui.getVersionInfo();
+    return {
+      value: {
+        version: versionInfo.version,
+        buildTimestamp: versionInfo.buildTimestamp
+      }
+    };
   },
-
+  
   getWindowToolbarSize: function getWindowToolbarSize () {
     return {
-      width: window.outerWidth - window.innerWidth,
-      height: window.outerHeight - window.innerHeight
+      value: {
+        width: window.outerWidth - window.innerWidth,
+        height: window.outerHeight - window.innerHeight
+      }
     };
   },
 
@@ -234,39 +277,48 @@ var mFunctions = {
   },
 
   startLogCollection: function startLogCollection (mScriptParams) {
-    if (!window.sap || !window.sap.ui) {
-      throw new Error('startLogCollection: no UI5 on this page.');
-    }
-
-    var sError = 'Your application needs a minimum version of UI5 v1.64 to collect browser logs!';
-
     try {
-      sap.ui.require([
-        'sap/ui/test/_BrowserLogCollector'
-      ], function (_BrowserLogCollector) {
-        window.uiveri5 = window.uiveri5 || {};
-        window.uiveri5._BrowserLogCollector = _BrowserLogCollector.getInstance();
-        window.uiveri5._BrowserLogCollector.start(mScriptParams.level);
-      }, function (oError) {
-        throw new Error(sError + ' Details: ' + oError);
-      });
+      if (!window.uiveri5._BrowserLogCollector) {
+        throw new Error('Log collection is not set up! Call "loadLogDependencies" before "startLogCollection"');
+      }
+      return {
+        value: window.uiveri5._BrowserLogCollector.start(mScriptParams.level)
+      };
     } catch (oError) {
-      throw new Error(sError + ' Details: ' + oError);
+      return {
+        error: 'Error while starting log collection, Details: ' + oError
+      };
     }
   },
 
   getAndClearLogs: function getAndClearLogs () {
-    if (!window.uiveri5._BrowserLogCollector) {
-      throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
+    try {
+      if (!window.uiveri5._BrowserLogCollector) {
+        throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
+      }
+      return {
+        value: window.uiveri5._BrowserLogCollector.getAndClearLogs().logs
+      };
+    } catch (oError) {
+      return {
+        error: 'Error while getting logs, Details: ' + oError
+      };
     }
-    return window.uiveri5._BrowserLogCollector.getAndClearLogs().logs;
   },
 
   stopLogsCollection: function stopLogsCollection () {
-    if (!window.uiveri5._BrowserLogCollector) {
-      throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
+    try {
+      if (!window.uiveri5._BrowserLogCollector) {
+        throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
+      }
+      return {
+        value: window.uiveri5._BrowserLogCollector.stop()
+      };
+    } catch (oError) {
+      return {
+        error: 'Error while stopping log collection, Details: ' + oError
+      };
     }
-    return window.uiveri5._BrowserLogCollector.stop();
   }
 };
 

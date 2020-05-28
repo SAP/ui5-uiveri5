@@ -5,7 +5,7 @@ var _ = require('lodash');
 // 0 - INFO,ERROR
 // 1 - +DEBUG
 // 2 - +TRACE
-// 3 - +trace data
+// 3 - +DUMP
 
 function ConsoleLogger(level){
   this.level = level;
@@ -29,13 +29,17 @@ ConsoleLogger.prototype.debug = function(msg,args) {
   }
 };
 
-//TODO stringify for objects and arrays
 ConsoleLogger.prototype.trace = function(msg,args) {
   if(this.level>1) {
     console.log('TRACE: ' + _.template(msg)(args));
   }
 };
 
+ConsoleLogger.prototype.dump = function(msg,args) {
+  if(this.level>2) {
+    console.log('DUMP: ' + _.template(msg)(args));
+  }
+};
 module.exports = function (level) {
   return new ConsoleLogger(level);
 };

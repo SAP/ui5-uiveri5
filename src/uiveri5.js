@@ -280,7 +280,7 @@ function run(config) {
         var params = arguments[2];
         // log script execution
         logger.trace('Execute protractor async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-        //logger.trace('Execute async script code: \n' + JSON.stringify(code));
+        logger.dump('Execute protractor async script code: \n' + JSON.stringify(code));
         //call original function in its context
         return origExecuteAsyncScript_.apply(browser, arguments)
           .then(function(res) {
@@ -297,7 +297,7 @@ function run(config) {
         params = params || {};
         browser.controlFlow().execute(function () {
           logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          //logger.trace('Execute async script code: \n' + JSON.stringify(code));
+          logger.dump('Execute async script code: \n' + JSON.stringify(code));
         });
         return browser.executeAsyncScript(code,params)
           .then(function (res) {
@@ -318,7 +318,7 @@ function run(config) {
         params = params || {};
         browser.controlFlow().execute(function () {
           logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-         // logger.trace('Execute script code: \n' + JSON.stringify(code));
+          logger.dump('Execute script code: \n' + JSON.stringify(code));
         });
         return browser.executeScript(code,params)
           .then(function (res) {

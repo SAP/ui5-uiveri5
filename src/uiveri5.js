@@ -177,7 +177,8 @@ function run(config) {
       // prepare capabilities from runtime for this specific connection type
       return connectionProvider.resolveCapabilitiesFromRuntime(runtime);
     });
-    logger.debug('Resolved protractor multiCapabilities from runtime: ' + JSON.stringify(protractorArgv.multiCapabilities));
+    logger.debug('Resolved protractor multiCapabilities: ' +
+      JSON.stringify(protractorArgv.multiCapabilities));
 
     // no way to implement concurrent executions with current driverProvider impl
     protractorArgv.maxSessions = 1;
@@ -260,7 +261,8 @@ function run(config) {
         };
 
         // add WebDriver overrides
-        if (runtime.capabilities.enableClickWithActions) {
+        var enableClickWithActions = _.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions');
+        if (enableClickWithActions) {
           logger.debug('Activating WebElement.click() override with actions');
           protractorModule.parent.parent.exports.WebElement.prototype.click = function () {
             logger.trace('Taking over WebElement.click()');

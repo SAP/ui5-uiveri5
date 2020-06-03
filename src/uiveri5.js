@@ -429,7 +429,7 @@ function run(config) {
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
               }
-              if (browser.testrunner.runtime.capabilities.enableClickWithActions) {
+              if (_.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions')) {
                 _moveMouseOutsideBody(browser.driver.actions());
               }
             });

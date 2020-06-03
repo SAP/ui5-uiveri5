@@ -11,9 +11,9 @@ exports.config = {
     'chrome,chromium,ie': {
       'windows,linux': {
         '*': {
-          enableClickWithActions: true
           /*
           remoteWebDriverOptions: {
+            enableClickWithActions: true
             contextSwitch: true, // {native: 'NATIVE_APP', webview: 'WEBVIEW_1'}
             crops: {
               size: {

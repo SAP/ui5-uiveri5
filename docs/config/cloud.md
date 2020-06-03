@@ -1,6 +1,6 @@
 # SauceLabs
 SauceLabs is a popular browser cloud provider where you can spin a large variaty of browsers.
-UIVer5 uses a predefined naming scheme for runtimes that does not match completely with the naming scheme of [SauceLabs generic capabilities](https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/)
+UIVeri5 uses a predefined naming scheme for runtimes that does not match completely with the naming scheme of [SauceLabs generic capabilities](https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/)
 But is it very easy to override any capability or add arbitrary new ones.
 
 * ci-conf.js

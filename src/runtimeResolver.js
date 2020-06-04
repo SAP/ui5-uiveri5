@@ -175,7 +175,11 @@ RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserC
           for(executionTypePattern in browserCapabilities[browserNamePattern][platformNamePattern]){
             if(this._isMatching(currentExecutionType, executionTypePattern)){
               runtime.capabilities = _.merge({},
-                browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],runtime.capabilities);
+                browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],
+                runtime.capabilities,
+                function(a, b) {
+                  return _.isArray(a) ? a.concat(b) : undefined;
+                });
             }
           }
         }

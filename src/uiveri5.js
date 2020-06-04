@@ -224,10 +224,10 @@ function run(config) {
         });
 
         // process remoteWebDriverOptions
-        var isMaximized = _.get(runtime.capabilities.remoteWebDriverOptions, 'maximized');
-        var remoteWindowPosition = _.get(runtime.capabilities.remoteWebDriverOptions, 'position');
-        var remoteViewportSize = _.get(runtime.capabilities.remoteWebDriverOptions, 'viewportSize');
-        var remoteBrowserSize = _.get(runtime.capabilities.remoteWebDriverOptions, 'browserSize');
+        var isMaximized = _.get(runtime,'capabilities.remoteWebDriverOptions.maximized');
+        var remoteWindowPosition = _.get(runtime,'capabilities.remoteWebDriverOptions.position');
+        var remoteViewportSize = _.get(runtime,'capabilities.remoteWebDriverOptions.viewportSize');
+        var remoteBrowserSize = _.get(runtime,'capabilities.remoteWebDriverOptions.browserSize');
 
         if (isMaximized) {
           logger.debug('Maximizing browser window');
@@ -429,7 +429,7 @@ function run(config) {
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
               }
-              if (_.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions')) {
+              if (_.get(browser.testrunner.runtime,'capabilities.remoteWebDriverOptions.enableClickWithActions')) {
                 _moveMouseOutsideBody(browser.driver.actions());
               }
             });

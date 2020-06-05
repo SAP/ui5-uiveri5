@@ -159,7 +159,7 @@ exports.config = {
               '--no-sandbox',
               '--disable-dev-shm-usage',
               '--disable-gpu',
-              'disable-infobars'
+              '--disable-infobars'
             ]
           }
         }
@@ -175,7 +175,7 @@ exports.config = {
               '--no-sandbox',
               '--disable-dev-shm-usage',
               '--disable-gpu',
-              'disable-infobars'
+              '--disable-infobars'
             ]
           }
         }

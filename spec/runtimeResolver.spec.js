@@ -132,6 +132,37 @@ describe("RuntimeResolver", function() {
       expect(runtime.capabilities.chromeArgs.args).toEqual(['two','one']);
 
     });
+
+    it('Should remove duplicates from merged arrays', function() {
+      var runtime = {
+        capabilities: {
+          chromeArgs: {
+            args: ['one']
+          },
+        },
+        browserName: 'chrome',
+        platformName: 'windows'
+      };
+
+      // override to return local execution
+      resolver._getExecutionType = function() {
+        return 'remote';
+      };
+
+      resolver._mergeMatchingCapabilities(runtime, {
+        'chrome,chromium': {
+          'windows,mac,linux': {
+            "*" : {
+              chromeArgs: {
+                args: ['one','two']
+              }
+            }
+          }
+        }
+      });
+      expect(runtime.capabilities.chromeArgs.args).toEqual(['one','two']);
+
+    });
   });
 
   describe('Should merge with execution type capabilities', function() {

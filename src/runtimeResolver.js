@@ -174,8 +174,8 @@ RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserC
                 browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],
                 runtime.capabilities,
                 function(objValue, srcValue) {
-                  if (_.isArray(objValue)) {
-                    return objValue.concat(srcValue);
+                  if (_.isArray(objValue) && srcValue) {
+                    return _(objValue).concat(srcValue).uniqWith(_.isEqual).value();
                   }
                 });
             }

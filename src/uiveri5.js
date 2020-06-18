@@ -1,4 +1,5 @@
 
+var fs = require('fs');
 var _ = require('lodash');
 var proxyquire =  require('proxyquire');
 var url = require('url');
@@ -503,7 +504,16 @@ function run(config) {
           _callPlugins('suiteDone',[{name:jasmineSuite.description}]);
         },
       });
-  
+
+      if (config.exportParamsFile) {
+        jasmine.getEnv().addReporter({
+          jasmineDone: function () {
+            logger.debug('Exporting test params to file ' + config.exportParamsFile);
+            fs.writeFileSync(config.exportParamsFile, JSON.stringify(browser.testrunner.config.exportParams, null, 2));
+          }
+        });
+      }
+
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
         to: function(url, authConfig) {

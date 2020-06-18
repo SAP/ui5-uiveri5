@@ -11,8 +11,8 @@ function ConfigParser(logger) {
   this.config = {};
 }
 
-ConfigParser.prototype.mergeConfigs = function (config) {
-  this.config = config;
+ConfigParser.prototype.mergeConfigs = function (cliConfig) {
+  this.config = cliConfig;
 
   // load config file
   this._mergeConfigFile(this.config.conf || DEFAULT_CONF, 'default');
@@ -25,6 +25,8 @@ ConfigParser.prototype.mergeConfigs = function (config) {
 
   // Changing config via confKeys
   this._setConfKeys();
+
+  this._mergeParams();
 
   // return new fully merged config
   return this.config;
@@ -173,6 +175,20 @@ ConfigParser.prototype._readConfig = function (configPath, type) {
   this.logger.debug('Loading ' + (type ? type + ' ': '') + 'config from: ' + configPath);
   // clone so we avoid module cache
   return _.cloneDeep(require(configPath).config);
+};
+
+ConfigParser.prototype._mergeParams = function () {
+  if (this.config.importParamsFile) {
+    this.config.importParamsFile = path.resolve(this.config.importParamsFile);
+    this.logger.debug('Loading test params from file ' + this.config.importParamsFile);
+    var importParams = _.cloneDeep(require(this.config.importParamsFile));
+    // cli params should have higher prio
+    this.config.params = _mergeWithArrays(importParams, this.config.params);
+  }
+  if (this.config.exportParamsFile) {
+    this.config.exportParamsFile = path.resolve(this.config.exportParamsFile);
+    this.config.exportParams = {};
+  }
 };
 
 function _mergeWithArrays(newObject, destination) {

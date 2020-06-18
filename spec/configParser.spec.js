@@ -45,6 +45,20 @@ describe("configParser", function() {
     expect(mergedConfig.test.key.param).toEqual('sap-ui-theme=sap_theme');
     expect(mergedConfig.test.key.secondParam).toEqual('sap-ui-rtl=true');
   });
+
+  it('Should merge imported test params', function () {
+    var cliConfig = {
+      conf: __dirname + '/configParser/conf.js',  // default config file
+      importParams: __dirname + '/configParser/testParams.json',
+      params: {
+        param2: 'newValue'
+      }
+    };
+
+    var mergedConfig = configParser.mergeConfigs(cliConfig);
+
+    expect(mergedConfig.params).toEqual({param1: 'value1', param2: 'newValue'});
+  });
 });
 
 describe("Should parse confkey from command-line", function () {

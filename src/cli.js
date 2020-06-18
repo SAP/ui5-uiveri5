@@ -30,6 +30,8 @@ var argv = require('yargs').
   string('browsers').
   describe('browsers', 'Comma separated list of browsers to execute tests, overwrites *.conf.js values, defaults to chrome').
   describe('params', 'Param object to be passed to the tests').
+  describe('importParamsFile', 'path to JSON file with input params to be passed to the tests').
+  describe('exportParamsFile', 'path to JSON file where output params will be written after all tests are completed').
   describe('timeouts', 'Timeouts').
   string('config').
   describe('config', 'JSON formatted config object to override config file options').

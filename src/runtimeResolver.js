@@ -2,14 +2,10 @@
 var _ = require('lodash');
 
 var DEFAULT_BROWSER_NAME = 'chrome';
-var DEFAULT_PLATFORM_NAME = 'windows';
 var DEFAULT_VERSION = '*';
-var DEFAULT_DEVICE_NAME = '*';
 var DEFAULT_UI5_THEME = 'belize';
 var DEFAULT_UI5_DIRECTION = 'ltr';
 var DEFAULT_UI5_MODE = 'cozy';
-/* eslint no-unused-vars: */
-var DEFAULT_EXECUTION_TYPE = '*';
 
 var defaultPlatformResolutionPerPlatformName = {
   windows: '1600x1200',
@@ -173,9 +169,15 @@ RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserC
         if (this._isMatching(runtime.platformName,platformNamePattern)){
           var executionTypePattern;
           for(executionTypePattern in browserCapabilities[browserNamePattern][platformNamePattern]){
-            if(this._isMatching(currentExecutionType, executionTypePattern)){
-              runtime.capabilities = _.merge({},
-                browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],runtime.capabilities);
+            if(this._isMatching(currentExecutionType, executionTypePattern)){              
+              runtime.capabilities = _.mergeWith({},
+                browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],
+                runtime.capabilities,
+                function(objValue, srcValue) {
+                  if (_.isArray(objValue) && srcValue) {
+                    return _(objValue).concat(srcValue).uniqWith(_.isEqual).value();
+                  }
+                });
             }
           }
         }

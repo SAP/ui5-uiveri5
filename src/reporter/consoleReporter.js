@@ -1,3 +1,4 @@
+var _ = require('lodash');
 
 /**
  * @typedef ConsoleReporterConfig
@@ -35,38 +36,35 @@ JasmineConsoleReporter.prototype.jasmineStarted = function() {
 
 JasmineConsoleReporter.prototype.suiteStarted = function() {
   var that = this;
+  var suiteName = _.cloneDeep(that.collector.getCurrentSuite().name);
   browser.controlFlow().execute(function () {
-    that.logger.info('Suite started: ' + that.collector.getCurrentSuite().name);
+    that.logger.info('Second try: Suite started: ' + suiteName);
   });
 };
 
 JasmineConsoleReporter.prototype.specStarted = function() {
   var that = this;
+  var specName = _.cloneDeep(that.collector.getCurrentSpec().name);
   browser.controlFlow().execute(function () {
-    that.logger.info('Spec started: ' + that.collector.getCurrentSpec().name);
+    that.logger.info('Spec started: ' + specName);
   });
 };
 
 JasmineConsoleReporter.prototype.specDone = function() {
   var that = this;
-  var spec = that.collector.getCurrentSpec();
-  spec.expectations.forEach(function (expectation) {
-    if (expectation.status === 'failed') {
-      browser.controlFlow().execute(function () {
-        that.logger.info('Expectation FAILED: ' + expectation.message);
-      });
-      if(expectation.details){
-        browser.controlFlow().execute(function () {
-          that.logger.info('Expectation FAILED details: ${JSON.stringify(details)}',{details: expectation.details});
-        });
-      }
-      browser.controlFlow().execute(function () {
-        that.logger.debug('Expectation FAILED stack: ${stack}',{stack: expectation.stack});
-      });
-    }
-  }, that);
+  var spec = _.cloneDeep(that.collector.getCurrentSpec());
+  that.logger.info('Spec finished call is now');
   browser.controlFlow().execute(function () {
-    that.logger.info('Spec finished: ' + that.collector.getCurrentSpec().name +
+    spec.expectations.forEach(function (expectation) {
+      if (expectation.status === 'failed') { 
+        that.logger.info('Expectation FAILED: ' + expectation.message);
+        if(expectation.details){ 
+          that.logger.info('Expectation FAILED details: ${JSON.stringify(details)}',{details: expectation.details});
+        }
+        that.logger.debug('Expectation FAILED stack: ${stack}',{stack: expectation.stack});
+      }
+    }, that);
+    that.logger.info('Spec finished: ' + spec.name +
       ' with status: ' + spec.status.toUpperCase());
   });
   /*
@@ -81,7 +79,8 @@ JasmineConsoleReporter.prototype.specDone = function() {
 
 JasmineConsoleReporter.prototype.suiteDone = function() {
   var that = this;
-  var suite = that.collector.getCurrentSuite();
+  var suite =  _.cloneDeep(that.collector.getCurrentSuite());
+  that.logger.info('Suite finished call is now');
   browser.controlFlow().execute(function () {
     that.logger.info('Suite finished: ' + suite.name +
     ' with status: ' + suite.status.toUpperCase() +
@@ -103,7 +102,9 @@ JasmineConsoleReporter.prototype.suiteDone = function() {
 
 JasmineConsoleReporter.prototype.jasmineDone = function() {
   var that = this;
-  var overview = that.collector.getOverview();
+  var overview =  _.cloneDeep(that.collector.getOverview());
+  that.logger.info('Overall status call is now');
+  /*
   browser.controlFlow().execute(function () {
     that.logger.info('Overall status: ' + overview.status.toUpperCase() +
     ' for: ' + overview.statistic.duration/1000 + 's');
@@ -124,6 +125,7 @@ JasmineConsoleReporter.prototype.jasmineDone = function() {
     ', failed with error: ' + overview.statistic.expectations.failed.error +
     ', failed with image comparison: ' + overview.statistic.expectations.failed.image);
   });
+  */
 };
 
 /**

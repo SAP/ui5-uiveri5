@@ -10,7 +10,7 @@ var mFunctions = {
   // fnCallback will be called with an object argument
   // which will always have a 'log' and will have 'error' only when loading of dependensies was unsuccessful
   loadUI5Dependencies: function loadUI5Dependencies (mScriptParams, fnCallback) {
-    var sDebugLog = 'Loading UI5 instrumentation';
+    var sDebugLog = 'Loading UI5 dependencies';
     
     // retry checking for UI5
     var waitedTime = 0;
@@ -166,7 +166,7 @@ var mFunctions = {
   getControlProperty: function getControlProperty (mScriptParams) {
     if (!window.uiveri5 ) {
       return {
-        error: 'UIVeri5 instrumentation is not loaded on this page'
+        error: 'UI5 dependencies are not loaded on this page'
       };
     } else if (!window.uiveri5._ControlFinder) {
       return {
@@ -196,7 +196,7 @@ var mFunctions = {
   // called directly from webdriver.by so does not comply with executeScriptHandleErrors result structure
   findByControl: function findByControl (sMatchers, oParentElement) {
     if (!window.uiveri5) {
-      throw new Error('UIVeri5 instrumentation is not loaded on this page');
+      throw new Error('UI5 dependencies are not loaded on this page');
     } else if (!window.uiveri5._ControlFinder) {
       throw new Error('Your application needs a newer version of UI5 to use control locators!' +
       ' Minimum versions supported: 1.52.12; 1.54.4; 1.55 and up.');

@@ -41,7 +41,7 @@ describe("cliParser", function() {
 
     it('Should parse all :-separated arguments with spaces in browsers key', function () {
       var argvStub = new ArgvStub();
-      argvStub.browsers = 'safari:*:ios:9.1:*:iPad Air 2:bluecrystal:ltr:cozy';
+      argvStub.browsers = 'safari:*:ios:9.1:*:bluecrystal:ltr:cozy';
       var config = cliParser.parse(argvStub);
 
       expect(config.browsers).toEqual([{
@@ -50,7 +50,6 @@ describe("cliParser", function() {
         platformName: 'ios',
         platformVersion: '9.1',
         platformResolution: '*',
-        deviceName: 'iPad Air 2',
         ui5: {theme: 'bluecrystal', direction: 'ltr', mode: 'cozy'}
       }]);
     });
@@ -65,7 +64,7 @@ describe("cliParser", function() {
 
     it('Should parse mixed formatted arguments in browsers key', function () {
       var argvStub = new ArgvStub();
-      argvStub.browsers = '{"browserName":"ie","ui5":{"theme":"bluecrystal"}},chrome,firefox:*:windows:*:*:*:bluecrystal:ltr:cozy';
+      argvStub.browsers = '{"browserName":"ie","ui5":{"theme":"bluecrystal"}},chrome,firefox:*:windows:*:*:bluecrystal:ltr:cozy';
       var config = cliParser.parse(argvStub);
 
       expect(config.browsers).toEqual([{browserName: 'ie', ui5: {theme: 'bluecrystal'}}, {browserName: 'chrome'}, {
@@ -74,7 +73,6 @@ describe("cliParser", function() {
         platformName: 'windows',
         platformVersion: '*',
         platformResolution: '*',
-        deviceName: '*',
         ui5: {theme: 'bluecrystal', direction: 'ltr', mode: 'cozy'}
       }]);
     });

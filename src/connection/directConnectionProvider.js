@@ -126,12 +126,7 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
   if (runtime.platformVersion !== '*'){
     capabilities.platformVersion = runtime.platformVersion;
   }
-
-  // format deviceName
-  if (runtime.deviceName !== '*'){
-    capabilities.deviceName = runtime.deviceName;
-  }
-
+  
   return this._mergeRuntimeCapabilities(capabilities,runtime);
 };
 

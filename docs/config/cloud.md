@@ -35,3 +35,40 @@ Some additional [SauceLabs specific capabilities](https://wiki.saucelabs.com/dis
 * maxDuration - max duration of the whole test suite execution in seconds, default is 30min. Could be extended to 10800sec = 3hours for extremely long tests.
 * idleTimeout - max duration for a single interaction. This is the time that the application needs to process the longest interaction like a navigation after a click. Default is 90sec and could be extended to 600sec for extremely slow
 applications.
+
+## Test annotations
+SauceLabs gives you the option to annotate tests and make their execution logs more comrehensive.
+UIVeri5 has a SauceLabs reporter that adds a default set of annotations - spec names, actions, expectation results, suite result, etc.
+To enable it, simply add it to the `reporters` configuration:
+```js
+exports.config = {
+  reporters: [
+    {name: './reporter/saucelabsReporter'}
+  ]
+}
+```
+
+If you want to set a name, tags or CI build number for your test, you can do so in the browser capabilities:
+```js
+exports.config = {
+  profile: 'integration',
+  baseUrl: '<App URL>',
+  // open the browser on SauceLabs cloud
+  seleniumAddress: "https://<user>:<key>@ondemand.eu-central-1.saucelabs.com:443/wd/hub",
+
+  browsers: [{
+    // here you define the runtime according UIVeri5 naming scheme
+    browserName: "edge",
+    platformName: "windows",
+    capabilities: {
+      // and here you can override with SauceLabs specific names
+      platform: "Windows 10",
+      browserName: "MicrosoftEdge",
+      // you can add details for your saucelabs test execution
+      name: "my-test",
+      tags: ["UIVeri5"],
+      build: process.env.BUILD_NUMBER
+    }
+  }]
+};
+```

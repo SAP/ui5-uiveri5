@@ -49,7 +49,7 @@ describe("configParser", function() {
   it('Should merge imported test params', function () {
     var cliConfig = {
       conf: __dirname + '/configParser/conf.js',  // default config file
-      importParams: __dirname + '/configParser/testParams.json',
+      paramsFile: __dirname + '/configParser/testParams.json',
       params: {
         param2: 'newValue'
       }

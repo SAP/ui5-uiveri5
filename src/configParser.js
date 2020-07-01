@@ -178,10 +178,10 @@ ConfigParser.prototype._readConfig = function (configPath, type) {
 };
 
 ConfigParser.prototype._mergeParams = function () {
-  if (this.config.importParamsFile) {
-    this.config.importParamsFile = path.resolve(this.config.importParamsFile);
-    this.logger.debug('Loading test params from file ' + this.config.importParamsFile);
-    var importParams = _.cloneDeep(require(this.config.importParamsFile));
+  if (this.config.paramsFile) {
+    this.config.paramsFile = path.resolve(this.config.paramsFile);
+    this.logger.debug('Loading test params from file ' + this.config.paramsFile);
+    var importParams = _.cloneDeep(require(this.config.paramsFile));
     // cli params should have higher prio
     this.config.params = _mergeWithArrays(importParams, this.config.params);
   }

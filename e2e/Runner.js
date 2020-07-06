@@ -82,9 +82,9 @@ module.exports = class Runner {
         });
       });
 
-      function buildConfigArgs(prefix,opts) {
+      function buildConfigArgs(prefix, opts) {
         return Object.entries(opts).map((opt) => {
-          return prefix + '.' + opt[0] + '=' + opt[1];
+          return prefix + '.' + opt[0] + '="' + opt[1] + '"';
         }).join(' ');
       }
     }

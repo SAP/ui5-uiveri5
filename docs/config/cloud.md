@@ -51,20 +51,9 @@ exports.config = {
 If you want to set a name, tags or CI build number for your test, you can do so in the browser capabilities:
 ```js
 exports.config = {
-  profile: 'integration',
-  baseUrl: '<App URL>',
-  // open the browser on SauceLabs cloud
-  seleniumAddress: "https://<user>:<key>@ondemand.eu-central-1.saucelabs.com:443/wd/hub",
-
   browsers: [{
-    // here you define the runtime according UIVeri5 naming scheme
-    browserName: "edge",
-    platformName: "windows",
     capabilities: {
-      // and here you can override with SauceLabs specific names
-      platform: "Windows 10",
-      browserName: "MicrosoftEdge",
-      // you can add details for your saucelabs test execution
+      // here you can add details for your saucelabs test execution
       name: "my-test",
       tags: ["UIVeri5"],
       build: process.env.BUILD_NUMBER

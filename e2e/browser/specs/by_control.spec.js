@@ -137,6 +137,26 @@ describe("by_control", function () {
 		});
 	});
 
+	it("should find control by binding path regex", function () {
+		var input = element(by.control({
+			controlType: "sap.m.Input",
+			bindingPath: {
+				path: "/compositeProperty"
+			}
+		}));
+		expect(input.getAttribute("value")).toEqual("some");
+
+		[/comp.*site/, /COMP.*SITE/gi, new RegExp("^\/COMP.*SITE", "gi")].forEach(function (oRegExp) {
+			var input = element(by.control({
+				controlType: "sap.m.Input",
+				bindingPath: {
+					path: oRegExp
+				}
+			}));
+			expect(input.getAttribute("value")).toEqual("some");
+		});
+	});
+
 	it("should use ancestor and descendant as selector keys", function () {
 		element(by.id("show-nav-btn")).click();
 

@@ -208,16 +208,17 @@ var mFunctions = {
       mMatchers.ancestor = control && [[control.getId()]];
     }
 
-    if (mMatchers.id && mMatchers.id.regex) {
-      mMatchers.id = new RegExp(mMatchers.id.regex.source, mMatchers.id.regex.flags);
-    }
-    if (mMatchers.properties) {
-      Object.keys(mMatchers.properties).forEach(function (sProperty) {
-        var mRegexp = mMatchers.properties[sProperty].regex;
-        if (mRegexp) {
-          mMatchers.properties[sProperty] = new RegExp(mRegexp.source, mRegexp.flags);
+    for (var name in mMatchers) {
+      if (mMatchers[name].regex) {
+        mMatchers[name] = new RegExp(mMatchers[name].regex.source, mMatchers[name].regex.flags);
+      } else if (typeof mMatchers[name] === 'object') {
+        for (var key in mMatchers[name]) {
+          var mRegexp = mMatchers[name][key].regex;
+          if (mRegexp) {
+            mMatchers[name][key] = new RegExp(mRegexp.source, mRegexp.flags);
+          }
         }
-      });
+      }
     }
 
     return window.uiveri5._ControlFinder._findElements(mMatchers);

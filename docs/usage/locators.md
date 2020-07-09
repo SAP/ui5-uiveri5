@@ -166,6 +166,28 @@ element(by.control({
   }
 }));
 ```
+### Common usecases
+
+#### Working with responsive toolbars
+A responsive toolbar may have overflowing content, depending on the screen size.
+This content will be moved to a popover which is open by pressing a toggle button in the toolbar.
+A toggle button will be shown only when there is overflowing content. This is a problem for tests because they should only try to press the button when it's visible and interactable. One way to solve this is to always start the application under test with with a fixed screen size. Another way is to first look for any toggle button - with no restriction on visibility, and then press on it only if it exists:
+```javascript
+var button = element(by.control({
+  controlType: "sap.m.ToggleButton",
+  ancestor: {
+    viewNamespace: "appUnderTest.view.",
+    viewName : "Main",
+    id: "toolbar-overflow"
+  }
+}));
+
+button.isPresent().then(function (isPresent) {
+  if (isPresent) {
+    button.click();
+  }
+});
+```
 
 ### Interactable, Visible, Enabled
 In contrast to OPA5 (with enabled autoWaiter), the control locator in UIVeri5 will find controls even if they are not visible, not enabled or not interactable. This is a basic limitation, comming from the fact that "auto waiting" in UIVeri5 is global and happens before the element location. To limit the search to visible controls, add `visible: true', to limit to enabled controls add 'enabled: true' and to limit to interactable controls add 'interactable: true'. The interactable check is the most extensive, it makes sure that the control is visible on the screen, there is no busy indicator on this control or any of its parents, the control is not scheduled for rerendering and

@@ -8,7 +8,7 @@ var storageMock = require('./remoteStorageProvider/remoteStorageMock')();
 describe("RemoteStorageProvider", function () {
   var RemoteStorageProvider = require('../src/image/remoteStorageProvider');
 
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
   var runtime = {
     platformName: 'platform',
     platformResolution: 'resolution',

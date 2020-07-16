@@ -1,10 +1,9 @@
 /**
  * ==========================================================
- * Copied from protractor, with excluded angular-only methods
+ * Copied from protractor, with excluded angular-only locators
  * ==========================================================
  */
 var selenium_webdriver = require('selenium-webdriver');
-var clientSideScripts = require('../scripts/clientsidescripts');
 
 // Explicitly define webdriver.By.
 // We do this because we want to inherit the static methods of webdriver.By, as opposed to
@@ -87,80 +86,6 @@ ProtractorBy.prototype.addLocator = function (name, script) {
         return 'by.' + name + '("' + Array.prototype.join.call(locatorArguments, '", "') + '")';
       }
     };
-  };
-};
-
-/**
- * Find a button by text.
- *
- * @view
- * <button>Save</button>
- *
- * @example
- * element(by.buttonText('Save'));
- *
- * @param {string} searchText
- * @returns {ProtractorLocator} location strategy
- */
-ProtractorBy.prototype.buttonText = function (searchText) {
-  return {
-    findElementsOverride: function (driver, using, rootSelector) {
-      return driver.findElements(selenium_webdriver.By.js(clientSideScripts.findByButtonText, searchText, using, rootSelector));
-    },
-    toString: function () {
-      return 'by.buttonText("' + searchText + '")';
-    }
-  };
-};
-/**
- * Find a button by partial text.
- *
- * @view
- * <button>Save my file</button>
- *
- * @example
- * element(by.partialButtonText('Save'));
- *
- * @param {string} searchText
- * @returns {ProtractorLocator} location strategy
- */
-ProtractorBy.prototype.partialButtonText = function (searchText) {
-  return {
-    findElementsOverride: function (driver, using, rootSelector) {
-      return driver.findElements(selenium_webdriver.By.js(clientSideScripts.findByPartialButtonText, searchText, using, rootSelector));
-    },
-    toString: function () {
-      return 'by.partialButtonText("' + searchText + '")';
-    }
-  };
-};
-
-/**
- * Find elements by CSS which contain a certain string.
- *
- * @view
- * <ul>
- *   <li class='pet'>Dog</li>
- *   <li class='pet'>Cat</li>
- * </ul>
- *
- * @example
- * // Returns the li for the dog, but not cat.
- * var dog = element(by.cssContainingText('.pet', 'Dog'));
- *
- * @param {string} cssSelector css selector
- * @param {string|RegExp} searchString text search
- * @returns {ProtractorLocator} location strategy
- */
-ProtractorBy.prototype.cssContainingText = function (cssSelector, searchText) {
-  searchText = (searchText instanceof RegExp) ? '__REGEXP__' + searchText.toString() : searchText;
-  return {
-    findElementsOverride: function (driver, using, rootSelector) {
-      return driver.findElements(selenium_webdriver.By.js(clientSideScripts.findByCssContainingText, cssSelector, searchText, using, rootSelector));
-    },
-    toString: function () {
-      return 'by.cssContainingText("' + cssSelector + '", "' + searchText + '")';
-    }
   };
 };
 

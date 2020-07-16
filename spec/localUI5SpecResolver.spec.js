@@ -1,7 +1,7 @@
 
 describe("LocalUI5SpecResolver", function () {
   var LocalUI5SpecResolver = require('../src/resolver/localUI5SpecResolver');
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
 
   it("Should resolve specs in openui5 project", function(done) {
     var specResolver = new LocalUI5SpecResolver(

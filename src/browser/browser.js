@@ -7,13 +7,10 @@ var CommandName = require('selenium-webdriver/lib/command').Name;
 var element = require('../element/element');
 var locators = require('../element/locators');
 
-// TODO module to copy from Protractor
-var protrDebugger = require('protractor/built/debugger');
-
 // helper modules
 var logger = require('../logger');
 var elementUtil = require('./elementUtil');
-var clientSideScripts = require('../scripts/clientsidescripts');
+var clientsideScripts = require('../scripts/clientsidescripts');
 
 // consts
 var DEFAULT_RESET_URL = 'data:text/html,<html></html>';
@@ -60,7 +57,6 @@ var ProtractorBrowser = function (webdriverInstance, opt_baseUrl) {
   this.getPageTimeout = DEFAULT_GET_PAGE_TIMEOUT;
   this.params = {};
   this.resetUrl = DEFAULT_RESET_URL;
-  this.debugHelper = new protrDebugger.DebugHelper(this);
   this.ready = this.driver.getSession()
     .then(function (session) {
       // Internet Explorer does not accept data URLs, which are the default reset URL for Protractor.
@@ -74,27 +70,6 @@ var ProtractorBrowser = function (webdriverInstance, opt_baseUrl) {
     }.bind(this));
 };
 
-/**
- * The same as {@code webdriver.WebDriver.prototype.executeScript},
- * but with a customized description for debugging.
- *
- * @private
- * @param {!(string|Function)} script The script to execute.
- * @param {string} description A description of the command for debugging.
- * @param {...*} var_args The arguments to pass to the script.
- * @returns {!webdriver.promise.Promise.<T>} A promise that will resolve to
- * the scripts return value.
- * @template T
- */
-ProtractorBrowser.prototype.executeScriptWithDescription = function (script, description, ...scriptArgs) {
-  if (typeof script === 'function') {
-    script = 'return (' + script + ').apply(null, arguments);';
-  }
-  return this.driver.schedule(new Command(CommandName.EXECUTE_SCRIPT)
-    .setParameter('script', script)
-    .setParameter('args', scriptArgs), description);
-};
-
 
 /**
  * The same as {@code webdriver.WebDriver.prototype.executeAsyncScript} but with extra logging
@@ -106,7 +81,7 @@ ProtractorBrowser.prototype.executeScriptWithDescription = function (script, des
  * @template T
  */
 ProtractorBrowser.prototype._executeAsyncScript = function (scriptName, ...scriptArgs) {
-  var scriptCode = clientSideScripts[scriptName];
+  var scriptCode = clientsideScripts[scriptName];
   var logLevel = scriptName === 'waitForUI5' ? 'trace' : 'debug';
   logger[logLevel]('Execute async script: ' + scriptName + ' with args: ' + JSON.stringify(scriptArgs));
   logger.trace('Execute async script code: \n' + JSON.stringify(scriptCode));
@@ -136,7 +111,7 @@ ProtractorBrowser.prototype._executeAsyncScript = function (scriptName, ...scrip
 };
 
 ProtractorBrowser.prototype.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName, params) {
-  var code = clientsidescripts[scriptName];
+  var code = clientsideScripts[scriptName];
   params = params || {};
   browser.controlFlow().execute(function () {
     logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
@@ -157,7 +132,7 @@ ProtractorBrowser.prototype.executeAsyncScriptHandleErrors = function executeAsy
 };
 
 ProtractorBrowser.prototype.executeScriptHandleErrors = function executeScriptHandleErrors(scriptName, params) {
-  var code = clientsidescripts[scriptName];
+  var code = clientsideScripts[scriptName];
   params = params || {};
   browser.controlFlow().execute(function () {
     logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
@@ -178,22 +153,6 @@ ProtractorBrowser.prototype.executeScriptHandleErrors = function executeScriptHa
 };
 
 /**
- * If set to false, Protractor will not wait for UI5
- * tasks to complete before interacting with the browser. This can cause
- * flaky tests, but should be used if, for instance, your app continuously
- * polls an API with $timeout.
- *
- * Call waitForAngularEnabled() without passing a value to read the current
- * state without changing it.
- */
-ProtractorBrowser.prototype.waitForAngularEnabled = function (enabled) {
-  if (typeof enabled !== 'undefined') {
-    this.ignoreSynchronization = !enabled;
-  }
-  return selenium_webdriver.promise.when(!this.ignoreSynchronization);
-};
-
-/**
  * Instruct webdriver to wait until UI5 is interactive.
  * Note that UIVeri5 automatically applies this command before every WebDriver action.
  * @param {string=} opt_description An optional description to be added to webdriver logs.
@@ -201,12 +160,6 @@ ProtractorBrowser.prototype.waitForAngularEnabled = function (enabled) {
  */
 ProtractorBrowser.prototype.waitForUI5 = function (description) {
   description = description ? ' - ' + description : '';
-  if (this.ignoreSynchronization) {
-    return this.driver.controlFlow().execute(function () {
-      return true;
-    }, 'Ignore Synchronization UIVeri5.waitForUI5()');
-  }
-
   return this.driver.controlFlow().execute(function () {
     return this._executeAsyncScript('waitForUI5');
   }.bind(this)).then(function () {
@@ -234,6 +187,12 @@ ProtractorBrowser.prototype.waitForUI5 = function (description) {
     }
     throw error;
   });
+};
+
+// remove when protr runner is moved!
+ProtractorBrowser.prototype.waitForAngularEnabled = function (enabled) {
+  // change nothing
+  return selenium_webdriver.promise.when(this.ignoreSynchronization);
 };
 
 /**
@@ -280,14 +239,10 @@ ProtractorBrowser.prototype.isElementPresent = function (locatorOrElement) {
  * @param {number=} opt_timeout Number of milliseconds to wait for UI5 to start.
  */
 ProtractorBrowser.prototype.refresh = function (opt_timeout) {
-  if (this.ignoreSynchronization) {
-    return this.driver.navigate().refresh();
-  } else {
-    return this.executeScriptWithDescription('return window.location.href', 'Protractor.refresh() - getUrl')
-      .then(function (href) {
-        return this.get(href, opt_timeout);
-      }.bind(this));
-  }
+  return this.executeScriptWithDescription('return window.location.href', 'Protractor.refresh() - getUrl')
+    .then(function (href) {
+      return this.get(href, opt_timeout);
+    }.bind(this));
 };
 
 /**
@@ -321,116 +276,6 @@ ProtractorBrowser.prototype.navigate = function () {
  */
 ProtractorBrowser.prototype.forkNewDriverInstance = function (/*useSameUrl, copyMockModules, copyConfigUpdates = true*/) {
   return null;
-};
-
-/**
- * Adds a task to the control flow to pause the test and inject helper
- * functions
- * into the browser, so that debugging may be done in the browser console.
- *
- * This should be used under node in debug mode, i.e. with
- * protractor debug <configuration.js>
- *
- * @example
- * While in the debugger, commands can be scheduled through webdriver by
- * entering the repl:
- *   debug> repl
- *   > element(by.input('user')).sendKeys('Laura');
- *   > browser.debugger();
- *   Press Ctrl + c to leave debug repl
- *   debug> c
- *
- * This will run the sendKeys command as the next task, then re-enter the debugger.
- */
-ProtractorBrowser.prototype.debugger = function () {
-  return this.driver.executeScript(clientSideScripts.installInBrowser)
-    .then(function () {
-      return selenium_webdriver.promise.controlFlow().execute(function () {
-        return protrDebugger;
-      }, 'add breakpoint to control flow');
-    });
-};
-
-/**
- * See browser.explore().
- */
-ProtractorBrowser.prototype.enterRepl = function (opt_debugPort) {
-  return this.explore(opt_debugPort);
-};
-
-/**
- * Beta (unstable) explore function for entering the repl loop from
- * any point in the control flow. Use browser.explore() in your test.
- * Does not require changes to the command line (no need to add 'debug').
- * Note, if you are wrapping your own instance of Protractor, you must
- * expose globals 'browser' and 'protractor' for pause to work.
- *
- * @example
- * element(by.id('foo')).click();
- * browser.explore();
- * // Execution will stop before the next click action.
- * element(by.id('bar')).click();
- *
- * @param {number=} opt_debugPort Optional port to use for the debugging
- * process
- */
-ProtractorBrowser.prototype.explore = function (opt_debugPort) {
-  var protrDebuggerClientPath = __dirname + '/protrDebugger/clients/explorer.js';
-  var onStartFn = function (firstTime) {
-    logger.info();
-    if (firstTime) {
-      logger.info('------- Element Explorer -------');
-      logger.info('Starting WebDriver protrDebugger in a child process. Element ' +
-        'Explorer is still beta, please report issues at ' +
-        'github.com/angular/protractor');
-      logger.info();
-      logger.info('Type <tab> to see a list of locator strategies.');
-      logger.info('Use the `list` helper function to find elements by strategy:');
-      logger.info('  e.g., list(by.binding(\'\')) gets all bindings.');
-      logger.info();
-    }
-  };
-  this.debugHelper.initBlocking(protrDebuggerClientPath, onStartFn, opt_debugPort);
-};
-
-/**
- * Beta (unstable) pause function for debugging webdriver tests. Use
- * browser.pause() in your test to enter the protractor protrDebugger from that
- * point in the control flow.
- * Does not require changes to the command line (no need to add 'debug').
- * Note, if you are wrapping your own instance of Protractor, you must
- * expose globals 'browser' and 'protractor' for pause to work.
- *
- * @example
- * element(by.id('foo')).click();
- * browser.pause();
- * // Execution will stop before the next click action.
- * element(by.id('bar')).click();
- *
- * @param {number=} opt_debugPort Optional port to use for the debugging
- * process
- */
-ProtractorBrowser.prototype.pause = function (opt_debugPort) {
-  if (this.debugHelper.isAttached()) {
-    logger.info('Encountered browser.pause(), but protrDebugger already attached.');
-    return selenium_webdriver.promise.when(true);
-  }
-  var protrDebuggerClientPath = __dirname + '/protrDebugger/clients/wdprotrDebugger.js';
-  var onStartFn = function (firstTime) {
-    logger.info();
-    logger.info('Encountered browser.pause(). Attaching protrDebugger...');
-    if (firstTime) {
-      logger.info();
-      logger.info('------- WebDriver protrDebugger -------');
-      logger.info('Starting WebDriver protrDebugger in a child process. Pause is ' +
-        'still beta, please report issues at github.com/angular/protractor');
-      logger.info();
-      logger.info('press c to continue to the next webdriver command');
-      logger.info('press ^D to detach protrDebugger and resume code execution');
-      logger.info();
-    }
-  };
-  this.debugHelper.init(protrDebuggerClientPath, onStartFn, opt_debugPort);
 };
 
 /**

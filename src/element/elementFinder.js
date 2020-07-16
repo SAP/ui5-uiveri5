@@ -86,11 +86,10 @@ var ElementFinder = function (browser_, elementArrayFinder) {
       if (webElements.length === 0) {
         throw new selenium_webdriver.error.NoSuchElementError('No element found using locator: ' + elementArrayFinder.locator().toString());
       } else if (webElements.length > 1) {
-        logger.warn('more than one element found for locator ' +
+        logger.info('more than one element found for locator ' +
           elementArrayFinder.locator().toString() + ' - the first result will be used');
-      } else {
-        return [webElements[0]];
       }
+      return [webElements[0]];
     }.bind(this));
   };
 

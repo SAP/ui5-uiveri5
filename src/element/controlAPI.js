@@ -1,8 +1,8 @@
-function Control(elementArrayFinder) {
+function ControlAPI(elementArrayFinder) {
   this.getWebElements = elementArrayFinder.getWebElements.bind(elementArrayFinder);
 }
 
-Control.prototype.getProperty = function (property) {
+ControlAPI.prototype.getProperty = function (property) {
   return this.getWebElements()
     .then(function (webElements) {
       // at least one element is found, elsewise webdriver.error.ErrorCode.NO_SUCH_ELEMENT is thrown

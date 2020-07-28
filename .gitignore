@@ -3,7 +3,6 @@
 /.idea
 /selenium
 /e2e/**/target
-e2e/scenario/fixture/export_params.json
 /.vscode
 
 /**/*debug.log

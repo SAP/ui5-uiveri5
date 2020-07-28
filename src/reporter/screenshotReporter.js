@@ -42,7 +42,7 @@ JasmineScreenshotReporter.prototype.jasmineDone = function () {
   utils.saveReport(this.reportName, htmlReport);
 };
 
-var mLocators = {};
+var sLatestLocator;
 
 JasmineScreenshotReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
@@ -60,12 +60,10 @@ JasmineScreenshotReporter.prototype._registerOnAction = function (options) {
 
   var applyAction_ = protractorModule.parent.exports.ElementArrayFinder.prototype.applyAction_;
   protractorModule.parent.exports.ElementArrayFinder.prototype.applyAction_ = function (cb) {
-    var sLocator = this.locator().toString();
+    var sCbLocator = this.locator().toString();
     var newCb = function (webElem) {
-      return webElem.getAttribute('id').then(function (elementId) {
-        mLocators[elementId] = sLocator;
-        return cb.call(this, webElem);
-      });
+      sLatestLocator = sCbLocator;
+      return cb.call(this, webElem);
     };
     return applyAction_.call(this, newCb);
   };
@@ -79,7 +77,7 @@ JasmineScreenshotReporter.prototype._registerOnAction = function (options) {
       return element.getAttribute('id').then(function (elementId) {
         var onAction = that._onAction({
           element: element,
-          locator: mLocators[elementId],
+          locator: sLatestLocator,
           elementId: elementId,
           name: action,
           value: actionValue

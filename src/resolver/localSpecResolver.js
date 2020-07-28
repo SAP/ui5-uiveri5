@@ -6,7 +6,7 @@ var Q = require('q');
 var _ = require('lodash');
 
 var DEFAULT_SPECS_GLOB = './*.spec.js';
-var DEFAULT_SPEC_REGEX = '(?:\\w\\:)?\\/(?:[\\w\\-\\.]+\\/)*([\\w\\-]+)\\.(?:[\\w\\.]+)';
+var DEFAULT_SPEC_REGEX = '([\\w\\-]+)\\.(?:[\\w\\.]+)';
 var FILTER_ALL = '*';
 var EXCLUDE_NONE = '';
 var LIST_SEPARATOR = ',';
@@ -106,7 +106,7 @@ LocalSpecResolver.prototype._resolveGlob = function (specGlob) {
 
         specPaths.forEach(function (specPath) {
           // extract spec file name - no extension, no path
-          var specMatches = specPath.match(that.specRegex);
+          var specMatches = path.basename(specPath).match(that.specRegex);
           if (specMatches === null) {
             throw new Error('Could not parse spec path: ' + specPath);
           }

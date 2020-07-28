@@ -1,5 +1,6 @@
 var Runner = require('../Runner');
 var path = require('path');
+var fs = require('fs');
 
 describe('import and export of params - scenario test', function() {
   var app;
@@ -27,10 +28,12 @@ describe('import and export of params - scenario test', function() {
 
   it('should see exported params', () => {
     return new Promise((resolve) => {
-      _pollForFile(path.resolve(__dirname, './fixture/export_params.json'), function (exportedParams) {
+      var file = path.resolve(__dirname, './fixture/export_params.json');
+      _pollForFile(file, function (exportedParams) {
         expect(Object.keys(exportedParams).length).toBe(2);
         expect(exportedParams.new_param).toBe('exported param');
         expect(exportedParams.param_1).toBe('param from file - changed');
+        fs.unlinkSync(file);
         resolve();
       })();
     });

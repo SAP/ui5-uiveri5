@@ -192,7 +192,7 @@
           <div>Expectation <%- _.upperCase(step.status) %>: <%- step.message %></div>
           <% } %>
           <% if (stepType === "actions") { %>
-          <div>Execute '<%- step.name %>' on element with ID '<%- step.elementId %>'
+          <div>Execute '<%- step.name %>' on element with locator '<%- step.locator %>' and ID '<%- step.elementId %>'
             <% if (step.value) { %> with value '<%- step.value %>' <% } %>
           </div>
           <% } %>

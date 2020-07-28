@@ -42,6 +42,8 @@ JasmineScreenshotReporter.prototype.jasmineDone = function () {
   utils.saveReport(this.reportName, htmlReport);
 };
 
+var mLocators = {};
+
 JasmineScreenshotReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
 
@@ -56,17 +58,28 @@ JasmineScreenshotReporter.prototype._registerOnAction = function (options) {
   // screenshot is taken between sync and interaction
   this._registerOnSync();
 
+  var applyAction_ = protractorModule.parent.exports.ElementArrayFinder.prototype.applyAction_;
+  protractorModule.parent.exports.ElementArrayFinder.prototype.applyAction_ = function (cb) {
+    var sLocator = this.locator().toString();
+    var newCb = function (webElem) {
+      return webElem.getAttribute('id').then(function (elementId) {
+        mLocators[elementId] = sLocator;
+        return cb.call(this, webElem);
+      });
+    };
+    return applyAction_.call(this, newCb);
+  };
+
   options.actions.forEach(function (action) {
     var originalAction = protractorModule.parent.parent.exports.WebElement.prototype[action];
-
     protractorModule.parent.parent.exports.WebElement.prototype[action] = function () {
       var element = this;
       var actionValue = arguments[0];
 
-      // TODO: save the locator which was used to find the element
       return element.getAttribute('id').then(function (elementId) {
         var onAction = that._onAction({
           element: element,
+          locator: mLocators[elementId],
           elementId: elementId,
           name: action,
           value: actionValue
@@ -103,7 +116,7 @@ JasmineScreenshotReporter.prototype._onAction = function (options) {
       delete that.lastSyncScreenshot;
     }
 
-    var action = _.extend(_.pick(options, ['name', 'elementId', 'value']), {
+    var action = _.extend(_.pick(options, ['name', 'locator', 'elementId', 'value']), {
       stepIndex: that.stepIndex,
       screenshot: screenshotName
     });

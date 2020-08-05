@@ -2,6 +2,8 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var utils = require('./reporterUtils');
+var ExpectationPlugin = require('./expectationPlugin');
+var ActionPlugin = require('./actionPlugin');
 
 var DEFAULT_SCREENSHOTS_ROOT = 'target/report/screenshots/';
 var DEFAULT_TEMPLATE_NAME = __dirname + '/report.screenshots.tpl.html';
@@ -16,6 +18,8 @@ function JasmineScreenshotReporter(config, instanceConfig, logger, collector) {
   this.templateName = instanceConfig.templateName || DEFAULT_TEMPLATE_NAME;
   this.reportName = path.join(this.screenshotsRoot, instanceConfig.reportName || DEFAULT_REPORT_NAME);
   this.stepIndex = 0;
+  this.expectationPlugin = new ExpectationPlugin();
+  this.actionPlugin = new ActionPlugin();
 }
 
 JasmineScreenshotReporter.prototype.jasmineStarted = function () {
@@ -42,124 +46,48 @@ JasmineScreenshotReporter.prototype.jasmineDone = function () {
   utils.saveReport(this.reportName, htmlReport);
 };
 
-var sLatestLocator;
-
 JasmineScreenshotReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
-
-  // always save text info, but take screenshots only if option is set
-  this._registerOnAction({actions: ['click', 'sendKeys']});
-  this._registerOnExpectation();
-};
-
-JasmineScreenshotReporter.prototype._registerOnAction = function (options) {
   var that = this;
 
-  // screenshot is taken between sync and interaction
-  this._registerOnSync();
-
-  var applyAction_ = protractorModule.parent.exports.ElementArrayFinder.prototype.applyAction_;
-  protractorModule.parent.exports.ElementArrayFinder.prototype.applyAction_ = function (cb) {
-    var sCbLocator = this.locator().toString();
-    var newCb = function (webElem) {
-      sLatestLocator = sCbLocator;
-      return cb.call(this, webElem);
-    };
-    return applyAction_.call(this, newCb);
-  };
-
-  options.actions.forEach(function (action) {
-    var originalAction = protractorModule.parent.parent.exports.WebElement.prototype[action];
-    protractorModule.parent.parent.exports.WebElement.prototype[action] = function () {
-      var element = this;
-      var actionValue = arguments[0];
-
-      return element.getAttribute('id').then(function (elementId) {
-        var onAction = that._onAction({
-          element: element,
-          locator: sLatestLocator,
-          elementId: elementId,
-          name: action,
-          value: actionValue
-        });
-        return originalAction.call(element, actionValue).then(onAction, onAction);
-      });
-    };
-  });
-};
-
-JasmineScreenshotReporter.prototype._registerOnSync = function () {
-  if (this._isEnabled('onAction')) {
-    var that = this;
-    var onSync = function () {
-      return that._takeScreenshot(function (png) {
-        that.lastSyncScreenshot = png;
-      });
-    };
-
-    var originalWaitForAngular = browser.waitForAngular;
-    browser.waitForAngular = function () {
-      return originalWaitForAngular.apply(this, arguments).then(onSync, onSync);
-    };
-  }
-};
-
-JasmineScreenshotReporter.prototype._onAction = function (options) {
-  var that = this;
-
-  return function () {
-    if (that._isEnabled('onAction') && that.lastSyncScreenshot) {
-      var screenshotName = that._generateActionScreenshotName(options.name, options.elementId);
-      that._saveScreenshot(screenshotName, that.lastSyncScreenshot);
-      delete that.lastSyncScreenshot;
-    }
-
-    var action = _.extend(_.pick(options, ['name', 'locator', 'elementId', 'value']), {
-      stepIndex: that.stepIndex,
-      screenshot: screenshotName
+  this.expectationPlugin.onExpectation(this._onExpectation.bind(this));
+  this.actionPlugin.onSync(function () {
+    // screenshot is taken between sync and interaction
+    return that._takeScreenshot(function (png) {
+      that.lastSyncScreenshot = png;
     });
-
-    that.collector.collectAction(action);
-    that.stepIndex += 1;
-  };
+  });
+  this.actionPlugin.onAction(that._onAction.bind(this));
 };
 
-// should be called after browser.getProcessedConfig()
-JasmineScreenshotReporter.prototype._registerOnExpectation = function () {
+JasmineScreenshotReporter.prototype._onExpectation = function (expectation, specResult, category) {
   var that = this;
-  var originalAddExpectationResult = jasmine.Spec.prototype.addExpectationResult;
 
-  jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
-    var specResult = this.result;
-    var expectationCategory = passed ? 'passedExpectations' : 'failedExpectations';
-    var expectationResult = originalAddExpectationResult.apply(this, arguments);
+  if ((that._isEnabled('onExpectSuccess') && expectation.passed) ||
+      (that._isEnabled('onExpectFailure') && !expectation.passed)) {
+    var screenshotName = that._generateExpectationScreenshotName(specResult.fullName, expectation.passed);
+    _.last(specResult[category]).screenshot = screenshotName;
+    that._takeScreenshot(function (png) {
+      that._saveScreenshot(screenshotName, png);
+    });
+  }
 
-    function takeScreenshot () {
-      var screenshotName = that._generateExpectationScreenshotName(specResult.fullName, passed);
-      _.last(specResult[expectationCategory]).screenshot = screenshotName;
-      that._takeScreenshot(function (png) {
-        that._saveScreenshot(screenshotName, png);
-      });
-    }
+  _.last(specResult[category]).stepIndex = that.stepIndex;
+  that.stepIndex += 1;
+};
 
-    if (passed) {
-      _.last(specResult[expectationCategory]).message = that._createExpectationMessage(expectation);
+JasmineScreenshotReporter.prototype._onAction = function (action) {
+  if (this._isEnabled('onAction') && this.lastSyncScreenshot) {
+    var screenshotName = this._generateActionScreenshotName(action.name, action.elementId);
+    this._saveScreenshot(screenshotName, this.lastSyncScreenshot);
+    delete this.lastSyncScreenshot;
+  }
 
-      if (that._isEnabled('onExpectSuccess')) {
-        takeScreenshot();
-      }
-    } else {
-      if (that._isEnabled('onExpectFailure') && (!passed || expectation.error)) {
-        takeScreenshot();
-      }
-    }
-
-    _.last(specResult[expectationCategory]).stepIndex = that.stepIndex;
-
-    that.stepIndex += 1;
-
-    return expectationResult;
-  };
+  this.collector.collectAction(_.extend(_.pick(action, ['name', 'elementLocator', 'elementId', 'value']), {
+    stepIndex: this.stepIndex,
+    screenshot: screenshotName
+  }));
+  this.stepIndex += 1;
 };
 
 JasmineScreenshotReporter.prototype._takeScreenshot = function (successCallback) {
@@ -202,10 +130,6 @@ JasmineScreenshotReporter.prototype._generateActionScreenshotName = function (ac
 
 JasmineScreenshotReporter.prototype._isEnabled = function (option) {
   return _.get(this.config, 'takeScreenshot.' + option);
-};
-
-JasmineScreenshotReporter.prototype._createExpectationMessage = function (expectation) {
-  return ['Expected', '\'' + expectation.actual + '\'', expectation.matcherName, '\'' + expectation.expected + '\''].join(' ');
 };
 
 module.exports = function (config, instanceConfig, logger, collector) {

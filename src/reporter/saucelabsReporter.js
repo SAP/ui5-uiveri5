@@ -1,8 +1,14 @@
+var _ = require('lodash');
+var ExpectationPlugin = require('./expectationPlugin');
+var ActionPlugin = require('./actionPlugin');
+
 function JasmineSaucelabsReporter(config, instanceConfig, logger, collector) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
   this.collector = collector;
+  this.expectationPlugin = new ExpectationPlugin();
+  this.actionPlugin = new ActionPlugin();
 }
 
 JasmineSaucelabsReporter.prototype.suiteStarted = function () {
@@ -29,48 +35,13 @@ JasmineSaucelabsReporter.prototype.jasmineDone = function () {
 JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
 
-  ['click', 'sendKeys'].forEach(this._registerOnAction.bind(this));
-  this._registerOnExpectation();
-};
-
-JasmineSaucelabsReporter.prototype._registerOnAction = function (action) {
-  var originalAction = protractorModule.parent.parent.exports.WebElement.prototype[action];
-
-  protractorModule.parent.parent.exports.WebElement.prototype[action] = function () {
-    var element = this;
-    var actionValue = arguments[0];
-
-    // TODO: save the locator which was used to find the element
-    return element.getAttribute('id').then(function (elementId) {
-      var onAction = function () {
-        browser.executeScript('sauce:context=Perform action: ' + action + ' with value "' + actionValue + '" on "' + elementId + '"');
-      };
-      return originalAction.call(element, actionValue).then(onAction, onAction);
-    });
-  };
-};
-
-// should be called after browser.getProcessedConfig()
-JasmineSaucelabsReporter.prototype._registerOnExpectation = function () {
-  var originalAddExpectationResult = jasmine.Spec.prototype.addExpectationResult;
-
-  jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
-    var sExpectation = 'Expectation ' + (passed ? 'passed' : 'failed') + '.';
-
-    if (expectation.matcherName) {
-      sExpectation += ' Expected "' + expectation.actual + '" ' + expectation.matcherName + ' "' + expectation.expected + '".';
-    }
-    if (expectation.message) {
-      sExpectation += ' Message: "' + expectation.message + '". ';
-    }
-    if (expectation.error) {
-      sExpectation += ' Error: "' + expectation.error + '". ';
-    }
-
-    browser.executeScript('sauce:context=' + sExpectation);
-
-    return originalAddExpectationResult.apply(this, arguments);
-  };
+  this.expectationPlugin.onExpectation(function (expectation, specResult, category) {
+    browser.executeScript('sauce:context=' + _.last(specResult[category]).fullMessage);
+  });
+  this.actionPlugin.onAction(function (action) {
+    browser.executeScript('sauce:context=Perform action: ' + action.name + ' with value "' + action.value +
+      '" on element with ' + (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"');
+  });
 };
 
 module.exports = function (config, instanceConfig, logger, collector) {

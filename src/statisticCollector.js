@@ -147,7 +147,9 @@ StatisticCollector.prototype.specDone = function(jasmineSpec, specMeta) {
       matcher: jasmineExpectation.matcherName,
       stack: jasmineExpectation.stack,
       stepIndex: jasmineExpectation.stepIndex,
-      screenshot: jasmineExpectation.screenshot
+      screenshot: jasmineExpectation.screenshot,
+      shortMessage: jasmineExpectation.shortMessage,
+      fullMessage: jasmineExpectation.fullMessage
     };
 
     // unpack details if any
@@ -186,7 +188,9 @@ StatisticCollector.prototype.specDone = function(jasmineSpec, specMeta) {
       matcher: jasmineExpectation.matcherName,
       stepIndex: jasmineExpectation.stepIndex,
       screenshot: jasmineExpectation.screenshot,
-      message: jasmineExpectation.message
+      message: jasmineExpectation.message,
+      shortMessage: jasmineExpectation.shortMessage,
+      fullMessage: jasmineExpectation.fullMessage
     };
 
     // unpack details if any

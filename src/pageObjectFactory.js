@@ -24,6 +24,12 @@ PageObjectFactory.prototype.createPageObjects = function (pageObjects) {
     }
 
     var name = 'onThe' + page + 'Page';
+    
+    if (that.When[name] || that.Then[name] || that.Given[name]) {
+      var config = browser.testrunner.config; // this is already available here
+      var logger = require('./logger')(config.verbose);
+      logger.warn('Merging page objects with the same name: ' + page);
+    }
 
     that.When[name] = _.extend(that.When[name], definition.actions);
     that.Then[name] = _.extend(that.Then[name], definition.assertions);

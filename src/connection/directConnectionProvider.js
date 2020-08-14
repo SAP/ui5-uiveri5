@@ -18,7 +18,8 @@ var BINARIES = {
   SELENIUM: 'selenium',
   CHROMEDRIVER: 'chromedriver',
   IEDRIVER: 'iedriver',
-  GECKODRIVER: 'geckodriver'
+  GECKODRIVER: 'geckodriver',
+  EDGEDRIVER: 'edgedriver'
 };
 
 /**
@@ -85,6 +86,8 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
       capabilities.browserName = 'internet explorer';
     } else if (runtime.browserName === 'edge') {
       capabilities.browserName = 'MicrosoftEdge';
+    } else if (runtime.browserName === 'edgelegacy') {
+      capabilities.browserName = 'MicrosoftEdgeLegacy';
     } else {
       capabilities.browserName = runtime.browserName;
     }
@@ -190,10 +193,16 @@ DirectConnectionProvider.prototype.setupEnv = function() {
           })
         );
       } else if (browserName == 'edge') {
+        promises.push(that._getBinaryFileName(BINARIES.EDGEDRIVER).then(
+          function(filename){
+            that.seleniumConfig.executables.edgedriver = filename;
+          })
+        );
+      } else if (browserName == 'edgelegacy') {
         promises.push((function() {
           var deferred = q.defer();
           var filename = path.join(that._getSeleniumRoot(), 'MicrosoftWebDriver.exe');
-          that.seleniumConfig.executables.edgedriver = filename;
+          that.seleniumConfig.executables.edgelegacydriver = filename;
           deferred.resolve(filename);
           return deferred.promise;
         })());
@@ -471,6 +480,8 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         opts.jvmArgs.push('-Dwebdriver.ie.driver=' + that.seleniumConfig.executables.iedriver);
       } else if (browserName == 'MicrosoftEdge') {
         opts.jvmArgs.push('-Dwebdriver.edge.driver=' + that.seleniumConfig.executables.edgedriver);
+      } else if (browserName == 'MicrosoftEdgeLegacy') {
+        opts.jvmArgs.push('-Dwebdriver.edgelegacy.driver=' + that.seleniumConfig.executables.edgelegacydriver);
       }
 
       var seleniumServer = new that.deps.remote.SeleniumServer(that.seleniumConfig.executables.selenium,opts);
@@ -568,6 +579,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var allIECapabilities = driverOptions.toCapabilities(browserOptions.toCapabilities());
         // start the local iedriver and connect to it
         driver = that.deps.ie.Driver.createSession(that.deps.ie.Options.fromCapabilities(allIECapabilities));
+      
       } else if (browserName == 'MicrosoftEdge') {
         that.deps.edge = protractorModule.require('selenium-webdriver/edge');
 
@@ -586,6 +598,24 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         // start the local edgedriver and connect to it
         var edgeServiceBuilder = new that.deps.edge.ServiceBuilder(that.seleniumConfig.executables.edgedriver);
         driver =  that.deps.edge.Driver.createSession(allEdgeCapabilities, edgeServiceBuilder.build());
+      } else if (browserName == 'MicrosoftEdgeLegacy') {
+        that.deps.edgelegacy = protractorModule.require('selenium-webdriver/edge');
+
+        that.logger.debug('Starting local edgelegacydriver with executable: ' +
+          that.seleniumConfig.executables.edgelegacydriver);
+
+        var edgelegacyOptions = [new that.deps.edgelegacy.Options(), new that.deps.edgelegacy.Options()];
+        _.forEach(['edgelegacydriverOptions', 'edgelegacyOptions'], function (capabilitiesKey, index) {
+          _.forIn(that.protConfig.capabilities[capabilitiesKey], function (value, key) {
+            that.deps.edgelegacy.Options.prototype[key].apply(edgelegacyOptions[index], value);
+          });
+        });
+        // merge capabilities
+        var allEdgeLegacyCapabilities = edgelegacyOptions[0].toCapabilities(edgelegacyOptions[1].toCapabilities());
+
+        // start the local edgelegacy driver and connect to it
+        var edgeLegacyServiceBuilder = new that.deps.edgelegacy.ServiceBuilder(that.seleniumConfig.executables.edgelegacydriver);
+        driver =  that.deps.edgelegacy.Driver.createSession(allEdgeLegacyCapabilities, edgeLegacyServiceBuilder.build());
       } else if (browserName == 'safari') {
         that.deps.safari = protractorModule.require('selenium-webdriver/safari');
 

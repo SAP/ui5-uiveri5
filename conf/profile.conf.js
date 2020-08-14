@@ -49,6 +49,20 @@ exports.config = {
           'IEDriverServer_Win32_${connectionConfigs.direct.binaries.iedriver.version}.' + '${connectionConfigs.direct.binaries.iedriver.patch}.zip',
           executable: 'IEDriverServer.exe'
         },
+        // edge based on chromium; Note: If on a Windows 64bit system the variable osTypeString returns win32 string (see uiveri5.js), then maintain the url below with e.g. edgedriver_win64.zip 
+        edgedriver: {
+          version: '{edge.latest}',
+          unzip: true,
+          filename: '${osTypeString == "win32" || osTypeString == "win64" ? "msedgedriver.exe" : "msedgedriver"}',
+          baseurl: 'https://msedgedriver.azureedge.net',
+          url: '${connectionConfigs.direct.binaries.edgedriver.baseurl}/${connectionConfigs.direct.binaries.edgedriver.version}'+'/edgedriver_${osTypeString}.zip',
+          latestCompleteVersionFileUrl: 'https://raw.githubusercontent.com/SAP/ui5-uiveri5/master/driverVersions.json',
+          executable: {
+            win32: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
+            win64: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}.exe',
+            mac64: 'msedgedriver-${connectionConfigs.direct.binaries.edgedriver.version}'
+          }
+        },
         geckodriver: {
           version: '{latest}',
           unzip: '${osTypeString == "win32" || osTypeString == "win64"}',
@@ -83,7 +97,7 @@ exports.config = {
       }
     },
     /* maximize browser on all desktops to ensure consistent browser size */
-    'firefox,ie,edge,safari,chrome,chromium': {
+    'firefox,ie,edge,edgelegacy,safari,chrome,chromium': {
       'windows,mac,linux': {
         '*': {
           remoteWebDriverOptions: {
@@ -201,10 +215,10 @@ exports.config = {
     },
     */
     /*
-    'edge': {
+    'edgelegacy': {
       '*': {
         '*': {
-          edgedriverOptions: {
+          edgelegacydriverOptions: {
             'setPageLoadStrategy': ['normal'],
           }
         }

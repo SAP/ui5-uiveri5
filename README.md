@@ -19,6 +19,7 @@ and brings most (and more) of its benefits to UI5 applications.
 * Use generated snippets from [Test Recorder](https://blogs.sap.com/2020/01/23/test-recording-with-ui5-test-recorder/) that is build-in every UI5 app (from UI5 1.74)
 * Open-source, fork and modify to fit your specific neeeds.
 
+
 ## Requirements
 * [NodeJS](https://nodejs.org/en/download/), version 8.0 or higher
 

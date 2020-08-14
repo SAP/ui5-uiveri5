@@ -23,7 +23,7 @@ var platformNamePerOsTypeString = {
   mac64: 'mac'
 };
 var supportedBrowserNames = [
-  'chrome','chromium','browser','chromeMobileEmulation','firefox','ie','safari','edge','chromeHeadless'
+  'chrome','chromium','browser','chromeMobileEmulation','firefox','ie','safari','edge','edgelegacy','chromeHeadless'
 ];
 var supportedPlatformNames = [
   'windows','mac','linux','android','ios','winphone'
@@ -41,7 +41,7 @@ var supportedUI5Modes = [
 /**
  * @typedef Runtime
  * @type {Object}
- * @param {string(chrome|chromium|browser|firefox|ie|safari|edge)} browserName - browser name, default: chrome
+ * @param {string(chrome|chromium|browser|firefox|ie|safari|edge|edgelegacy)} browserName - browser name, default: chrome
  * @param {number} browserVersion - browser version, default: *
  * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *

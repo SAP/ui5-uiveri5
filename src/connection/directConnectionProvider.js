@@ -129,12 +129,7 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
   if (runtime.platformVersion !== '*'){
     capabilities.platformVersion = runtime.platformVersion;
   }
-
-  // format deviceName
-  if (runtime.deviceName !== '*'){
-    capabilities.deviceName = runtime.deviceName;
-  }
-
+  
   return this._mergeRuntimeCapabilities(capabilities,runtime);
 };
 
@@ -416,8 +411,15 @@ DirectDriverProvider.prototype.getExistingDrivers = function() {
 DirectDriverProvider.prototype.getNewDriver = function() {
   var that = this;
 
+  // cleanup required capabilities from any non-webdriver related options
+  var requiredCapabilities = _.cloneDeep(this.protConfig.capabilities);
+  delete requiredCapabilities.runtime;
+  delete requiredCapabilities.remoteWebDriverOptions;
+  that.logger.info('Opening webdriver connection with capabilities: ' +
+    JSON.stringify(requiredCapabilities));
+
   // open webdriver connection, start local webdriver if necessary
-  var capabilities = new that.deps.webdriver.Capabilities(this.protConfig.capabilities);
+  var capabilities = new that.deps.webdriver.Capabilities(requiredCapabilities);
   var driver;
   if (that.seleniumConfig.address) {
     that.logger.debug('Opening remote webdriver session to: ' + that.seleniumConfig.address);
@@ -464,12 +466,12 @@ DirectDriverProvider.prototype.getNewDriver = function() {
       }
 
       // seleniumOptions.args
-      if(this.protConfig.capabilities.seleniumOptions && this.protConfig.capabilities.seleniumOptions.args){
-        opts.args = opts.args.concat(this.protConfig.capabilities.seleniumOptions.args);
+      if(requiredCapabilities.seleniumOptions && requiredCapabilities.seleniumOptions.args){
+        opts.args = opts.args.concat(requiredCapabilities.seleniumOptions.args);
       }
       // local webdriver binaries
       opts.jvmArgs = [];
-      var browserName = this.protConfig.capabilities.browserName;
+      var browserName = requiredCapabilities.browserName;
       if (browserName == 'chrome') {
         opts.jvmArgs.push('-Dwebdriver.chrome.driver=' + that.seleniumConfig.executables.chromedriver);
       } else if (browserName == 'firefox') {
@@ -504,7 +506,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
       driver = that.deps.webdriver.WebDriver.createSession(executor,capabilities);
     } else  {
       // switch on browser
-      browserName = this.protConfig.capabilities.browserName;
+      browserName = requiredCapabilities.browserName;
       if (browserName == 'chrome') {
         that.deps.chrome = protractorModule.require('selenium-webdriver/chrome');
 
@@ -515,7 +517,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var chromeServiceBuilder = new that.deps.chrome.ServiceBuilder(that.seleniumConfig.executables.chromedriver);
 
         // set chromedriverOptions
-        _.forIn(this.protConfig.capabilities.chromedriverOptions, function (value, key) {
+        _.forIn(requiredCapabilities.chromedriverOptions, function (value, key) {
           chromeServiceBuilder[key].apply(chromeServiceBuilder, _asArray(value));
         });
 
@@ -536,13 +538,13 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var firefoxServiceBuilder = new that.deps.firefox.ServiceBuilder(that.seleniumConfig.executables.geckodriver);
 
         // set geckodriverOptions
-        _.forIn(this.protConfig.capabilities.geckodriverOptions, function (value, key) {
+        _.forIn(requiredCapabilities.geckodriverOptions, function (value, key) {
           firefoxServiceBuilder[key].apply(firefoxServiceBuilder, _asArray(value));
         });
 
         // no firefox.Options.fromCapabilities() so need to build firefoxOptions manually
         var firefoxOptions = new that.deps.firefox.Options();
-        _.forIn(this.protConfig.capabilities.firefoxOptions, function (value, key) {
+        _.forIn(requiredCapabilities.firefoxOptions, function (value, key) {
           firefoxOptions[key].apply(firefoxOptions, _asArray(value));
         });
 
@@ -561,7 +563,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         process.env.PATH = process.env.PATH + path.delimiter + path.dirname(that.seleniumConfig.executables.iedriver);
 
         var driverOptions = new that.deps.ie.Options();
-        _.forIn(this.protConfig.capabilities.iedriverOptions, function (value, key) {
+        _.forIn(requiredCapabilities.iedriverOptions, function (value, key) {
           var funcName = key;
           if (funcName.startsWith('ie.')) {
             funcName = funcName.substring(3);
@@ -569,7 +571,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
           that.deps.ie.Options.prototype[funcName].apply(driverOptions, _asArray(value));
         });
         var browserOptions = new that.deps.ie.Options();
-        _.forIn(this.protConfig.capabilities.ieOptions, function (value, key) {
+        _.forIn(requiredCapabilities.ieOptions, function (value, key) {
           that.deps.ie.Options.prototype[key].apply(browserOptions, _asArray(value));
         });
 
@@ -624,7 +626,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
         var safariServiceBuilder = new that.deps.safari.ServiceBuilder();
 
         // set safaridriverOptions
-        _.forIn(this.protConfig.capabilities.safaridriverOptions, function (value, key) {
+        _.forIn(requiredCapabilities.safaridriverOptions, function (value, key) {
           safariServiceBuilder[key].apply(safariServiceBuilder, _asArray(value));
         });
 

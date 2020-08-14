@@ -10,41 +10,56 @@ var mFunctions = {
   // fnCallback will be called with an object argument
   // which will always have a 'log' and will have 'error' only when loading of dependensies was unsuccessful
   loadUI5Dependencies: function loadUI5Dependencies (mScriptParams, fnCallback) {
-    var sDebugLog = 'Loading waitForUI5 implementation';
+    var sDebugLog = 'Loading UI5 dependencies';
+    
+    // retry checking for UI5
+    var waitedTime = 0;
+    (function wait () {
+      if (window.sap && window.sap.ui) {
+        
+        // wait for UI5 core to complete initialisation
+        window.sap.ui.getCore().attachInit(function() {
+          
+          /* global uiveri5 */
+          window.uiveri5 = window.uiveri5 || {};
 
-    if (!window.sap || !window.sap.ui) {
-      fnCallback({log: sDebugLog, error: 'No UI5 on this page'});
-    }
-
-    /* global uiveri5 */
-    window.uiveri5 = window.uiveri5 || {};
-
-    loadOPAControlFinder().then(function () {
-      if (mScriptParams.useClassicalWaitForUI5) {
-        sDebugLog += '\nLoading classical waitForUI5 implementation.';
-        return loadClassicalWaitForUI5();
-      } else {
-        sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
-        return loadOPAWaitForUI5().catch(function (sError) {
-          sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
-          return loadClassicalWaitForUI5();
+          loadControlFinder()
+            .then(function(){
+              return loadBrowserLogCollector();
+            })
+            .then(function () {
+              if (mScriptParams.useClassicalWaitForUI5) {
+                sDebugLog += '\nLoading classical waitForUI5 implementation.';
+                return loadClassicalWaitForUI5();
+              } else {
+                sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
+                return loadOPAWaitForUI5().catch(function (sError) {
+                  sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+                  return loadClassicalWaitForUI5();
+                });
+              }
+            }).then(function (sLog) {
+              fnCallback({log: sDebugLog + (sLog || '')});
+            }).catch(function (sError, sLog) {
+              fnCallback({error: sError, log: sDebugLog + (sLog || '')});
+            });
         });
+      } else if (waitedTime < mScriptParams.waitForUI5Timeout) {
+        waitedTime += mScriptParams.waitForUI5PollingInterval;
+        setTimeout(wait, mScriptParams.waitForUI5PollingInterval);
+      } else {
+        fnCallback({log: sDebugLog, error: 'No UI5 on this page'});
       }
-    }).then(function (sLog) {
-      fnCallback({log: sDebugLog + (sLog || '')});
-    }).catch(function (sError, sLog) {
-      fnCallback({error: sError, log: sDebugLog + (sLog || '')});
-    });
+    })();
 
     // --- helper function declarations below ---
-
     function loadClassicalWaitForUI5() {
       return new Promise(function (resolve) {
-        if (uiveri5.ClassicalWaitForUI5) {
+        if (window.uiveri5.ClassicalWaitForUI5) {
           resolve();
         } else {
           var ClassicalWaitForUI5 = new Function('return (' + mScriptParams.ClassicalWaitForUI5 + ').apply(this, arguments)');
-          sap.ui.getCore().registerPlugin({
+          window.sap.ui.getCore().registerPlugin({
             startPlugin: function (oCore) {
               window.uiveri5.ClassicalWaitForUI5 = new ClassicalWaitForUI5(mScriptParams.waitForUI5Timeout, {
                 getUIDirty: oCore.getUIDirty.bind(oCore),
@@ -59,14 +74,14 @@ var mFunctions = {
 
     function loadOPAWaitForUI5() {
       return new Promise(function (resolve, reject) {
-        if (uiveri5.autoWaiterAsync) {
+        if (window.uiveri5.autoWaiterAsync) {
           resolve();
         } else {
           var onError = function (oError) {
             reject('Cannot define uiveri5.autoWaiterAsync. Details: ' + oError);
           };
           try {
-            sap.ui.require([
+            window.sap.ui.require([
               'sap/ui/test/autowaiter/_autoWaiterAsync'
             ], function(_autoWaiterAsync) {
               _autoWaiterAsync.extendConfig({
@@ -83,9 +98,9 @@ var mFunctions = {
       });
     }
 
-    function loadOPAControlFinder() {
+    function loadControlFinder() {
       return new Promise(function (resolve) {
-        if (uiveri5._ControlFinder) {
+        if (window.uiveri5._ControlFinder) {
           resolve();
         } else {
           sDebugLog += '\nLoading OPA5 control locator utilities.';
@@ -95,10 +110,35 @@ var mFunctions = {
             ' Minimum UI5 versions supporting control locators: 1.52.12; 1.54.4; 1.55 and up. Details: ' + oError);
           };
           try {
-            sap.ui.require([
+            window.sap.ui.require([
               'sap/ui/test/_ControlFinder'
             ], function (_ControlFinder) {
               window.uiveri5._ControlFinder = _ControlFinder;
+              resolve();
+            }, onError);
+          } catch (oError) {
+            onError(oError);
+          }
+        }
+      });
+    }
+
+    function loadBrowserLogCollector() {
+      return new Promise(function (resolve) {
+        if (window.uiveri5._BrowserLogCollector) {
+          resolve();
+        } else {
+          sDebugLog += '\nLoading OPA5 browser log collector.';
+          var onError = function (oError) {
+            // only throw error if dependency is missing when a control locator is actually used
+            resolve('Browser log collector will not be enabled.' +
+            ' Minimum UI5 versions supporting nrowser log collector: 1.64 and up. Details: ' + oError);
+          };
+          try {
+            window.sap.ui.require([
+              'sap/ui/test/_BrowserLogCollector'
+            ], function (_BrowserLogCollector) {
+              window.uiveri5._BrowserLogCollector =  _BrowserLogCollector.getInstance();
               resolve();
             }, onError);
           } catch (oError) {
@@ -113,10 +153,10 @@ var mFunctions = {
     if (!window.sap || !window.sap.ui) {
       fnCallback('waitForUI5: no UI5 on this page.');
     } else {
-      if (uiveri5.autoWaiterAsync) {
-        uiveri5.autoWaiterAsync.waitAsync(fnCallback);
-      } else if (uiveri5.ClassicalWaitForUI5) {
-        uiveri5.ClassicalWaitForUI5.notifyWhenStable(fnCallback);
+      if (window.uiveri5.autoWaiterAsync) {
+        window.uiveri5.autoWaiterAsync.waitAsync(fnCallback);
+      } else if (window.uiveri5.ClassicalWaitForUI5) {
+        window.uiveri5.ClassicalWaitForUI5.notifyWhenStable(fnCallback);
       } else {
         fnCallback('waitForUI5: no waitForUI5 implementation is currently loaded.');
       }
@@ -124,19 +164,27 @@ var mFunctions = {
   },
 
   getControlProperty: function getControlProperty (mScriptParams) {
-    if (!uiveri5._ControlFinder) {
-      throw new Error('Your application needs a newer version of UI5 to use control locators!' +
-      ' Minimum versions supported: 1.52.12; 1.54.4; 1.55 and up.');
+    if (!window.uiveri5 ) {
+      return {
+        error: 'UI5 dependencies are not loaded on this page'
+      };
+    } else if (!window.uiveri5._ControlFinder) {
+      return {
+        error: 'Your application needs a newer version of UI5 to use control locators!' +
+          ' Minimum versions supported: 1.52.12; 1.54.4; 1.55 and up.'
+      };
     }
 
     try {
-      var control = uiveri5._ControlFinder._getControlForElement(mScriptParams.elementId);
+      var control = window.uiveri5._ControlFinder._getControlForElement(mScriptParams.elementId);
       if (control) {
         return {
-          property: uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
+          value: window.uiveri5._ControlFinder._getControlProperty(control, mScriptParams.property)
         };
       } else {
-        throw new Error('Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree');
+        return {
+          error: 'Element with ID "' + mScriptParams.elementId + '" is not part of a control DOM representation tree'
+        };
       }
     } catch (oError) {
       return {
@@ -145,60 +193,73 @@ var mFunctions = {
     }
   },
 
+  // called directly from webdriver.by so does not comply with executeScriptHandleErrors result structure
   findByControl: function findByControl (sMatchers, oParentElement) {
-    if (!uiveri5._ControlFinder) {
+    if (!window.uiveri5) {
+      throw new Error('UI5 dependencies are not loaded on this page');
+    } else if (!window.uiveri5._ControlFinder) {
       throw new Error('Your application needs a newer version of UI5 to use control locators!' +
       ' Minimum versions supported: 1.52.12; 1.54.4; 1.55 and up.');
     }
 
     var mMatchers = JSON.parse(sMatchers);
     if (oParentElement) {
-      var control = uiveri5._ControlFinder._getControlForElement(oParentElement.id);
+      var control = window.uiveri5._ControlFinder._getControlForElement(oParentElement.id);
       mMatchers.ancestor = control && [[control.getId()]];
     }
 
-    if (mMatchers.id && mMatchers.id.regex) {
-      mMatchers.id = new RegExp(mMatchers.id.regex.source, mMatchers.id.regex.flags);
-    }
-    if (mMatchers.properties) {
-      Object.keys(mMatchers.properties).forEach(function (sProperty) {
-        var mRegexp = mMatchers.properties[sProperty].regex;
-        if (mRegexp) {
-          mMatchers.properties[sProperty] = new RegExp(mRegexp.source, mRegexp.flags);
+    for (var name in mMatchers) {
+      if (mMatchers[name].regex) {
+        mMatchers[name] = new RegExp(mMatchers[name].regex.source, mMatchers[name].regex.flags);
+      } else if (typeof mMatchers[name] === 'object') {
+        for (var key in mMatchers[name]) {
+          var mRegexp = mMatchers[name][key].regex;
+          if (mRegexp) {
+            mMatchers[name][key] = new RegExp(mRegexp.source, mRegexp.flags);
+          }
         }
-      });
+      }
     }
 
-    return uiveri5._ControlFinder._findElements(mMatchers);
+    return window.uiveri5._ControlFinder._findElements(mMatchers);
   },
 
+  // called with driver.executScript from findElements overrideso so does not comply ith executeScriptHandleErrors result structure
   getLatestLog: function getLatestLog () {
     var sLog = '';
-    if (uiveri5._ControlFinder && uiveri5._ControlFinder._getLatestLog) {
-      sLog = uiveri5._ControlFinder._getLatestLog();
+    if (window.uiveri5._ControlFinder && window.uiveri5._ControlFinder._getLatestLog) {
+      sLog = window.uiveri5._ControlFinder._getLatestLog();
     }
-    return  sLog;
+    return sLog;
   },
 
   getUI5Version: function() {
-    return sap.ui.getVersionInfo();
+    var versionInfo = window.sap.ui.getVersionInfo();
+    return {
+      value: {
+        version: versionInfo.version,
+        buildTimestamp: versionInfo.buildTimestamp
+      }
+    };
   },
-
+  
   getWindowToolbarSize: function getWindowToolbarSize () {
     return {
-      width: window.outerWidth - window.innerWidth,
-      height: window.outerHeight - window.innerHeight
+      value: {
+        width: window.outerWidth - window.innerWidth,
+        height: window.outerHeight - window.innerHeight
+      }
     };
   },
 
   hideScrollbars: function hideScrollbars (mScriptParams,fnCallback) {   
-    if (window.$) {
+    if (window.uiveri5.$) {
       hideScrollbars();
     } else if (window.sap && window.sap.ui) {
-      sap.ui.require([
+      window.sap.ui.require([
         'sap/ui/thirdparty/jquery'
       ], function (jQuery) {
-        window.$ = jQuery;
+        window.uiveri5.$ = jQuery;
         hideScrollbars();
       }, function (error) {
         fnCallback({error: 'Error while loading jquery module, details: ' + error});
@@ -207,10 +268,10 @@ var mFunctions = {
 
     function hideScrollbars() {
       try {
-        var elements = $('*');
+        var elements = window.uiveri5.$('*');
         var log = 'Processing: ' + elements.length + ' elements';
         elements.each(function (iIndex, oDOMElement) {
-          var oElement = $(oDOMElement);
+          var oElement = window.uiveri5.$(oDOMElement);
           ['overflow', 'overflow-x', 'overflow-y'].forEach(function (sAttribute) {
             // force style and layout recalculations
             /* eslint no-unused-vars: 0 */
@@ -234,39 +295,48 @@ var mFunctions = {
   },
 
   startLogCollection: function startLogCollection (mScriptParams) {
-    if (!window.sap || !window.sap.ui) {
-      throw new Error('startLogCollection: no UI5 on this page.');
-    }
-
-    var sError = 'Your application needs a minimum version of UI5 v1.64 to collect browser logs!';
-
     try {
-      sap.ui.require([
-        'sap/ui/test/_BrowserLogCollector'
-      ], function (_BrowserLogCollector) {
-        window.uiveri5 = window.uiveri5 || {};
-        window.uiveri5._BrowserLogCollector = _BrowserLogCollector.getInstance();
-        window.uiveri5._BrowserLogCollector.start(mScriptParams.level);
-      }, function (oError) {
-        throw new Error(sError + ' Details: ' + oError);
-      });
+      if (!window.uiveri5 || !window.uiveri5._BrowserLogCollector) {
+        throw new Error('Log collection is not set up! Call "loadLogDependencies" before "startLogCollection"');
+      }
+      return {
+        value: window.uiveri5._BrowserLogCollector.start(mScriptParams.level)
+      };
     } catch (oError) {
-      throw new Error(sError + ' Details: ' + oError);
+      return {
+        error: 'Error while starting log collection, Details: ' + oError
+      };
     }
   },
 
   getAndClearLogs: function getAndClearLogs () {
-    if (!window.uiveri5._BrowserLogCollector) {
-      throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
+    try {
+      if (!window.uiveri5 || !window.uiveri5._BrowserLogCollector) {
+        throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
+      }
+      return {
+        value: window.uiveri5._BrowserLogCollector.getAndClearLogs().logs
+      };
+    } catch (oError) {
+      return {
+        error: 'Error while getting logs, Details: ' + oError
+      };
     }
-    return window.uiveri5._BrowserLogCollector.getAndClearLogs().logs;
   },
 
   stopLogsCollection: function stopLogsCollection () {
-    if (!window.uiveri5._BrowserLogCollector) {
-      throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
+    try {
+      if (!window.uiveri5 ||  !window.uiveri5._BrowserLogCollector) {
+        throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
+      }
+      return {
+        value: window.uiveri5._BrowserLogCollector.stop()
+      };
+    } catch (oError) {
+      return {
+        error: 'Error while stopping log collection, Details: ' + oError
+      };
     }
-    return window.uiveri5._BrowserLogCollector.stop();
   }
 };
 

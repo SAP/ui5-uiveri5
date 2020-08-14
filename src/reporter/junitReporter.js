@@ -42,7 +42,6 @@ JasmineJUnitReporter.prototype.jasmineDone = function() {
     platformResolution: this.collector.overview.meta.runtime.platformResolution,
     browser: this.collector.overview.meta.runtime.browserName,
     browserVersion: this.collector.overview.meta.runtime.browserVersion,
-    deviceName: this.collector.overview.meta.runtime.deviceName,
     ui5_theme: this.collector.overview.meta.runtime.ui5.theme,
     ui5_direction: this.collector.overview.meta.runtime.ui5.direction,
     ui5_mode: this.collector.overview.meta.runtime.ui5.mode

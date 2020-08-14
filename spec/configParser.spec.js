@@ -45,6 +45,20 @@ describe("configParser", function() {
     expect(mergedConfig.test.key.param).toEqual('sap-ui-theme=sap_theme');
     expect(mergedConfig.test.key.secondParam).toEqual('sap-ui-rtl=true');
   });
+
+  it('Should merge imported test params', function () {
+    var cliConfig = {
+      conf: __dirname + '/configParser/conf.js',  // default config file
+      paramsFile: __dirname + '/configParser/testParams.json',
+      params: {
+        param2: 'newValue'
+      }
+    };
+
+    var mergedConfig = configParser.mergeConfigs(cliConfig);
+
+    expect(mergedConfig.params).toEqual({param1: 'value1', param2: 'newValue'});
+  });
 });
 
 describe("Should parse confkey from command-line", function () {
@@ -98,6 +112,16 @@ describe("Should parse confkey from command-line", function () {
 
     expect(config.key1).toEqual({key2: 'value',key3: 'value1'});
     expect(config.confKeys).toContain('key1.key2:value;key1.key3:value1');
+  });
+
+  it('Should parse array values in confkey string', function () {
+    var argvStub = new ArgvStub();
+    argvStub.confKeys = 'key1[0].key2:[opt1, opt2];browsers[0].capabilities.chromeOptions.args:[--window-size=700,800, --headless]';
+    var config = configParser.mergeConfigs(argvStub);
+
+    expect(config.key1).toEqual([{key2: ["opt1", "opt2"]}]);
+    expect(config.browsers).toEqual([{capabilities: {chromeOptions: {args: ["--window-size=700,800", "--headless"]}}}]);
+    expect(config.confKeys).toEqual(argvStub.confKeys);
   });
 
   it('Should overwrite config.browsers with --browsers', () => {

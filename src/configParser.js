@@ -11,8 +11,8 @@ function ConfigParser(logger) {
   this.config = {};
 }
 
-ConfigParser.prototype.mergeConfigs = function (config) {
-  this.config = config;
+ConfigParser.prototype.mergeConfigs = function (cliConfig) {
+  this.config = cliConfig;
 
   // load config file
   this._mergeConfigFile(this.config.conf || DEFAULT_CONF, 'default');
@@ -25,6 +25,8 @@ ConfigParser.prototype.mergeConfigs = function (config) {
 
   // Changing config via confKeys
   this._setConfKeys();
+
+  this._mergeParams();
 
   // return new fully merged config
   return this.config;
@@ -116,19 +118,26 @@ ConfigParser.prototype.resolvePlaceholders = function(obj) {
   return obj;
 };
 
-ConfigParser.prototype._setConfKeys =  function() {
-  var confKeys = this.config.confKeys;
-  var config = this.config;
-  if (confKeys) {
-    if (_.isArray(confKeys)) {
-      _.forEach(confKeys,function(key) {
-        _setConfKey(config,key);
-      });
-    } else {
-      _setConfKey(config,confKeys);
-    }
+// modifies this.config
+// confKeys can be a single <key, value> pair or a list of pairs, separated by ; ( e.g.  --confKeys=a[0].key1:value1;a[1].key2:value2 )
+// the pair value can be single or array, denoted by [] ( e.g. --confKeys:a[0].key.args="[--window-size=700,800, --headless]" )
+ConfigParser.prototype._setConfKeys = function () {
+  if (this.config.confKeys) {
+    var allConfKeys = _.isArray(this.config.confKeys) ? this.config.confKeys : [this.config.confKeys];
+    _.forEach(allConfKeys, function (confKeys) {
+      var pairs = confKeys.split(';'); // split multiple pairs
+      _.forEach(pairs, function (pair) {
+        var parts = pair.split(':'); // split key, value
+        var key = parts[0];
+        var value = parts[1];
+        if (value.match(/^\[.+\]$/gm)) {
+          // value in the pair is an array
+          value = _.compact(value.substr(1, value.length - 2).split(', '));
+        }
+        _.set(this.config, key, value);
+      }.bind(this));
+    }.bind(this));
   }
-  this.config = config;
 };
 
 ConfigParser.prototype._updateExistingKey = function (config, key) {
@@ -168,16 +177,19 @@ ConfigParser.prototype._readConfig = function (configPath, type) {
   return _.cloneDeep(require(configPath).config);
 };
 
-function _setConfKey(config,confKey) {
-  var pairs = confKey.split(';');
-  _.forEach(pairs,function(pair) {
-    var columnCharIndex = pair.indexOf(':');
-    if (columnCharIndex === -1) {
-      return;
-    }
-    _.set(config,pair.substr(0,columnCharIndex),pair.substr(columnCharIndex+1));
-  });
-}
+ConfigParser.prototype._mergeParams = function () {
+  if (this.config.paramsFile) {
+    this.config.paramsFile = path.resolve(this.config.paramsFile);
+    this.logger.debug('Loading test params from file ' + this.config.paramsFile);
+    var importParams = _.cloneDeep(require(this.config.paramsFile));
+    // cli params should have higher prio
+    this.config.params = _mergeWithArrays(importParams, this.config.params);
+  }
+  if (this.config.exportParamsFile) {
+    this.config.exportParamsFile = path.resolve(this.config.exportParamsFile);
+    this.config.exportParams = {};
+  }
+};
 
 function _mergeWithArrays(newObject, destination) {
   return _.mergeWith(newObject, destination, function (objectValue, sourceValue) {

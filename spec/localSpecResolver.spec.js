@@ -18,6 +18,25 @@ describe("LocalSpecResolver", function () {
     });
   });
 
+  it("Should resolve specs in folder with dot in the name", function (done) {
+    var specResolver = new LocalSpecResolver({
+      specs: __dirname + '/localSpecResolver/folder.test/*.spec.js'
+    }, {}, logger);
+    specResolver.resolve().then(function (specs) {
+      expect(specs.length).toEqual(1);
+      expect(specs[0]).toEqual({
+        name: 'test',
+        fullName: 'test',
+        testPath: __dirname.replace(/\\/g, '/') + '/localSpecResolver/folder.test/test.spec.js',
+        contentUrl: undefined
+      });
+      done();
+    }).catch(function (error) {
+      fail(error);
+      done();
+    });
+  });
+
   it("Should resolve array of specs", function (done) {
     var specResolver = new LocalSpecResolver({
       specs: [

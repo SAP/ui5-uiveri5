@@ -2,14 +2,10 @@
 var _ = require('lodash');
 
 var DEFAULT_BROWSER_NAME = 'chrome';
-var DEFAULT_PLATFORM_NAME = 'windows';
 var DEFAULT_VERSION = '*';
-var DEFAULT_DEVICE_NAME = '*';
 var DEFAULT_UI5_THEME = 'belize';
 var DEFAULT_UI5_DIRECTION = 'ltr';
 var DEFAULT_UI5_MODE = 'cozy';
-/* eslint no-unused-vars: */
-var DEFAULT_EXECUTION_TYPE = '*';
 
 var defaultPlatformResolutionPerPlatformName = {
   windows: '1600x1200',
@@ -50,7 +46,6 @@ var supportedUI5Modes = [
  * @param {string(windows|mac|linux|android|ios|winphone)} platformName - platform name, default: windows
  * @param {number} platformVersion - platform number like 7,8 for windows; 4.4,5.0 for android;, default: *
  * @param {string(default|/\d+x\d+/)} platformResolution - platform resolution, WIDTHxHEIGHT, default: resolved from available
- * @param {string} deviceName - device name, default: *
  * @param {string(bluecrystal|belize|fiori_3|fiori_3_dark)} ui5.theme - UI5 theme, default belize
  * @param {string(rtl|ltr)} ui5.direction - UI5 direction, default: ltr
  * @param {string(cozy|compact)} ui5.mode - UI5 mode, default: cozy
@@ -123,10 +118,6 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
       runtime.platformVersion = DEFAULT_VERSION;
     }
 
-    // handle device name
-    if (!runtime.deviceName) {
-      runtime.deviceName = DEFAULT_DEVICE_NAME;
-    }
     // handle ui5 defaults
     if (!runtime.ui5){
       runtime.ui5 = {};
@@ -178,9 +169,15 @@ RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserC
         if (this._isMatching(runtime.platformName,platformNamePattern)){
           var executionTypePattern;
           for(executionTypePattern in browserCapabilities[browserNamePattern][platformNamePattern]){
-            if(this._isMatching(currentExecutionType, executionTypePattern)){
-              runtime.capabilities = _.merge({},
-                browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],runtime.capabilities);
+            if(this._isMatching(currentExecutionType, executionTypePattern)){              
+              runtime.capabilities = _.mergeWith({},
+                browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],
+                runtime.capabilities,
+                function(objValue, srcValue) {
+                  if (_.isArray(objValue) && srcValue) {
+                    return _(objValue).concat(srcValue).uniqWith(_.isEqual).value();
+                  }
+                });
             }
           }
         }

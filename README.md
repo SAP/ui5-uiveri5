@@ -13,9 +13,12 @@ and brings most (and more) of its benefits to UI5 applications.
 * Control locators (OPA5 declarative matchers) allow locating and interacting with UI5 controls.
 * Does not depend on testability support in applications - works with autorefreshing views, resizing elements, animated transitions.
 * Declarative authentications - authentication flow over OAuth2 providers, etc.
-* Console operation, CI ready, fully configurable, no need for java (comming soon) or IDE.
-* Covers full UI5 browser matrix: Chrome, Firefox, IE, Edge, EdgeLegacy, Safari, iOS, Android.
-* Open-source, modify to suite your specific neeeds.
+* Console operation, CI ready, fully configurable or IDE.
+* Covers full UI5 browser matrix: Chrome, Firefox, IE, Edge, Safari, iOS, Android.
+* Works with browser cloud provider like [SauseLabs](docs/config/cloud.md)
+* Use generated snippets from [Test Recorder](https://blogs.sap.com/2020/01/23/test-recording-with-ui5-test-recorder/) that is build-in every UI5 app (from UI5 1.74)
+* Open-source, fork and modify to fit your specific neeeds.
+
 
 ## Requirements
 * [NodeJS](https://nodejs.org/en/download/), version 8.0 or higher
@@ -83,21 +86,25 @@ You will see the test execution in the console and an overview when the test com
 By default uiveri5 will discover all tests in current folder and execute them on localy started Chrome.
 All of those defaults could be modified either in conf.js or by providing command-line arguments.
 
+* Specify non-default config file
+```
+$uiveri5 ci-conf.js
+```
 * Enable verbose logging
 ```
--v
+$uiveri5 -v
 ```
 * Run tests on different browser
 ```
---browsers=firefox
+$uiveri5 --browsers=firefox
 ```
 * Run tests against app deployed on a specific system
 ```
---baseUrl="http://<host>:<port>/app"
+$uiveri5 --baseUrl="http://<host>:<port>/app"
 ```
 * Run tests against a remote selenium server
 ```
---seleniumAddress="<host>:<port>/wd/hub"
+$uiveri5 --seleniumAddress="<host>:<port>/wd/hub"
 ```
 
 ## Learn more
@@ -120,7 +127,7 @@ Here we gather few projects that build on UIVeri5 and tailor it for specific use
 * Docker container with UIVeri5, Chrome, Jenkins: [Link](https://github.com/frumania/docker-uiveri5-jenkins-slave)
 
 ## Automatic Downloads
-By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver,InternetExplorerDriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
+By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
 
 ## Licence
 Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.

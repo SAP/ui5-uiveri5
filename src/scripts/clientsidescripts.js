@@ -11,15 +11,15 @@ var mFunctions = {
   // which will always have a 'log' and will have 'error' only when loading of dependensies was unsuccessful
   loadUI5Dependencies: function loadUI5Dependencies (mScriptParams, fnCallback) {
     var sDebugLog = 'Loading UI5 dependencies';
-    
+
     // retry checking for UI5
     var waitedTime = 0;
     (function wait () {
       if (window.sap && window.sap.ui) {
-        
+
         // wait for UI5 core to complete initialisation
         window.sap.ui.getCore().attachInit(function() {
-          
+
           /* global uiveri5 */
           window.uiveri5 = window.uiveri5 || {};
 
@@ -44,9 +44,9 @@ var mFunctions = {
               fnCallback({error: sError, log: sDebugLog + (sLog || '')});
             });
         });
-      } else if (waitedTime < mScriptParams.waitForUI5Timeout) {
-        waitedTime += mScriptParams.waitForUI5PollingInterval;
-        setTimeout(wait, mScriptParams.waitForUI5PollingInterval);
+      } else if (waitedTime < mScriptParams.autoWait.timeout) {
+        waitedTime += mScriptParams.autoWait.interval;
+        setTimeout(wait, mScriptParams.autoWait.interval);
       } else {
         fnCallback({log: sDebugLog, error: 'No UI5 on this page'});
       }
@@ -61,7 +61,7 @@ var mFunctions = {
           var ClassicalWaitForUI5 = new Function('return (' + mScriptParams.ClassicalWaitForUI5 + ').apply(this, arguments)');
           window.sap.ui.getCore().registerPlugin({
             startPlugin: function (oCore) {
-              window.uiveri5.ClassicalWaitForUI5 = new ClassicalWaitForUI5(mScriptParams.waitForUI5Timeout, {
+              window.uiveri5.ClassicalWaitForUI5 = new ClassicalWaitForUI5(mScriptParams.autoWait.timeout, {
                 getUIDirty: oCore.getUIDirty.bind(oCore),
                 attachUIUpdated: oCore.attachUIUpdated.bind(oCore)
               });
@@ -84,10 +84,7 @@ var mFunctions = {
             window.sap.ui.require([
               'sap/ui/test/autowaiter/_autoWaiterAsync'
             ], function(_autoWaiterAsync) {
-              _autoWaiterAsync.extendConfig({
-                timeout: mScriptParams.waitForUI5Timeout,
-                interval: mScriptParams.waitForUI5PollingInterval
-              });
+              _autoWaiterAsync.extendConfig(mScriptParams.autoWait);
               window.uiveri5.autoWaiterAsync = _autoWaiterAsync;
               resolve();
             }, onError);

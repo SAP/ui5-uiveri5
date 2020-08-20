@@ -336,7 +336,7 @@ function run(config) {
             return res.value;
           });
       };
-      
+
       browser.loadUI5Dependencies = function () {
         return browser._loadUI5Dependencies().then(function () {
           return browser.waitForAngular();
@@ -345,8 +345,10 @@ function run(config) {
 
       browser._loadUI5Dependencies = function () {
         return browser.executeAsyncScriptHandleErrors('loadUI5Dependencies', {
-          waitForUI5Timeout: waitForUI5Timeout,
-          waitForUI5PollingInterval: config.timeouts.waitForUI5PollingInterval,
+          autoWait: _.extend({
+            timeout: waitForUI5Timeout,
+            interval: config.timeouts.waitForUI5PollingInterval
+          }, config.autoWait),
           ClassicalWaitForUI5: ClassicalWaitForUI5,
           useClassicalWaitForUI5: config.useClassicalWaitForUI5
         });

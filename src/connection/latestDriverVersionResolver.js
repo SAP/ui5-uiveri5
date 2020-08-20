@@ -21,11 +21,11 @@ LatestDriverVersionResolver.prototype.getLatestVersion = function (binary) {
 LatestDriverVersionResolver.prototype._getLatestMajorVersion = function (binary) {
   var that = this;
 
-  that.logger.info('Check for latest major version of: ' + binary.filename);
   return q.Promise(function (resolveFn, rejectFn) {
-    if (binary.latestVersionFileUrl) {
+    if (!binary.useDirectUrl && binary.latestMajorVersionFileUrl) {
+      that.logger.info('Check for latest major version of: ' + binary.filename);
       request({
-        url: binary.latestVersionFileUrl
+        url: binary.latestMajorVersionFileUrl
       }, function (error, res, body) {
         if (_hasError(error, res)) {
           rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest major version number'));
@@ -49,7 +49,7 @@ LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary
   that.logger.info('Check for latest version of: ' + binary.filename);
   return q.Promise(function (resolveFn, rejectFn) {
     request({
-      url: binary.latestVersionUrlRedirect || binary.latestVersionUrl
+      url: (binary.useDirectUrl && binary.latestVersionUrlDirect) || binary.latestVersionUrlRedirect || binary.latestVersionUrl
     }, function (error, res, body) {
       if(_hasError(error, res)) {
         rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest version number'));

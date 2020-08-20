@@ -27,7 +27,19 @@ describe('DirectConnectionProvider', function() {
         chromedriverGHConfig:
           {
             version: '{chrome.latest}',
-            latestVersionFileUrl: mockUrl + '/driverVersions.json',
+            latestMajorVersionFileUrl: mockUrl + '/driverVersions.json',
+            filename: 'chromedriver',
+            executable: 'chromedriver-{chrome.latest}',
+            baseurl: mockUrl,
+            latestVersionUrl: mockUrl + '/LATEST_RELEASE_{chrome.latest}',
+            url: mockUrl + '/{chrome.latest}/chromedriver_win32.zip',
+          },
+        chromedriverDirectUrl:
+          {
+            version: '{chrome.latest}',
+            useDirectUrl: true,
+            latestVersionUrlDirect: mockUrl + '/LATEST_RELEASE',
+            latestMajorVersionFileUrl: mockUrl + '/driverVersions.json',
             filename: 'chromedriver',
             executable: 'chromedriver-{chrome.latest}',
             baseurl: mockUrl,
@@ -81,6 +93,16 @@ describe('DirectConnectionProvider', function() {
       expect(directConnectionProvider.binaries.chromedriverGHConfig.latestVersionUrl).toBe(mockUrl + '/LATEST_RELEASE_73');
       expect(directConnectionProvider.binaries.chromedriverGHConfig.latestVersionUrl).toBe(mockUrl + '/LATEST_RELEASE_73');
       expect(directConnectionProvider.binaries.chromedriverGHConfig.url).toBe(mockUrl + '/73.4/chromedriver_win32.zip');
+      done();
+    })
+  });
+
+  it('Should get the latest chromedriver version from the direct url', function (done) {
+    var version = directConnectionProvider._getLatestVersion(testBinaries.chromedriverDirectUrl);
+    version.then(function () {
+      expect(directConnectionProvider.binaries.chromedriverDirectUrl.version).toBe('1.0');
+      expect(directConnectionProvider.binaries.chromedriverDirectUrl.executable).toBe('chromedriver-1.0');
+      expect(directConnectionProvider.binaries.chromedriverDirectUrl.url).toBe(mockUrl + '/1.0/chromedriver_win32.zip');
       done();
     })
   });

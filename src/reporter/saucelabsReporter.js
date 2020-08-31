@@ -1,14 +1,10 @@
-var _ = require('lodash');
-var ExpectationPlugin = require('./expectationPlugin');
-var ActionPlugin = require('./actionPlugin');
-
-function JasmineSaucelabsReporter(config, instanceConfig, logger, collector) {
+function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
   this.collector = collector;
-  this.expectationPlugin = new ExpectationPlugin();
-  this.actionPlugin = new ActionPlugin();
+  this.actionInterceptor = actionInterceptor;
+  this.expectationInterceptor = expectationInterceptor;
 }
 
 JasmineSaucelabsReporter.prototype.suiteStarted = function () {
@@ -35,15 +31,30 @@ JasmineSaucelabsReporter.prototype.jasmineDone = function () {
 JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
 
-  this.expectationPlugin.onExpectation(function (expectation, specResult, category) {
-    browser.executeScript('sauce:context=' + _.last(specResult[category]).fullMessage);
-  });
-  this.actionPlugin.onAction(function (action) {
+  this.expectationInterceptor.onExpectation(function (expectation) {
+    browser.executeScript('sauce:context=' + this._createFullMessage(expectation));
+  }.bind(this));
+  this.actionInterceptor.onAction(function (action) {
     browser.executeScript('sauce:context=Perform action: ' + action.name + ' with value "' + action.value +
       '" on element with ' + (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"');
   });
 };
 
-module.exports = function (config, instanceConfig, logger, collector) {
-  return new JasmineSaucelabsReporter(config, instanceConfig, logger, collector);
+JasmineSaucelabsReporter.prototype._createFullMessage = function (expectation) {
+  var sExpectation = 'Expectation ' + (expectation.passed ? 'passed' : 'failed') + '.';
+  if (expectation.matcherName) {
+    sExpectation += ' Expected "' + expectation.actual + '" ' + expectation.matcherName + ' "' + expectation.expected + '".';
+  }
+  if (expectation.message) {
+    sExpectation += ' Message: "' + expectation.message + '". ';
+  }
+  if (!expectation.passed && expectation.error) {
+    sExpectation += ' Error: "' + expectation.error + '". ';
+  }
+
+  return sExpectation;
+};
+
+module.exports = function (config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
+  return new JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor);
 };

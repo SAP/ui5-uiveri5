@@ -1,8 +1,8 @@
-function ActionPlugin() {
+function ActionInterceptor() {
   this.latestLocator = null;
 }
 
-ActionPlugin.prototype.onSync = function (syncCb) {
+ActionInterceptor.prototype.onSync = function (syncCb) {
   // hook in waiter (before actions)
   var originalWaitForAngular = browser.waitForAngular;
   browser.waitForAngular = function () {
@@ -10,7 +10,7 @@ ActionPlugin.prototype.onSync = function (syncCb) {
   };
 };
 
-ActionPlugin.prototype.onAction = function (actionCb) {
+ActionInterceptor.prototype.onAction = function (actionCb) {
   var that = this;
 
   // hook in applyAction_ to get the element locator
@@ -47,4 +47,4 @@ ActionPlugin.prototype.onAction = function (actionCb) {
   });
 };
 
-module.exports = ActionPlugin;
+module.exports = new ActionInterceptor();

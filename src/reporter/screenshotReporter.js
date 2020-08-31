@@ -2,24 +2,22 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var utils = require('./reporterUtils');
-var ExpectationPlugin = require('./expectationPlugin');
-var ActionPlugin = require('./actionPlugin');
 
 var DEFAULT_SCREENSHOTS_ROOT = 'target/report/screenshots/';
 var DEFAULT_TEMPLATE_NAME = __dirname + '/report.screenshots.tpl.html';
 var DEFAULT_REPORT_NAME = 'report.html';
 
-function JasmineScreenshotReporter(config, instanceConfig, logger, collector) {
+function JasmineScreenshotReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
   this.collector = collector;
+  this.actionInterceptor = actionInterceptor;
+  this.expectationInterceptor = expectationInterceptor;
   this.screenshotsRoot = instanceConfig.screenshotsRoot || DEFAULT_SCREENSHOTS_ROOT;
   this.templateName = instanceConfig.templateName || DEFAULT_TEMPLATE_NAME;
   this.reportName = path.join(this.screenshotsRoot, instanceConfig.reportName || DEFAULT_REPORT_NAME);
   this.stepIndex = 0;
-  this.expectationPlugin = new ExpectationPlugin();
-  this.actionPlugin = new ActionPlugin();
 }
 
 JasmineScreenshotReporter.prototype.jasmineStarted = function () {
@@ -50,21 +48,20 @@ JasmineScreenshotReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
   var that = this;
 
-  this.expectationPlugin.onExpectation(this._onExpectation.bind(this));
-  this.actionPlugin.onSync(function () {
+  this.expectationInterceptor.onExpectation(this._onExpectation.bind(this));
+  this.actionInterceptor.onSync(function () {
     // screenshot is taken between sync and interaction
     return that._takeScreenshot(function (png) {
       that.lastSyncScreenshot = png;
     });
   });
-  this.actionPlugin.onAction(that._onAction.bind(this));
+  this.actionInterceptor.onAction(that._onAction.bind(this));
 };
 
 JasmineScreenshotReporter.prototype._onExpectation = function (expectation, specResult, category) {
   var that = this;
 
-  if ((that._isEnabled('onExpectSuccess') && expectation.passed) ||
-      (that._isEnabled('onExpectFailure') && !expectation.passed)) {
+  if ((that._isEnabled('onExpectSuccess') && expectation.passed) || (that._isEnabled('onExpectFailure') && !expectation.passed)) {
     var screenshotName = that._generateExpectationScreenshotName(specResult.fullName, expectation.passed);
     _.last(specResult[category]).screenshot = screenshotName;
     that._takeScreenshot(function (png) {
@@ -72,6 +69,7 @@ JasmineScreenshotReporter.prototype._onExpectation = function (expectation, spec
     });
   }
 
+  _.last(specResult[category]).shortMessage = ['Expected', '\'' + expectation.actual + '\'', expectation.matcherName, '\'' + expectation.expected + '\''].join(' ');
   _.last(specResult[category]).stepIndex = that.stepIndex;
   that.stepIndex += 1;
 };
@@ -132,6 +130,6 @@ JasmineScreenshotReporter.prototype._isEnabled = function (option) {
   return _.get(this.config, 'takeScreenshot.' + option);
 };
 
-module.exports = function (config, instanceConfig, logger, collector) {
-  return new JasmineScreenshotReporter(config, instanceConfig, logger, collector);
+module.exports = function (config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
+  return new JasmineScreenshotReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor);
 };

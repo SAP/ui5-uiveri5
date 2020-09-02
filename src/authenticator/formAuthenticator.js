@@ -1,4 +1,5 @@
 
+var _ = require('lodash');
 var webdriver = require('selenium-webdriver');
 
 /**
@@ -22,6 +23,16 @@ function FormAuthenticator(config,instanceConfig,logger,statisticsCollector){
   this.idpSelector = instanceConfig.idpSelector;
   this.redirectUrl = instanceConfig.redirectUrl;
   this.statisticsCollector = statisticsCollector;
+
+  var authorizationButtonTimeout = instanceConfig.authorizationButtonTimeout;
+  if (_.isString(authorizationButtonTimeout)) {
+    authorizationButtonTimeout = parseInt(authorizationButtonTimeout, 10);
+  }
+  if (Number.isInteger(authorizationButtonTimeout) && authorizationButtonTimeout >= 0) {
+    this.authorizationButtonTimeout = authorizationButtonTimeout;
+  } else {
+    this.authorizationButtonTimeout = 0;
+  }
 }
 
 /**

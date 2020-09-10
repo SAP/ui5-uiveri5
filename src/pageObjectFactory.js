@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var logger = require('./logger')(3);
 
 var PageObjectFactory = function () {
   this.Given = {};
@@ -23,13 +24,21 @@ PageObjectFactory.prototype.createPageObjects = function (pageObjects) {
       }
     }
 
-    var name = 'onThe' + page + 'Page';
+    var poName = 'onThe' + page + 'Page';
 
-    that.When[name] = _.extend(that.When[name], definition.actions);
-    that.Then[name] = _.extend(that.Then[name], definition.assertions);
+    if (that.When[poName] || that.Then[poName]) {
+      logger.info('Merging page objects with the same name: ' + poName);
+    }
 
-    _.each(definition.arrangements, function (arrangement, name) {
-      that.Given[name] = arrangement;
+    that.When[poName] = _.extend(that.When[poName], definition.actions);
+    that.Then[poName] = _.extend(that.Then[poName], definition.assertions);
+
+    // add arrangements directly to Given (and not to Given.onThe<Name>Page)
+    _.each(definition.arrangements, function (arrangement, arrangementName) {
+      if (that.Given[arrangementName]) {
+        logger.info('Overriding arrangement with the same name: ' + arrangementName);
+      }
+      that.Given[arrangementName] = arrangement;
     });
   });
 };

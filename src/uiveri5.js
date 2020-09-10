@@ -126,36 +126,41 @@ function run(config) {
     // disable default jasmine console reporter
     protractorArgv.jasmineNodeOpts.print = function() {};
 
-    // copy timeouts
-    if (config.timeouts){
-      if (config.timeouts.getPageTimeout){
-        var getPageTimeout = config.timeouts.getPageTimeout;
-        if(_.isString(getPageTimeout)){
-          getPageTimeout = parseInt(getPageTimeout,10);
+    config.timeouts = config.timeouts || {};
+
+    var pageRedirectDelta = 100;
+    var defaultTimeouts = {
+      getPageTimeout: 10000,
+      allScriptsTimeout: 11000,
+      defaultTimeoutInterval: 30000,
+      waitForUI5Delta: 200,
+      waitForUI5PollingInterval: 400
+    };
+
+    function copyTimeoutFromConfig(name, minValue, path) {
+      minValue = minValue || 0;
+      path = (path ? path + '.' : '') + name;
+      if (!_.isUndefined(config.timeouts[name])) {
+        var value = config.timeouts[name];
+        if (_.isString(value)) {
+          value = parseInt(value, 10);
         }
-        logger.debug('Setting getPageTimeout: ' + getPageTimeout);
-        protractorArgv.getPageTimeout = getPageTimeout;
-      }
-      if (config.timeouts.allScriptsTimeout){
-        var allScriptsTimeout = config.timeouts.allScriptsTimeout;
-        if(_.isString(allScriptsTimeout)){
-          allScriptsTimeout = parseInt(allScriptsTimeout,10);
+        if (Number.isInteger(value) && value > minValue) {
+          logger.debug('Setting ' + name + ': ' + value);
+        } else {
+          value = defaultTimeouts[name];
+          logger.debug(name + ' should be an integer > ' + minValue + '. Setting ' + name + ' to the default value: ' + value);
         }
-        logger.debug('Setting allScriptsTimeout: ' + allScriptsTimeout);
-        protractorArgv.allScriptsTimeout = allScriptsTimeout;
-      }
-      if (config.timeouts.defaultTimeoutInterval){
-        var defaultTimeoutInterval = config.timeouts.defaultTimeoutInterval;
-        if(_.isString(defaultTimeoutInterval)){
-          defaultTimeoutInterval = parseInt(defaultTimeoutInterval,10);
-        }
-        logger.debug('Setting defaultTimeoutInterval: ' + defaultTimeoutInterval);
-        protractorArgv.jasmineNodeOpts.defaultTimeoutInterval = defaultTimeoutInterval;
+        _.set(protractorArgv, path, value);
       }
     }
 
-    var ui5SyncDelta = config.timeouts && config.timeouts.waitForUI5Delta;
-    var waitForUI5Timeout = ui5SyncDelta > 0 ? (config.timeouts.allScriptsTimeout - ui5SyncDelta) : 0;
+    copyTimeoutFromConfig('waitForUI5Delta', 100);
+    copyTimeoutFromConfig('waitForUI5PollingInterval', 100);
+    copyTimeoutFromConfig('getPageTimeout', pageRedirectDelta);
+    copyTimeoutFromConfig('allScriptsTimeout', config.timeouts.waitForUI5Delta);
+    copyTimeoutFromConfig('defaultTimeoutInterval', protractorArgv.allScriptsTimeout, 'jasmineNodeOpts');
+
 
     proxyquire('protractor/built/browser', {
       './clientsidescripts': clientsidescripts
@@ -345,8 +350,8 @@ function run(config) {
 
       browser._loadUI5Dependencies = function () {
         return browser.executeAsyncScriptHandleErrors('loadUI5Dependencies', {
-          waitForUI5Timeout: waitForUI5Timeout,
-          waitForUI5PollingInterval: config.timeouts.waitForUI5PollingInterval,
+          waitForUI5Timeout: protractorArgv.allScriptsTimeout - protractorArgv.waitForUI5Delta,
+          waitForUI5PollingInterval: protractorArgv.waitForUI5PollingInterval,
           ClassicalWaitForUI5: ClassicalWaitForUI5,
           useClassicalWaitForUI5: config.useClassicalWaitForUI5
         });
@@ -599,7 +604,7 @@ function run(config) {
                 throw new Error('Could not match target url that is neither string nor regexp');
               }
             });
-          }, browser.getPageTimeout - 100,'Waiting for redirection to complete, target url: ' + targetUrl); 
+          }, browser.getPageTimeout - pageRedirectDelta,'Waiting for redirection to complete, target url: ' + targetUrl);
           // 10ms delta is necessary or webdriver crashes and the process stops without exit status
         }
       };

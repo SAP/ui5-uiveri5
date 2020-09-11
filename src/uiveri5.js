@@ -632,9 +632,11 @@ function run(config) {
         }
       };
 
+      var actionInterceptor = require('./reporter/actionInterceptor');
+      var expectationInterceptor = require('./reporter/expectationInterceptor');
       // register reporters
       var jasmineEnv = jasmine.getEnv();
-      moduleLoader.loadModule('reporters',[statisticCollector]).forEach(function(reporter){
+      moduleLoader.loadModule('reporters',[statisticCollector, actionInterceptor, expectationInterceptor]).forEach(function(reporter){
         reporter.register(jasmineEnv);
       });
     };

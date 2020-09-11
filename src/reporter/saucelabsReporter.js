@@ -1,8 +1,10 @@
-function JasmineSaucelabsReporter(config, instanceConfig, logger, collector) {
+function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
   this.collector = collector;
+  this.actionInterceptor = actionInterceptor;
+  this.expectationInterceptor = expectationInterceptor;
 }
 
 JasmineSaucelabsReporter.prototype.suiteStarted = function () {
@@ -29,50 +31,30 @@ JasmineSaucelabsReporter.prototype.jasmineDone = function () {
 JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
 
-  ['click', 'sendKeys'].forEach(this._registerOnAction.bind(this));
-  this._registerOnExpectation();
+  this.expectationInterceptor.onExpectation(function (expectation) {
+    browser.executeScript('sauce:context=' + this._createFullMessage(expectation));
+  }.bind(this));
+  this.actionInterceptor.onAction(function (action) {
+    browser.executeScript('sauce:context=Perform action: ' + action.name + ' with value "' + action.value +
+      '" on element with ' + (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"');
+  });
 };
 
-JasmineSaucelabsReporter.prototype._registerOnAction = function (action) {
-  var originalAction = protractorModule.parent.parent.exports.WebElement.prototype[action];
+JasmineSaucelabsReporter.prototype._createFullMessage = function (expectation) {
+  var sExpectation = 'Expectation ' + (expectation.passed ? 'passed' : 'failed') + '.';
+  if (expectation.matcherName) {
+    sExpectation += ' Expected "' + expectation.actual + '" ' + expectation.matcherName + ' "' + expectation.expected + '".';
+  }
+  if (expectation.message) {
+    sExpectation += ' Message: "' + expectation.message + '". ';
+  }
+  if (!expectation.passed && expectation.error) {
+    sExpectation += ' Error: "' + expectation.error + '". ';
+  }
 
-  protractorModule.parent.parent.exports.WebElement.prototype[action] = function () {
-    var element = this;
-    var actionValue = arguments[0];
-
-    // TODO: save the locator which was used to find the element
-    return element.getAttribute('id').then(function (elementId) {
-      var onAction = function () {
-        browser.executeScript('sauce:context=Perform action: ' + action + ' with value "' + actionValue + '" on "' + elementId + '"');
-      };
-      return originalAction.call(element, actionValue).then(onAction, onAction);
-    });
-  };
+  return sExpectation;
 };
 
-// should be called after browser.getProcessedConfig()
-JasmineSaucelabsReporter.prototype._registerOnExpectation = function () {
-  var originalAddExpectationResult = jasmine.Spec.prototype.addExpectationResult;
-
-  jasmine.Spec.prototype.addExpectationResult = function (passed, expectation) {
-    var sExpectation = 'Expectation ' + (passed ? 'passed' : 'failed') + '.';
-
-    if (expectation.matcherName) {
-      sExpectation += ' Expected "' + expectation.actual + '" ' + expectation.matcherName + ' "' + expectation.expected + '".';
-    }
-    if (expectation.message) {
-      sExpectation += ' Message: "' + expectation.message + '". ';
-    }
-    if (expectation.error) {
-      sExpectation += ' Error: "' + expectation.error + '". ';
-    }
-
-    browser.executeScript('sauce:context=' + sExpectation);
-
-    return originalAddExpectationResult.apply(this, arguments);
-  };
-};
-
-module.exports = function (config, instanceConfig, logger, collector) {
-  return new JasmineSaucelabsReporter(config, instanceConfig, logger, collector);
+module.exports = function (config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
+  return new JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor);
 };

@@ -46,10 +46,11 @@ LatestDriverVersionResolver.prototype._getLatestMajorVersion = function (binary)
 LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary) {
   var that = this;
 
-  that.logger.info('Check for latest version of: ' + binary.filename);
   return q.Promise(function (resolveFn, rejectFn) {
+    var url = (binary.useDirectUrl && binary.latestVersiondDirectUrl) || binary.latestVersionRedirectUrl || binary.latestVersionUrl;
+    that.logger.info('Check for latest version of: ' + binary.filename + ' from: ' + url);
     request({
-      url: (binary.useDirectUrl && binary.latestVersionUrlDirect) || binary.latestVersionUrlRedirect || binary.latestVersionUrl
+      url: url
     }, function (error, res, body) {
       if(_hasError(error, res)) {
         rejectFn(_buildErrorObject(error, res, binary.filename, 'the latest version number'));
@@ -57,9 +58,9 @@ LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary
         var latestVersion;
 
         // resolve latest version
-        if(binary.latestVersionUrl) {
+        if(binary.latestVersionUrl || (binary.useDirectUrl && binary.latestVersiondDirectUrl)) {
           latestVersion = body;
-        } else if(binary.latestVersionUrlRedirect) {
+        } else if(binary.latestVersionRedirectUrl ) {
           // request to the latest version is redirected to the latest release, so get the version from req.path
           var redirectPath = res.req.path.split('/');
           latestVersion = redirectPath[redirectPath.length - 1];
@@ -72,7 +73,9 @@ LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary
           });
         } else {
           rejectFn(new Error('Latest version resolving is not configured correctly, one of latestVersionUrl: ' + binary.latestVersionUrl +
-          ' or latestVersionUrlRedirect: ' + binary.latestVersionUrlRedirect + ' should be provided'));
+          ' or latestVersionRedirectUrl: ' + binary.latestVersionRedirectUrl + 
+          ' or latestVersionDirectUrl:' + binary.latestVersiondDirectUrl +
+          ' should be provided'));
         }
       }
     });

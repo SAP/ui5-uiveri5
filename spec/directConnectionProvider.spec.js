@@ -38,7 +38,7 @@ describe('DirectConnectionProvider', function() {
           {
             version: '{chrome.latest}',
             useDirectUrl: true,
-            latestVersionUrlDirect: mockUrl + '/LATEST_RELEASE',
+            latestVersiondDirectUrl: mockUrl + '/LATEST_RELEASE',
             latestMajorVersionFileUrl: mockUrl + '/driverVersions.json',
             filename: 'chromedriver',
             executable: 'chromedriver-{chrome.latest}',
@@ -60,7 +60,7 @@ describe('DirectConnectionProvider', function() {
             filename: 'geckodriver',
             executable: 'geckodriver-{latest}',
             baseurl: mockUrl,
-            latestVersionUrlRedirect: mockUrl + '/latest',
+            latestVersionRedirectUrl: mockUrl + '/latest',
             url: mockUrl + '/download/{latest}/geckodriver-{latest}-win32.zip',
           },
         chromedriverExisting:

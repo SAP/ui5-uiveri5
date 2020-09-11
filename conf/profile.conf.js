@@ -32,7 +32,7 @@ exports.config = {
           'chromedriver_${osTypeString}.zip',
           latestVersionUrl: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE_${connectionConfigs.direct.binaries.chromedriver.version}',
           latestMajorVersionFileUrl: 'https://raw.githubusercontent.com/SAP/ui5-uiveri5/master/driverVersions.json',
-          latestVersionUrlDirect: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE',
+          latestVersiondDirectUrl: '${connectionConfigs.direct.binaries.chromedriver.baseurl}/LATEST_RELEASE',
           useDirectUrl: false,
           executable: {
             win32: 'chromedriver-${connectionConfigs.direct.binaries.chromedriver.version}.exe',
@@ -60,7 +60,7 @@ exports.config = {
           url: '${connectionConfigs.direct.binaries.geckodriver.baseurl}/download/${connectionConfigs.direct.binaries.geckodriver.version}' +
           '/geckodriver-${connectionConfigs.direct.binaries.geckodriver.version}-${osTypeString == "mac64" ? "macos" : osTypeString}' +
           '${osTypeString == "win32" || osTypeString == "win64" ? ".zip" : ".tar.gz"}',
-          latestVersionUrlRedirect: '${connectionConfigs.direct.binaries.geckodriver.baseurl}/latest',
+          latestVersionRedirectUrl: '${connectionConfigs.direct.binaries.geckodriver.baseurl}/latest',
           executable: {
             win32: 'geckodriver-${connectionConfigs.direct.binaries.geckodriver.version}.exe',
             win64: 'geckodriver-${connectionConfigs.direct.binaries.geckodriver.version}.exe',

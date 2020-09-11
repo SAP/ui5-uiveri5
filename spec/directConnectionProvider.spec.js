@@ -38,7 +38,7 @@ describe('DirectConnectionProvider', function() {
           {
             version: '{chrome.latest}',
             useDirectUrl: true,
-            latestVersiondDirectUrl: mockUrl + '/LATEST_RELEASE',
+            latestVersionDirectUrl: mockUrl + '/LATEST_RELEASE',
             latestMajorVersionFileUrl: mockUrl + '/driverVersions.json',
             filename: 'chromedriver',
             executable: 'chromedriver-{chrome.latest}',

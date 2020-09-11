@@ -47,7 +47,7 @@ LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary
   var that = this;
 
   return q.Promise(function (resolveFn, rejectFn) {
-    var url = (binary.useDirectUrl && binary.latestVersiondDirectUrl) || binary.latestVersionRedirectUrl || binary.latestVersionUrl;
+    var url = (binary.useDirectUrl && binary.latestVersionDirectUrl) || binary.latestVersionRedirectUrl || binary.latestVersionUrl;
     that.logger.info('Check for latest version of: ' + binary.filename + ' from: ' + url);
     request({
       url: url
@@ -58,7 +58,7 @@ LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary
         var latestVersion;
 
         // resolve latest version
-        if(binary.latestVersionUrl || (binary.useDirectUrl && binary.latestVersiondDirectUrl)) {
+        if(binary.latestVersionUrl || (binary.useDirectUrl && binary.latestVersionDirectUrl)) {
           latestVersion = body;
         } else if(binary.latestVersionRedirectUrl ) {
           // request to the latest version is redirected to the latest release, so get the version from req.path
@@ -74,7 +74,7 @@ LatestDriverVersionResolver.prototype._getLatestDriverVersion = function (binary
         } else {
           rejectFn(new Error('Latest version resolving is not configured correctly, one of latestVersionUrl: ' + binary.latestVersionUrl +
           ' or latestVersionRedirectUrl: ' + binary.latestVersionRedirectUrl + 
-          ' or latestVersionDirectUrl:' + binary.latestVersiondDirectUrl +
+          ' or latestVersionDirectUrl:' + binary.latestVersionDirectUrl +
           ' should be provided'));
         }
       }

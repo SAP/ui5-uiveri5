@@ -96,14 +96,14 @@ var mFunctions = {
     }
 
     function loadControlFinder() {
-      return new Promise(function (resolve) {
+      return new Promise(function (resolve, reject) {
         if (window.uiveri5._ControlFinder) {
           resolve();
         } else {
           sDebugLog += '\nLoading OPA5 control locator utilities.';
           var onError = function (oError) {
             // only throw error if dependency is missing when a control locator is actually used
-            resolve('Control locators will not be enabled.' +
+            reject('Failed to load ControlFinder API. Control locators will not be enabled.' +
             ' Minimum UI5 versions supporting control locators: 1.52.12; 1.54.4; 1.55 and up. Details: ' + oError);
           };
           try {
@@ -121,15 +121,15 @@ var mFunctions = {
     }
 
     function loadBrowserLogCollector() {
-      return new Promise(function (resolve) {
+      return new Promise(function (resolve, reject) {
         if (window.uiveri5._BrowserLogCollector) {
           resolve();
         } else {
           sDebugLog += '\nLoading OPA5 browser log collector.';
           var onError = function (oError) {
             // only throw error if dependency is missing when a control locator is actually used
-            resolve('Browser log collector will not be enabled.' +
-            ' Minimum UI5 versions supporting nrowser log collector: 1.64 and up. Details: ' + oError);
+            reject('Failed to load BrowserLogCollector API. Browser log collector will not be enabled.' +
+            ' Minimum UI5 versions supporting browser log collector: 1.64 and up. Details: ' + oError);
           };
           try {
             window.sap.ui.require([

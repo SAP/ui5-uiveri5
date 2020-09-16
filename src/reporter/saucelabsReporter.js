@@ -31,13 +31,28 @@ JasmineSaucelabsReporter.prototype.jasmineDone = function () {
 JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
 
+  this.collector.onAuthStarted(function () {
+    browser.executeScript('sauce: disable log');
+  });
+
+  this.collector.onAuthDone(function () {
+    browser.executeScript('sauce: enable log');
+  });
+
   this.expectationInterceptor.onExpectation(function (expectation) {
     browser.executeScript('sauce:context=' + this._createFullMessage(expectation));
   }.bind(this));
+
   this.actionInterceptor.onAction(function (action) {
-    browser.executeScript('sauce:context=Perform action: ' + action.name + ' with value "' + action.value +
-      '" on element with ' + (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"');
-  });
+    var locatorLog = (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"';
+    if (this.collector.isAuthInProgress()) {
+      browser.executeScript('sauce: enable log');
+      browser.executeScript('sauce:context=Perform authentication action: ' + action.name + ' on element with ' + locatorLog);
+      browser.executeScript('sauce: disable log');
+    } else {
+      browser.executeScript('sauce:context=Perform action: ' + action.name + ' with value "' + action.value + '" on element with ' + locatorLog);
+    }
+  }.bind(this));
 };
 
 JasmineSaucelabsReporter.prototype._createFullMessage = function (expectation) {

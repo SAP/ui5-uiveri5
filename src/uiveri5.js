@@ -372,11 +372,6 @@ function run(config) {
         jasmine.getEnv().addMatchers(matchers);
       });
 
-      // add additional locators
-      moduleLoader.loadModule('locators').forEach(function(locator){
-        locator.register(by);
-      });
-
       // hook into specs lifecycle
       // open test content page before every suite
       jasmine.getEnv().addReporter({
@@ -641,6 +636,12 @@ function run(config) {
       moduleLoader.loadModule('reporters',[statisticCollector, actionInterceptor, expectationInterceptor]).forEach(function(reporter){
         reporter.register(jasmineEnv);
       });
+
+      // add additional locators
+      moduleLoader.loadModule('locators', [statisticCollector]).forEach(function (locator) {
+        locator.register(by);
+      });
+
     };
 
     protractorArgv.afterLaunch = function(){

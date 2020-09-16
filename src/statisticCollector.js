@@ -102,6 +102,7 @@ function StatisticCollector(){
   this.currentSpec = null;
   this._authStartedCallbacks = [];
   this._authDoneCallbacks = [];
+  this.stepIndex = 0;
 }
 
 StatisticCollector.prototype.jasmineStarted = function(){
@@ -117,8 +118,8 @@ StatisticCollector.prototype.suiteStarted = function(jasmineSuite){
     }
   };
 };
-
-StatisticCollector.prototype.specStarted = function(jasmineSpec, specMeta){
+StatisticCollector.prototype.specStarted = function(jasmineSpec,specMeta){
+  this.stepIndex = 0;
   this.currentSpec = {
     // save the description as spec name instead of fullName, which includes the suite name too
     name: jasmineSpec.description,
@@ -126,7 +127,8 @@ StatisticCollector.prototype.specStarted = function(jasmineSpec, specMeta){
       duration: new Date()  // save start time in duration during the run
     },
     actions: [],
-    stepSequence: []
+    stepSequence: [],
+    logs: []
   };
   if (specMeta) {
     this.currentSpec.meta = specMeta;
@@ -407,9 +409,8 @@ StatisticCollector.prototype.onAuthDone = function (cb) {
 };
 
 StatisticCollector.prototype.collectAction = function (action) {
-  // we are collecting statistics outside of a jasmine spec - skip the collection
-  // the screenshot reporter is pushing an action on every sendKeys, if you use sendKeys
-  // If you are using sendKeys inside of the beforeEach of a test the currentSpec will be undefined
+  // don't collect actions outside of a jasmine spec;
+  // e.g. if you are using sendKeys in beforeEach, the currentSpec will be undefined
   if (!this.currentSpec) {
     return;
   }
@@ -417,9 +418,23 @@ StatisticCollector.prototype.collectAction = function (action) {
     // hide authentication values
     delete action.value;
   }
+  if (action.stepIndex === undefined) {
+    this.currentSpec.actions.push(Object.assign(action, {
+      stepIndex: this.stepIndex
+    }));
+    this.currentSpec.stepSequence[this.stepIndex] = 'actions';
+    this.stepIndex += 1;
+  } else {
+    this.currentSpec.actions.push(action);
+    this.currentSpec.stepSequence[action.stepIndex] = 'actions';
+  }
+};
 
-  this.currentSpec.actions.push(action);
-  this.currentSpec.stepSequence[action.stepIndex] = 'actions';
+StatisticCollector.prototype.collectLog = function (sLog) {
+  this.currentSpec.logs.push({
+    text: sLog,
+    stepIndex: this.stepIndex
+  });
 };
 
 /**

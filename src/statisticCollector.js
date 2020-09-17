@@ -386,10 +386,7 @@ StatisticCollector.prototype.authDone = function () {
   }, {
     isAuthentication: true
   });
-  // hide authentication values
-  this.currentSpec.actions.forEach(function (action) {
-    action.value = null;
-  });
+
   // restore the information about the first spec in the suite
   this.currentSpec = this.specStartedBeforeAuth;
   this._authDoneCallbacks.forEach(function (cb) {
@@ -415,6 +412,10 @@ StatisticCollector.prototype.collectAction = function (action) {
   // If you are using sendKeys inside of the beforeEach of a test the currentSpec will be undefined
   if (!this.currentSpec) {
     return;
+  }
+  if (this.isAuthInProgress()) {
+    // hide authentication values
+    delete action.value;
   }
 
   this.currentSpec.actions.push(action);

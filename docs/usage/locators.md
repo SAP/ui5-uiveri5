@@ -45,7 +45,7 @@ In order to use the `control` locator in your tests, the application being teste
 In the application testing approach we use hierarchical class locators composed of UI5 control main
 (marker) class names (the class names of the control root DOM element). This hierarchical composition is important to guarantee the stability of locators. Usage of classes is problematic as DOM is not a UI5 API and it can change between UI5 minor releases. Only UI5 JS API is guaranteed to be backward-compatible. One approach to mitigate this issue is to use control locators.
 
-The `control` locator is closely tied to the control level of abstraction and therefore should be much more intuitive for application developers. The `control` locator object can be written easily by inspecting the application using the [UI5 Inspector](https://chrome.google.com/webstore/detail/ui5-inspector/bebecogbafbighhaildooiibipcnbngo).
+The `control` locator is closely tied to the control level of abstraction and therefore should be much more intuitive for application developers.
 
 The locator is created using the `by` collection of factory functions:
 ```javascript
@@ -56,12 +56,27 @@ element.all(by.control({id: /test/}));
 
 Using the `control` locator gives you an `ElementFinder` of the DOM element best representing the found control. Since there can be more than one representation of a control, you can choose which one fits best a desired interaction. This is a common pitfall and is described below in the Interactions section.
 
+### Tools
+As of version 1.74, UI5 provides the [Test Recorder tool](https://openui5.hana.ondemand.com/topic/2535ef9272064cb6bd6b44e5402d531d)
+which supports application developers who write integration and system tests. Use it in your application under test to get hints
+on writing tests and suggestions for control locators. The Test Recorder provides UIVeri5 code snippets for most controls.
+Keep in mind that this tool is just a helper and you would often have to modify the snippets to fit your specific needs!
+
+In the Test Recorder you can inspect control properties to write your own snippets from scratch. There are a couple of other tools
+that can also help you inspect the control tree:
+* [UI5 Technical Information](https://openui5.hana.ondemand.com/topic/616a3ef07f554e20a3adf749c11f64e9#loio616a3ef07f554e20a3adf749c11f64e9)
+* [UI5 Diagnostics](https://openui5.hana.ondemand.com/topic/6ec18e80b0ce47f290bc2645b0cc86e6#loio790defe9ff8643bf8629c8567270e290)
+* [UI5 Inspector](https://chrome.google.com/webstore/detail/ui5-inspector/bebecogbafbighhaildooiibipcnbngo)
+
 ### Syntax
 Under the hood, control locators rely on [OPA5](https://openui5.hana.ondemand.com/#/api/sap.ui.test.Opa5/overview) functionality. If you are familiar with OPA5's `waitFor` structure, then you will be able to immediately transition to control locators. The difference between a control selector and a typical OPA5 `waitFor` is that some values are not allowed. The unsupported property values are: `matchers` and `actions` object constructions and `check`, `success` and `actions` functions.
 
-`by.control` accepts a plain object specifying the `viewName`, `viewNamespace`, ID, `controlType`, ID suffix, and other properties of the control to look for. The ID can be a string or a regular expression. Just like in OPA5, if a `viewName` is given, the ID is the view-relative ID, otherwise it is the global ID. All [OPA5 matchers](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers/overview) are supported. In OPA5, you normally create a matcher instance and pass the expected parameters to the constructor as a plain object. In a control selector, you can set the same plain object parameters to the matcher property.
+`by.control` accepts a plain object specifying the `viewName`, `viewNamespace`, ID, `controlType`, ID suffix, and other properties of the control to look for. The ID can be a string or a regular expression. Just like in OPA5, if a `viewName` is given, the ID is the view-relative ID, otherwise it is the global ID.
 
-Matchers syntax:
+All [OPA5 matchers](https://openui5.hana.ondemand.com/#/api/sap.ui.test.matchers/overview) are supported. In OPA5, you normally create a matcher instance and pass the expected parameters to the constructor as a plain object. In a control selector, you can set the same plain object parameters to the matcher property.
+
+The syntax for each matcher is detailed in the [API](https://openui5.hana.ondemand.com/api/), for example see [the binding path matcher's API](https://openui5.hana.ondemand.com/api/sap.ui.test.matchers.BindingPath). Here are some examples:
+
 ```javascript
 // find an object header with full ID matching "myViewID--foo.[0-9]+" and property data binding for model "JSONModel"
 element(by.control({
@@ -71,7 +86,7 @@ element(by.control({
   bindingPath: {path: "/products/1", propertyPath: "Status", modelName: "JSONModel"}
 });
 // other examples of matcher properties:
-  I18NText: {propertyName: "text", key: "buttonText"}
+  i18NText: {propertyName: "text", key: "buttonText"}
   labelFor: {key: "labelText", modelName: "i18n"}
   labelFor: {text: "myText"}
   properties: {text: "My Header Text"}
@@ -83,7 +98,7 @@ element(by.control({
   descendant: {id: /^bar/, properties: {text: "My Descendant Text"}}
 ```
 
-Multiple uses of one type of matcher in a single selector:
+You can use the same matcher multiple times in a single selector:
 ```javascript
 element(by.control({
   viewName: "myViewName",

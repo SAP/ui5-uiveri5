@@ -48,6 +48,18 @@ exports.config = {
 }
 ```
 
+You may want to hide sensitive test data, for example authentication steps.
+There are SauceLabs commands to disable or enable all logs - your custom logs, the `saucelabsReporter` logs and the browser logs that SauceLabs provides out-of-the-box.
+```js
+browser.executeScript('sauce: disable log');
+// this log won't show up in the test results
+browser.executeScript('sauce:context=Hidden log');
+// don't forget to re-enable the logs
+browser.executeScript('sauce: enable log');
+```
+
+## Identify test result
+
 If you want to set a name, tags or CI build number for your test, you can do so in the browser capabilities:
 ```js
 exports.config = {

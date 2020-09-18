@@ -100,6 +100,8 @@ function StatisticCollector(){
 
   this.currentSuite = null;
   this.currentSpec = null;
+  this._authStartedCallbacks = [];
+  this._authDoneCallbacks = [];
 }
 
 StatisticCollector.prototype.jasmineStarted = function(){
@@ -116,7 +118,7 @@ StatisticCollector.prototype.suiteStarted = function(jasmineSuite){
   };
 };
 
-StatisticCollector.prototype.specStarted = function(jasmineSpec){
+StatisticCollector.prototype.specStarted = function(jasmineSpec, specMeta){
   this.currentSpec = {
     // save the description as spec name instead of fullName, which includes the suite name too
     name: jasmineSpec.description,
@@ -126,6 +128,9 @@ StatisticCollector.prototype.specStarted = function(jasmineSpec){
     actions: [],
     stepSequence: []
   };
+  if (specMeta) {
+    this.currentSpec.meta = specMeta;
+  }
 };
 
 StatisticCollector.prototype.specDone = function(jasmineSpec, specMeta) {
@@ -213,7 +218,7 @@ StatisticCollector.prototype.specDone = function(jasmineSpec, specMeta) {
   },this);
 
   if (specMeta) {
-    this.currentSpec.meta = specMeta;
+    this.currentSpec.meta = Object.assign(this.currentSpec.meta || {}, specMeta);
   }
 
   // compute expectations statistic
@@ -364,6 +369,11 @@ StatisticCollector.prototype.authStarted = function () {
   this.specStartedBeforeAuth = this.currentSpec;
   this.specStarted({
     description: 'Authentication'
+  }, {
+    isAuthentication: true
+  });
+  this._authStartedCallbacks.forEach(function (cb) {
+    cb();
   });
 };
 
@@ -376,12 +386,24 @@ StatisticCollector.prototype.authDone = function () {
   }, {
     isAuthentication: true
   });
-  // hide authentication values
-  this.currentSpec.actions.forEach(function (action) {
-    action.value = null;
-  });
+
   // restore the information about the first spec in the suite
   this.currentSpec = this.specStartedBeforeAuth;
+  this._authDoneCallbacks.forEach(function (cb) {
+    cb();
+  });
+};
+
+StatisticCollector.prototype.isAuthInProgress = function () {
+  return this.currentSpec.meta && this.currentSpec.meta.isAuthentication;
+};
+
+StatisticCollector.prototype.onAuthStarted = function (cb) {
+  this._authStartedCallbacks.push(cb);
+};
+
+StatisticCollector.prototype.onAuthDone = function (cb) {
+  this._authDoneCallbacks.push(cb);
 };
 
 StatisticCollector.prototype.collectAction = function (action) {
@@ -390,6 +412,10 @@ StatisticCollector.prototype.collectAction = function (action) {
   // If you are using sendKeys inside of the beforeEach of a test the currentSpec will be undefined
   if (!this.currentSpec) {
     return;
+  }
+  if (this.isAuthInProgress()) {
+    // hide authentication values
+    delete action.value;
   }
 
   this.currentSpec.actions.push(action);

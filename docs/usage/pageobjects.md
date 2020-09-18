@@ -152,7 +152,7 @@ module.exports = {
     iClickTheButtonWithI18nText function (sI18nText) {
       var button = element(by.control({
         controlType: "sap.m.Button",
-        I18NText: {propertyName: "text", key: sI18nText}
+        i18NText: {propertyName: "text", key: sI18nText}
       }));
       button.click();
 });

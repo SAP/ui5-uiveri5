@@ -44,14 +44,17 @@ JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
   }.bind(this));
 
   this.actionInterceptor.onAction(function (action) {
-    var locatorLog = (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"';
     if (this.collector.isAuthInProgress()) {
       browser.executeScript('sauce: enable log');
-      browser.executeScript('sauce:context=Perform authentication action: ' + action.name + ' on element with ' + locatorLog);
-      browser.executeScript('sauce: disable log');
-    } else {
-      browser.executeScript('sauce:context=Perform action: ' + action.name + ' with value "' + action.value + '" on element with ' + locatorLog);
     }
+
+    browser.executeScript('sauce:context=Perform action: ' + action.name + 
+      (action.value ? ' with value "' + action.value : '') + '" on element with ' +
+      (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"');
+
+    if (this.collector.isAuthInProgress()) {
+      browser.executeScript('sauce: disable log');
+    } 
   }.bind(this));
 };
 

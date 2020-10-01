@@ -140,14 +140,14 @@ If think your authenticator would be usefull for others, please consider contrib
 ## Programatic Authentication
 Set `baseUrl` to `null` to disable automatic page loading and declartive authentication configuration. From the test, call  `browser.get()` with the required URL.
 
-You can override the default auth settings by providing an options object with the same syntax as in the conf.js file.
+You can override the default auth settings by providing an options object with the same syntax as in the conf.js file. You can also supply creditentials from parameters but you need to use the programatic approach as the parameters placeholders are resolved only in the declarative configuration.
 ```javascript
 browser.get(
   '<url>',{
     auth:{
       'sapcloud-form': {
-        user: '<user>',
-        pass: '<pass>'
+        user: browser.testrunner.config.params.user,
+        pass: browser.testrunner.config.params.pass
       }
     }
   }

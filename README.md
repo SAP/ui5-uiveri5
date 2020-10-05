@@ -6,6 +6,8 @@ UIVeri5 is an E2E testing framework for [UI5](https://ui5.sap.com)-based applica
 application as a real user would. UIVeri5 is heavily inspired by [Protractor](http://www.protractortest.org/)
 and brings most (and more) of its benefits to UI5 applications.
 
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/ui5-uiveri5)](https://api.reuse.software/info/github.com/SAP/ui5-uiveri5)
+
 ### Benefits
 * Automatic synchronization with UI5 app rendering so there is no need to add waits and sleeps to your test. Tests are reliable by design.
 * Tests are written in synchronous manner, no callbacks, no promise chaining so are really simple to write and maintain.
@@ -127,7 +129,3 @@ Here we gather few projects that build on UIVeri5 and tailor it for specific use
 
 ## Automatic Downloads
 By default, when running locally, UIVeri5 downloads selenium.jar and/or the respective webdrivers - chromedriver, geckodriver from their official locations. You can disable the downloading or change the locations in profile.conf.js. When using --seleniumAddress, nothing is downloaded.
-
-## Licence
-Copyright (c) 2018 SAP SE or an SAP affiliate company. All rights reserved.
-This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the [LICENSE](LICENSE.txt) file.

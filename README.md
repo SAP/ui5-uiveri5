@@ -6,6 +6,8 @@ UIVeri5 is an E2E testing framework for [UI5](https://ui5.sap.com)-based applica
 application as a real user would. UIVeri5 is heavily inspired by [Protractor](http://www.protractortest.org/)
 and brings most (and more) of its benefits to UI5 applications.
 
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/ui5-uiveri5)](https://api.reuse.software/info/github.com/SAP/ui5-uiveri5)
+
 ### Benefits
 * Automatic synchronization with UI5 app rendering so there is no need to add waits and sleeps to your test. Tests are reliable by design.
 * Tests are written in synchronous manner, no callbacks, no promise chaining so are really simple to write and maintain.

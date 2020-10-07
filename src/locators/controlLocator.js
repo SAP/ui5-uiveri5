@@ -7,13 +7,14 @@ var _ = require('lodash');
  * @param {object} logger optional logger object with methods: debug, info, error, trace. if not defined, no logs will be produced
  * @public
  */
-function ControlLocator(config, instanceConfig, logger) {
+function ControlLocator(config, instanceConfig, logger, collector) {
   this.logger = _.extend({
     debug: _.noop,
     info: _.noop,
     error: _.noop,
     trace: _.noop
   }, logger);
+  this.collector = collector;
 }
 
 /**
@@ -24,7 +25,7 @@ function ControlLocator(config, instanceConfig, logger) {
 ControlLocator.prototype.register = function (by) {
   this.logger.debug('Registering control locator');
   by.control = function (mMatchers) {
-    var locator = new _ControlLocator(mMatchers, this.logger);
+    var locator = new _ControlLocator(mMatchers, this.logger, this.collector);
     return locator;
   }.bind(this);
 };
@@ -34,7 +35,7 @@ ControlLocator.prototype.register = function (by) {
  * @param {object} mMatchers JSON object containing OPA5-style control search conditions and matchers
  */
 ControlLocator.prototype.apply = function (mMatchers) {
-  var locator = new _ControlLocator(mMatchers, this.logger);
+  var locator = new _ControlLocator(mMatchers, this.logger, this.collector);
   return locator;
 };
 
@@ -43,9 +44,10 @@ ControlLocator.prototype.apply = function (mMatchers) {
  * @param {object} mMatchers JSON object containing OPA5-style control search conditions and matchers
  * @implements {ProtractorLocator}
  */
-function _ControlLocator(mMatchers, logger) {
+function _ControlLocator(mMatchers, logger, collector) {
   this.matchers = mMatchers;
   this.logger = logger;
+  this.collector = collector;
 }
 
 /**
@@ -88,7 +90,9 @@ _ControlLocator.prototype.findElementsOverride = function (driver, using, rootSe
       } else {
         return driver.executeScript(clientsidescripts.getLatestLog)
           .then(function (sLatestLog) {
-            this.logger.debug('No elements found using by.control locator. This is what control locator last logged: ' + sLatestLog);
+            var details = 'No elements found using by.control locator. This is what control locator last logged: ' + sLatestLog;
+            this.logger.info(details);
+            this.collector.collectLog(details);
             return vResult;
           }.bind(this));
       }
@@ -104,6 +108,6 @@ _ControlLocator.prototype.toString = function toString() {
   return 'by.control(' + sMatchers + ')';
 };
 
-module.exports = function (config, instanceConfig, logger) {
-  return new ControlLocator(config, instanceConfig, logger);
+module.exports = function (config, instanceConfig, logger, collector) {
+  return new ControlLocator(config, instanceConfig, logger, collector);
 };

@@ -111,11 +111,18 @@
 
     code {
       width: 90%;
-      height: 300px;
       padding: 10px;
       background-color: #ffffff;
       overflow: auto;
       white-space: pre-wrap;
+    }
+
+    code.log {
+      height: 50px;
+    }
+
+    code.stack {
+      height: 300px;
     }
 
     img {
@@ -195,6 +202,8 @@
           <div>Execute '<%- step.name %>' on element with
             <% if (step.elementLocator) { %> locator '<%- step.elementLocator %>' and<% } %> ID '<%- step.elementId %>'
             <% if (step.value) { %> with value '<%- step.value %>' <% } %>
+            <% var log = _.find(spec.logs, {stepIndex: stepIndex}); %>
+            <% if (log) { %>Log: <code class="log"><%- log.text %></code><br><% } %>
           </div>
           <% } %>
           <% if (step.status === "failed" && step.matcher === 'toLookAs' && !!step.details) { %>
@@ -223,7 +232,9 @@
             <img data-source="<%- step.screenshot %>"/>
           </a>
           <% } %>
-          <% if (step.status === "failed") { %><code><%- step.stack %></code><% } %>
+          <% var log = _.find(spec.logs, {stepIndex: stepIndex}); %>
+          <% if (log) { %>Log: <code class="log"><%- log.text %></code><br><% } %>
+          <% if (step.status === "failed") { %>Error stack: <code class="stack"><%- step.stack %></code><% } %>
         </div>
       </div>
       <% } %>

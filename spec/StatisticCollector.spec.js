@@ -199,7 +199,7 @@ describe("StatisticCollector", function() {
     it('Should collect step sequence', function () {
       reporter.jasmineStarted();
       reporter.suiteStarted({description: 'Enabled suite'});
-      reporter.specStarted({fullName: 'should pass'});
+      reporter.specStarted({description: 'should pass'});
       reporter.authStarted();
       reporter.collectAction({name: 'click', stepIndex: 0, screenshot: 'click_0'});
       reporter.authDone();

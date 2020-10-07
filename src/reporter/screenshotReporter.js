@@ -17,7 +17,6 @@ function JasmineScreenshotReporter(config, instanceConfig, logger, collector, ac
   this.screenshotsRoot = instanceConfig.screenshotsRoot || DEFAULT_SCREENSHOTS_ROOT;
   this.templateName = instanceConfig.templateName || DEFAULT_TEMPLATE_NAME;
   this.reportName = path.join(this.screenshotsRoot, instanceConfig.reportName || DEFAULT_REPORT_NAME);
-  this.stepIndex = 0;
 }
 
 JasmineScreenshotReporter.prototype.jasmineStarted = function () {
@@ -28,7 +27,6 @@ JasmineScreenshotReporter.prototype.suiteStarted = function () {
 };
 
 JasmineScreenshotReporter.prototype.specStarted = function () {
-  this.stepIndex = 0;
 };
 
 JasmineScreenshotReporter.prototype.specDone = function () {
@@ -70,8 +68,8 @@ JasmineScreenshotReporter.prototype._onExpectation = function (expectation, spec
   }
 
   _.last(specResult[category]).shortMessage = ['Expected', '\'' + expectation.actual + '\'', expectation.matcherName, '\'' + expectation.expected + '\''].join(' ');
-  _.last(specResult[category]).stepIndex = that.stepIndex;
-  that.stepIndex += 1;
+  _.last(specResult[category]).stepIndex = this.collector.stepIndex;
+  this.collector.stepIndex += 1;
 };
 
 JasmineScreenshotReporter.prototype._onAction = function (action) {
@@ -81,11 +79,10 @@ JasmineScreenshotReporter.prototype._onAction = function (action) {
     delete this.lastSyncScreenshot;
   }
 
+  // add action to the statistic for the current spec
   this.collector.collectAction(_.extend(_.pick(action, ['name', 'elementLocator', 'elementId', 'value']), {
-    stepIndex: this.stepIndex,
     screenshot: screenshotName
   }));
-  this.stepIndex += 1;
 };
 
 JasmineScreenshotReporter.prototype._takeScreenshot = function (successCallback) {
@@ -107,7 +104,7 @@ JasmineScreenshotReporter.prototype._saveScreenshot = function (name, data) {
 JasmineScreenshotReporter.prototype._generateExpectationScreenshotName = function (specFullName, expectationPassed) {
   var fileName = [
     specFullName.substring(0, 220),
-    this.stepIndex,
+    this.collector.stepIndex,
     (expectationPassed ? 'pass' : 'fail'),
     new Date().toISOString().substring(0, 19)
   ].join('_').replace(/[\/\?<>\\:\*\|":\s]/g, '-');
@@ -119,7 +116,7 @@ JasmineScreenshotReporter.prototype._generateActionScreenshotName = function (ac
   var fileName = [
     action,
     elementId.substring(0, 190),
-    this.stepIndex,
+    this.collector.stepIndex,
     new Date().toISOString().substring(0, 19)
   ].join('_').replace(/[\/\?<>\\:\*\|":\s]/g, '-');
 

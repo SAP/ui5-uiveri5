@@ -118,7 +118,8 @@ StatisticCollector.prototype.suiteStarted = function(jasmineSuite){
     }
   };
 };
-StatisticCollector.prototype.specStarted = function(jasmineSpec,specMeta){
+
+StatisticCollector.prototype.specStarted = function(jasmineSpec, specMeta){
   this.stepIndex = 0;
   this.currentSpec = {
     // save the description as spec name instead of fullName, which includes the suite name too

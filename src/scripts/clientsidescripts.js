@@ -15,7 +15,7 @@ var mFunctions = {
     // retry checking for UI5
     var waitedTime = 0;
     (function wait () {
-      if (window.sap && window.sap.ui) {
+      if (window.sap && window.sap.ui && window.sap.ui.getCore()) {
 
         // wait for UI5 core to complete initialisation
         window.sap.ui.getCore().attachInit(function() {

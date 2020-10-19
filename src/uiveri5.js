@@ -342,9 +342,7 @@ function run(config) {
         // helps in situations where multiple redirects happen after final URL is reached and till UI5 page is reached
         browser.driver.wait(function() {
           return browser.driver.findElements(by.css(config.loadUI5Dependencies.ui5BootstrapCompletedSelector)).then(function (aFields) {
-            if (aFields.length) {
-              return aFields[0].isEnabled();
-            }
+            return !!aFields.length
           });
         }, browser.getPageTimeout - 100,'Waiting for UI5 boostrap. No UI5 on this page');
 

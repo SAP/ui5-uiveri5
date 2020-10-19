@@ -1,6 +1,6 @@
 {
   "name": "@ui5/uiveri5",
-  "version": "1.45.1",
+  "version": "1.45.1-syncboot-2",
   "description": "UIVeri5 is an E2E testing framework for UI5-based applications.",
   "author": "SAP SE (https://www.sap.com)",
   "license": "Apache-2.0",

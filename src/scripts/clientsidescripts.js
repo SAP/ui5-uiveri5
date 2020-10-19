@@ -44,11 +44,12 @@ var mFunctions = {
               fnCallback({error: sError, log: sDebugLog + (sLog || '')});
             });
         });
-      } else if (waitedTime < mScriptParams.autoWait.timeout) {
+      } else if (waitedTime < mScriptParams.autoWait.timeout - mScriptParams.autoWait.interval) {
+        // so to be sure we timout here first
         waitedTime += mScriptParams.autoWait.interval;
         setTimeout(wait, mScriptParams.autoWait.interval);
       } else {
-        fnCallback({log: sDebugLog, error: 'No UI5 on this page'});
+        fnCallback({log: sDebugLog, error: 'Waiting for UI5 initialization. No UI5 on this page'});
       }
     })();
 

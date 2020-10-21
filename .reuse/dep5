@@ -27,3 +27,7 @@ Disclaimer: The code in this project may include calls to APIs (“API Calls”)
 Files: *
 Copyright: 2018-2020 SAP SE or an SAP affiliate company and UI5 UIVeri5 contributors
 License: Apache-2.0
+
+Files: lib/resemblejs/resemble.js
+Copyright: 2013 Huddle
+License: 	MIT

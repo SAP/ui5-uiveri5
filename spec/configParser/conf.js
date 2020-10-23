@@ -1,5 +1,7 @@
 exports.config = {
-  provider: 'name',
+  provider1: 'name',
+  provider2: {key1: 'overwrite', key2: 'overwrite'},
+  specs: ['overwrite'],
   multi: [
     {name: 'option1'}
   ],

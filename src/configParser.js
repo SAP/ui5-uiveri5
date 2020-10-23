@@ -43,11 +43,15 @@ ConfigParser.prototype._mergeConfig = function (newConfig) {
   var modulesToDisable = _extractModulesToDisable(priorityConfig);
   _.compact(priorityConfig);
 
-  // if browsers are defined in both *.conf.js and command line, use command line parameters
-  if (priorityConfig.browsers && newConfig.browsers) {
-    logger.info('Browsers defined in both *.conf.js and --browsers CLI argument, using --browsers argument.');
-    delete newConfig.browsers;
-  }
+  ['browsers', 'specs'].forEach(function (key) {
+    // there are some values that should be only overwritten from the command line (no merge).
+    // if browsers are defined in both *.conf.js and command line, use command line parameters
+    if (priorityConfig[key] && newConfig[key]) {
+      logger.info(key + ' defined in both *.conf.js and --' + key + ' CLI argument, using --' + key + ' argument.');
+      delete newConfig[key];
+    }
+  });
+
 
   for (var key in newConfig) {
     var modulesToEnable = [];
@@ -59,23 +63,28 @@ ConfigParser.prototype._mergeConfig = function (newConfig) {
       }
     }
 
-    if (_.isArray(priorityConfig[key])) {
-      // if existing (high prio) config has data about the current key -> update it
-      modulesToEnable.forEach(this._updateExistingKey(priorityConfig, key));
-      // remove the already processed modules (to ensure compact values in final merge)
-      _clearEnabledModules(newConfig, key);
-    } else if (modulesToEnable && modulesToEnable.length) {
-      // if existing (high prio) config doesn't have data about the current key -> add the new modules from the new (low prio) config
-      modulesToEnable.forEach(function (moduleDef) {
-        logger.debug('Adding module with ID "' + moduleDef.id + '" and name "' + moduleDef.name + '"' + 'under key "' + key + '"');
-      });
-      priorityConfig[key] = modulesToEnable;
-      _clearEnabledModules(newConfig, key);
-    }
+    var applyModuleMerge = _.every(modulesToEnable, function (mModule) {
+      return mModule.name || mModule.id;
+    });
+    if (applyModuleMerge) {
+      if (_.isArray(priorityConfig[key])) {
+        // if existing (high prio) config has data about the current key -> update it
+        modulesToEnable.forEach(this._updateExistingKey(priorityConfig, key));
+        // remove the already processed modules (to ensure compact values in final merge)
+        _clearEnabledModules(newConfig, key);
+      } else if (modulesToEnable && modulesToEnable.length) {
+        // if existing (high prio) config doesn't have data about the current key -> add the new modules from the new (low prio) config
+        modulesToEnable.forEach(function (moduleDef) {
+          logger.debug('Adding module with ID "' + moduleDef.id + '" and name "' + moduleDef.name + '"' + 'under key "' + key + '"');
+        });
+        priorityConfig[key] = modulesToEnable;
+        _clearEnabledModules(newConfig, key);
+      }
 
-    // if the new (low prio) config enables a module, but the existing (high prio) config disables it ->
-    // delete the module from the new config
-    this._disableModules(modulesToDisable, modulesToEnable, key);
+      // if the new (low prio) config enables a module, but the existing (high prio) config disables it ->
+      // delete the module from the new config
+      this._disableModules(modulesToDisable, modulesToEnable, key);
+    }
   }
 
   // merge the loaded *.conf.js into glabal config

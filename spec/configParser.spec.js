@@ -9,13 +9,16 @@ describe("configParser", function() {
     configParser.config = {};
   });
 
-  it('Should override basic types and objects',function(){
+  it('Should override object values', function () {
     var config = {
-      conf: __dirname + '/configParser/conf.js',  // cofig file with data to override
-      provider: {name:'test',key:'value'}};        // comming from command-line
+      conf: __dirname + '/configParser/conf.js', // config file with data to override
+      provider1: {key1: 'test', key2: 'value'}, // comming from command-line
+      provider2: {key1: 'test', key2: 'value'}
+    };
 
     var mergedConfig = configParser.mergeConfigs(config);
-    expect(mergedConfig.provider).toEqual({name:'test',key:'value'});
+    expect(mergedConfig.provider1).toEqual({key1: 'test', key2: 'value'});
+    expect(mergedConfig.provider2).toEqual({key1: 'test', key2: 'value'});
   });
 
   it('Should merge arrays in config', function () {
@@ -122,6 +125,16 @@ describe("Should parse confkey from command-line", function () {
     expect(config.key1).toEqual([{key2: ["opt1", "opt2"]}]);
     expect(config.browsers).toEqual([{capabilities: {chromeOptions: {args: ["--window-size=700,800", "--headless"]}}}]);
     expect(config.confKeys).toEqual(argvStub.confKeys);
+  });
+
+  it('Should overwrite specs with --specs', function () {
+    var config = {
+      conf: __dirname + '/configParser/conf.js', // config file with data to override
+      specs: ['newvalue'] // comming from command-line
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+    expect(mergedConfig.specs).toEqual(['newvalue']);
   });
 
   it('Should overwrite config.browsers with --browsers', () => {

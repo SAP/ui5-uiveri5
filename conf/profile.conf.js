@@ -116,8 +116,11 @@ exports.config = {
               '--disable-dev-shm-usage',
               '--disable-gpu',
               'disable-infobars'
-            ]
+            ],
           },
+          loggingPrefs: {
+            browser: 'ALL'
+          }
           /*
           chromedriverOptions: {
             'enableVerboseLogging': [],
@@ -163,10 +166,14 @@ exports.config = {
               '--disable-gpu',
               '--disable-infobars'
             ]
+          },
+          loggingPrefs: {
+            browser: 'ALL'
           }
         }
       }
     },
+
     'chromeHeadless': {
       '*': {
         '*': {
@@ -179,10 +186,13 @@ exports.config = {
               '--disable-gpu',
               '--disable-infobars'
             ]
+          },
+          loggingPrefs: {
+            browser: 'ALL'
           }
         }
       }
-    }
+    },
     
     /* WARNING: ignoring protected mode may introduce errors
      * A better solution would be to configure your IE browser:
@@ -254,7 +264,7 @@ exports.config = {
   ],
 
   plugins: [
-    /*{name: './plugins/browserLogsPlugin'}*/
+    // {name: './plugins/browserLogsPlugin'}
   ],
 
   matchers: [],

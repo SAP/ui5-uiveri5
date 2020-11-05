@@ -289,51 +289,6 @@ var mFunctions = {
         fnCallback({error: 'Error while processing dom, details: ' + error});
       }
     }
-  },
-
-  startLogCollection: function startLogCollection (mScriptParams) {
-    try {
-      if (!window.uiveri5 || !window.uiveri5._BrowserLogCollector) {
-        throw new Error('Log collection is not set up! Call "loadLogDependencies" before "startLogCollection"');
-      }
-      return {
-        value: window.uiveri5._BrowserLogCollector.start(mScriptParams.level)
-      };
-    } catch (oError) {
-      return {
-        error: 'Error while starting log collection, Details: ' + oError
-      };
-    }
-  },
-
-  getAndClearLogs: function getAndClearLogs () {
-    try {
-      if (!window.uiveri5 || !window.uiveri5._BrowserLogCollector) {
-        throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
-      }
-      return {
-        value: window.uiveri5._BrowserLogCollector.getAndClearLogs().logs
-      };
-    } catch (oError) {
-      return {
-        error: 'Error while getting logs, Details: ' + oError
-      };
-    }
-  },
-
-  stopLogsCollection: function stopLogsCollection () {
-    try {
-      if (!window.uiveri5 ||  !window.uiveri5._BrowserLogCollector) {
-        throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
-      }
-      return {
-        value: window.uiveri5._BrowserLogCollector.stop()
-      };
-    } catch (oError) {
-      return {
-        error: 'Error while stopping log collection, Details: ' + oError
-      };
-    }
   }
 };
 

@@ -64,10 +64,28 @@ auth: {
 
 ### Plain Authneticator
 This is a default authenticator that doesn't do any authentication. It is used by default whenever authentication is not configured.
+By default the plain authentication directly opens the `baseUrl`.
+It accepts an `authUrl` URL, which is a URL that will be opened, before redirecting to the `baseUrl`:
+```javascript
+ auth: {
+	plain: {
+		authUrl: "https://user:pass@host/index.html"
+	}
+}
+```
 Implemented in [plainAuthenticator.js](../../src/authenticator/plainAuthenticator.js).
 
 ### Basic URL Authenticator
-It sends the user and password in the URL.
+This authenticator implements basic authentication by sending the user and password in the URL.
+It uses the `baseUrl` as the host, and prepends the user and pass given in the configuration file:
+```javascript
+auth: {
+	basic: {
+		user: "<user>",
+		pass: "<pass>"
+	}
+}
+```
 Implemented in [basicUrlAuthenticator.js](../../src/authenticator/basicUrlAuthenticator.js).
 
 #### Parameters

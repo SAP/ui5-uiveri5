@@ -6,11 +6,7 @@
  * @param {Object} instanceConfig
  * @param {Logger} logger
  */
-function PlainAuthenticator(config,instanceConfig) {
-  //this.config = config;
-  this.instanceConfig = instanceConfig;
-  this.authUrl = this.instanceConfig.authUrl;
-  //this.logger = logger;
+function PlainAuthenticator() {
 }
 
 /**
@@ -20,7 +16,7 @@ function PlainAuthenticator(config,instanceConfig) {
  */
 PlainAuthenticator.prototype.get = function(url){
   // get the url
-  browser.driver.get(this.authUrl ? this.authUrl : url);
+  browser.driver.get(url);
 
   // ensure possible redirect due to SSO client-auth is completed
   return browser.testrunner.navigation.waitForRedirect(url);

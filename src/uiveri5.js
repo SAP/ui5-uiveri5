@@ -589,6 +589,9 @@ function run(config) {
                 if(targetUrlHost.charAt(targetUrlHost.length - 1) == '/') {
                   targetUrlHost = targetUrlHost.slice(0, -1);
                 }
+                // strip basic auth information
+                targetUrlHost = targetUrlHost.replace(/\/\/\S+:\S+@/, '//');
+
                 return  currentUrlHost === targetUrlHost;
               } else if (_.isRegExp(targetUrl)) {
                 return targetUrl.test(currentUrlHost);

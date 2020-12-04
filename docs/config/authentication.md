@@ -67,7 +67,16 @@ This is a default authenticator that doesn't do any authentication. It is used b
 Implemented in [plainAuthenticator.js](../../src/authenticator/plainAuthenticator.js).
 
 ### Basic URL Authenticator
-It sends the user and password in the URL.
+This authenticator implements basic authentication by sending the user and password in the URL.
+It uses the `baseUrl` as the host, and prepends the user and pass given in the configuration file:
+```javascript
+auth: {
+	basic: {
+		user: "<user>",
+		pass: "<pass>"
+	}
+}
+```
 Implemented in [basicUrlAuthenticator.js](../../src/authenticator/basicUrlAuthenticator.js).
 
 #### Parameters

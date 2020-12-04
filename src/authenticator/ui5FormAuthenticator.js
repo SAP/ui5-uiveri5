@@ -55,6 +55,6 @@ UI5FormAuthenticator.prototype.get = function(url){
   return browser.testrunner.navigation.waitForRedirect(url);
 };
 
-module.exports = function(config,logger,statisticsCollector){
-  return new UI5FormAuthenticator(config,logger,statisticsCollector);
+module.exports = function(config,instanceConfig,logger,statisticsCollector){
+  return new UI5FormAuthenticator(config,instanceConfig,logger,statisticsCollector);
 };

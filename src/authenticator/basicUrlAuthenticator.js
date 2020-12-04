@@ -40,6 +40,6 @@ BasicUrlAuthenticator.prototype.get = function(url){
   return browser.driver.get(urlWithAuth);
 };
 
-module.exports = function(config,logger){
-  return new BasicUrlAuthenticator(config,logger);
+module.exports = function(config,instanceConfig,logger){
+  return new BasicUrlAuthenticator(config,instanceConfig,logger);
 };

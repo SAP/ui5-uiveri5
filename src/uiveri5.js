@@ -486,21 +486,30 @@ function run(config) {
         }
       });
 
-      // setup plugin hooks
       jasmine.getEnv().addReporter({
-        suiteStarted: function(jasmineSuite){
-          _callPlugins('suiteStarted',[{name:jasmineSuite.description}]);
-        },
-        specStarted: function(jasmineSpec){
-          _callPlugins('specStarted',[{name:jasmineSpec.description}]);
-        },
-        specDone: function(jasmineSpec){
-          _callPlugins('specDone',[{name:jasmineSpec.description}]);
-        },
-        suiteDone: function(jasmineSuite){
-          _callPlugins('suiteDone',[{name:jasmineSuite.description}]);
-        },
+        jasmineStarted: function () {
+          // load Jasmine plugins.
+          // in jasmine 2.x, the reporter callbacks can't handle promises, so we use a workaround
+          // by adding the plugin callbacks as before* and after* functions (which can handle promises)
+          var root = jasmine.getEnv().topSuite();
+          _addPlugins(root);
+        }
       });
+
+      function _addPlugins(root) {
+        if (root.children) {
+          root.children.filter(function (child) {
+            return child instanceof jasmine.Suite && !child.disabled;
+          }).forEach(function (child) {
+            child.beforeAllFns.unshift(_callJasminePlugins('suiteStarted'));
+            child.beforeFns.unshift( _callJasminePlugins('specStarted'));
+            child.afterFns.unshift(_callJasminePlugins('specDone'));
+            child.afterAllFns.unshift(_callJasminePlugins('suiteDone'));
+
+            _addPlugins(child);
+          });
+        }
+      }
 
       if (config.exportParamsFile) {
         jasmine.getEnv().addReporter({
@@ -669,11 +678,21 @@ function run(config) {
       return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
     }
 
-    function _callPlugins(method,args) {
+
+    function _callJasminePlugins(method) {
+      return {
+        fn: _callPlugins.bind(this, method),
+        timeout: function() {
+          return jasmine.DEFAULT_TIMEOUT_INTERVAL;
+        }
+      };
+    }
+
+    function _callPlugins(method, args) {
       return Promise.all(
-        plugins.map(function(module) {
+        plugins.map(function (module) {
           if (module[method]) {
-            return module[method].apply(module,args);
+            return module[method].apply(module, args);
           }
         })
       );
@@ -682,7 +701,7 @@ function run(config) {
     logger.debug('Loading BDD-style page object factory');
     pageObjectFactory.register(global);
 
-    // load plugins
+    // load protractor plugins
     var plugins = moduleLoader.loadModule('plugins');
     protractorArgv.plugins = [{
       inline: {

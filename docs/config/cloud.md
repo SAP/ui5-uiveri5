@@ -39,6 +39,7 @@ applications.
 ## Test annotations
 SauceLabs gives you the option to annotate tests and make their execution logs more comrehensive.
 UIVeri5 has a SauceLabs reporter that adds a default set of annotations - spec names, actions, expectation results, suite result, etc.
+The reporter only has an effect when the test is running on SauceLabs and it won't do anything in a local test execution.
 To enable it, simply add it to the `reporters` configuration:
 ```js
 exports.config = {

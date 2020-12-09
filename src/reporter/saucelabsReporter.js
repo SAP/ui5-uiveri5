@@ -5,52 +5,53 @@ function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, act
   this.collector = collector;
   this.actionInterceptor = actionInterceptor;
   this.expectationInterceptor = expectationInterceptor;
+  this.runningOnSauceLabs = !!(this.config.seleniumAddress && this.config.seleniumAddress.match(/saucelabs\.com/));
 }
 
 JasmineSaucelabsReporter.prototype.suiteStarted = function () {
-  browser.executeScript('sauce:context=Suite started: ' + this.collector.getCurrentSuite().name);
+  this._executeSauceLabsScript('sauce:context=Suite started: ' + this.collector.getCurrentSuite().name);
 };
 
 JasmineSaucelabsReporter.prototype.specStarted = function () {
-  browser.executeScript('sauce:context=Spec started: ' + this.collector.getCurrentSpec().name);
+  this._executeSauceLabsScript('sauce:context=Spec started: ' + this.collector.getCurrentSpec().name);
 };
 
 JasmineSaucelabsReporter.prototype.specDone = function () {
-  browser.executeScript('sauce:context=Spec done: ' + this.collector.getCurrentSpec().name);
+  this._executeSauceLabsScript('sauce:context=Spec done: ' + this.collector.getCurrentSpec().name);
 };
 
 JasmineSaucelabsReporter.prototype.suiteDone = function () {
-  browser.executeScript('sauce:context=Suite done: ' + this.collector.getCurrentSuite().name);
+  this._executeSauceLabsScript('sauce:context=Suite done: ' + this.collector.getCurrentSuite().name);
 };
 
 JasmineSaucelabsReporter.prototype.jasmineDone = function () {
   var overview = this.collector.getOverview();
-  browser.executeScript('sauce:job-result=' + overview.status);
+  this._executeSauceLabsScript('sauce:job-result=' + overview.status);
 };
 
 JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
 
   this.collector.onAuthStarted(function () {
-    browser.executeScript('sauce: disable log');
-  });
+    this._executeSauceLabsScript('sauce: disable log');
+  }.bind(this));
 
   this.collector.onAuthDone(function () {
-    browser.executeScript('sauce: enable log');
-  });
+    this._executeSauceLabsScript('sauce: enable log');
+  }.bind(this));
 
   this.expectationInterceptor.onExpectation(function (expectation) {
-    browser.executeScript('sauce:context=' + this._createFullMessage(expectation));
+    this._executeSauceLabsScript('sauce:context=' + this._createFullMessage(expectation));
   }.bind(this));
 
   this.actionInterceptor.onAction(function (action) {
     var locatorLog = (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"';
     if (this.collector.isAuthInProgress()) {
-      browser.executeScript('sauce: enable log');
-      browser.executeScript('sauce:context=Perform authentication action: ' + action.name + ' on element with ' + locatorLog);
-      browser.executeScript('sauce: disable log');
+      this._executeSauceLabsScript('sauce: enable log');
+      this._executeSauceLabsScript('sauce:context=Perform authentication action: ' + action.name + ' on element with ' + locatorLog);
+      this._executeSauceLabsScript('sauce: disable log');
     } else {
-      browser.executeScript('sauce:context=Perform action: ' + action.name +
+      this._executeSauceLabsScript('sauce:context=Perform action: ' + action.name +
         (action.value ? ' with value "' + action.value : '') + '" on element with ' + locatorLog);
     }
   }.bind(this));
@@ -69,6 +70,14 @@ JasmineSaucelabsReporter.prototype._createFullMessage = function (expectation) {
   }
 
   return sExpectation;
+};
+
+JasmineSaucelabsReporter.prototype._executeSauceLabsScript = function (script) {
+  if (this.runningOnSauceLabs) {
+    // execute SauceLabs scripts only when running on SauceLabs.
+    // otherwise the scripts fail with "javascript error: Unexpected identifier"
+    browser.executeScript(script);
+  }
 };
 
 module.exports = function (config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {

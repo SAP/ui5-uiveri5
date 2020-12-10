@@ -96,7 +96,8 @@ function run(config) {
   // load spec resolver
   var specResolver = moduleLoader.loadModule('specResolver');
 
-  // resolve specs
+  // resolve specs.
+  // specs refers to the collection of found .spec.js files (a file containing Jasmine suites)
   logger.info('Resolving specs');
   return specResolver.resolve().then(function(specs){
     if (!specs || specs.length==0){
@@ -377,6 +378,18 @@ function run(config) {
         jasmine.getEnv().addMatchers(matchers);
       });
 
+      // addChild is called inside a describe block, after the suite is created
+      // override addChild to include the the spec file path
+      var originalAddChild = jasmine.Suite.prototype.addChild;
+      jasmine.Suite.prototype.addChild = function (child) {
+        if (child instanceof jasmine.Suite) {
+          var e = new Error();
+          var testFilePath = e.stack.split('\n')[5].replace(/\\/g, '/'); // [1] = uiveri5.js (overwrite), [2] = jasmine.js (addSpecsToSuite), [3], [4] = jasmine.js (describe)
+          testFilePath = testFilePath.substr(testFilePath.indexOf('(') + 1).replace(/\:\d+\:\d+\)/, '');
+          child.result.testFilePath = testFilePath;
+        }
+        originalAddChild.call(this, child);
+      };
       // hook into specs lifecycle
       // open test content page before every suite
       jasmine.getEnv().addReporter({
@@ -395,10 +408,9 @@ function run(config) {
           // will call jasmine.fail() that will handle the error
           browser.controlFlow().execute(function() {
 
-            var specFullName = result.description;
-            var spec = _getSpecByFullName(specFullName);
+            var spec = _getSuiteDetails(result);
             if (!spec) {
-              fail(new Error('Spec with full name: ' + specFullName + ' not found'));
+              fail(new Error('Spec with full name: ' + result.description + ' not found'));
               return;
             }
 
@@ -449,9 +461,7 @@ function run(config) {
         },
 
         suiteDone: function(result){
-          var specFullName = result.description;
-          var spec = _getSpecByFullName(specFullName);
-
+          var spec = _getSuiteDetails(result);
           // call storage provider afterEach hook
           if (storageProvider && storageProvider.onAfterEachSpec){
             storageProvider.onAfterEachSpec(spec);
@@ -642,13 +652,12 @@ function run(config) {
       return connectionProvider.teardownEnv();
     };
 
-    function _getSpecByFullName(specFullName){
-      var specIndex = specs.map(function(spec){return spec.fullName;}).indexOf(specFullName);
-      if(specIndex==-1){
-        return;
-      }
-
-      return specs[specIndex];
+    // finds a UIVeri5 spec definition by a given Jasmine suite description
+    // i.e. given the description of one of the suites in a spec file, find the information for that file.
+    function _getSuiteDetails(suite){
+      return specs.filter(function (suiteDetails) {
+        return suiteDetails.testPath === suite.testFilePath;
+      })[0];
     }
 
     /**

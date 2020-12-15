@@ -496,19 +496,46 @@ function run(config) {
         }
       });
 
+      var currentSpecDescription;
+      var originalSpecExecute = jasmine.Spec.prototype.execute;
+      jasmine.Spec.prototype.execute = function () {
+        currentSpecDescription = this.result.description;
+        originalSpecExecute.apply(this, arguments);
+      };
+
       function _addPlugins(root) {
         if (root.children) {
           root.children.filter(function (child) {
             return child instanceof jasmine.Suite && !child.disabled;
           }).forEach(function (child) {
-            child.beforeAllFns.unshift(_callJasminePlugins('suiteStarted'));
-            child.beforeFns.unshift( _callJasminePlugins('specStarted'));
-            child.afterFns.unshift(_callJasminePlugins('specDone'));
-            child.afterAllFns.unshift(_callJasminePlugins('suiteDone'));
+            child.beforeAllFns.unshift(_callJasmineSuitePlugins('suiteStarted', child.result.description));
+            child.beforeFns.unshift(_callJasmineSpecPlugins('specStarted'));
+            child.afterFns.unshift(_callJasmineSpecPlugins('specDone'));
+            child.afterAllFns.unshift(_callJasmineSuitePlugins('suiteDone', child.result.description));
 
             _addPlugins(child);
           });
         }
+      }
+
+      function _callJasmineSuitePlugins(method, suiteDescription) {
+        return {
+          fn: _callPlugins.bind(this, method, [{name: suiteDescription}]),
+          timeout: function() {
+            return jasmine.DEFAULT_TIMEOUT_INTERVAL;
+          }
+        };
+      }
+  
+      function _callJasmineSpecPlugins(method) {
+        return {
+          fn: function () {
+            return _callPlugins.call(this, method, [{name: currentSpecDescription}]);
+          },
+          timeout: function() {
+            return jasmine.DEFAULT_TIMEOUT_INTERVAL;
+          }
+        };
       }
 
       if (config.exportParamsFile) {
@@ -676,16 +703,6 @@ function run(config) {
       // the implicit synchronization that element() does is important to ensure app is settled before clicking
       var bodyElement = element(by.css('body'));
       return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
-    }
-
-
-    function _callJasminePlugins(method) {
-      return {
-        fn: _callPlugins.bind(this, method),
-        timeout: function() {
-          return jasmine.DEFAULT_TIMEOUT_INTERVAL;
-        }
-      };
     }
 
     function _callPlugins(method, args) {

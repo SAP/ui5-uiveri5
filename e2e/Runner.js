@@ -45,7 +45,6 @@ module.exports = class Runner {
           'node',
           '../bin/uiveri5',
           '-v',
-          // '--debug',
           '--browsers=chromeHeadless',
           '--config.specResolver="./resolver/localSpecResolver"',
           '--config.specs=' + opts.specs,

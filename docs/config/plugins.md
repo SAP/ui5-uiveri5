@@ -2,23 +2,15 @@
 
 ## Browser Logs Plugin
 This plugin outputs the logs that appeared in the browser during `spec` execution, at the end of each spec.
-To activate the plugin, add the following line to you configuration file:
-```javascript
-plugins: [
-  {name: './plugins/browserLogsPlugin'}
-],
-```
+It is activated by default.
 
-You can choose to filter the browser logs by severity level. Type the required level in the browser configuration:
+You can choose to filter the browser logs by severity level. Enter the required level in the `log` configuration:
 ```javascript
-browsers: [{
-  browserName: "chromeHeadless",
-  capabilities: {
-  loggingPrefs: {
-    browser: 'SEVERE'
-    }
+log: {
+  browser: {
+    level: 'DEBUG'
   }
-}]
+}
 ```
 
 The available log levels for Chrome are:
@@ -31,7 +23,8 @@ The available log levels for Chrome are:
 'ALL'
 ```
 
-The default log level is `'ALL'`. This means that if you enable the `browserLogsPlugin`, all browser logs - error, info, and debug logs, will be logged to the UIVeri5 command output.
+The default log level is `'SEVERE'`. This means that if you enable the `browserLogsPlugin`,
+all browser errors logs will be logged to the UIVeri5 command output.
 
 Note that this relies on a relatively new webdriver specification that is still implemented differently for each browser.
 For more information, check out the [`selenium-webdriver` documentation](https://github.com/SeleniumHQ/selenium/wiki/Logging).

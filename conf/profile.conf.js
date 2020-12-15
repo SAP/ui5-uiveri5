@@ -117,9 +117,6 @@ exports.config = {
               '--disable-gpu',
               'disable-infobars'
             ],
-          },
-          loggingPrefs: {
-            browser: 'ALL'
           }
           /*
           chromedriverOptions: {
@@ -166,9 +163,6 @@ exports.config = {
               '--disable-gpu',
               '--disable-infobars'
             ]
-          },
-          loggingPrefs: {
-            browser: 'ALL'
           }
         }
       }
@@ -186,9 +180,6 @@ exports.config = {
               '--disable-gpu',
               '--disable-infobars'
             ]
-          },
-          loggingPrefs: {
-            browser: 'ALL'
           }
         }
       }
@@ -264,16 +255,15 @@ exports.config = {
   ],
 
   plugins: [
-    // {name: './plugins/browserLogsPlugin'}
+    {name: './plugins/browserLogsPlugin'}
   ],
 
   matchers: [],
 
-  /*
   log: {
     browser: {
-      level: 'error'
+      level: 'SEVERE'
     }
   }
-  */
+
 };

@@ -148,6 +148,12 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
     if (!runtime.capabilities) {
       runtime.capabilities = {};
     }
+
+    if (_.get(that, "config.log.browser.level")) {
+      runtime.capabilities.loggingPrefs = runtime.capabilities.loggingPrefs || {};
+      runtime.capabilities.loggingPrefs.browser = that.config.log.browser.level;
+    }
+
     if (that.config.browserCapabilities) {
       that._mergeMatchingCapabilities(runtime,that.config.browserCapabilities);
     }

@@ -486,21 +486,57 @@ function run(config) {
         }
       });
 
-      // setup plugin hooks
       jasmine.getEnv().addReporter({
-        suiteStarted: function(jasmineSuite){
-          _callPlugins('suiteStarted',[{name:jasmineSuite.description}]);
-        },
-        specStarted: function(jasmineSpec){
-          _callPlugins('specStarted',[{name:jasmineSpec.description}]);
-        },
-        specDone: function(jasmineSpec){
-          _callPlugins('specDone',[{name:jasmineSpec.description}]);
-        },
-        suiteDone: function(jasmineSuite){
-          _callPlugins('suiteDone',[{name:jasmineSuite.description}]);
-        },
+        jasmineStarted: function () {
+          // load Jasmine plugins.
+          // in jasmine 2.x, the reporter callbacks can't handle promises, so we use a workaround
+          // by adding the plugin callbacks as before* and after* functions (which can handle promises)
+          var root = jasmine.getEnv().topSuite();
+          _addPlugins(root);
+        }
       });
+
+      var currentSpecDescription;
+      var originalSpecExecute = jasmine.Spec.prototype.execute;
+      jasmine.Spec.prototype.execute = function () {
+        currentSpecDescription = this.result.description;
+        originalSpecExecute.apply(this, arguments);
+      };
+
+      function _addPlugins(root) {
+        if (root.children) {
+          root.children.filter(function (child) {
+            return child instanceof jasmine.Suite && !child.disabled;
+          }).forEach(function (child) {
+            child.beforeAllFns.push(_callJasmineSuitePlugins('suiteStarted', child.result.description));
+            child.beforeFns.push(_callJasmineSpecPlugins('specStarted'));
+            child.afterFns.push(_callJasmineSpecPlugins('specDone'));
+            child.afterAllFns.push(_callJasmineSuitePlugins('suiteDone', child.result.description));
+
+            _addPlugins(child);
+          });
+        }
+      }
+
+      function _callJasmineSuitePlugins(method, suiteDescription) {
+        return {
+          fn: _callPlugins.bind(this, method, [{name: suiteDescription}]),
+          timeout: function() {
+            return jasmine.DEFAULT_TIMEOUT_INTERVAL;
+          }
+        };
+      }
+  
+      function _callJasmineSpecPlugins(method) {
+        return {
+          fn: function () {
+            return _callPlugins.call(this, method, [{name: currentSpecDescription}]);
+          },
+          timeout: function() {
+            return jasmine.DEFAULT_TIMEOUT_INTERVAL;
+          }
+        };
+      }
 
       if (config.exportParamsFile) {
         jasmine.getEnv().addReporter({
@@ -672,11 +708,11 @@ function run(config) {
       return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
     }
 
-    function _callPlugins(method,args) {
+    function _callPlugins(method, args) {
       return Promise.all(
-        plugins.map(function(module) {
+        plugins.map(function (module) {
           if (module[method]) {
-            return module[method].apply(module,args);
+            return module[method].apply(module, args);
           }
         })
       );
@@ -685,7 +721,7 @@ function run(config) {
     logger.debug('Loading BDD-style page object factory');
     pageObjectFactory.register(global);
 
-    // load plugins
+    // load protractor plugins
     var plugins = moduleLoader.loadModule('plugins');
     protractorArgv.plugins = [{
       inline: {

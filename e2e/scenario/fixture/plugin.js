@@ -1,40 +1,80 @@
 'use strict';
 
-
-function TestPlugin(config,instanceConfig,logger){
-  //this.config  = config;
-  //this.instanceConfig = instanceConfig;
+function TestPlugin(config, instanceConfig, logger) {
   this.logger = logger;
 }
 
-TestPlugin.prototype.setup = function() {
-    this.logger.info('Plugin: setup');
+TestPlugin.prototype.setup = function () {
+  var logger = this.logger;
+  browser.logger = logger; // expose to spec
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: setup');
+      resolve();
+    }, 100);
+  });
 };
 
-TestPlugin.prototype.onPrepare = function() {
-    this.logger.info('Plugin: onPrepare');
+TestPlugin.prototype.onPrepare = function () {
+  var logger = this.logger;
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: onPrepare');
+      resolve();
+    }, 100);
+  });
 };
 
-TestPlugin.prototype.suiteStarted = function(suite) {
-    this.logger.info('Plugin: suiteStarted: ${name}',suite);
+TestPlugin.prototype.suiteStarted = function (suite) {
+  var logger = this.logger;
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: suiteStarted: ${name}', suite);
+      resolve();
+    }, 100);
+  });
 };
 
-TestPlugin.prototype.specStarted = function(spec) {
-    this.logger.info('Plugin: specStarted: ${name}',spec);
+TestPlugin.prototype.specStarted = function (spec) {
+  var logger = this.logger;
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: specStarted: ${name}', spec);
+      resolve();
+    }, 100);
+  });
 };
 
-TestPlugin.prototype.specDone = function(spec) {
-    this.logger.info('Plugin: specDone: ${name}',spec);
+TestPlugin.prototype.specDone = function (spec) {
+  var logger = this.logger;
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: specDone: ${name}', spec);
+      resolve();
+    }, 100);
+  });
 };
 
-TestPlugin.prototype.suiteDone = function(suite) {
-    this.logger.info('Plugin: suiteDone: ${name}',suite);
+TestPlugin.prototype.suiteDone = function (suite) {
+  var logger = this.logger;
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: suiteDone: ${name}', suite);
+      resolve();
+    }, 100);
+  });
 };
 
-TestPlugin.prototype.teardown = function() {
-    this.logger.info('Plugin: teardown');
+TestPlugin.prototype.teardown = function () {
+  var logger = this.logger;
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      logger.info('Plugin: teardown');
+      resolve();
+    }, 100);
+  });
 };
 
-module.exports = function(config,instanceConfig,logger){
-  return new TestPlugin(config,instanceConfig,logger);
+module.exports = function (config, instanceConfig, logger) {
+  return new TestPlugin(config, instanceConfig, logger);
 };

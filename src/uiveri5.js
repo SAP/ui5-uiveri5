@@ -508,10 +508,10 @@ function run(config) {
           root.children.filter(function (child) {
             return child instanceof jasmine.Suite && !child.disabled;
           }).forEach(function (child) {
-            child.beforeAllFns.unshift(_callJasmineSuitePlugins('suiteStarted', child.result.description));
-            child.beforeFns.unshift(_callJasmineSpecPlugins('specStarted'));
-            child.afterFns.unshift(_callJasmineSpecPlugins('specDone'));
-            child.afterAllFns.unshift(_callJasmineSuitePlugins('suiteDone', child.result.description));
+            child.beforeAllFns.push(_callJasmineSuitePlugins('suiteStarted', child.result.description));
+            child.beforeFns.push(_callJasmineSpecPlugins('specStarted'));
+            child.afterFns.push(_callJasmineSpecPlugins('specDone'));
+            child.afterAllFns.push(_callJasmineSuitePlugins('suiteDone', child.result.description));
 
             _addPlugins(child);
           });

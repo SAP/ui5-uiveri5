@@ -11,7 +11,7 @@ TestPlugin.prototype.setup = function () {
     setTimeout(function () {
       logger.info('Plugin: setup');
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 
@@ -21,7 +21,7 @@ TestPlugin.prototype.onPrepare = function () {
     setTimeout(function () {
       logger.info('Plugin: onPrepare');
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 
@@ -31,7 +31,7 @@ TestPlugin.prototype.suiteStarted = function (suite) {
     setTimeout(function () {
       logger.info('Plugin: suiteStarted: ${name}', suite);
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 
@@ -41,7 +41,7 @@ TestPlugin.prototype.specStarted = function (spec) {
     setTimeout(function () {
       logger.info('Plugin: specStarted: ${name}', spec);
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 
@@ -51,7 +51,7 @@ TestPlugin.prototype.specDone = function (spec) {
     setTimeout(function () {
       logger.info('Plugin: specDone: ${name}', spec);
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 
@@ -61,7 +61,7 @@ TestPlugin.prototype.suiteDone = function (suite) {
     setTimeout(function () {
       logger.info('Plugin: suiteDone: ${name}', suite);
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 
@@ -71,7 +71,7 @@ TestPlugin.prototype.teardown = function () {
     setTimeout(function () {
       logger.info('Plugin: teardown');
       resolve();
-    }, 1000);
+    }, 100);
   });
 };
 

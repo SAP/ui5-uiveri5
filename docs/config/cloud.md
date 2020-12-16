@@ -72,12 +72,12 @@ exports.config = {
 
 Another way is to add the SauceLabs reporter only in the CI/CD pipeline.
 
-Using the confKeys syntax. Be carefull to add at the first empty index so that you do not overwrite already existing reporter.
+Using the confKeys syntax. Be careful to add at the first empty index so that you do not overwrite already existing reporter.
 ```
 $ uiveri5 --confKeys=reporters[1].name:"./reporter/saucelabsReporter";
 ```
 
-Or using the json format. Be carefull to apply the correct escaping for your runtime.
+Or using the json format. Be careful to apply the correct escaping for your runtime.
 ```
 $ uiveri5 --config={"reporters":[{"name":"./reporter/saucelabsReporter"}]}
 ```

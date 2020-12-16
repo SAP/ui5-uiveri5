@@ -36,18 +36,6 @@ Some additional [SauceLabs specific capabilities](https://wiki.saucelabs.com/dis
 * idleTimeout - max duration for a single interaction. This is the time that the application needs to process the longest interaction like a navigation after a click. Default is 90sec and could be extended to 600sec for extremely slow
 applications.
 
-## Test annotations
-SauceLabs gives you the option to annotate tests and make their execution logs more comrehensive.
-UIVeri5 has a SauceLabs reporter that adds a default set of annotations - spec names, actions, expectation results, suite result, etc.
-To enable it, simply add it to the `reporters` configuration:
-```js
-exports.config = {
-  reporters: [
-    {name: './reporter/saucelabsReporter'}
-  ]
-}
-```
-
 ## Identify test result
 
 If you want to set a name, tags or CI build number for your test, you can do so in the browser capabilities:
@@ -63,12 +51,14 @@ exports.config = {
   }]
 };
 ```
-## Reporter
-We have a specific SauceLabs reporter that can add test details like describe() and it() blocks annotations in the commands execution log. Please note that SauceLabs reporter depends on SauceLabs environment and so will break if running with plain browser. 
 
-So you need to active it conditionally only when you use SauceLabs. Define the SAUCELABS environment variable before the execution.
+## Test annotations
+SauceLabs gives you the option to annotate tests and make their execution logs more comrehensive.
+UIVeri5 has a SauceLabs reporter that adds a default set of annotations - spec names, actions, expectation results, suite result, etc. Please note that SauceLabs reporter depends on SauceLabs environment and so will break if running with plain browser. 
+
+So you need to active it conditionally only when you use SauceLabs. Define the SAUCELABS environment variable before starting the test.
 ```js
-var reporter = [];
+var reporters = [];
 if (process.env.SAUCELABS) {
   reporters.push({
     {name: './reporter/saucelabsReporter'}

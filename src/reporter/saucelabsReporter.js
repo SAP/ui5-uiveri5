@@ -1,3 +1,6 @@
+var _ = require('lodash');
+var URL = require('url').URL;
+
 function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
@@ -6,6 +9,27 @@ function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, act
   this.actionInterceptor = actionInterceptor;
   this.expectationInterceptor = expectationInterceptor;
 }
+
+JasmineSaucelabsReporter.prototype.jasmineStarted = function () {
+  this._getSessionId().then(function (sessionId) {
+    var resultsUrl;
+    if (this.instanceConfig.resultsUrl) {
+      resultsUrl = _.template(this.instanceConfig.resultsUrl.replace(/\\/g, ''))({
+        sessionId: sessionId
+      });
+      
+      if (this.instanceConfig.loginUrl) {
+        var loginUrl = new URL(this.instanceConfig.loginUrl);
+        loginUrl.searchParams.append('RelayState', resultsUrl);
+        resultsUrl = loginUrl.toString();
+      }
+    }
+
+    if (resultsUrl) {
+      this.logger.info('SauceLabs results URL is: ' + resultsUrl);
+    }
+  }.bind(this));
+};
 
 JasmineSaucelabsReporter.prototype.suiteStarted = function () {
   browser.executeScript('sauce:context=Suite started: ' + this.collector.getCurrentSuite().name);
@@ -69,6 +93,13 @@ JasmineSaucelabsReporter.prototype._createFullMessage = function (expectation) {
   }
 
   return sExpectation;
+};
+
+JasmineSaucelabsReporter.prototype._getSessionId = function () {
+  return browser.driver.getSession().then(function (session) {
+    this.logger.trace('SauceLabs session ID: ' + session.id_);
+    return session.id_;
+  }.bind(this));
 };
 
 module.exports = function (config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {

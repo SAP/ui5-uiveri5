@@ -31,32 +31,10 @@ Some additional [SauceLabs specific capabilities](https://wiki.saucelabs.com/dis
 * parentTunnel - specify the name of the parrent SauceLabs tunnel that allaws access to internal network
 * tunnelIdentifier - specify the identifier of specific SauceLabs tunnel instance
 * timeZone - the timezone for the browser instance, you may need it if your tests depend on a timezone-specific date/time, example: "Berlin"
-* screenResolution - the screen resolution, you may need it with responsive app and assumtions for the screen size in the tests, example: "1280x1024"
+* screenResolution - the screen resolution, you may need it with responsive app and assumptions for the screen size in the tests, example: "1280x1024"
 * maxDuration - max duration of the whole test suite execution in seconds, default is 30min. Could be extended to 10800sec = 3hours for extremely long tests.
 * idleTimeout - max duration for a single interaction. This is the time that the application needs to process the longest interaction like a navigation after a click. Default is 90sec and could be extended to 600sec for extremely slow
 applications.
-
-## Test annotations
-SauceLabs gives you the option to annotate tests and make their execution logs more comrehensive.
-UIVeri5 has a SauceLabs reporter that adds a default set of annotations - spec names, actions, expectation results, suite result, etc.
-To enable it, simply add it to the `reporters` configuration:
-```js
-exports.config = {
-  reporters: [
-    {name: './reporter/saucelabsReporter'}
-  ]
-}
-```
-
-You may want to hide sensitive test data, for example authentication steps.
-There are SauceLabs commands to disable or enable all logs - your custom logs, the `saucelabsReporter` logs and the browser logs that SauceLabs provides out-of-the-box.
-```js
-browser.executeScript('sauce: disable log');
-// this log won't show up in the test results
-browser.executeScript('sauce:context=Hidden log');
-// don't forget to re-enable the logs
-browser.executeScript('sauce: enable log');
-```
 
 ## Identify test result
 
@@ -72,4 +50,34 @@ exports.config = {
     }
   }]
 };
+```
+
+## Test annotations
+SauceLabs gives you the option to annotate tests and make their execution logs more comrehensive.
+UIVeri5 has a SauceLabs reporter that adds a default set of annotations - spec names, actions, expectation results, suite result, etc. Please note that SauceLabs reporter depends on SauceLabs environment and so will break if running with plain browser. 
+
+So you need to active it conditionally only when you use SauceLabs. Define the SAUCELABS environment variable before starting the test.
+```js
+var reporters = [];
+if (process.env.SAUCELABS) {
+  reporters.push({
+    {name: './reporter/saucelabsReporter'}
+  })
+}
+
+exports.config = {
+  reporters: reporters  
+}
+```
+
+Another way is to add the SauceLabs reporter only in the CI/CD pipeline.
+
+Using the confKeys syntax. Be careful to add at the first empty index so that you do not overwrite already existing reporter.
+```
+$ uiveri5 --confKeys=reporters[1].name:"./reporter/saucelabsReporter";
+```
+
+Or using the json format. Be careful to apply the correct escaping for your runtime.
+```
+$ uiveri5 --config={"reporters":[{"name":"./reporter/saucelabsReporter"}]}
 ```

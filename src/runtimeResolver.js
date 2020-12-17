@@ -65,9 +65,10 @@ var supportedUI5Modes = [
  * @param {RuntimeResolverConfig} config
  * @param {Logger} logger
  */
-function RuntimeResolver(config,logger){
+function RuntimeResolver(config, logger, plugins) {
   this.config = config;
   this.logger = logger;
+  this.plugins = plugins;
 }
 
 /**
@@ -149,10 +150,7 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
       runtime.capabilities = {};
     }
 
-    if (_.get(that, "config.log.browser.level")) {
-      runtime.capabilities.loggingPrefs = runtime.capabilities.loggingPrefs || {};
-      runtime.capabilities.loggingPrefs.browser = that.config.log.browser.level;
-    }
+    that.plugins.onRuntimeSetup(runtime);
 
     if (that.config.browserCapabilities) {
       that._mergeMatchingCapabilities(runtime,that.config.browserCapabilities);
@@ -175,7 +173,7 @@ RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserC
         if (this._isMatching(runtime.platformName,platformNamePattern)){
           var executionTypePattern;
           for(executionTypePattern in browserCapabilities[browserNamePattern][platformNamePattern]){
-            if(this._isMatching(currentExecutionType, executionTypePattern)){              
+            if(this._isMatching(currentExecutionType, executionTypePattern)){
               runtime.capabilities = _.mergeWith({},
                 browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],
                 runtime.capabilities,
@@ -220,6 +218,6 @@ RuntimeResolver.prototype._isMatching = function(name,pattern){
   return matchingFlag;
 };
 
-module.exports = function(config,logger){
-  return new RuntimeResolver(config,logger);
+module.exports = function (config, logger, plugins) {
+  return new RuntimeResolver(config, logger, plugins);
 };

@@ -1,18 +1,28 @@
 var _ = require('lodash');
 var logging = require('selenium-webdriver').logging;
 
+var DEFAULT_LOG_LEVEL = logging.Level.OFF;
+
 function BrowserLogsPlugin(config, instanceConfig, logger) {
+  this.config = config;
   this.logger = logger;
-  var defaultLevel = logging.Level.OFF;
-  var browserLoggingPref = _.get(config, 'runtimes[0].capabilities.loggingPrefs.' + logging.Type.BROWSER, defaultLevel.name).toUpperCase();
-  var browserLevel = logging.Level[browserLoggingPref];
-  if (browserLevel && browserLevel.value < defaultLevel.value) {
+  this.browserLoggingPref = _.get(config, 'log.browser.level', DEFAULT_LOG_LEVEL.name).toUpperCase();
+
+  var browserLevel = logging.Level[this.browserLoggingPref];
+  if (browserLevel && browserLevel.value < DEFAULT_LOG_LEVEL.value) {
     this.active = true;
   }
 }
 
 BrowserLogsPlugin.prototype.specDone = function () {
   return this._logBrowserMessages();
+};
+
+BrowserLogsPlugin.prototype.onRuntimeSetup = function (runtime) {
+  if (_.get(this, 'config.log.browser.level')) {
+    runtime.capabilities.loggingPrefs = runtime.capabilities.loggingPrefs || {};
+    runtime.capabilities.loggingPrefs.browser = this.config.log.browser.level;
+  }
 };
 
 BrowserLogsPlugin.prototype._logBrowserMessages = function () {

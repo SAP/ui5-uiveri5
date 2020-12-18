@@ -41,8 +41,8 @@ Plugins.prototype.loadProtractorPlugins = function (protractorArgv) {
   }];
 };
 
-Plugins.prototype.onRuntimeSetup = function (runtime) {
-  _callPlugins('onRuntimeSetup', [runtime]);
+Plugins.prototype.onConnectionSetup = function (runtime) {
+  _callPlugins('onConnectionSetup', [runtime]);
 };
 
 function _callPlugins(method, args) {

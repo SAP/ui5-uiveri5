@@ -18,10 +18,10 @@ BrowserLogsPlugin.prototype.specDone = function () {
   return this._logBrowserMessages();
 };
 
-BrowserLogsPlugin.prototype.onRuntimeSetup = function (runtime) {
+BrowserLogsPlugin.prototype.onConnectionSetup = function (capabilities) {
   if (_.get(this, 'config.log.browser.level')) {
-    runtime.capabilities.loggingPrefs = runtime.capabilities.loggingPrefs || {};
-    runtime.capabilities.loggingPrefs.browser = this.config.log.browser.level;
+    capabilities.loggingPrefs = capabilities.loggingPrefs || {};
+    capabilities.loggingPrefs.browser = this.config.log.browser.level;
   }
 };
 

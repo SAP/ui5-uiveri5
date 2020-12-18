@@ -78,7 +78,7 @@ function run(config) {
   var plugins = new Plugins(moduleLoader.loadModule('plugins'));
 
   // resolve runtime and set browsers with capabilities
-  var runtimeResolver = require('./runtimeResolver')(config,logger,plugins);
+  var runtimeResolver = require('./runtimeResolver')(config,logger);
   config.runtimes = runtimeResolver.resolveRuntimes();
 
   // resolve all placeholders in config
@@ -111,7 +111,7 @@ function run(config) {
     }
 
     // create connectionProvider
-    var connectionProvider = moduleLoader.loadNamedModule('connection');
+    var connectionProvider = moduleLoader.loadNamedModule('connection', [plugins]);
 
     // prepare protractor executor args
     var protractorArgv = connectionProvider.buildProtractorArgv();

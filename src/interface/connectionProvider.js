@@ -8,11 +8,13 @@ var q = require('q');
  * @param {Config} config
  * @param {Object} instanceConfig
  * @param {Logger} logger
+ * @param {Array} plugins
  */
-function ConnectionProvider(config,instanceConfig,logger) {
+function ConnectionProvider(config,instanceConfig,logger, plugins) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
+  this.plugins = plugins;
 }
 
 ConnectionProvider.prototype.buildProtractorArgv = function(){

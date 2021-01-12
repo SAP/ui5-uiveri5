@@ -43,9 +43,17 @@ UI5FormAuthenticator.prototype.get = function(url){
 
   // collect login actions separately
   this.statisticsCollector.authStarted();
-  // enter user and pass in the respective fields
-  element(by.css(this.userFieldSelector)).sendKeys(this.user);
-  element(by.css(this.passFieldSelector)).sendKeys(this.pass);
+
+  // enter user and pass in the respective fields.
+  // clear the fields beforehand - there might be prefilled data (e.g. after logout)
+  var userField = element(by.css(this.userFieldSelector));
+  userField.clear();
+  userField.sendKeys(this.user);
+
+  var passField = element(by.css(this.passFieldSelector));
+  passField.clear();
+  passField.sendKeys(this.pass);
+
   element(by.css(this.logonButtonSelector)).click().then(function () {
     // wait for all login actions to complete
     that.statisticsCollector.authDone();

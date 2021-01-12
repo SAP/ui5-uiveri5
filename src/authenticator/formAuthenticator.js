@@ -71,10 +71,13 @@ FormAuthenticator.prototype.get = function(url){
     return that._isPresent(that.userFieldSelector);
   }, 'Waiting to redirect to login page');
 
-  // enter credentials in the respective fields
+  // enter credentials in the respective fields.
+  // clear the fields beforehand - there might be prefilled data (e.g. after logout)
 
-  // enter user identifier (email, ID or login name)
-  this._getField(this.userFieldSelector).sendKeys(this.user);
+  // enter user identifier (email, ID or login name).
+  var userField = this._getField(this.userFieldSelector);
+  userField.clear();
+  userField.sendKeys(this.user);
 
   // handle conditional login:
   // first a user identifier is entered,
@@ -86,7 +89,10 @@ FormAuthenticator.prototype.get = function(url){
     this._waitForField(this.passFieldSelector, 'Wating to redirect to conditional auth page');
   }
 
-  this._getField(this.passFieldSelector).sendKeys(this.pass);
+  var passField = this._getField(this.passFieldSelector);
+  passField.clear();
+  passField.sendKeys(this.pass);
+
   this._getField(this.logonButtonSelector).click();
 
   // handle reauthorization in github

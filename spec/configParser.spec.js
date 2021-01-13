@@ -260,7 +260,7 @@ describe("Should parse confkey from command-line", function () {
     // with decreasing prio: refering -> referred -> api -> integration
     expect(mergedConfig.profile).toContain('referred');
     expect(mergedConfig.prop).toEqual([{name: 'optionToUpdate', updateKey: "newValue", newKey: "value1", existingKey: "value2"}])
-    expect(mergedConfig.plugins).toEqual([{name: '../src/api/requestPlugin'}]);
+    expect(mergedConfig.plugins).toContain({name: '../src/api/requestPlugin'});
     expect(mergedConfig.specResolver).toEqual('./resolver/localSpecResolver');
   });
 

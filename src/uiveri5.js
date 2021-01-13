@@ -7,6 +7,7 @@ var clientsidescripts = require('./scripts/clientsidescripts');
 var ClassicalWaitForUI5 = require('./scripts/classicalWaitForUI5');
 var Control = require('./control');
 var pageObjectFactory = require('./pageObjectFactory');
+var Plugins = require('./plugins/plugins');
 
 var DEFAULT_CONNECTION_NAME = 'direct';
 var AUTH_CONFIG_NAME = 'auth';
@@ -71,6 +72,11 @@ function run(config) {
     return osType;
   })();
 
+  // start module loader
+  var moduleLoader = require('./moduleLoader')(config,logger);
+
+  var plugins = new Plugins(moduleLoader.loadModule('plugins'));
+
   // resolve runtime and set browsers with capabilities
   var runtimeResolver = require('./runtimeResolver')(config,logger);
   config.runtimes = runtimeResolver.resolveRuntimes();
@@ -86,9 +92,6 @@ function run(config) {
 
   // log cwd
   logger.debug('Current working directory: ' + process.cwd());
-
-  // start module loader
-  var moduleLoader = require('./moduleLoader')(config,logger);
 
   // load spec resolver
   var specResolver = moduleLoader.loadModule('specResolver');
@@ -108,10 +111,11 @@ function run(config) {
     }
 
     // create connectionProvider
-    var connectionProvider = moduleLoader.loadNamedModule('connection');
+    var connectionProvider = moduleLoader.loadNamedModule('connection', [plugins]);
 
     // prepare protractor executor args
     var protractorArgv = connectionProvider.buildProtractorArgv();
+    plugins.loadProtractorPlugins(protractorArgv);
 
     // enable protractor debug logs
     protractorArgv.troubleshoot = config.verbose>0;
@@ -189,6 +193,7 @@ function run(config) {
 
     // execute after test env setup and just before test execution starts
     protractorArgv.onPrepare = function () {
+      plugins.loadJasminePlugins();
 
       // publish configs on protractor's browser object
       browser.testrunner = {};
@@ -486,58 +491,6 @@ function run(config) {
         }
       });
 
-      jasmine.getEnv().addReporter({
-        jasmineStarted: function () {
-          // load Jasmine plugins.
-          // in jasmine 2.x, the reporter callbacks can't handle promises, so we use a workaround
-          // by adding the plugin callbacks as before* and after* functions (which can handle promises)
-          var root = jasmine.getEnv().topSuite();
-          _addPlugins(root);
-        }
-      });
-
-      var currentSpecDescription;
-      var originalSpecExecute = jasmine.Spec.prototype.execute;
-      jasmine.Spec.prototype.execute = function () {
-        currentSpecDescription = this.result.description;
-        originalSpecExecute.apply(this, arguments);
-      };
-
-      function _addPlugins(root) {
-        if (root.children) {
-          root.children.filter(function (child) {
-            return child instanceof jasmine.Suite && !child.disabled;
-          }).forEach(function (child) {
-            child.beforeAllFns.push(_callJasmineSuitePlugins('suiteStarted', child.result.description));
-            child.beforeFns.push(_callJasmineSpecPlugins('specStarted'));
-            child.afterFns.push(_callJasmineSpecPlugins('specDone'));
-            child.afterAllFns.push(_callJasmineSuitePlugins('suiteDone', child.result.description));
-
-            _addPlugins(child);
-          });
-        }
-      }
-
-      function _callJasmineSuitePlugins(method, suiteDescription) {
-        return {
-          fn: _callPlugins.bind(this, method, [{name: suiteDescription}]),
-          timeout: function() {
-            return jasmine.DEFAULT_TIMEOUT_INTERVAL;
-          }
-        };
-      }
-  
-      function _callJasmineSpecPlugins(method) {
-        return {
-          fn: function () {
-            return _callPlugins.call(this, method, [{name: currentSpecDescription}]);
-          },
-          timeout: function() {
-            return jasmine.DEFAULT_TIMEOUT_INTERVAL;
-          }
-        };
-      }
-
       if (config.exportParamsFile) {
         jasmine.getEnv().addReporter({
           jasmineDone: function () {
@@ -708,34 +661,10 @@ function run(config) {
       return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
     }
 
-    function _callPlugins(method, args) {
-      return Promise.all(
-        plugins.map(function (module) {
-          if (module[method]) {
-            return module[method].apply(module, args);
-          }
-        })
-      );
-    }
     // register page object factory on global scope
     logger.debug('Loading BDD-style page object factory');
     pageObjectFactory.register(global);
 
-    // load protractor plugins
-    var plugins = moduleLoader.loadModule('plugins');
-    protractorArgv.plugins = [{
-      inline: {
-        setup: function() {
-          return _callPlugins('setup');
-        },
-        onPrepare: function() {
-          return _callPlugins('onPrepare');
-        },
-        teardown: function() {
-          return _callPlugins('teardown');
-        }
-      }
-    }];
     // setup connection provider env
     logger.debug('Setting up connection provider environment');
     return connectionProvider.setupEnv().then(function(){

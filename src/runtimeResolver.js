@@ -65,7 +65,7 @@ var supportedUI5Modes = [
  * @param {RuntimeResolverConfig} config
  * @param {Logger} logger
  */
-function RuntimeResolver(config,logger){
+function RuntimeResolver(config, logger) {
   this.config = config;
   this.logger = logger;
 }
@@ -148,6 +148,7 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
     if (!runtime.capabilities) {
       runtime.capabilities = {};
     }
+
     if (that.config.browserCapabilities) {
       that._mergeMatchingCapabilities(runtime,that.config.browserCapabilities);
     }
@@ -169,7 +170,7 @@ RuntimeResolver.prototype._mergeMatchingCapabilities = function(runtime,browserC
         if (this._isMatching(runtime.platformName,platformNamePattern)){
           var executionTypePattern;
           for(executionTypePattern in browserCapabilities[browserNamePattern][platformNamePattern]){
-            if(this._isMatching(currentExecutionType, executionTypePattern)){              
+            if(this._isMatching(currentExecutionType, executionTypePattern)){
               runtime.capabilities = _.mergeWith({},
                 browserCapabilities[browserNamePattern][platformNamePattern][executionTypePattern],
                 runtime.capabilities,
@@ -214,6 +215,6 @@ RuntimeResolver.prototype._isMatching = function(name,pattern){
   return matchingFlag;
 };
 
-module.exports = function(config,logger){
-  return new RuntimeResolver(config,logger);
+module.exports = function (config, logger) {
+  return new RuntimeResolver(config, logger);
 };

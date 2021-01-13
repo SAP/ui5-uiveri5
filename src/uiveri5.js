@@ -338,9 +338,19 @@ function run(config) {
       };
 
       browser.loadUI5Dependencies = function () {
-        return browser._loadUI5Dependencies().then(function () {
-          return browser.waitForAngular();
-        });
+        // wait for UI5 runtime being fully initialized
+        // helps in situations where multiple redirects happen after final URL is reached and till UI5 page is reached
+        browser.driver.wait(function() {
+          return browser.driver.findElements(by.css(config.loadUI5Dependencies.ui5BootstrapCompletedSelector)).then(function (aFields) {
+            return !!aFields.length
+          });
+        }, browser.getPageTimeout - 100,'Waiting for UI5 boostrap. No UI5 on this page');
+
+        // inject uiveri5 instrumentation
+        browser._loadUI5Dependencies();
+        
+        // synchronize with UI5 runtime e.g. consume the initial rendering time
+        return browser.waitForAngular();
       };
 
       browser._loadUI5Dependencies = function () {
@@ -610,7 +620,7 @@ function run(config) {
                 throw new Error('Could not parse current url: ' + currentUrl);
               }
               var currentUrlHost = currentUrlMathes[1];
-              // strip trailing slashe
+              // strip trailing slash
               if(currentUrlHost.charAt(currentUrlHost.length - 1) == '/') {
                 currentUrlHost = currentUrlHost.slice(0, -1);
               }

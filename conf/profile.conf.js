@@ -7,6 +7,9 @@ exports.config = {
     defaultTimeoutInterval: 30000,
     waitForUI5PollingInterval: 400
   },
+  loadUI5Dependencies: {
+    ui5BootstrapCompletedSelector: '#sap-ui-static'
+  },
   useClassicalWaitForUI5: false,
   connection: 'direct',
   connectionConfigs: {

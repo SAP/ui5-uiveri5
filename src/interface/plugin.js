@@ -12,8 +12,7 @@ function Plugin(config,instanceConfig,logger){
 /**
  * Called just before webdriver connection is established
  * @param {Object} capabilities - required webdriver capabilities
- * @return {Promise<void>|void} Can return a promise that will be waited to be resolved before uiveri5 continues.
- */
+  */
 Plugin.prototype.onConnectionSetup = function (capabilities) {
 };
 

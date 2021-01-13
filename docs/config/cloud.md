@@ -82,11 +82,12 @@ Or using the json format. Be careful to apply the correct escaping for your runt
 $ uiveri5 --config={"reporters":[{"name":"./reporter/saucelabsReporter"}]}
 ```
 
-## Test annotations
+## Test execution link
 
 If you want the reporter to print the URL to SauceLabs test results, you need to add your SauceLabs dashboard URL.
 The session ID will be filled by the reporter, so you only need to add a placeholder for it.
-Depending on your SauceLabs authentication mechanism, you may also need to include the login URL:
+Depending on your SauceLabs authentication mechanism, you may also need to include the login URL.
+
 ```javascript
 reporters: [{
   name: './reporter/saucelabsReporter', 

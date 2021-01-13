@@ -23,8 +23,7 @@ The available log levels for Chrome are:
 'ALL'
 ```
 
-The default log level is `'SEVERE'`. This means that if you enable the `browserLogsPlugin`,
-all browser errors logs will be logged to the UIVeri5 command output.
+The default log level is `'SEVERE'`. This means that all browser errors logs will be logged to the UIVeri5 command output.
 
 Note that this relies on a relatively new webdriver specification that is still implemented differently for each browser.
 For more information, check out the [`selenium-webdriver` documentation](https://github.com/SeleniumHQ/selenium/wiki/Logging).

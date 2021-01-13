@@ -1,10 +1,7 @@
 exports.config = {
     log: {
         browser: {
-            level: "debug"
+            level: "ALL"
         }
-    },
-    plugins: [
-        {name: './plugins/browserLogsPlugin'}
-    ],
+    }
 };

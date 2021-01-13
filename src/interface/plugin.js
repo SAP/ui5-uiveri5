@@ -10,6 +10,13 @@ function Plugin(config,instanceConfig,logger){
 }
 
 /**
+ * Called just before webdriver connection is established
+ * @param {Object} capabilities - required webdriver capabilities
+  */
+Plugin.prototype.onConnectionSetup = function (capabilities) {
+};
+
+/**
  * Called after webdriver connection is established but before the test framework has been set up.
  * 
  * @return {Promise<void>|void} Can return a promise that will be waited to 

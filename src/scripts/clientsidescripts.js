@@ -24,9 +24,6 @@ var mFunctions = {
           window.uiveri5 = window.uiveri5 || {};
 
           loadControlFinder()
-            .then(function(){
-              return loadBrowserLogCollector();
-            })
             .then(function () {
               if (mScriptParams.useClassicalWaitForUI5) {
                 sDebugLog += '\nLoading classical waitForUI5 implementation.';
@@ -111,31 +108,6 @@ var mFunctions = {
               'sap/ui/test/_ControlFinder'
             ], function (_ControlFinder) {
               window.uiveri5._ControlFinder = _ControlFinder;
-              resolve();
-            }, onError);
-          } catch (oError) {
-            onError(oError);
-          }
-        }
-      });
-    }
-
-    function loadBrowserLogCollector() {
-      return new Promise(function (resolve) {
-        if (window.uiveri5._BrowserLogCollector) {
-          resolve();
-        } else {
-          sDebugLog += '\nLoading OPA5 browser log collector.';
-          var onError = function (oError) {
-            // only throw error if dependency is missing when a control locator is actually used
-            resolve('Browser log collector will not be enabled.' +
-            ' Minimum UI5 versions supporting nrowser log collector: 1.64 and up. Details: ' + oError);
-          };
-          try {
-            window.sap.ui.require([
-              'sap/ui/test/_BrowserLogCollector'
-            ], function (_BrowserLogCollector) {
-              window.uiveri5._BrowserLogCollector =  _BrowserLogCollector.getInstance();
               resolve();
             }, onError);
           } catch (oError) {
@@ -288,51 +260,6 @@ var mFunctions = {
       } catch (error) {
         fnCallback({error: 'Error while processing dom, details: ' + error});
       }
-    }
-  },
-
-  startLogCollection: function startLogCollection (mScriptParams) {
-    try {
-      if (!window.uiveri5 || !window.uiveri5._BrowserLogCollector) {
-        throw new Error('Log collection is not set up! Call "loadLogDependencies" before "startLogCollection"');
-      }
-      return {
-        value: window.uiveri5._BrowserLogCollector.start(mScriptParams.level)
-      };
-    } catch (oError) {
-      return {
-        error: 'Error while starting log collection, Details: ' + oError
-      };
-    }
-  },
-
-  getAndClearLogs: function getAndClearLogs () {
-    try {
-      if (!window.uiveri5 || !window.uiveri5._BrowserLogCollector) {
-        throw new Error('Log collection is not set up! Call "startLogCollection" before "getAndClearLogs"');
-      }
-      return {
-        value: window.uiveri5._BrowserLogCollector.getAndClearLogs().logs
-      };
-    } catch (oError) {
-      return {
-        error: 'Error while getting logs, Details: ' + oError
-      };
-    }
-  },
-
-  stopLogsCollection: function stopLogsCollection () {
-    try {
-      if (!window.uiveri5 ||  !window.uiveri5._BrowserLogCollector) {
-        throw new Error('Log collection is not set up! Call "startLogCollection" before "stopLogsCollection"');
-      }
-      return {
-        value: window.uiveri5._BrowserLogCollector.stop()
-      };
-    } catch (oError) {
-      return {
-        error: 'Error while stopping log collection, Details: ' + oError
-      };
     }
   }
 };

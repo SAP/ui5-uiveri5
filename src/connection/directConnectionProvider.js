@@ -38,8 +38,8 @@ var BINARIES = {
  * @param config - config
  * @param logger - logger
  */
-function DirectConnectionProvider(config,instanceConfig,logger) {
-  ConnectionProvider.call(this,config,instanceConfig,logger);
+function DirectConnectionProvider(config, instanceConfig, logger, plugins) {
+  ConnectionProvider.call(this, config, instanceConfig, logger, plugins);
 
   this.seleniumConfig = {};
   this.seleniumConfig.executables = {};
@@ -150,7 +150,7 @@ DirectConnectionProvider.prototype.setupEnv = function() {
   // attach our custom driverProviders
   var driverProviders = require('protractor/built/driverProviders');
   driverProviders.buildDriverProvider = function (protConfig) {
-    return new DirectDriverProvider(protConfig, that.logger, that.seleniumConfig);
+    return new DirectDriverProvider(protConfig, that.logger, that.seleniumConfig, that.plugins);
   };
   proxyquire('protractor/built/runner', {
     './driverProviders': driverProviders
@@ -371,10 +371,11 @@ DirectConnectionProvider.prototype._getSeleniumRoot = function () {
 
 // overloaded DriverProvider to be injected
 
-var DirectDriverProvider = function(protConfig,logger,seleniumConfig) {
+var DirectDriverProvider = function (protConfig, logger, seleniumConfig, plugins) {
   this.protConfig = protConfig;
   this.logger = logger;
   this.seleniumConfig = seleniumConfig;
+  this.plugins = plugins;
   this.drivers = [];
 
   // use selenium-webdriver from protractor dependecies
@@ -406,6 +407,9 @@ DirectDriverProvider.prototype.getNewDriver = function() {
   var requiredCapabilities = _.cloneDeep(this.protConfig.capabilities);
   delete requiredCapabilities.runtime;
   delete requiredCapabilities.remoteWebDriverOptions;
+
+  this.plugins.onConnectionSetup(requiredCapabilities);
+
   that.logger.info('Opening webdriver connection with capabilities: ' +
     JSON.stringify(requiredCapabilities));
 
@@ -645,6 +649,6 @@ function _asArray(value) {
   return _.isArray(value) ? value : [value];
 }
 
-module.exports = function(config,instanceConfig,logger){
-  return new DirectConnectionProvider(config,instanceConfig,logger);
+module.exports = function(config, instanceConfig, logger, plugins){
+  return new DirectConnectionProvider(config, instanceConfig, logger, plugins);
 };

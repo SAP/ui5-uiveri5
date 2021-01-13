@@ -1,39 +1,44 @@
-/* eslint no-console: */
-
 var _ = require('lodash');
+var logging = require('selenium-webdriver').logging;
+
+var DEFAULT_LOG_LEVEL = logging.Level.OFF;
+
 function BrowserLogsPlugin(config, instanceConfig, logger) {
-  this.level = _.get(config, 'log.browser.level', 'error');
+  this.config = config;
   this.logger = logger;
+  this.browserLoggingPref = _.get(config, 'log.browser.level', DEFAULT_LOG_LEVEL.name).toUpperCase();
+
+  var browserLevel = logging.Level[this.browserLoggingPref];
+  if (browserLevel && browserLevel.value < DEFAULT_LOG_LEVEL.value) {
+    this.active = true;
+  }
 }
 
-BrowserLogsPlugin.prototype.suiteStarted = function () {
-  var that = this;
-  if (that.level) {
-    browser.executeScriptHandleErrors('startLogCollection', {level: that.level})
-      .catch(function () {
-        // swallow error, already logged on debug level, avoid double logs
-      });
+BrowserLogsPlugin.prototype.specDone = function () {
+  return this._logBrowserMessages();
+};
+
+BrowserLogsPlugin.prototype.onConnectionSetup = function (capabilities) {
+  if (_.get(this, 'config.log.browser.level')) {
+    capabilities.loggingPrefs = capabilities.loggingPrefs || {};
+    capabilities.loggingPrefs.browser = this.config.log.browser.level;
   }
 };
 
-BrowserLogsPlugin.prototype.specDone = function () {
-  browser.executeScriptHandleErrors('getAndClearLogs')
-    .then(function (logs) {
-      var template = _.template('BROWSER LOG: ${level}: ${message}');
-      _.each(logs, function (log) {
-        console.log(template(log));
-      });
-    })
-    .catch(function () {
-      // swallow error, already logged on debug level, avoid double logs
-    });
-};
+BrowserLogsPlugin.prototype._logBrowserMessages = function () {
+  var logger = this.logger;
 
-BrowserLogsPlugin.prototype.suiteDone = function () {
-  browser.executeScriptHandleErrors('stopLogsCollection')
-    .catch(function () {
-      // swallow error, already logged on debug level, avoid double logs
+  if (this.active) {
+    return browser.driver.manage().logs().get(logging.Type.BROWSER).then(function (browserLogs) {
+      var template = _.template('BROWSER LOG: ${level.name}: ${message}');
+
+      _.each(browserLogs, function (browserLog) {
+        logger.debug(template(browserLog));
+      });
+    }).catch(function (e) {
+      logger.debug('Could not fetch browser logs: ' + e);
     });
+  }
 };
 
 module.exports = function (config, instanceConfig, logger) {

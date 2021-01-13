@@ -1,3 +1,4 @@
+var _ = require('lodash');
 
 /**
  * @typedef ConsoleReporterConfig
@@ -34,26 +35,38 @@ JasmineConsoleReporter.prototype.jasmineStarted = function() {
 };
 
 JasmineConsoleReporter.prototype.suiteStarted = function() {
-  this.logger.info('Suite started: ' + this.collector.getCurrentSuite().name);
+  var that = this;
+  var suiteName = _.cloneDeep(that.collector.getCurrentSuite().name);
+  browser.controlFlow().execute(function () {
+    that.logger.info('Second try: Suite started: ' + suiteName);
+  });
 };
 
 JasmineConsoleReporter.prototype.specStarted = function() {
-  this.logger.info('Spec started: ' + this.collector.getCurrentSpec().name);
+  var that = this;
+  var specName = _.cloneDeep(that.collector.getCurrentSpec().name);
+  browser.controlFlow().execute(function () {
+    that.logger.info('Spec started: ' + specName);
+  });
 };
 
 JasmineConsoleReporter.prototype.specDone = function() {
-  var spec = this.collector.getCurrentSpec();
-  spec.expectations.forEach(function (expectation) {
-    if (expectation.status === 'failed') {
-      this.logger.info('Expectation FAILED: ' + expectation.message);
-      if(expectation.details){
-        this.logger.info('Expectation FAILED details: ${JSON.stringify(details)}',{details: expectation.details});
+  var that = this;
+  var spec = _.cloneDeep(that.collector.getCurrentSpec());
+  that.logger.info('Spec finished call is now');
+  browser.controlFlow().execute(function () {
+    spec.expectations.forEach(function (expectation) {
+      if (expectation.status === 'failed') { 
+        that.logger.info('Expectation FAILED: ' + expectation.message);
+        if(expectation.details){ 
+          that.logger.info('Expectation FAILED details: ${JSON.stringify(details)}',{details: expectation.details});
+        }
+        that.logger.debug('Expectation FAILED stack: ${stack}',{stack: expectation.stack});
       }
-      this.logger.debug('Expectation FAILED stack: ${stack}',{stack: expectation.stack});
-    }
-  },this);
-  this.logger.info('Spec finished: ' + this.collector.getCurrentSpec().name +
-    ' with status: ' + spec.status.toUpperCase());
+    }, that);
+    that.logger.info('Spec finished: ' + spec.name +
+      ' with status: ' + spec.status.toUpperCase());
+  });
   /*
   this.logger.info('Spec expectations summary' +
   ', total: ' + spec.statistic.expectations.total +
@@ -65,44 +78,54 @@ JasmineConsoleReporter.prototype.specDone = function() {
 };
 
 JasmineConsoleReporter.prototype.suiteDone = function() {
-  var suite = this.collector.getCurrentSuite();
-  this.logger.info('Suite finished: ' + suite.name +
-  ' with status: ' + suite.status.toUpperCase() +
-  ' for: ' + suite.statistic.duration/1000 + 's');
-  this.logger.info('Suite specs summary' +
-  ', total: ' + suite.statistic.specs.total +
-  ', passed: ' + suite.statistic.specs.passed +
-  ', failed: ' + suite.statistic.specs.failed +
-  ', pending: ' + suite.statistic.specs.pending +
-  ', disabled: ' + suite.statistic.specs.disabled);
-  this.logger.info('Suite expectations summary' +
-  ', total: ' + suite.statistic.expectations.total +
-  ', passed: ' + suite.statistic.expectations.passed +
-  ', failed total: ' + suite.statistic.expectations.failed.total +
-  ', failed with error: ' + suite.statistic.expectations.failed.error +
-  ', failed with image comparison: ' + suite.statistic.expectations.failed.image);
+  var that = this;
+  var suite =  _.cloneDeep(that.collector.getCurrentSuite());
+  that.logger.info('Suite finished call is now');
+  browser.controlFlow().execute(function () {
+    that.logger.info('Suite finished: ' + suite.name +
+    ' with status: ' + suite.status.toUpperCase() +
+    ' for: ' + suite.statistic.duration/1000 + 's');
+    that.logger.info('Suite specs summary' +
+    ', total: ' + suite.statistic.specs.total +
+    ', passed: ' + suite.statistic.specs.passed +
+    ', failed: ' + suite.statistic.specs.failed +
+    ', pending: ' + suite.statistic.specs.pending +
+    ', disabled: ' + suite.statistic.specs.disabled);
+    that.logger.info('Suite expectations summary' +
+    ', total: ' + suite.statistic.expectations.total +
+    ', passed: ' + suite.statistic.expectations.passed +
+    ', failed total: ' + suite.statistic.expectations.failed.total +
+    ', failed with error: ' + suite.statistic.expectations.failed.error +
+    ', failed with image comparison: ' + suite.statistic.expectations.failed.image);
+  });
 };
 
 JasmineConsoleReporter.prototype.jasmineDone = function() {
-  var overview = this.collector.getOverview();
-  this.logger.info('Overall status: ' + overview.status.toUpperCase() +
-  ' for: ' + overview.statistic.duration/1000 + 's');
-  this.logger.info('Overall suites summary' +
-  ', total: ' + overview.statistic.suites.total +
-  ', passed: ' + overview.statistic.suites.passed +
-  ', failed: ' + overview.statistic.suites.failed);
-  this.logger.info('Overall specs summary' +
-  ', total: ' + overview.statistic.specs.total +
-  ', passed: ' + overview.statistic.specs.passed +
-  ', failed: ' + overview.statistic.specs.failed +
-  ', pending: ' + overview.statistic.specs.pending +
-  ', disabled: ' + overview.statistic.specs.disabled);
-  this.logger.info('Overall expectations summary' +
-  ', total: ' + overview.statistic.expectations.total +
-  ', passed: ' + overview.statistic.expectations.passed +
-  ', failed total: ' + overview.statistic.expectations.failed.total +
-  ', failed with error: ' + overview.statistic.expectations.failed.error +
-  ', failed with image comparison: ' + overview.statistic.expectations.failed.image);
+  var that = this;
+  var overview =  _.cloneDeep(that.collector.getOverview());
+  that.logger.info('Overall status call is now');
+  /*
+  browser.controlFlow().execute(function () {
+    that.logger.info('Overall status: ' + overview.status.toUpperCase() +
+    ' for: ' + overview.statistic.duration/1000 + 's');
+    that.logger.info('Overall suites summary' +
+    ', total: ' + overview.statistic.suites.total +
+    ', passed: ' + overview.statistic.suites.passed +
+    ', failed: ' + overview.statistic.suites.failed);
+    that.logger.info('Overall specs summary' +
+    ', total: ' + overview.statistic.specs.total +
+    ', passed: ' + overview.statistic.specs.passed +
+    ', failed: ' + overview.statistic.specs.failed +
+    ', pending: ' + overview.statistic.specs.pending +
+    ', disabled: ' + overview.statistic.specs.disabled);
+    that.logger.info('Overall expectations summary' +
+    ', total: ' + overview.statistic.expectations.total +
+    ', passed: ' + overview.statistic.expectations.passed +
+    ', failed total: ' + overview.statistic.expectations.failed.total +
+    ', failed with error: ' + overview.statistic.expectations.failed.error +
+    ', failed with image comparison: ' + overview.statistic.expectations.failed.image);
+  });
+  */
 };
 
 /**

@@ -254,16 +254,14 @@ exports.config = {
   ],
 
   plugins: [
-    /*{name: './plugins/browserLogsPlugin'}*/
+    {name: './plugins/browserLogsPlugin'}
   ],
 
   matchers: [],
 
-  /*
   log: {
     browser: {
-      level: 'error'
+      level: 'info'
     }
   }
-  */
 };

@@ -51,7 +51,7 @@ browser.loadUI5Dependencies()`.
 After this call, the UI5 synchronization and control locators will work again in the new UI5 runtime.
 
 If the application opens the new UI5 page in a new window (popup or tab) or IFrame, you will first need to focus it by using the `browse.driver.switchTo()` [API](https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_TargetLocator.html) and just then synchronize with it and inject the instrumentation. If the app in the new tab needs new authentication, replace the `loadUI5Dependencues();` call `with browser.go(<url>,<auth object>);`
-```
+```javascript
 browser.driver.getAllWindowHandles().then(function (handles) {
   browser.switchTo().window(handles[handles.length - 1]).then(function () {
     // load uiveri5 instrumentation so by.control works

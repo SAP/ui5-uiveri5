@@ -13,14 +13,13 @@ The plain authenticator is applied by default. It simply waits for the requested
 and doesn't perform any authentication.
 The accepted authentication strategies and parameters are described in [Authentication](../config/authentication.md).
 
-Example inline parameters for form authentication:
+Example with inline parameters for form authentication:
 ```javascript
 browser.get('<url>', {
     auth: {
         'sapcloud-form': {
             user: '<user>',
-            pass: '<pass>',
-            redirectUrl: /console\/tenant\_/
+            pass: '<pass>'
         }
     }
 });

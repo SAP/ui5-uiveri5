@@ -183,5 +183,38 @@ describe("by_control", function () {
 		}));
 
 		expect(list.getAttribute("id")).toContain("ListPage1");
-	})
+	});
+
+	it("should use ancestor and descendant regex", function () {
+		element(by.id("show-nav-btn")).click();
+		var listItem = element(by.control({
+			controlType: "sap.m.StandardListItem",
+			properties: {
+				title: /2/
+			},
+			ancestor: {
+				id: /listpage/i,
+				descendant: {
+					controlType: "sap.m.StandardListItem",
+					properties: {
+						title: /[2-4]/
+					}
+				}
+			}
+		}));
+
+		expect(listItem.getText()).toEqual("2");
+
+		var list = element(by.control({
+			controlType: "sap.m.List",
+			descendant: {
+				controlType: "sap.m.StandardListItem",
+				properties: {
+					title: new RegExp("3")
+				}
+			}
+		}));
+
+		expect(list.getAttribute("id")).toContain("ListPage1");
+	});
 });

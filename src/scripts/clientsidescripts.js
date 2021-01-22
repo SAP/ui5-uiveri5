@@ -177,14 +177,22 @@ var mFunctions = {
       mMatchers.ancestor = control && [[control.getId()]];
     }
 
-    for (var name in mMatchers) {
-      if (mMatchers[name].regex) {
-        mMatchers[name] = new RegExp(mMatchers[name].regex.source, mMatchers[name].regex.flags);
-      } else if (typeof mMatchers[name] === 'object') {
-        for (var key in mMatchers[name]) {
-          var mRegexp = mMatchers[name][key].regex;
-          if (mRegexp) {
-            mMatchers[name][key] = new RegExp(mRegexp.source, mRegexp.flags);
+    // this parsing is used for ui5 versions < 1.74.0
+    _convertPlainObjectToRegex(mMatchers);
+
+    function _convertPlainObjectToRegex(matchers) {
+      for (var name in matchers) {
+        if (matchers[name].regex) {
+          matchers[name] = new RegExp(matchers[name].regex.source, matchers[name].regex.flags);
+        } else if (typeof matchers[name] === 'object') {
+
+          for (var key in matchers[name]) {
+            var mRegexp = matchers[name][key].regex;
+            if (mRegexp) {
+              matchers[name][key] = new RegExp(mRegexp.source, mRegexp.flags);
+            } else if (typeof matchers[name] === 'object') {
+              _convertPlainObjectToRegex(matchers[name][key]);
+            }
           }
         }
       }

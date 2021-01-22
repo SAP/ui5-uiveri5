@@ -58,28 +58,7 @@ function _ControlLocator(mMatchers, logger, collector) {
  * @returns {wdpromise.Promise<WebElement[]>}
  */
 _ControlLocator.prototype.findElementsOverride = function (driver, using, rootSelector) {
-  for (var name in this.matchers) {
-    if (this.matchers[name] instanceof RegExp) {
-      this.matchers[name] = {
-        regex: {
-          source: this.matchers[name].source,
-          flags: this.matchers[name].flags
-        }
-      };
-    } else if (_.isPlainObject(this.matchers[name])) {
-      for (var key in this.matchers[name]) {
-        var vValue = this.matchers[name][key];
-        if (vValue instanceof RegExp) {
-          this.matchers[name][key] = {
-            regex: {
-              source: vValue.source,
-              flags: vValue.flags
-            }
-          };
-        }
-      }
-    }
-  }
+  this._convertRegexToPlainObject();
 
   var sMatchers = JSON.stringify(this.matchers);
 
@@ -106,6 +85,37 @@ _ControlLocator.prototype.findElementsOverride = function (driver, using, rootSe
 _ControlLocator.prototype.toString = function toString() {
   var sMatchers = JSON.stringify(this.matchers);
   return 'by.control(' + sMatchers + ')';
+};
+
+_ControlLocator.prototype._convertRegexToPlainObject = function (matchers) {
+  matchers = matchers || this.matchers;
+  for (var name in matchers) {
+    if (matchers[name] instanceof RegExp) {
+      // e.g. id matcher
+      matchers[name] = {
+        regex: {
+          source: matchers[name].source,
+          flags: matchers[name].flags
+        }
+      };
+    } else if (_.isPlainObject(matchers[name])) {
+      // e.g. properties matcher
+      for (var key in matchers[name]) {
+        var vValue = matchers[name][key];
+        if (vValue instanceof RegExp) {
+          matchers[name][key] = {
+            regex: {
+              source: vValue.source,
+              flags: vValue.flags
+            }
+          };
+        } else if (_.isPlainObject(vValue)) {
+          // transform nested matchers e.g. ancestor, descendant
+          this._convertRegexToPlainObject(matchers[name][key]);
+        }
+      }
+    }
+  }
 };
 
 module.exports = function (config, instanceConfig, logger, collector) {

@@ -1,3 +1,3 @@
 module.exports = function(){
-  global.protractorModule = module.parent;
+  global.protractorModule = module;
 };

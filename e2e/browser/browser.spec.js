@@ -15,7 +15,7 @@ describe('Browser tests', function() {
 
     it('should execute all UI5 tests', () => {
         return Runner.execTest({
-            specs: './browser/specs/*.spec.js',
+            specs: './browser/specs/wait.spec.js',
             baseUrl: app.host + '/browser/index.html'
         });
     }, 80000);

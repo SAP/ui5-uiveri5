@@ -6,6 +6,7 @@ var url = require('url');
 var clientsidescripts = require('./scripts/clientsidescripts');
 var ClassicalWaitForUI5 = require('./scripts/classicalWaitForUI5');
 var Control = require('./control');
+var Runner = require('./ptor/runner').Runner;
 var pageObjectFactory = require('./pageObjectFactory');
 var Plugins = require('./plugins/plugins');
 
@@ -115,7 +116,6 @@ function run(config) {
 
     // prepare protractor executor args
     var protractorArgv = connectionProvider.buildProtractorArgv();
-    plugins.loadProtractorPlugins(protractorArgv);
 
     // enable protractor debug logs
     protractorArgv.troubleshoot = config.verbose>0;
@@ -161,6 +161,7 @@ function run(config) {
     var ui5SyncDelta = config.timeouts && config.timeouts.waitForUI5Delta;
     var waitForUI5Timeout = ui5SyncDelta > 0 ? (config.timeouts.allScriptsTimeout - ui5SyncDelta) : 0;
 
+    
     proxyquire('protractor/built/browser', {
       './clientsidescripts': clientsidescripts
     });
@@ -262,15 +263,17 @@ function run(config) {
           }
         }
 
-        protractorModule.parent.exports.ElementFinder.prototype.asControl = function () {
-          return new Control(this.elementArrayFinder_);
-        };
+        // TODO - will throw error; get from prev pr
+        // TODO remove protractorModule
+        // protractorModule.parent.exports.ElementFinder.prototype.asControl = function () {
+        //   return new Control(this.elementArrayFinder_);
+        // };
 
         // add WebDriver overrides
         var enableClickWithActions = _.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions');
         if (enableClickWithActions) {
           logger.debug('Activating WebElement.click() override with actions');
-          protractorModule.parent.parent.exports.WebElement.prototype.click = function () {
+          protractorModule.parent.exports.WebElement.prototype.click = function () {
             logger.trace('Taking over WebElement.click()');
             var driverActions = this.driver_.actions().mouseMove(this).click();
             return _moveMouseOutsideBody(driverActions);
@@ -670,8 +673,11 @@ function run(config) {
     return connectionProvider.setupEnv().then(function(){
       // call protractor
       logger.info('Executing ' + specs.length + ' specs');
-      var protractorLauncher = require('protractor/built/launcher');
-      protractorLauncher.init(null,protractorArgv);
+
+      var launcher = require('./ptor/launcher');
+      // TODO fix teardown error -- could have something to do with pluginsß
+      // TODO - improve module loading
+      launcher.init(protractorArgv, connectionProvider, plugins);
     });
   });
 }

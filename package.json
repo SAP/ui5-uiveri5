@@ -34,8 +34,8 @@
     "grunt": "^1.0.2",
     "grunt-contrib-connect": "^1.0.2",
     "grunt-shell": "^2.1.0",
-    "jasmine": "^2.2.1",
-    "jasminewd2": "0.0.6",
+    "jasmine": "2.8.0",
+    "jasminewd2": "^2.1.0",
     "multer": "^1.1.0",
     "portfinder": "^0.4.0",
     "sinon": "^3.2.0"

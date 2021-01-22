@@ -25,27 +25,18 @@ Plugins.prototype.loadJasminePlugins = function () {
   });
 };
 
-Plugins.prototype.loadProtractorPlugins = function (protractorArgv) {
-  protractorArgv.plugins = [{
-    inline: {
-      setup: function() {
-        return _callPlugins('setup');
-      },
-      onPrepare: function() {
-        return _callPlugins('onPrepare');
-      },
-      teardown: function() {
-        return _callPlugins('teardown');
-      }
-    }
-  }];
-};
-
-Plugins.prototype.onConnectionSetup = function (runtime) {
-  _callPlugins('onConnectionSetup', [runtime]);
-};
+['setup', 'onPrepare', 'teardown', 'onConnectionSetup', 'postTest',
+  'getResults', 'postResults', 'skipAngularStability', 'waitForPromise', 'waitForCondition'].forEach(function (sEvent) {
+  Plugins.prototype[sEvent] = function () {
+    return _callPlugins(sEvent, arguments);
+  };
+});
 
 function _callPlugins(method, args) {
+  // TODO fix waitForCondition plugins
+  if (method === 'waitForCondition') {
+    return Promise.resolve([true]);
+  }
   return Promise.all(
     pluginModules.map(function (module) {
       if (module[method]) {

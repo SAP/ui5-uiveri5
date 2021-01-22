@@ -378,18 +378,6 @@ function run(config) {
         jasmine.getEnv().addMatchers(matchers);
       });
 
-      // addChild is called inside a describe block, after the suite is created
-      // override addChild to include the the spec file path
-      var originalAddChild = jasmine.Suite.prototype.addChild;
-      jasmine.Suite.prototype.addChild = function (child) {
-        if (child instanceof jasmine.Suite) {
-          var e = new Error();
-          var testFilePath = e.stack.split('\n')[5].replace(/\\/g, '/'); // [1] = uiveri5.js (overwrite), [2] = jasmine.js (addSpecsToSuite), [3], [4] = jasmine.js (describe)
-          testFilePath = testFilePath.substr(testFilePath.indexOf('(') + 1).replace(/\:\d+\:\d+\)/, '');
-          child.result.testFilePath = testFilePath;
-        }
-        originalAddChild.call(this, child);
-      };
       // hook into specs lifecycle
       // open test content page before every suite
       jasmine.getEnv().addReporter({
@@ -410,7 +398,8 @@ function run(config) {
 
             var spec = _getSuiteDetails(result);
             if (!spec) {
-              fail(new Error('Spec with full name: ' + result.description + ' not found'));
+              logger.error('Cannot find spec file with name: ' + result.description +
+                '. The spec file name should be the same as the Jasmine suite!');
               return;
             }
 
@@ -463,7 +452,7 @@ function run(config) {
         suiteDone: function(result){
           var spec = _getSuiteDetails(result);
           // call storage provider afterEach hook
-          if (storageProvider && storageProvider.onAfterEachSpec){
+          if (spec && storageProvider && storageProvider.onAfterEachSpec){
             storageProvider.onAfterEachSpec(spec);
           }
         },
@@ -656,7 +645,7 @@ function run(config) {
     // i.e. given the description of one of the suites in a spec file, find the information for that file.
     function _getSuiteDetails(suite){
       return specs.filter(function (suiteDetails) {
-        return suiteDetails.testPath === suite.testFilePath;
+        return suiteDetails.fullName === suite.description;
       })[0];
     }
 

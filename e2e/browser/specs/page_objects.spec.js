@@ -13,8 +13,8 @@ describe("page_objects", function () {
     App: {
       arrangements: {
         iSetUpMyApp: function () {
-          element(by.tagName("input")).sendKeys("setup");
-          element(by.tagName("form")).element(by.css(".sapMSFB.sapMSFS")).click();
+          element(by.css("input")).sendKeys("setup");
+          element(by.css("form")).element(by.css(".sapMSFB.sapMSFS")).click();
         }
       },
       actions: {
@@ -31,7 +31,7 @@ describe("page_objects", function () {
     Second: {
       assertions: {
         theScrollTextShouldBeDisplayed: function () {
-          expect(element(by.id("page2-cont")).all(by.tagName("div")).get(0).getText()).toBe("This page does not scroll.");
+          expect(element(by.id("page2-cont")).all(by.css("div")).get(0).getText()).toBe("This page does not scroll.");
         }
       }
     }

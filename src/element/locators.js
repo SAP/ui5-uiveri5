@@ -24,8 +24,7 @@ function isProtractorLocator(locator) {
 }
 
 /**
- * The Protractor Locators. These provide ways of finding elements in
- * Angular applications by binding, model, etc.
+ * The Protractor Locators
  *
  * @alias by
  * @extends {webdriver.By}

@@ -22,8 +22,7 @@
         "no-octal": "off"
     },
     "globals": {
-        "sap": true,
-        "protractorModule": true,
+        "sap": true,,
         "Reporter": true
     }
 }

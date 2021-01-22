@@ -1,5 +1,10 @@
 /* eslint no-console: */
 
+
+// https://developers.sap.com/tutorials/appstudio-onboarding.html
+// wiki:  ../wiki/display/CPC15N/Introduction+to+BAS+Operation
+
+
 var _ = require('lodash');
 
 // 0 - INFO,ERROR

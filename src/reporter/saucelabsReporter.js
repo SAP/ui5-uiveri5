@@ -1,12 +1,12 @@
 var _ = require('lodash');
 var URL = require('url').URL;
 
-function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
+// TODO test
+function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
   this.logger = logger;
   this.collector = collector;
-  this.actionInterceptor = actionInterceptor;
   this.expectationInterceptor = expectationInterceptor;
 }
 
@@ -67,17 +67,22 @@ JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
     browser.executeScript('sauce:context=' + this._createFullMessage(expectation));
   }.bind(this));
 
-  this.actionInterceptor.onAction(function (action) {
-    var locatorLog = (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"';
-    if (this.collector.isAuthInProgress()) {
-      browser.executeScript('sauce: enable log');
-      browser.executeScript('sauce:context=Perform authentication action: ' + action.name + ' on element with ' + locatorLog);
-      browser.executeScript('sauce: disable log');
-    } else {
-      browser.executeScript('sauce:context=Perform action: ' + action.name +
-        (action.value ? ' with value "' + action.value : '') + '" on element with ' + locatorLog);
-    }
-  }.bind(this));
+  // TODO refactor
+  browser.plugins_.addPlugin({
+    onElementAction: this._onAction.bind(this)
+  });
+};
+
+JasmineSaucelabsReporter.prototype._onAction = function (action) {
+  var locatorLog = (action.elementLocator ? 'locator "' + action.elementLocator + '" and' : '') + ' ID "' + action.elementId + '"';
+  if (this.collector.isAuthInProgress()) {
+    browser.executeScript('sauce: enable log');
+    browser.executeScript('sauce:context=Perform authentication action: ' + action.name + ' on element with ' + locatorLog);
+    browser.executeScript('sauce: disable log');
+  } else {
+    browser.executeScript('sauce:context=Perform action: ' + action.name +
+      (action.value ? ' with value "' + action.value : '') + '" on element with ' + locatorLog);
+  }
 };
 
 JasmineSaucelabsReporter.prototype._createFullMessage = function (expectation) {
@@ -102,6 +107,6 @@ JasmineSaucelabsReporter.prototype._getSessionId = function () {
   }.bind(this));
 };
 
-module.exports = function (config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor) {
-  return new JasmineSaucelabsReporter(config, instanceConfig, logger, collector, actionInterceptor, expectationInterceptor);
+module.exports = function (config, instanceConfig, logger, collector, expectationInterceptor) {
+  return new JasmineSaucelabsReporter(config, instanceConfig, logger, collector, expectationInterceptor);
 };

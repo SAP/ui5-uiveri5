@@ -1,4 +1,5 @@
 var element = require('../element/element');
+var logger = require('../logger');
 
 /**
  * Mix a function from one object onto another. The function will still be
@@ -49,7 +50,17 @@ function buildElementHelper(browser) {
   return elementHelper;
 }
 
+function enableClickWithActions (browser) {
+  logger.debug('Activating WebElement.click() override with actions');
+  element.ElementArrayFinder.prototype.click = function () {
+    logger.trace('Taking over WebElement.click()');
+    var driverActions = browser.driver.actions().mouseMove(this).click();
+    return browser._moveMouseOutsideBody(driverActions);
+  };
+};
+
 module.exports = {
   mixin: mixin,
-  buildElementHelper: buildElementHelper
+  buildElementHelper: buildElementHelper,
+  enableClickWithActions: enableClickWithActions
 };

@@ -1,6 +1,6 @@
 
 var DEFAULT_TAKE = true;
-var webdriver = protractorModule.require('selenium-webdriver');
+var webdriver = require('selenium-webdriver');
 var pngCrop = require('png-crop');
 var _ = require('lodash');
 var PNG = require('pngjs').PNG;

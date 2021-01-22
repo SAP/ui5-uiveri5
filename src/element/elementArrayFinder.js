@@ -76,9 +76,30 @@ var ElementArrayFinder = function (browser_, getWebElements, locator_, actionRes
   WEB_ELEMENT_FUNCTIONS.forEach(function (fnName) {
     this[fnName] = function () {
       var args = arguments;
-      return this.applyAction_(function (webElem) {
-        return webElem[fnName].apply(webElem, args);
-      });
+      var element = this;
+      var actionFn = function (webElem) {
+          return webElem[fnName].apply(webElem, args);
+      };
+
+      // TODO fix
+      // if (['click', 'sendKeys'].indexOf(fnName) > -1) {
+      //   return element.getAttribute('id').then(function (elementId) {
+      //     var onActionCb = function () {
+      //       browser_.plugins_.onElementAction({
+      //         element: element,
+      //         elementLocator: element.locator_.toString(),
+      //         elementId: elementId,
+      //         name: fnName,
+      //         value: args[0]
+      //       });
+      //     }
+      //     return this.applyAction_(actionFn).then(onActionCb, onActionCb);
+      //   }.bind(this), function (e) {
+      //     console.log("=========== hi 3", e);
+      //   });
+      // } else {
+        return this.applyAction_(actionFn);
+      // }
     }.bind(this);
   }.bind(this));
 };
@@ -141,7 +162,6 @@ ElementArrayFinder.prototype.all = function (locator) {
   var getWebElementsWithWait = function () {
     if (this.getWebElements === null) {
       // This is the first time we are looking for an element
-      // TODO: do own wait
       return this.browser_.waitForUI5('Locator: ' + locator)
         .then(function () {
           if (locators.isProtractorLocator(locator)) {

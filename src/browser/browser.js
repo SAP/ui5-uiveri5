@@ -3,16 +3,12 @@ var webdriver_js_extender = require('webdriver-js-extender');
 var Command = require('selenium-webdriver/lib/command').Command;
 var CommandName = require('selenium-webdriver/lib/command').Name;
 
-// modules copied to UIVeri5
 var element = require('../element/element');
 var locators = require('../element/locators');
-
-// helper modules
 var logger = require('../logger');
 var elementUtil = require('./elementUtil');
 var clientsideScripts = require('../scripts/clientsidescripts');
 
-// consts
 var DEFAULT_RESET_URL = 'data:text/html,<html></html>';
 var DEFAULT_GET_PAGE_TIMEOUT = 10000;
 
@@ -28,8 +24,7 @@ var ProtractorBrowser = function (webdriverInstance, opt_baseUrl) {
     extendWDInstance = webdriver_js_extender.extend(webdriverInstance);
   }
   catch (e) {
-    // Probably not a driver that can be extended (e.g. gotten using
-    // `directConnect: true` in the config)
+    // Probably not a driver that can be extended (e.g. gotten using `directConnect: true` in the config)
     extendWDInstance = webdriverInstance;
   }
 
@@ -70,7 +65,6 @@ var ProtractorBrowser = function (webdriverInstance, opt_baseUrl) {
     }.bind(this));
 };
 
-
 /**
  * The same as {@code webdriver.WebDriver.prototype.executeAsyncScript} but with extra logging
  *
@@ -110,14 +104,14 @@ ProtractorBrowser.prototype._executeAsyncScript = function (scriptName, ...scrip
     });
 };
 
-ProtractorBrowser.prototype.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName, params) {
+ProtractorBrowser.prototype.executeAsyncScriptHandleErrors = function executeAsyncScriptHandleErrors(scriptName, params) {
   var code = clientsideScripts[scriptName];
   params = params || {};
-  browser.controlFlow().execute(function () {
+  this.controlFlow().execute(function () {
     logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
     logger.dump('Execute async script code: \n' + JSON.stringify(code));
   });
-  return browser.executeAsyncScript(code, params)
+  return this.executeAsyncScript(code, params)
     .then(function (res) {
       if (res.log) {
         logger.trace('Async script: ' + scriptName + ' logs: \n' + res.log);
@@ -134,11 +128,11 @@ ProtractorBrowser.prototype.executeAsyncScriptHandleErrors = function executeAsy
 ProtractorBrowser.prototype.executeScriptHandleErrors = function executeScriptHandleErrors(scriptName, params) {
   var code = clientsideScripts[scriptName];
   params = params || {};
-  browser.controlFlow().execute(function () {
+  this.controlFlow().execute(function () {
     logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
     logger.dump('Execute script code: \n' + JSON.stringify(code));
   });
-  return browser.executeScript(code, params)
+  return this.executeScript(code, params)
     .then(function (res) {
       if (res.log) {
         logger.trace('Script: ' + scriptName + ' logs: \n' + res.log);
@@ -186,7 +180,36 @@ ProtractorBrowser.prototype.waitForUI5 = function (description) {
       error.message = errMsg;
     }
     throw error;
-  });
+  }).then(this.plugins_.onUI5Sync, this.plugins_.onUI5Sync);
+};
+
+ProtractorBrowser.prototype.enableClickWithActions = function () {
+  element.enableClickWithActions();
+};
+
+/**
+ * Moving mouse to body (-1, -1)
+ */
+ProtractorBrowser.prototype._moveMouseOutsideBody = function (driverActions) {
+  logger.trace('Moving mouse to body (-1, -1).');
+  // the implicit synchronization that element() does is important to ensure app is settled before clicking
+  var bodyElement = element(by.css('body'));
+  return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
+};
+
+// TODO move browser.testrunner and ui5 loading
+
+ProtractorBrowser.prototype.get = function (sUrl, vOptions) {
+  return this.testrunner.navigation.to(sUrl, vOptions);
+};
+
+ProtractorBrowser.prototype.setViewportSize = function (viewportSize) {
+  return this.executeScriptHandleErrors('getWindowToolbarSize')
+    .then(function (toolbarSize) {
+      this.driver.manage().window().setSize(
+        viewportSize.width * 1 + toolbarSize.width,
+        viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly
+    }.bind(this));
 };
 
 /**
@@ -233,7 +256,7 @@ ProtractorBrowser.prototype.isElementPresent = function (locatorOrElement) {
  * @param {number=} opt_timeout Number of milliseconds to wait for UI5 to start.
  */
 ProtractorBrowser.prototype.refresh = function (opt_timeout) {
-  return this.executeScriptWithDescription('return window.location.href', 'Protractor.refresh() - getUrl')
+  return this.executeScript('return window.location.href')
     .then(function (href) {
       return this.get(href, opt_timeout);
     }.bind(this));
@@ -294,15 +317,5 @@ ProtractorBrowser.By = new locators.ProtractorBy();
 var moduleExports = {
   ProtractorBrowser: ProtractorBrowser
 };
-
-// TODO(cnishina): either remove for loop entirely since this does not export anything
-// the user might need since everything is composed (with caveat that this could be a
-// potential breaking change) or export the types with `export * from 'selenium-webdriver'`;
-/*
- * Mix in other webdriver functionality to be accessible via protractor.
- */
-for (var foo in selenium_webdriver) {
-  moduleExports[foo] = selenium_webdriver[foo];
-}
 
 module.exports = moduleExports;

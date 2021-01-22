@@ -1,10 +1,10 @@
+/**
+ * uses modules from protractor@5.3.2
+ */
 
 var fs = require('fs');
 var _ = require('lodash');
-var proxyquire =  require('proxyquire');
 var url = require('url');
-var UIVeri5Browser = require('./browser/browser');
-var clientsidescripts = require('./scripts/clientsidescripts');
 var ClassicalWaitForUI5 = require('./scripts/classicalWaitForUI5');
 var pageObjectFactory = require('./pageObjectFactory');
 var Plugins = require('./plugins/plugins');
@@ -39,16 +39,6 @@ var AUTH_CONFIG_NAME = 'auth';
 function run(config) {
 
   logger.setLevel(config.verbose);
-
-  proxyquire('protractor/built/ptor', {
-    './browser': UIVeri5Browser
-  });
-  proxyquire('protractor/built/runner', {
-    './browser': UIVeri5Browser
-  });
-  proxyquire('protractor/built/index', {
-    './browser': UIVeri5Browser
-  });
 
   // log framework version
   var pjson = require('../package.json');
@@ -126,7 +116,6 @@ function run(config) {
 
     // prepare protractor executor args
     var protractorArgv = connectionProvider.buildProtractorArgv();
-    plugins.loadProtractorPlugins(protractorArgv);
 
     // enable protractor debug logs
     protractorArgv.troubleshoot = config.verbose>0;
@@ -172,6 +161,7 @@ function run(config) {
     var ui5SyncDelta = config.timeouts && config.timeouts.waitForUI5Delta;
     var waitForUI5Timeout = ui5SyncDelta > 0 ? (config.timeouts.allScriptsTimeout - ui5SyncDelta) : 0;
 
+
     // set specs
     protractorArgv.specs = [];
     specs.forEach(function(spec){
@@ -188,9 +178,6 @@ function run(config) {
 
     // no way to implement concurrent executions with current driverProvider impl
     protractorArgv.maxSessions = 1;
-
-    // export protractor module object as global.protractorModule
-    protractorArgv.beforeLaunch = __dirname + '/beforeLaunchHandler';
 
     // execute after test env setup and just before test execution starts
     protractorArgv.onPrepare = function () {
@@ -264,14 +251,11 @@ function run(config) {
         }
 
         // add WebDriver overrides
+
         var enableClickWithActions = _.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions');
         if (enableClickWithActions) {
-          logger.debug('Activating WebElement.click() override with actions');
-          protractorModule.parent.parent.exports.WebElement.prototype.click = function () {
-            logger.trace('Taking over WebElement.click()');
-            var driverActions = this.driver_.actions().mouseMove(this).click();
-            return _moveMouseOutsideBody(driverActions);
-          };
+          // TODO refactor?
+          browser.enableClickWithActions();
         }
 
       });
@@ -363,7 +347,7 @@ function run(config) {
                 storageProvider.onBeforeEachSpec(spec);
               }
               if (_.get(browser.testrunner.runtime,'capabilities.remoteWebDriverOptions.enableClickWithActions')) {
-                _moveMouseOutsideBody(browser.driver.actions());
+                browser._moveMouseOutsideBody(browser.driver.actions());
               }
             });
           }).catch(function(error){
@@ -563,11 +547,10 @@ function run(config) {
         }
       };
 
-      var actionInterceptor = require('./reporter/actionInterceptor');
       var expectationInterceptor = require('./reporter/expectationInterceptor');
       // register reporters
       var jasmineEnv = jasmine.getEnv();
-      moduleLoader.loadModule('reporters',[statisticCollector, actionInterceptor, expectationInterceptor]).forEach(function(reporter){
+      moduleLoader.loadModule('reporters',[statisticCollector, expectationInterceptor]).forEach(function(reporter){
         reporter.register(jasmineEnv);
       });
 
@@ -592,16 +575,6 @@ function run(config) {
       })[0];
     }
 
-    /**
-     * Moving mouse to body (-1, -1)
-     */
-    function _moveMouseOutsideBody(driverActions) {
-      logger.trace('Moving mouse to body (-1, -1).');
-      // the implicit synchronization that element() does is important to ensure app is settled before clicking
-      var bodyElement = element(by.css('body'));
-      return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
-    }
-
     // register page object factory on global scope
     logger.debug('Loading BDD-style page object factory');
     pageObjectFactory.register(global);
@@ -611,8 +584,10 @@ function run(config) {
     return connectionProvider.setupEnv().then(function(){
       // call protractor
       logger.info('Executing ' + specs.length + ' specs');
-      var protractorLauncher = require('protractor/built/launcher');
-      protractorLauncher.init(null,protractorArgv);
+
+      var launcher = require('./ptor/launcher');
+      // TODO - improve dependency loading?
+      launcher.init(protractorArgv, connectionProvider, plugins);
     });
   });
 }

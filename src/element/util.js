@@ -17,6 +17,17 @@ function falseIfMissing(error) {
   }
 }
 
+/**
+ * Return a boolean given boolean value.
+ *
+ * @param {boolean} value
+ * @returns {boolean} given value
+ */
+function passBoolean(value) {
+  return value;
+}
+
 module.exports = {
-  falseIfMissing: falseIfMissing
+  falseIfMissing: falseIfMissing,
+  passBoolean: passBoolean
 };

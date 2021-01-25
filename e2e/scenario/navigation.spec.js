@@ -13,6 +13,14 @@ describe('Navigation scenario test', function() {
         app.server.close();
     });
 
+    it('should open baseUrl if configured', () => {
+        return Runner.execTest({
+            specs: './scenario/fixture/navigation_default.spec.js',
+            confjs: './scenario/navigation.conf.js',
+            baseUrl: app.host + '/formauth/app.html?auth=true'  // skip auth
+        });
+    }, 60000);
+
     it('should navigate in browser', () => {
         return Runner.execTest({
             specs: './scenario/fixture/navigation.spec.js',

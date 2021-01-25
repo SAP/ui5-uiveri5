@@ -392,19 +392,15 @@ function run(config) {
         //TODO consider several describe() per spec file
         suiteStarted: function(result){
 
-          // enclose all WebDriver operations in a new flow for a gracefull handlong of failures
+          // enclose all WebDriver operations in a new flow for a gracefull handling of failures
           // will call jasmine.fail() that will handle the error
           browser.controlFlow().execute(function() {
 
-            var spec = _getSuiteDetails(result);
-            if (!spec) {
-              logger.error('Cannot find spec file with name: ' + result.description +
-                '. The spec file name should be the same as the Jasmine suite!');
-              return;
-            }
-
+            var spec = _getSpecDetails(result);
+            var contentUrl = spec ? spec.contentUrl : config.baseUrl;
+            
             // open content page if required
-            if (!spec.contentUrl) {
+            if (!contentUrl) {
               logger.debug('Skip content page opening');
               return;
             }
@@ -413,7 +409,7 @@ function run(config) {
             // so no need to synchronize manually with callbacks/promises
 
             // add request params
-            var specUrl = url.parse(spec.contentUrl);
+            var specUrl = url.parse(contentUrl);
             if (config.baseUrlQuery && config.baseUrlQuery.length >0){
               if (specUrl.search == null) {
                 specUrl.search = '';
@@ -450,7 +446,7 @@ function run(config) {
         },
 
         suiteDone: function(result){
-          var spec = _getSuiteDetails(result);
+          var spec = _getSpecDetails(result);
           // call storage provider afterEach hook
           if (spec && storageProvider && storageProvider.onAfterEachSpec){
             storageProvider.onAfterEachSpec(spec);
@@ -643,7 +639,7 @@ function run(config) {
 
     // finds a UIVeri5 spec definition by a given Jasmine suite description
     // i.e. given the description of one of the suites in a spec file, find the information for that file.
-    function _getSuiteDetails(suite){
+    function _getSpecDetails(suite){
       return specs.filter(function (suiteDetails) {
         return suiteDetails.fullName === suite.description;
       })[0];

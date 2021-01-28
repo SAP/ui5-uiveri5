@@ -15,5 +15,4 @@ describe('navigation', function() {
         browser.loadUI5Dependencies();
         expect(browser.getTitle()).toBe('E2E Test');
     });
-
 });

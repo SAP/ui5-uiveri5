@@ -1,8 +1,13 @@
 var express = require('express');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var csrf = require('csurf');
 
 module.exports = function() {
   var app = express();
+  var csrfProtection = csrf({
+    cookie: true
+  });
 
   var response = 1;
   app.get('/user/', function(req, res) {
@@ -66,6 +71,32 @@ module.exports = function() {
 
   app.delete('/users/:user', function(req, res) {
     res.send({deleted: req.params.user});
+  });
+
+  app.use(cookieParser());
+  app.use(function (err, req, res, next) {
+    if (err.code === 'EBADCSRFTOKEN') {
+      // CSRF token error
+      res.status(403);
+      res.send('form tampered with');
+    } else {
+      return next();
+    }
+  });
+
+  app.get('/form', csrfProtection, function (req, res) {
+    if (req.headers['x-csrf-token'].toLowerCase() === 'fetch') {
+      res.set('x-csrf-token', req.csrfToken());
+      res.send({
+        csrfToken: req.csrfToken()
+      });
+    } else {
+      res.sendStatus(200);
+    }
+  });
+  
+  app.post('/form', csrfProtection, function (req, res) {
+    res.send('data is being processed')
   });
 
   return app;

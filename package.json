@@ -29,6 +29,8 @@
     "yargs": "^3.8.0"
   },
   "devDependencies": {
+    "cookie-parser": "^1.4.5",
+    "csurf": "^1.11.0",
     "eslint": "^5.2.0",
     "express": "^4.13.4",
     "grunt": "^1.0.2",

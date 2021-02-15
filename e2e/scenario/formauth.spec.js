@@ -60,4 +60,17 @@ describe('FormAuth scenario test', function() {
             confjs: './scenario/formauth_authorize.conf.js'
         });
     },80000);
+
+    it('should execute auth only for the first test', () => {
+        // will execute 2 spec files:
+        // authOnce will change the page by a click;
+        // authOnce2 will check that the change is still there - which would mean that there wasn't a second auth
+        return Runner.execTest({
+            specs: './scenario/fixture/authOnce*.spec.js',
+            baseUrl: app.host + '/formauth/authOnce.html',
+            confjs: './scenario/formauth_url_once.conf.js'
+        }).then(function () {
+
+        });
+    },60000);
 });

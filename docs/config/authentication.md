@@ -3,6 +3,13 @@ To test a protected page, you need to specify authentication type and credential
 is handled by plugable authenticator [modules](../src/moduleLoader.js). Basic (in URL), plain form, and form with UI5
 authentication modules are already available. Each authenticator module accepts a number of parameters that could override the defaults.
 
+By default, the authentication is performed before each spec file. If you want to do it only for the first spec, add the `authOnce` parameter:
+```javascript
+exports.config = {
+  authOnce: true
+}
+```
+
 ## Authentication Configurations
 To enable auth configuration, just configure it in the conf.js.
 ```javascript
@@ -147,7 +154,7 @@ exports.config = {
 If think your authenticator would be usefull for others, please consider contributing it by creating a pull request against this repo.
 
 ## Programatic Authentication
-Set `baseUrl` to `null` to disable automatic page loading and declartive authentication configuration. From the test, call  `browser.get()` with the required URL.
+Set `baseUrl` to `null` to disable automatic page loading and declartive authentication configuration. From the test, call  `browser.get()` with the required URL. Note that `authOnce` isn't relevant for this case and will be ignored.
 
 You can override the default auth settings by providing an options object with the same syntax as in the conf.js file. You can also supply creditentials from parameters but you need to use the programatic approach as the parameters placeholders are resolved only in the declarative configuration.
 ```javascript

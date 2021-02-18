@@ -48,6 +48,7 @@ module.exports = class Runner {
           '--browsers=chromeHeadless',
           '--config.specResolver="./resolver/localSpecResolver"',
           '--config.specs=' + opts.specs,
+          opts.specFilter ? '--specFilter="' + opts.specFilter + '"' : '',
           opts.baseUrl ? '--config.baseUrl="' + opts.baseUrl + '"' : '',
           opts.params ? buildConfigArgs('--params',opts.params) : '',
           opts.confjs ? opts.confjs : ''

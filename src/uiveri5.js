@@ -495,17 +495,31 @@ function run(config) {
         });
       }
 
+      var authConfigModule;
       // expose navigation helpers to tests
       browser.testrunner.navigation = {
         to: function(url, authConfig) {
-          authConfig = authConfig || AUTH_CONFIG_NAME;
-          var authenticator =  moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
+          var authenticator;
+          if (authConfig) {
+            // programatically invoked authentication - load auth module every time
+            authenticator =  moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
+          } else {
+            // auth is declared in config - load the (global) auth module only once.
+            // when authOnce is enabled, auth should be done only once - before the first spec file.
+            if (authConfigModule) {
+              authenticator = config.authOnce ? null : authConfigModule;
+            } else {
+              authenticator = authConfigModule = moduleLoader.loadNamedModule(AUTH_CONFIG_NAME, [statisticCollector]);
+            }
+          }
 
-          // open page and login
-          browser.controlFlow().execute(function () {
-            logger.info('Opening: ' + url);
-          });
-          authenticator.get(url);
+          if (authenticator) {
+            // open page and login
+            browser.controlFlow().execute(function () {
+              logger.info('Opening: ' + url);
+            });
+            authenticator.get(url);
+          }
 
           // handle pageLoading options
           if (config.pageLoading) {

@@ -58,7 +58,7 @@ function _ControlLocator(mMatchers, logger, collector) {
  * @returns {wdpromise.Promise<WebElement[]>}
  */
 _ControlLocator.prototype.findElementsOverride = function (driver, using, rootSelector) {
-  this._convertRegexToPlainObject();
+  this._convertRegexToPlainObject(this.matchers);
 
   var sMatchers = JSON.stringify(this.matchers);
 
@@ -88,7 +88,6 @@ _ControlLocator.prototype.toString = function toString() {
 };
 
 _ControlLocator.prototype._convertRegexToPlainObject = function (matchers) {
-  matchers = matchers || this.matchers;
   for (var name in matchers) {
     if (matchers[name] instanceof RegExp) {
       // e.g. id matcher

@@ -183,13 +183,13 @@ var mFunctions = {
     function _convertPlainObjectToRegex(matchers) {
       for (var name in matchers) {
         if (matchers[name].regex) {
-          matchers[name] = new RegExp(matchers[name].regex.source, matchers[name].regex.flags);
+          matchers[name] = new window.RegExp(matchers[name].regex.source, matchers[name].regex.flags);
         } else if (typeof matchers[name] === 'object') {
 
           for (var key in matchers[name]) {
             var mRegexp = matchers[name][key].regex;
             if (mRegexp) {
-              matchers[name][key] = new RegExp(mRegexp.source, mRegexp.flags);
+              matchers[name][key] = new window.RegExp(mRegexp.source, mRegexp.flags);
             } else if (typeof matchers[name] === 'object') {
               _convertPlainObjectToRegex(matchers[name][key]);
             }

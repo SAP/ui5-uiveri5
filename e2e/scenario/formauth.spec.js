@@ -66,8 +66,9 @@ describe('FormAuth scenario test', function() {
         // authOnce will change the page by a click;
         // authOnce2 will check that the change is still there - which would mean that there wasn't a second auth
         return Runner.execTest({
-            specs: './scenario/fixture/authOnce*.spec.js',
-            baseUrl: app.host + '/formauth/authOnce.html',
+            specs: './scenario/fixture/authonce*.spec.js',
+            specFilter: 'authonce_first,authonce_second',
+            baseUrl: app.host + '/formauth/app.html',
             confjs: './scenario/formauth_url_once.conf.js'
         }).then(function () {
 

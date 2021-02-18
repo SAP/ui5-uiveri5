@@ -35,14 +35,25 @@
 			var app = new sap.m.App("myApp", {initialPage:"page1"});
 
 			var page1 = new sap.m.Page("page1", {
-				title:"Page 1",
-				content : [
-					new sap.m.Button({
-						id : "show-footer-btn",
-						text : "Press me"
+				title: "Page 1",
+					content: [
+						new sap.m.Button({
+							id: "show-footer-btn",
+							text: "Show footer",
+							press: function () {
+								page1.setShowFooter(true);
+							}
+						})
+					],
+					footer: new sap.m.Bar({
+						id: 'page1-footer',
+						contentMiddle: [
+							new sap.m.Button({ icon: "images/iconCompetitors.png", tooltip: "Trophy" })
+						]
 					})
-				]
 			});
+
+			page1.setShowFooter(false);
 
 			app.addPage(page1);
 			app.placeAt("body");

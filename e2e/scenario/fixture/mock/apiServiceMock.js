@@ -5,6 +5,7 @@ var csrf = require('csurf');
 
 module.exports = function() {
   var app = express();
+  // will also use a _csrf cookie (secret) and validate against it
   var csrfProtection = csrf({
     cookie: true
   });
@@ -86,9 +87,10 @@ module.exports = function() {
 
   app.get('/form', csrfProtection, function (req, res) {
     if (req.headers['x-csrf-token'].toLowerCase() === 'fetch') {
-      res.set('x-csrf-token', req.csrfToken());
+      var csrfToken = req.csrfToken();
+      res.set('x-csrf-token', csrfToken);
       res.send({
-        csrfToken: req.csrfToken()
+        csrfToken: csrfToken
       });
     } else {
       res.sendStatus(200);

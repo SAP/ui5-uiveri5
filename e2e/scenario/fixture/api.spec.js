@@ -85,16 +85,14 @@ describe('api', function() {
       expect(err.status).toBe(403);
     });
 
-    request.csrf({
-      url: restServiceMockUrl + '/form'
-    }).then(function () {
-      request.post(restServiceMockUrl + '/form').send({
-        field: 'value'
-      }).do().then(function (res) {
-        expect(res.status).toBe(200);
-      }).catch(function (err) {
-        expect(true).toBeFalsy();
-      });
+    request.authenticate(new CsrfAuthenticator({
+      csrfFetchUrl: restServiceMockUrl + '/form'
+    }));
+
+    request.post(restServiceMockUrl + '/form').send({
+      field: 'value'
+    }).do().then(function (res) {
+      expect(res.status).toBe(200);
     });
   });
 

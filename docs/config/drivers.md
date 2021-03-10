@@ -130,6 +130,34 @@ browsers: [{
 }]
 ```
 
+## Chromium
+To run Chromium you need to download the Chromium executable and ChromeDriver Canary. Automatic download is not implemented.
+
+The easiest way to get Chromium is to download the [latest version](https://www.chromium.org/getting-involved/download-chromium), which needs the latest ChromeDriver. Follow the instructions to get the latest version from the official [ChromeDriver page](https://chromedriver.chromium.org/chromedriver-canary).
+
+You need to set the following paths in the config file:
+
+```javascript
+browsers: [{
+  browserName: 'chromium',
+  capabilities: {
+    chromeOptions: {
+      args: 'start-maximized',
+      binary: "/path/to/Chromium"
+    }
+  }
+}],
+connectionConfigs: {
+  direct: {
+    binaries: {
+      chromedriver: {
+        localPath: 'path/to/ChromeDriver'
+      }
+    }
+  }
+}
+```
+
 ## Firefox
 Firefox uses the geckodriver that is updated regularly, so by default, we use the latest version.
 

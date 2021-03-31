@@ -122,7 +122,7 @@ describe('waitForUI5: ClassicalWaitForUI5', function() {
       expect(oClassicalWaitForUI5.aPendingTimeouts.length).toEqual(2); //the timeouts called by inside functions will be pending
 
       //after 5 times of unique timeout it wouldn't be tracked any more
-      jasmine.clock().tick(1750); //firstFunction() called from secondFunction() 5*350=1750
+      jasmine.clock().tick(6 * 350); //firstFunction() called from secondFunction()
       expect(oClassicalWaitForUI5.aPendingTimeouts.length).toEqual(0);
     });
   });

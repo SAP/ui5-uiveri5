@@ -51,7 +51,7 @@ var WEB_ELEMENT_FUNCTIONS = require('./elementFunctions').webElementFunctions;
  *
  * @constructor
  * @extends {webdriver.WebElement}
- * @param {ProtractorBrowser} browser_ A browser instance.
+ * @param {Browser} browser_ A browser instance.
  * @param {ElementArrayFinder} elementArrayFinder The ElementArrayFinder
  *     that this is branched from.
  * @returns {ElementFinder}

@@ -17,7 +17,7 @@ function ConnectionProvider(config,instanceConfig,logger, plugins) {
   this.plugins = plugins;
 }
 
-ConnectionProvider.prototype.buildProtractorArgv = function(){
+ConnectionProvider.prototype.buildLauncherArgv = function(){
   return {};
 };
 

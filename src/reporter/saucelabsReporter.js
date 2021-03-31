@@ -1,7 +1,5 @@
 var _ = require('lodash');
 var URL = require('url').URL;
-
-// TODO test
 function JasmineSaucelabsReporter(config, instanceConfig, logger, collector, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
@@ -67,7 +65,6 @@ JasmineSaucelabsReporter.prototype.register = function (jasmineEnv) {
     browser.executeScript('sauce:context=' + this._createFullMessage(expectation));
   }.bind(this));
 
-  // TODO refactor
   browser.plugins_.addPlugin({
     onElementAction: this._onAction.bind(this)
   });

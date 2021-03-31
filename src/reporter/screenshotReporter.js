@@ -7,8 +7,6 @@ const { browser } = require('protractor');
 var DEFAULT_SCREENSHOTS_ROOT = 'target/report/screenshots/';
 var DEFAULT_TEMPLATE_NAME = __dirname + '/report.screenshots.tpl.html';
 var DEFAULT_REPORT_NAME = 'report.html';
-
-// TODO fix + test with demokit
 function JasmineScreenshotReporter(config, instanceConfig, logger, collector, expectationInterceptor) {
   this.config = config;
   this.instanceConfig = instanceConfig;
@@ -47,18 +45,10 @@ JasmineScreenshotReporter.prototype.register = function (jasmineEnv) {
   jasmineEnv.addReporter(this);
   this.expectationInterceptor.onExpectation(this._onExpectation.bind(this));
 
-  // TODO refactor
   browser.plugins_.addPlugin({
     onUI5Sync: this._onUI5Sync.bind(this),
     onElementAction: this._onAction.bind(this)
   });
-};
-
-JasmineScreenshotReporter.prototype._onUI5Sync = function () {
-  // screenshot is taken between sync and interaction
-  return this._takeScreenshot(function (png) {
-    this.lastSyncScreenshot = png;
-  }.bind(this));
 };
 
 JasmineScreenshotReporter.prototype._onExpectation = function (expectation, specResult, category) {
@@ -73,6 +63,13 @@ JasmineScreenshotReporter.prototype._onExpectation = function (expectation, spec
   _.last(specResult[category]).shortMessage = ['Expected', '\'' + expectation.actual + '\'', expectation.matcherName, '\'' + expectation.expected + '\''].join(' ');
   _.last(specResult[category]).stepIndex = this.collector.stepIndex;
   this.collector.stepIndex += 1;
+};
+
+JasmineScreenshotReporter.prototype._onUI5Sync = function () {
+  // screenshot is taken between sync and interaction
+  return this._takeScreenshot(function (png) {
+    this.lastSyncScreenshot = png;
+  }.bind(this));
 };
 
 JasmineScreenshotReporter.prototype._onAction = function (action) {

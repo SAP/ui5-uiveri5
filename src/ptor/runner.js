@@ -148,7 +148,7 @@ Runner.prototype.setupGlobals_ = function (browser_) {
   ptor.protractor.$ = browser_.$;
   ptor.protractor.$$ = browser_.$$;
   ptor.protractor.element = browser_.element;
-  ptor.protractor.by = ptor.protractor.By = browser.ProtractorBrowser.By;
+  ptor.protractor.by = ptor.protractor.By = browser.Browser.By;
   ptor.protractor.ExpectedConditions = browser_.ExpectedConditions;
   if (!this.config_.noGlobals) {
     // Export protractor to the global namespace to be used in tests.
@@ -199,7 +199,7 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
     initProperties.getPageTimeout = parentBrowser.getPageTimeout;
     initProperties.allScriptsTimeout = parentBrowser.allScriptsTimeout;
   }
-  var browser_ = new browser.ProtractorBrowser(driver, initProperties.baseUrl, initProperties.rootElement);
+  var browser_ = new browser.Browser(driver, initProperties.baseUrl, initProperties.rootElement);
   browser_.params = initProperties.params;
   browser_.plugins_ = plugins || this.plugins;
   if (initProperties.getPageTimeout) {

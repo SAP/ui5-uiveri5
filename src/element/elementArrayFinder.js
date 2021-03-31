@@ -57,7 +57,7 @@ var WEB_ELEMENT_FUNCTIONS = require('./elementFunctions').webElementFunctions;
  * });
  *
  * @constructor
- * @param {ProtractorBrowser} browser A browser instance.
+ * @param {Browser} browser A browser instance.
  * @param {function(): Array.<webdriver.WebElement>} getWebElements A function
  *    that returns a list of the underlying Web Elements.
  * @param {webdriver.Locator} locator The most relevant locator. It is only
@@ -77,29 +77,29 @@ var ElementArrayFinder = function (browser_, getWebElements, locator_, actionRes
     this[fnName] = function () {
       var args = arguments;
       var element = this;
-      var actionFn = function (webElem) {
-          return webElem[fnName].apply(webElem, args);
-      };
+      var actionFn;
 
-      // TODO fix
-      // if (['click', 'sendKeys'].indexOf(fnName) > -1) {
-      //   return element.getAttribute('id').then(function (elementId) {
-      //     var onActionCb = function () {
-      //       browser_.plugins_.onElementAction({
-      //         element: element,
-      //         elementLocator: element.locator_.toString(),
-      //         elementId: elementId,
-      //         name: fnName,
-      //         value: args[0]
-      //       });
-      //     }
-      //     return this.applyAction_(actionFn).then(onActionCb, onActionCb);
-      //   }.bind(this), function (e) {
-      //     console.log("=========== hi 3", e);
-      //   });
-      // } else {
-        return this.applyAction_(actionFn);
-      // }
+      if (['click', 'sendKeys'].indexOf(fnName) > -1) {
+        actionFn = function (webElem) {
+          return webElem.getAttribute('id').then(function (id) {
+            var onAction = function () {
+              browser_.plugins_.onElementAction({
+                element: element,
+                elementLocator: element.locator_.toString(),
+                elementId: id,
+                name: fnName,
+                value: args[0]
+              });
+            };
+            return webElem[fnName].apply(webElem, args).then(onAction, onAction);
+          });
+        };
+      } else {
+        actionFn = function (webElem) {
+          return webElem[fnName].apply(webElem, args);
+        };
+      }
+      return this.applyAction_(actionFn);
     }.bind(this);
   }.bind(this));
 };
@@ -479,8 +479,7 @@ ElementArrayFinder.prototype.applyAction_ = function (actionFn) {
   var actionResults = this.getWebElements()
     .then(function (arr) {
       return selenium_webdriver.promise.all(arr.map(actionFn));
-    })
-    .then(function (value) {
+    }).then(function (value) {
       return {
         passed: true,
         value: value

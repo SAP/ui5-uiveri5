@@ -131,13 +131,11 @@ DirectConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(run
 };
 
 
-DirectConnectionProvider.prototype.buildProtractorArgv = function(){
-  var protractorArgv = {};
-
+DirectConnectionProvider.prototype.buildLauncherArgv = function () {
   // require direct connection as directDriverProvider will be overtaken later
-  protractorArgv.directConnect = true;
-
-  return protractorArgv;
+  return {
+    directConnect: true
+  };
 };
 
 /**

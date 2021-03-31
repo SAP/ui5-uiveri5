@@ -21,7 +21,7 @@ function Ptor() {
     return null;
   };
   // Export protractor classes.
-  this.ProtractorBrowser = browser.ProtractorBrowser;
+  this.ProtractorBrowser = browser.Browser;
   this.ElementFinder = element.ElementFinder;
   this.ElementArrayFinder = element.ElementArrayFinder;
   this.ProtractorBy = locators.ProtractorBy;

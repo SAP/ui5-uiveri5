@@ -131,18 +131,22 @@ browsers: [{
 ```
 
 ## Chromium
-To run Chromium you need to download the Chromium executable and ChromeDriver Canary. Automatic download is not implemented.
+Chromium uses the same ChromeDriver as Chrome. But automatic download of ChromeDriver is not implemented for Chromium. Please make sure
+you have the correct version of ChromeDriver for your Chromium version.
 
-The easiest way to get Chromium is to download the [latest version](https://www.chromium.org/getting-involved/download-chromium), which needs the latest ChromeDriver. Follow the instructions to get the latest version from the official [ChromeDriver page](https://chromedriver.chromium.org/chromedriver-canary).
-
-You need to set the following paths in the config file:
-
+The easiest way to install Chromium and ChromeDriver on macOS is using the brew package manager. For stable versions of chromium and the corresponding chromedriver you can use:
+```
+$brew install --cask eloston-chromium 
+# chromium is available as: /Applications/Chromium.app/Contents/MacOS/Chromium
+$brew install --cask chromedriver
+# chromedriver is available as: /usr/local/bin/chromedriver
+```
+Then you need to set the paths in the config file:
 ```javascript
 browsers: [{
   browserName: 'chromium',
   capabilities: {
     chromeOptions: {
-      args: 'start-maximized',
       binary: "/path/to/Chromium"
     }
   }
@@ -156,6 +160,11 @@ connectionConfigs: {
     }
   }
 }
+```
+Or using command line:
+```
+$ uiveri5 --browsers=chromium --config.connectionConfigs.direct.binaries.chromedriver.localPath=path/to/ChromeDriver
+--confKeys=browsers[0].capabilities.chromeOptions.binary:/path/to/Chromium
 ```
 
 ## Firefox

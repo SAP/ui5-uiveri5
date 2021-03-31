@@ -171,7 +171,7 @@ DirectConnectionProvider.prototype.setupEnv = function() {
     // switch on browser
     that.runtimes.forEach(function(runtime){
       var browserName = runtime.browserName;
-      if (browserName == 'chrome' || browserName == 'chromeMobileEmulation' || browserName == 'chromeHeadless') {
+      if (browserName == 'chrome' || browserName == 'chromeMobileEmulation' || browserName == 'chromeHeadless' || browserName == 'chromium') {
         promises.push(that._getBinaryFileName(BINARIES.CHROMEDRIVER).then(
           function(filename){
             that.seleniumConfig.executables.chromedriver = filename;
@@ -500,7 +500,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
     } else  {
       // switch on browser
       browserName = requiredCapabilities.browserName;
-      if (browserName == 'chrome') {
+      if (browserName == 'chrome' || browserName == 'chromium') {
         that.deps.chrome = protractorModule.require('selenium-webdriver/chrome');
 
         // chromedriver is started without specifying host, on findFreePort, returns getLoopbackAddress

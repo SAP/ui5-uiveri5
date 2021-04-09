@@ -95,7 +95,7 @@ var taskResults_ = new TaskResults();
 var init = function (config, connectionProvider, plugins) {
   var configParser = new ConfigParser();
   configParser.addConfig(config);
-  var config = configParser.getConfig();
+  config = configParser.getConfig();
  
   logger.debug('Your base url for tests is ' + config.baseUrl);
   // Run beforeLaunch

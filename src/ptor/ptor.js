@@ -14,10 +14,10 @@ var expectedConditions = require('../element/expectedConditions');
 
 function Ptor() {
   // $ and $$ will be available after driver starts
-  this.$ = function (search) {
+  this.$ = function () {
     return null;
   };
-  this.$$ = function (search) {
+  this.$$ = function () {
     return null;
   };
   // Export protractor classes.

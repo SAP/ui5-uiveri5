@@ -22,7 +22,7 @@
         "no-octal": "off"
     },
     "globals": {
-        "sap": true,,
+        "sap": true,
         "Reporter": true
     }
 }

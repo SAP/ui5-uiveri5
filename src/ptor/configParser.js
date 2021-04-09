@@ -85,7 +85,7 @@ ConfigParser.getSpecs = function (config) {
  * @param {Object} additionalConfig
  * @param {string} relativeTo the file path to resolve paths against
  */
-ConfigParser.prototype.addConfig_ = function (additionalConfig, relativeTo) {
+ConfigParser.prototype.addConfig_ = function (additionalConfig) {
   merge_(this.config_, additionalConfig);
 };
 
@@ -149,8 +149,8 @@ function makeArray (item) {
  */
 function union (dest, src) {
   var elems = {};
-  for (var key in dest) {
-    elems[dest[key]] = true;
+  for (var destKey in dest) {
+    elems[dest[destKey]] = true;
   }
   for (var key in src) {
     if (!elems[src[key]]) {

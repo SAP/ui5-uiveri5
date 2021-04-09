@@ -220,7 +220,7 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
     return selenium_webdriver.promise.when(config);
   };
   browser_.forkNewDriverInstance =
-    (useSameUrl, copyMockModules, copyConfigUpdates = true) => {
+    (useSameUrl, copyMockModules) => {
       var newBrowser = this.createBrowser(plugins);
       if (copyMockModules) {
         newBrowser.mockModules_ = browser_.mockModules_;
@@ -355,7 +355,6 @@ Runner.prototype.run = function () {
       return this.exit_(exitCode);
     })
     .catch(function (e) {
-      debugger
       logger.debug('Ptor runner error: ' + e);
     })
     .fin(() => {

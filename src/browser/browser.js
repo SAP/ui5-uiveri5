@@ -90,7 +90,7 @@ var Browser = function (webdriverInstance, opt_baseUrl) {
     navigation: {
       waitForRedirect: browser._waitForRedirect.bind(browser),
       to: browser._navigateTo.bind(browser),
-      _getAuthenticator: function (authConfig) {
+      _getAuthenticator: function () {
         // override in uiveri5.js - needs moduleLoader and statisticCollector
         return null;
       }

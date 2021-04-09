@@ -75,16 +75,16 @@ TaskRunner.prototype.run = function () {
           taskLogger.peek();
         }
         switch (m.event) {
-          case 'testPass':
-            process.stdout.write('.');
-            break;
-          case 'testFail':
-            process.stdout.write('F');
-            break;
-          case 'testsDone':
-            runResults.failedCount = m.results.failedCount;
-            runResults.specResults = m.results.specResults;
-            break;
+        case 'testPass':
+          process.stdout.write('.');
+          break;
+        case 'testFail':
+          process.stdout.write('F');
+          break;
+        case 'testsDone':
+          runResults.failedCount = m.results.failedCount;
+          runResults.specResults = m.results.specResults;
+          break;
         }
       })
       .on('error', (err) => {

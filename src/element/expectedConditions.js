@@ -70,7 +70,7 @@ ProtractorExpectedConditions.prototype.not = function (expectedCondition) {
   };
 };
 
-  /**
+/**
  * Helper function that is equivalent to the logical_and if defaultRet==true,
  * or logical_or if defaultRet==false
  *
@@ -121,7 +121,7 @@ ProtractorExpectedConditions.prototype.and = function (...args) {
   return this.logicalChain_(true, args);
 };
 
-  /**
+/**
  * Chain a number of expected conditions using logical_or, short circuiting
  * at the first expected condition that evaluates to true.
  *

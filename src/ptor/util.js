@@ -49,7 +49,6 @@ function runFilenameOrFn_(configDir, filenameOrFn, args) {
           err = new Error(err);
         }
         else {
-          err = err;
           if (!err.stack) {
             err.stack = new Error().stack;
           }

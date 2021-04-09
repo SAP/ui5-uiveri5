@@ -1,5 +1,4 @@
 var element = require('../element/element');
-var logger = require('../logger');
 
 /**
  * Mix a function from one object onto another. The function will still be

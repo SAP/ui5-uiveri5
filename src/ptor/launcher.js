@@ -12,7 +12,6 @@ var TaskScheduler = require('./taskScheduler').TaskScheduler;
 
 var logger = require('../logger');
 var helper = require('./util');
-var Runner = require('./runner').Runner;
 var TaskRunner = require('./taskRunner').TaskRunner;
 
 var RUNNERS_FAILED_EXIT_CODE = 100;
@@ -148,25 +147,6 @@ var init = function (config, connectionProvider, plugins) {
             config.multiCapabilities = [{ browserName: 'chrome' }];
           }
         });
-    })
-    .then(() => {
-      // 3) If we're in `elementExplorer` mode, run only that.
-      if (config.elementExplorer || config.framework === 'explorer') {
-        if (config.multiCapabilities.length != 1) {
-          throw new Error('Must specify only 1 browser while using elementExplorer');
-        }
-        else {
-          config.capabilities = config.multiCapabilities[0];
-        }
-        config.framework = 'explorer';
-        var runner = new Runner(config, connectionProvider, plugins);
-        return runner.run().then((exitCode) => {
-          process.exit(exitCode);
-        }, (err) => {
-          logger.error(err);
-          process.exit(1);
-        });
-      }
     })
     .then(() => {
       // 4) Run tests.

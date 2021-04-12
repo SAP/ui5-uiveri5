@@ -132,7 +132,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
     } else  {
       // switch on browser
       browserName = requiredCapabilities.browserName;
-      if (browserName == 'chrome') {
+      if (browserName == 'chrome' || browserName == 'chromium') {
         that.deps.chrome = require('selenium-webdriver/chrome');
 
         // chromedriver is started without specifying host, on findFreePort, returns getLoopbackAddress

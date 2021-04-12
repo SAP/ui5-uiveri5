@@ -20,8 +20,7 @@ function ConfigParser() {
     seleniumArgs: [],
     configDir: './',
     noGlobals: false,
-    plugins: [],
-    skipSourceMapSupport: false
+    plugins: []
   };
 }
 /**

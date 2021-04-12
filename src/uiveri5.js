@@ -27,7 +27,6 @@ var AUTH_CONFIG_NAME = 'auth';
  *  be browserName, supports column delimited and json formats, overwrites *.conf.js values, defaults to: 'chrome'
  * @property {Object} params - params object to be passed to the tests
  * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
- * @property {boolean} useClassicalWaitForUI5 - use classical version of waitForUI5, defaults to: false
  */
 
 /**
@@ -168,8 +167,9 @@ function run(config) {
     });
     logger.debug('Resolved multiCapabilities: ' + JSON.stringify(launcherArgv.multiCapabilities));
 
+    // TODO see driverProvider
     // no way to implement concurrent executions with current driverProvider impl
-    launcherArgv.maxSessions = 1;
+    // launcherArgv.maxSessions = 1;
 
     // execute after test env setup and just before test execution starts
     launcherArgv.onPrepare = function () {

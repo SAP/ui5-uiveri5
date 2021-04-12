@@ -10,7 +10,6 @@ var expectedConditions = require('../element/expectedConditions');
 var logger = require('../logger');
 var elementUtil = require('./elementUtil');
 var clientsideScripts = require('../scripts/clientsidescripts');
-var ClassicalWaitForUI5 = require('../scripts/classicalWaitForUI5');
 
 var DEFAULT_RESET_URL = 'data:text/html,<html></html>';
 var DEFAULT_GET_PAGE_TIMEOUT = 10000;
@@ -252,14 +251,12 @@ Browser.prototype._loadUI5Dependencies = function () {
     autoWait: _.extend({
       timeout: waitForUI5Timeout,
       interval: this.testrunner.config.timeouts.waitForUI5PollingInterval
-    }, this.testrunner.config.autoWait),
-    ClassicalWaitForUI5: ClassicalWaitForUI5,
-    useClassicalWaitForUI5: this.testrunner.config.useClassicalWaitForUI5
+    }, this.testrunner.config.autoWait)
   });
 };
 
-Browser.prototype.get = function (sUrl, vOptions) {
-  return this.testrunner.navigation.to(sUrl, vOptions);
+Browser.prototype.get = function (sUrl, authConfig) {
+  return this.testrunner.navigation.to(sUrl, authConfig);
 };
 
 Browser.prototype.setViewportSize = function (viewportSize) {
@@ -456,43 +453,6 @@ Browser.prototype.navigate = function () {
   var nav = this.driver.navigate();
   elementUtil.mixin(nav, this, 'refresh');
   return nav;
-};
-
-/**
- * Fork another instance of browser for use in interactive tests.
- *
- * @example
- * // Running with control flow enabled
- * var fork = browser.forkNewDriverInstance();
- * fork.get('page1'); // 'page1' gotten by forked browser
- *
- * // Running with control flow disabled
- * var forked = await browser.forkNewDriverInstance().ready;
- * await forked.get('page1'); // 'page1' gotten by forked browser
- *
- * @param {boolean=} useSameUrl Whether to navigate to current url on creation
- * @param {boolean=} copyMockModules Whether to apply same mock modules on creation
- * @param {boolean=} copyConfigUpdates Whether to copy over changes to `baseUrl` and similar
- *   properties initialized to values in the the config.  Defaults to `true`
- *
- * @returns {Browser} A browser instance.
- */
-Browser.prototype.forkNewDriverInstance = function (/*useSameUrl, copyMockModules, copyConfigUpdates = true*/) {
-  return null;
-};
-
-/**
- * Determine if the control flow is enabled.
- *
- * @returns true if the control flow is enabled, false otherwise.
- */
-Browser.prototype.controlFlowIsEnabled = function () {
-  if (typeof selenium_webdriver.promise.USE_PROMISE_MANAGER === 'undefined') {
-    // True for old versions of `selenium-webdriver`, probably false in >=5.0.0
-    return !!selenium_webdriver.promise.ControlFlow;
-  } else {
-    return selenium_webdriver.promise.USE_PROMISE_MANAGER;
-  }
 };
 
 /**

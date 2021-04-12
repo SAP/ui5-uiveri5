@@ -2,7 +2,6 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var utils = require('./reporterUtils');
-const { browser } = require('protractor');
 
 var DEFAULT_SCREENSHOTS_ROOT = 'target/report/screenshots/';
 var DEFAULT_TEMPLATE_NAME = __dirname + '/report.screenshots.tpl.html';

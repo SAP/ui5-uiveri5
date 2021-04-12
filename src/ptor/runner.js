@@ -160,10 +160,6 @@ Runner.prototype.setupGlobals_ = function (browser_) {
     global.ExpectedConditions = ptor.protractor.ExpectedConditions;
   }
   global.protractor = ptor.protractor;
-  if (!this.config_.skipSourceMapSupport) {
-    // Enable sourcemap support for stack traces.
-    require('source-map-support').install();
-  }
   // Required by dart2js machinery.
   // https://code.google.com/p/dart/source/browse/branches/bleeding_edge/dart/sdk/lib/js/dart2js/js_dart2js.dart?spec=svn32943&r=32943#487
   global.DartObject = function (o) {
@@ -219,28 +215,8 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
   browser_.getProcessedConfig = () => {
     return selenium_webdriver.promise.when(config);
   };
-  browser_.forkNewDriverInstance =
-    (useSameUrl, copyMockModules) => {
-      var newBrowser = this.createBrowser(plugins);
-      if (copyMockModules) {
-        newBrowser.mockModules_ = browser_.mockModules_;
-      }
-      if (useSameUrl) {
-        newBrowser.ready = newBrowser.ready
-          .then(() => {
-            return browser_.driver.getCurrentUrl();
-          })
-          .then((url) => {
-            return newBrowser.get(url);
-          })
-          .then(() => {
-            return newBrowser;
-          });
-      }
-      return newBrowser;
-    };
   var replaceBrowser = () => {
-    var newBrowser = browser_.forkNewDriverInstance(false, true);
+    var newBrowser = this.createBrowser(plugins);
     if (browser_ === ptor.protractor.browser) {
       this.setupGlobals_(newBrowser);
     }
@@ -249,20 +225,9 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
   browser_.restart = () => {
     // Note: because tests are not paused at this point, any async
     // calls here are not guaranteed to complete before the tests resume.
-    // Seperate solutions depending on if the control flow is enabled (see lib/browser.ts)
-    if (browser_.controlFlowIsEnabled()) {
-      return browser_.restartSync().ready;
-    }
-    else {
-      return this.driverprovider_.quitDriver(browser_.driver)
-        .then(replaceBrowser)
-        .then(newBrowser => newBrowser.ready);
-    }
+    return browser_.restartSync().ready;
   };
   browser_.restartSync = () => {
-    if (!browser_.controlFlowIsEnabled()) {
-      throw TypeError('Unable to use `browser.restartSync()` when the control flow is disabled');
-    }
     this.driverprovider_.quitDriver(browser_.driver);
     return replaceBrowser();
   };

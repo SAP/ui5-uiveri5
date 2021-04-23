@@ -5,7 +5,6 @@ var LocalComparisonProvider = require('../src/image/localComparisonProvider.js')
 
 describe("LocalComparisonProvider", function () {
   var logger = require('../src/logger');
-  var matchers = {};
   var imagePath = '/localComparisonProvider/images/testSpec/platform/resolution/browser/theme/direction/mode';
 
   function takeScreenshotMock(name){
@@ -58,7 +57,7 @@ describe("LocalComparisonProvider", function () {
   it('Should pass with similar images', function (done) {
     var comparisonProvider = new LocalComparisonProvider(
       comparisonConfig,comparisonInstanceConfig,logger,storageProvider);
-    comparisonProvider.register(matchers);
+    var matchers = comparisonProvider.getMatchers();
 
     var result = matchers.toLookAs().compare(takeScreenshotMock('arrow_left'),'arrow_left');
     result.pass.then(
@@ -72,7 +71,7 @@ describe("LocalComparisonProvider", function () {
   it('Should fail with different images', function(done) {
     var comparisonProvider = new LocalComparisonProvider(
       comparisonConfig,comparisonInstanceConfig,logger,storageProvider);
-    comparisonProvider.register(matchers);
+    var matchers = comparisonProvider.getMatchers();
 
     var result = matchers.toLookAs().compare(takeScreenshotMock('arrow_left_hover'),'arrow_left');
     result.pass.then(
@@ -89,7 +88,7 @@ describe("LocalComparisonProvider", function () {
     comparisonConfig.thresholdPercentage = 0.75;
 
     var comparisonProvider = new LocalComparisonProvider(comparisonConfig,comparisonInstanceConfig,logger,storageProvider);
-    comparisonProvider.register(matchers);
+    var matchers = comparisonProvider.getMatchers();
 
     var result = matchers.toLookAs().compare(takeScreenshotMock('drop_down_draw'),'drop_down_clean');
     result.pass.then(
@@ -105,7 +104,7 @@ describe("LocalComparisonProvider", function () {
     comparisonConfig.thresholdPercentage = 0.1;
 
     var comparisonProvider = new LocalComparisonProvider(comparisonConfig,comparisonInstanceConfig,logger,storageProvider);
-    comparisonProvider.register(matchers);
+    var matchers = comparisonProvider.getMatchers();
 
     var result = matchers.toLookAs().compare(takeScreenshotMock('drop_down_draw'),'drop_down_clean');
     result.pass.then(
@@ -121,7 +120,7 @@ describe("LocalComparisonProvider", function () {
     comparisonConfig.thresholdPercentage = 0.75;
 
     var comparisonProvider = new LocalComparisonProvider(comparisonConfig,comparisonInstanceConfig,logger,storageProvider);
-    comparisonProvider.register(matchers);
+    var matchers = comparisonProvider.getMatchers();
 
     var result = matchers.toLookAs().compare(takeScreenshotMock('drop_down_draw'),'drop_down_clean');
     result.pass.then(
@@ -136,7 +135,7 @@ describe("LocalComparisonProvider", function () {
     comparisonConfig.ignoreNothing = true;
 
     var comparisonProvider = new LocalComparisonProvider(comparisonConfig,comparisonInstanceConfig,logger,storageProvider);
-    comparisonProvider.register(matchers);
+    var matchers = comparisonProvider.getMatchers();
 
     var result = matchers.toLookAs().compare(takeScreenshotMock('calendar_act'),'calendar_ref');
     result.pass.then(function(passed){
@@ -149,8 +148,8 @@ describe("LocalComparisonProvider", function () {
     var invalidBuffer = new Buffer('not an actual png', 'utf8');
     var comparisonProvider = new LocalComparisonProvider(
       comparisonConfig, comparisonInstanceConfig, logger, storageProvider);
+    var matchers = comparisonProvider.getMatchers();
 
-    comparisonProvider.register(matchers);
     var result = matchers.toLookAs().compare(invalidBuffer, 'arrow_left');
     result.pass.then(function (passed) {
       expect(passed).toBe(false);

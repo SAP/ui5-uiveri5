@@ -55,7 +55,7 @@ JasmineJsonReporter.prototype.suiteDone = function() {
 
 JasmineJsonReporter.prototype.jasmineDone = function() {
   var overview = this.collector.getOverview();
-  var jsonReport = JSON.stringify(overview);
+  var jsonReport = JSON.stringify(overview, null, 2);
   utils.saveReport(this.reportName, jsonReport);
 };
 

@@ -92,11 +92,7 @@
  */
 function StatisticCollector(){
 
-  // @type Overview
-  this.overview = {
-    suites: [],
-    statistic: {}
-  };
+  this.reset();
 
   this.currentSuite = null;
   this.currentSpec = null;
@@ -462,6 +458,12 @@ StatisticCollector.prototype.getCurrentSuite = function(){
   return this.currentSuite;
 };
 
-module.exports = function(){
-  return new StatisticCollector();
+StatisticCollector.prototype.reset = function () {
+  // @type Overview
+  this.overview = {
+    suites: [],
+    statistic: {}
+  };
 };
+
+module.exports = new StatisticCollector();

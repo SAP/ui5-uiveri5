@@ -3,6 +3,19 @@
 var ConfigParser = require('./configParser').ConfigParser;
 
 /**
+ * properties for parallelization and multi browser support:
+ * as taken from https://github.com/angular/protractor/blob/master/lib/config.ts
+ * - count - Number of times to run this set of capabilities (in parallel, unless limited by maxSessions). Default is 1.
+ * - shardTestFiles - If this is set to be true, specs will be sharded by file
+ *   (i.e. all files to be run by this set of capabilities will run in parallel). Default is false.
+ * - maxInstances - Maximum number of browser instances that can run in parallel for this set of capabilities.
+ *   This is only needed if shardTestFiles is true. Default is <total-number-of-spec-files> in UIVeri5 (and 1 in protractor).
+ * - maxSessions - Maximum number of total browser sessions to run.
+ *   Tests are queued in sequence if number of browser sessions is limited by this parameter.
+ *   Use a number less than 1 to denote unlimited. Default is unlimited.
+ */
+
+/**
  * The taskScheduler keeps track of the spec files that needs to run next
  * and which task is running what.
  */
@@ -33,6 +46,7 @@ function TaskScheduler(config) {
     .filter((path) => {
       return excludes.indexOf(path) < 0;
     });
+
   var taskQueues = [];
   config.multiCapabilities.forEach((capabilities) => {
     var capabilitiesSpecs = allSpecs;
@@ -50,14 +64,18 @@ function TaskScheduler(config) {
     // If we shard, we return an array of one element arrays, each containing
     // the spec file. If we don't shard, we return an one element array
     // containing an array of all the spec files
+
     if (capabilities.shardTestFiles) {
       capabilitiesSpecs.forEach((spec) => {
         specLists.push([spec]);
       });
-    }
-    else {
+
+      // always allow to run the maximum number of browsers in parallel
+      capabilities.maxInstances = capabilities.maxInstances || config.specs.length;
+    } else {
       specLists.push(capabilitiesSpecs);
     }
+
     capabilities.count = capabilities.count || 1;
     for (var i = 0; i < capabilities.count; ++i) {
       taskQueues.push(new TaskQueue(capabilities, specLists));
@@ -77,8 +95,7 @@ TaskScheduler.prototype.nextTask = function () {
   for (var i = 0; i < this.taskQueues.length; ++i) {
     var rotatedIndex = ((i + this.rotationIndex) % this.taskQueues.length);
     var queue = this.taskQueues[rotatedIndex];
-    if (queue.numRunningInstances < queue.maxInstance &&
-      queue.specsIndex < queue.specLists.length) {
+    if (queue.numRunningInstances < queue.maxInstance && queue.specsIndex < queue.specLists.length) {
       this.rotationIndex = rotatedIndex + 1;
       ++queue.numRunningInstances;
       var taskId = '' + rotatedIndex + 1;

@@ -127,3 +127,13 @@ Execute the visual test:
 $ uiveri5 --browsers=browser:*:android --seleniumAddress=http://127.0.0.1:4723/wd/hub --baseUrl=http://10.0.2.2:8080
 ```
 
+## Run test files in parallel
+Use the following capabilities to run every spec file in a separate browser parallelly
+```javascript
+ browsers: [{
+    browserName: "chrome",
+      capabilities: {
+        shardTestFiles: true
+      }
+  }]
+```

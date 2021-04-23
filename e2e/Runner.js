@@ -44,7 +44,7 @@ module.exports = class Runner {
         var cmdString = [
           'node',
           '../bin/uiveri5',
-          '-v',
+          '--v',
           '--browsers=chromeHeadless',
           '--config.specResolver="./resolver/localSpecResolver"',
           '--config.specs=' + opts.specs,

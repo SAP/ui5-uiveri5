@@ -7,7 +7,9 @@ var util = require('util');
 var browser = require('../browser/browser');
 var logger = require('../logger');
 var ptor = require('./ptor');
-var helper = require('./util');
+var helper = require('./helper');
+var uiveri5Plugins = require('../plugins/plugins');
+var connectionProvider = require('../connection/connectionProvider');
 
 /*
  * Runner is responsible for starting the execution of a test run and triggering
@@ -21,15 +23,18 @@ var helper = require('./util');
  * @param {Object} config
  * @constructor
  */
-function Runner(config, connectionProvider, plugins) {
+function Runner(config) {
   events.EventEmitter.apply(this, arguments);
   this.config_ = config;
-  this.plugins = plugins;
-  this.connectionProvider = connectionProvider;
 
   if (config.capabilities && config.capabilities.seleniumAddress) {
     config.seleniumAddress = config.capabilities.seleniumAddress;
   }
+  
+  logger.setLevel(config.verbose);
+
+  this.moduleLoader = require('../moduleLoader')(config);
+  uiveri5Plugins.loadModules(this.moduleLoader.loadModule('plugins'));
 
   this.loadDriverProvider_(config);
   this.setTestPreparer(config.onPrepare);
@@ -78,11 +83,10 @@ Runner.prototype.runTestPreparer = function (extraFlags) {
   }
   if (unknownFlags.length > 0 && !this.config_.disableChecks) {
     logger.info('Ignoring unknown extra flags: ' + unknownFlags.join(', ') + '. This will be' +
-      ' an error in future versions, please use --disableChecks flag to disable the ' +
-      ' Protractor CLI flag checks. ');
+      ' an error in future versions, please use --disableChecks flag to disable the CLI flag checks.');
   }
-  return this.plugins.onPrepare().then(() => {
-    return helper.runFilenameOrFn_(this.config_.configDir, this.preparer_);
+  return uiveri5Plugins.onPrepare().then(() => {
+    return helper.runFilenameOrFn_(this.config_.configDir, this.preparer_, this.config_);
   });
 };
 
@@ -106,19 +110,17 @@ Runner.prototype.afterEach = function () {
 };
 
 /**
- * Grab driver provider based on type
+ * get uiveri5 direct driver provider
  * @private
- *
- * Priority
- * 1) if directConnect is true, use that
- * 2) if seleniumAddress is given, use that
- * 3) if a Sauce Labs account is given, use that
- * 4) if a seleniumServerJar is specified, use that
- * 5) try to find the seleniumServerJar in protractor/selenium
  */
 Runner.prototype.loadDriverProvider_ = function (config) {
+  connectionProvider.verifyConfig(config);
   this.config_ = config;
-  this.driverprovider_ = this.connectionProvider.buildDriverProvider(this.config_);
+  
+  this.connection = this.moduleLoader.loadNamedModule('connection');
+  connectionProvider.setConnection(this.connection);
+
+  this.driverprovider_ = this.connection.buildDriverProvider(this.config_);
 };
 
 /**
@@ -197,7 +199,7 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
   }
   var browser_ = new browser.Browser(driver, initProperties.baseUrl, initProperties.rootElement);
   browser_.params = initProperties.params;
-  browser_.plugins_ = plugins || this.plugins;
+  browser_.plugins_ = plugins || uiveri5Plugins;
   if (initProperties.getPageTimeout) {
     browser_.getPageTimeout = initProperties.getPageTimeout;
   }
@@ -241,7 +243,8 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
  * @private
  */
 Runner.prototype.shutdown_ = function () {
-  return this.driverprovider_.teardownEnv();
+  logger.debug('Tearing down connection provider environment');
+  return this.connection.teardownEnv().then(() => this.driverprovider_.teardownEnv());
 };
 
 /**
@@ -252,7 +255,6 @@ Runner.prototype.shutdown_ = function () {
  */
 Runner.prototype.run = function () {
   var testPassed;
-  var plugins = this.plugins;
   var browser_;
   var results;
   if (this.config_.framework !== 'explorer' && !this.config_.specs.length) {
@@ -261,10 +263,11 @@ Runner.prototype.run = function () {
   if (this.config_.SELENIUM_PROMISE_MANAGER != null) {
     selenium_webdriver.promise.USE_PROMISE_MANAGER = this.config_.SELENIUM_PROMISE_MANAGER;
   }
-  return this.driverprovider_.setupEnv()
+  return this.connection.setupEnv(this.config_.multiCapabilities)
+    .then(this.driverprovider_.setupEnv)
     .then(() => {
       // 2) Create a browser and setup globals
-      browser_ = this.createBrowser(plugins);
+      browser_ = this.createBrowser(uiveri5Plugins);
       this.setupGlobals_(browser_);
       return browser_.ready.then(browser_.getSession)
         .then((session) => {
@@ -277,7 +280,7 @@ Runner.prototype.run = function () {
       // 3) Setup plugins
     })
     .then(() => {
-      return plugins.setup();
+      return uiveri5Plugins.setup();
       // 4) Execute test cases
     })
     .then(() => {
@@ -300,7 +303,7 @@ Runner.prototype.run = function () {
       results = testResults;
     })
     .then(() => {
-      return plugins.teardown();
+      return uiveri5Plugins.teardown();
       // 7) Teardown
     })
     .then(() => {
@@ -320,7 +323,7 @@ Runner.prototype.run = function () {
       return this.exit_(exitCode);
     })
     .catch(function (e) {
-      logger.debug('Ptor runner error: ' + e);
+      logger.debug('UIVeri5 runner error: ' + e);
     })
     .fin(() => {
       return this.shutdown_();

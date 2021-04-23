@@ -1,9 +1,8 @@
-
 describe("StatisticCollector", function() {
-  var reporter;
+  var reporter = require('../src/statisticCollector');
 
   beforeEach(function(){
-    reporter = require('../src/statisticCollector')();
+    reporter.reset();
   });
 
   describe("getOverview", function () {

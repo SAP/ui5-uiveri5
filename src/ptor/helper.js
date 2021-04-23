@@ -41,7 +41,7 @@ function runFilenameOrFn_(configDir, filenameOrFn, args) {
       throw new Error('filenameOrFn must be a string or function');
     }
     if (typeof filenameOrFn === 'string') {
-      filenameOrFn = require(path.resolve(configDir, filenameOrFn));
+      filenameOrFn = require(path.resolve(configDir, filenameOrFn))(args);
     }
     if (typeof filenameOrFn === 'function') {
       var results = q.when(filenameOrFn.apply(null, args), null, (err) => {

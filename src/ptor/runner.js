@@ -1,7 +1,6 @@
 'use strict';
 
 var events = require('events');
-var q = require('q');
 var selenium_webdriver = require('selenium-webdriver');
 var util = require('util');
 var browser = require('../browser/browser');
@@ -25,7 +24,7 @@ var connectionProvider = require('../connection/connectionProvider');
  */
 function Runner(config) {
   events.EventEmitter.apply(this, arguments);
-  this.config_ = config;
+  this.config = config;
 
   if (config.capabilities && config.capabilities.seleniumAddress) {
     config.seleniumAddress = config.capabilities.seleniumAddress;
@@ -49,7 +48,7 @@ Runner.prototype.constructor = Runner;
  * @param {int} Standard unix exit code
  */
 Runner.prototype.exit_ = function (exitCode) {
-  return helper.runFilenameOrFn_(this.config_.configDir, this.config_.onCleanUp, [exitCode])
+  return helper.runFilenameOrFn_(this.config.configDir, this.config.onCleanUp, [exitCode])
     .then((returned) => {
       if (typeof returned === 'number') {
         return returned;
@@ -77,36 +76,17 @@ Runner.prototype.setTestPreparer = function (filenameOrFn) {
  *     are finished.
  */
 Runner.prototype.runTestPreparer = function (extraFlags) {
-  var unknownFlags = this.config_.unknownFlags_ || [];
+  var unknownFlags = this.config.unknownFlags_ || [];
   if (extraFlags) {
     unknownFlags = unknownFlags.filter((f) => extraFlags.indexOf(f) === -1);
   }
-  if (unknownFlags.length > 0 && !this.config_.disableChecks) {
+  if (unknownFlags.length > 0 && !this.config.disableChecks) {
     logger.info('Ignoring unknown extra flags: ' + unknownFlags.join(', ') + '. This will be' +
       ' an error in future versions, please use --disableChecks flag to disable the CLI flag checks.');
   }
   return uiveri5Plugins.onPrepare().then(() => {
-    return helper.runFilenameOrFn_(this.config_.configDir, this.preparer_, this.config_);
+    return helper.runFilenameOrFn_(this.config.configDir, this.preparer_, this.config);
   });
-};
-
-/**
- * Called after each test finishes.
- *
- * Responsible for `restartBrowserBetweenTests`
- *
- * @public
- * @return {q.Promise} A promise that will resolve when the work here is done
- */
-Runner.prototype.afterEach = function () {
-  var ret;
-  this.frameworkUsesAfterEach = true;
-  if (this.config_.restartBrowserBetweenTests) {
-    this.restartPromise = this.restartPromise || q(ptor.protractor.browser.restart());
-    ret = this.restartPromise;
-    this.restartPromise = undefined;
-  }
-  return ret || q();
 };
 
 /**
@@ -115,12 +95,12 @@ Runner.prototype.afterEach = function () {
  */
 Runner.prototype.loadDriverProvider_ = function (config) {
   connectionProvider.verifyConfig(config);
-  this.config_ = config;
+  this.config = config;
   
   this.connection = this.moduleLoader.loadNamedModule('connection');
   connectionProvider.setConnection(this.connection);
 
-  this.driverprovider_ = this.connection.buildDriverProvider(this.config_);
+  this.driverprovider_ = this.connection.buildDriverProvider(this.config);
 };
 
 /**
@@ -129,7 +109,7 @@ Runner.prototype.loadDriverProvider_ = function (config) {
  * @return {Object} config
  */
 Runner.prototype.getConfig = function () {
-  return this.config_;
+  return this.config;
 };
 
 /**
@@ -152,7 +132,7 @@ Runner.prototype.setupGlobals_ = function (browser_) {
   ptor.protractor.element = browser_.element;
   ptor.protractor.by = ptor.protractor.By = browser.Browser.By;
   ptor.protractor.ExpectedConditions = browser_.ExpectedConditions;
-  if (!this.config_.noGlobals) {
+  if (!this.config.noGlobals) {
     // Export protractor to the global namespace to be used in tests.
     global.browser = browser_;
     global.$ = browser_.$;
@@ -182,7 +162,7 @@ Runner.prototype.setupGlobals_ = function (browser_) {
  * @public
  */
 Runner.prototype.createBrowser = function (plugins, parentBrowser) {
-  var config = this.config_;
+  var config = this.config;
   var driver = this.driverprovider_.getNewDriver();
   var initProperties = {
     baseUrl: config.baseUrl,
@@ -198,14 +178,22 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
     initProperties.allScriptsTimeout = parentBrowser.allScriptsTimeout;
   }
   var browser_ = new browser.Browser(driver, initProperties.baseUrl, initProperties.rootElement);
+
+  browser_.setConfig(config);
+
+  logger.debug('Runtime resolved from capabilities: ' + JSON.stringify(config.multiCapabilities));
+  browser_.setRuntime(config.multiCapabilities);
+
   browser_.params = initProperties.params;
   browser_.plugins_ = plugins || uiveri5Plugins;
+
   if (initProperties.getPageTimeout) {
     browser_.getPageTimeout = initProperties.getPageTimeout;
   }
   if (initProperties.allScriptsTimeout) {
     browser_.allScriptsTimeout = initProperties.allScriptsTimeout;
   }
+
   browser_.ready =
     browser_.ready
       .then(() => {
@@ -214,9 +202,11 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
       .then(() => {
         return browser_;
       });
+
   browser_.getProcessedConfig = () => {
     return selenium_webdriver.promise.when(config);
   };
+
   var replaceBrowser = () => {
     var newBrowser = this.createBrowser(plugins);
     if (browser_ === ptor.protractor.browser) {
@@ -224,12 +214,15 @@ Runner.prototype.createBrowser = function (plugins, parentBrowser) {
     }
     return newBrowser;
   };
+
   browser_.restart = () => {
     // Note: because tests are not paused at this point, any async
     // calls here are not guaranteed to complete before the tests resume.
     return browser_.restartSync().ready;
   };
+
   browser_.restartSync = () => {
+    logger.debug('Restarting browser');
     this.driverprovider_.quitDriver(browser_.driver);
     return replaceBrowser();
   };
@@ -257,13 +250,10 @@ Runner.prototype.run = function () {
   var testPassed;
   var browser_;
   var results;
-  if (this.config_.framework !== 'explorer' && !this.config_.specs.length) {
+  if (!this.config.specs.length) {
     throw new Error('Spec patterns did not match any files.');
   }
-  if (this.config_.SELENIUM_PROMISE_MANAGER != null) {
-    selenium_webdriver.promise.USE_PROMISE_MANAGER = this.config_.SELENIUM_PROMISE_MANAGER;
-  }
-  return this.connection.setupEnv(this.config_.multiCapabilities)
+  return this.connection.setupEnv(this.config.multiCapabilities)
     .then(this.driverprovider_.setupEnv)
     .then(() => {
       // 2) Create a browser and setup globals
@@ -286,18 +276,9 @@ Runner.prototype.run = function () {
     .then(() => {
       // Do the framework setup here so that jasmine globals are
       // available to the onPrepare function.
-      if (this.config_.restartBrowserBetweenTests) {
-        var restartDriver = () => {
-          if (!this.frameworkUsesAfterEach) {
-            this.restartPromise = q(browser_.restart());
-          }
-        };
-        this.on('testPass', restartDriver);
-        this.on('testFail', restartDriver);
-      }
-      logger.debug('Running with spec files ' + this.config_.specs);
+      logger.debug('Running with spec files ' + this.config.specs);
       var jasmine = require('./frameworks/jasmine');
-      return jasmine.run(this, this.config_.specs);
+      return jasmine.run(this, this.config.specs);
     })
     .then((testResults) => {
       results = testResults;

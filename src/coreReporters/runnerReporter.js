@@ -12,6 +12,19 @@ RunnerReporter.prototype.jasmineStarted = function () {
   // Need to initiate startTime here, in case reportSpecStarting is not
   // called (e.g. when fit is used)
   this.startTime = new Date();
+
+  browser.plugins_.addPlugin({
+    specDone: function () {
+      if (this.emitter.config.restartBrowserBetweenTests) {
+        browser.restartSync();
+      }
+    }.bind(this),
+    suiteDone: function () {
+      if (this.emitter.config.restartBrowserBetweenSuites) {
+        browser.restartSync();
+      }
+    }.bind(this)
+  });
 };
 
 RunnerReporter.prototype.specStarted = function () {

@@ -137,3 +137,13 @@ Use the following capabilities to run every spec file in a separate browser para
       }
   }]
 ```
+
+## Restart browser between suites
+Disabled by default.
+Note the current limitation that each spec file should contain exactly one suite.
+```javascript
+exports.config = {
+  restartBrowserBetweenSuites: true
+}
+```
+Protractor's `restartBrowserBetweenTests` is also available and false by default.

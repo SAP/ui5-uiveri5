@@ -20,30 +20,20 @@ Plugins.prototype.loadJasminePlugins = function () {
       // in jasmine 2.x, the reporter callbacks can't handle promises, so we use a workaround
       // by adding the plugin callbacks as before* and after* functions (which can handle promises)
       var root = jasmine.getEnv().topSuite();
-      _addPlugins(root);
+      _addJasminePlugins(root);
     }
   });
 };
 
-Plugins.prototype.loadProtractorPlugins = function (protractorArgv) {
-  protractorArgv.plugins = [{
-    inline: {
-      setup: function() {
-        return _callPlugins('setup');
-      },
-      onPrepare: function() {
-        return _callPlugins('onPrepare');
-      },
-      teardown: function() {
-        return _callPlugins('teardown');
-      }
-    }
-  }];
+Plugins.prototype.addPlugin = function (plugin) {
+  pluginModules.push(plugin);
 };
 
-Plugins.prototype.onConnectionSetup = function (runtime) {
-  _callPlugins('onConnectionSetup', [runtime]);
-};
+['setup', 'onPrepare', 'teardown', 'onConnectionSetup', 'onUI5Sync', 'onElementAction'].forEach(function (sEvent) {
+  Plugins.prototype[sEvent] = function () {
+    return _callPlugins(sEvent, arguments);
+  };
+});
 
 function _callPlugins(method, args) {
   return Promise.all(
@@ -55,7 +45,7 @@ function _callPlugins(method, args) {
   );
 }
 
-function _addPlugins (root) {
+function _addJasminePlugins (root) {
   if (root.children) {
     root.children.filter(function (child) {
       return child instanceof jasmine.Suite && !child.disabled;
@@ -65,7 +55,7 @@ function _addPlugins (root) {
       child.afterFns.push(_callJasmineSpecPlugins('specDone'));
       child.afterAllFns.push(_callJasmineSuitePlugins('suiteDone', child.result.description));
 
-      _addPlugins(child);
+      _addJasminePlugins(child);
     });
   }
 }

@@ -1,6 +1,7 @@
 #### Upcomming 
-* Support for SauceLabs reporting (Q3 2020)
-* Support for browser restart (Q3 2020)
-* Support for parallel browser sessions(Q4 2020)
-* BusinessApplicationStudio runner (Q4 2020)
-* Yeoman-based scaffolding support (console and BusinessApplicationStudio) (Q4 2020)
+* BusinessApplicationStudio yeoman-based context actions (Q1 2021) - in progress (March 2021)
+* BusinessApplicationStudio runner (Q1-Q2 2021) - in progress (March 2021)
+* Remove protractor dependecy, upgrade to latest WebDriverJS (Q1 2021) - in progress (March 2021)
+* Support for browser restart (Q2 2021) - depends on removal of protractor dep.
+* Support for parallel browser sessions(Q2 2021) - depends on removal of protractor dep.
+

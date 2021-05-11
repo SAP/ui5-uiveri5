@@ -130,6 +130,43 @@ browsers: [{
 }]
 ```
 
+## Chromium
+Chromium uses the same ChromeDriver as Chrome. But automatic download of ChromeDriver is not implemented for Chromium. Please make sure
+you have the correct version of ChromeDriver for your Chromium version.
+
+The easiest way to install Chromium and ChromeDriver on macOS is using the brew package manager. For stable versions of chromium and the corresponding chromedriver you can use:
+```
+$brew install --cask eloston-chromium 
+# chromium is available as: /Applications/Chromium.app/Contents/MacOS/Chromium
+$brew install --cask chromedriver
+# chromedriver is available as: /usr/local/bin/chromedriver
+```
+Then you need to set the paths in the config file:
+```javascript
+browsers: [{
+  browserName: 'chromium',
+  capabilities: {
+    chromeOptions: {
+      binary: "/path/to/Chromium"
+    }
+  }
+}],
+connectionConfigs: {
+  direct: {
+    binaries: {
+      chromedriver: {
+        localPath: 'path/to/ChromeDriver'
+      }
+    }
+  }
+}
+```
+Or using command line:
+```
+$ uiveri5 --browsers=chromium --config.connectionConfigs.direct.binaries.chromedriver.localPath=path/to/ChromeDriver
+--confKeys=browsers[0].capabilities.chromeOptions.binary:/path/to/Chromium
+```
+
 ## Firefox
 Firefox uses the geckodriver that is updated regularly, so by default, we use the latest version.
 

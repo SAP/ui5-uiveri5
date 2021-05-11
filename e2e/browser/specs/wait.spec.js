@@ -12,6 +12,7 @@ describe("wait", function() {
 	// verify wait after button click
 	it("should click the button and wait", function() {
     element(by.id("button")).click();
-    expect(element.all(by.cssContainingText(".sapMMessageToast", "Pressed")).count()).toBe(1);
+    expect(element.all(by.xpath('//div[contains(@class, "sapMMessageToast") and text() = "Pressed"]')).count()).toBe(1);
+    expect(browser.getTitle()).toBe('E2E Test');
 	});
 });

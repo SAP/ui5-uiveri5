@@ -1,13 +1,13 @@
+/**
+ * uses modules copied from protractor@5.3.2
+ */
 
 var fs = require('fs');
 var _ = require('lodash');
-var proxyquire =  require('proxyquire');
 var url = require('url');
-var clientsidescripts = require('./scripts/clientsidescripts');
-var ClassicalWaitForUI5 = require('./scripts/classicalWaitForUI5');
-var Control = require('./control');
 var pageObjectFactory = require('./pageObjectFactory');
 var Plugins = require('./plugins/plugins');
+var logger = require('./logger');
 
 var DEFAULT_CONNECTION_NAME = 'direct';
 var AUTH_CONFIG_NAME = 'auth';
@@ -27,7 +27,6 @@ var AUTH_CONFIG_NAME = 'auth';
  *  be browserName, supports column delimited and json formats, overwrites *.conf.js values, defaults to: 'chrome'
  * @property {Object} params - params object to be passed to the tests
  * @property {boolean} ignoreSync - disables waitForUI5 synchronization, defaults to: false
- * @property {boolean} useClassicalWaitForUI5 - use classical version of waitForUI5, defaults to: false
  */
 
 /**
@@ -37,8 +36,7 @@ var AUTH_CONFIG_NAME = 'auth';
  */
 function run(config) {
 
-  // configure logger
-  var logger = require('./logger')(config.verbose);
+  logger.setLevel(config.verbose);
 
   // log framework version
   var pjson = require('../package.json');
@@ -72,9 +70,7 @@ function run(config) {
     return osType;
   })();
 
-  // start module loader
-  var moduleLoader = require('./moduleLoader')(config,logger);
-
+  var moduleLoader = require('./moduleLoader')(config);
   var plugins = new Plugins(moduleLoader.loadModule('plugins'));
 
   // resolve runtime and set browsers with capabilities
@@ -114,22 +110,21 @@ function run(config) {
     // create connectionProvider
     var connectionProvider = moduleLoader.loadNamedModule('connection', [plugins]);
 
-    // prepare protractor executor args
-    var protractorArgv = connectionProvider.buildProtractorArgv();
-    plugins.loadProtractorPlugins(protractorArgv);
+    // prepare executor args
+    var launcherArgv = connectionProvider.buildLauncherArgv();
 
-    // enable protractor debug logs
-    protractorArgv.troubleshoot = config.verbose>0;
+    // enable debug logs
+    launcherArgv.troubleshoot = config.verbose > 0;
 
     // add baseUrl
-    protractorArgv.baseUrl = config.baseUrl;
+    launcherArgv.baseUrl = config.baseUrl;
 
     // use jasmine 2.0
-    protractorArgv.framework = 'jasmine2';
-    protractorArgv.jasmineNodeOpts = {};
+    launcherArgv.framework = 'jasmine2';
+    launcherArgv.jasmineNodeOpts = {};
 
     // disable default jasmine console reporter
-    protractorArgv.jasmineNodeOpts.print = function() {};
+    launcherArgv.jasmineNodeOpts.print = function() {};
 
     // copy timeouts
     if (config.timeouts){
@@ -139,7 +134,7 @@ function run(config) {
           getPageTimeout = parseInt(getPageTimeout,10);
         }
         logger.debug('Setting getPageTimeout: ' + getPageTimeout);
-        protractorArgv.getPageTimeout = getPageTimeout;
+        launcherArgv.getPageTimeout = getPageTimeout;
       }
       if (config.timeouts.allScriptsTimeout){
         var allScriptsTimeout = config.timeouts.allScriptsTimeout;
@@ -147,7 +142,7 @@ function run(config) {
           allScriptsTimeout = parseInt(allScriptsTimeout,10);
         }
         logger.debug('Setting allScriptsTimeout: ' + allScriptsTimeout);
-        protractorArgv.allScriptsTimeout = allScriptsTimeout;
+        launcherArgv.allScriptsTimeout = allScriptsTimeout;
       }
       if (config.timeouts.defaultTimeoutInterval){
         var defaultTimeoutInterval = config.timeouts.defaultTimeoutInterval;
@@ -155,61 +150,42 @@ function run(config) {
           defaultTimeoutInterval = parseInt(defaultTimeoutInterval,10);
         }
         logger.debug('Setting defaultTimeoutInterval: ' + defaultTimeoutInterval);
-        protractorArgv.jasmineNodeOpts.defaultTimeoutInterval = defaultTimeoutInterval;
+        launcherArgv.jasmineNodeOpts.defaultTimeoutInterval = defaultTimeoutInterval;
       }
     }
 
-    var ui5SyncDelta = config.timeouts && config.timeouts.waitForUI5Delta;
-    var waitForUI5Timeout = ui5SyncDelta > 0 ? (config.timeouts.allScriptsTimeout - ui5SyncDelta) : 0;
-
-    proxyquire('protractor/built/browser', {
-      './clientsidescripts': clientsidescripts
-    });
-    proxyquire('protractor/built/element', {
-      './clientsidescripts': clientsidescripts
-    });
-    proxyquire('protractor/built/locators', {
-      './clientsidescripts': clientsidescripts
-    });
-
     // set specs
-    protractorArgv.specs = [];
+    launcherArgv.specs = [];
     specs.forEach(function(spec){
-      protractorArgv.specs.push(spec.testPath);
+      launcherArgv.specs.push(spec.testPath);
     });
 
     // resolve browsers capabilities from runtime
-    protractorArgv.multiCapabilities = config.runtimes.map(function(runtime){
+    launcherArgv.multiCapabilities = config.runtimes.map(function(runtime){
       // prepare capabilities from runtime for this specific connection type
       return connectionProvider.resolveCapabilitiesFromRuntime(runtime);
     });
-    logger.debug('Resolved protractor multiCapabilities: ' +
-      JSON.stringify(protractorArgv.multiCapabilities));
+    logger.debug('Resolved multiCapabilities: ' + JSON.stringify(launcherArgv.multiCapabilities));
 
+    // TODO see driverProvider
     // no way to implement concurrent executions with current driverProvider impl
-    protractorArgv.maxSessions = 1;
-
-    // export protractor module object as global.protractorModule
-    protractorArgv.beforeLaunch = __dirname + '/beforeLaunchHandler';
+    // launcherArgv.maxSessions = 1;
 
     // execute after test env setup and just before test execution starts
-    protractorArgv.onPrepare = function () {
+    launcherArgv.onPrepare = function () {
       plugins.loadJasminePlugins();
 
-      // publish configs on protractor's browser object
-      browser.testrunner = {};
-      browser.testrunner.config = config;
+      browser.setConfig(config);
 
       var matchers = {};
       var storageProvider;
 
       // register a hook to be called after webdriver is created ( may not be connected yet )
-      browser.getProcessedConfig().then(function (protractorConfig) {
-        var runtime = connectionProvider.resolveRuntimeFromCapabilities(protractorConfig.capabilities);
+      browser.getProcessedConfig().then(function (processedConfig) {
+        var runtime = connectionProvider.resolveRuntimeFromCapabilities(processedConfig.capabilities);
         logger.debug('Runtime resolved from capabilities: ' + JSON.stringify(runtime));
 
-        // export current runtime for tests
-        browser.testrunner.runtime = runtime;
+        browser.setRuntime(runtime);
 
         // register screenshot provider
         var screenshotProvider = moduleLoader.loadModuleIfAvailable('screenshotProvider', [runtime]);
@@ -230,148 +206,8 @@ function run(config) {
           matcher.register(matchers);
         });
 
-        // process remoteWebDriverOptions
-        var isMaximized = _.get(runtime,'capabilities.remoteWebDriverOptions.maximized');
-        var remoteWindowPosition = _.get(runtime,'capabilities.remoteWebDriverOptions.position');
-        var remoteViewportSize = _.get(runtime,'capabilities.remoteWebDriverOptions.viewportSize');
-        var remoteBrowserSize = _.get(runtime,'capabilities.remoteWebDriverOptions.browserSize');
-
-        if (isMaximized) {
-          logger.debug('Maximizing browser window');
-          browser.driver.manage().window().maximize();
-        } else {
-          if (remoteWindowPosition) {
-            if (_.some(remoteWindowPosition, _.isUndefined)) {
-              throw Error('Setting browser window position: X and Y coordinates required but not specified');
-            }
-            logger.debug('Setting browser window position: x: ' + remoteWindowPosition.x + ', y: ' + remoteWindowPosition.y);
-            browser.driver.manage().window().setPosition(remoteWindowPosition.x * 1, remoteWindowPosition.y * 1); // convert to integer implicitly
-          }
-
-          if (remoteViewportSize) {
-            if (_.some(remoteViewportSize, _.isUndefined)) {
-              throw Error('Setting browser viewport size: width and height required but not specified');
-            }
-            logger.debug('Setting browser viewport size: width: ' + remoteViewportSize.width + ', height: ' + remoteViewportSize.height);
-            browser.setViewportSize(remoteViewportSize);
-          } else if (remoteBrowserSize) {
-            if (_.some(remoteBrowserSize, _.isUndefined)) {
-              throw Error('Setting browser window size: width and height required but not specified');
-            }
-            logger.debug('Setting browser window size: width: ' + remoteBrowserSize.width + ', height: ' + remoteBrowserSize.height);
-            browser.driver.manage().window().setSize(remoteBrowserSize.width * 1, remoteBrowserSize.height * 1); // convert to integer implicitly
-          }
-        }
-
-        protractorModule.parent.exports.ElementFinder.prototype.asControl = function () {
-          return new Control(this.elementArrayFinder_);
-        };
-
-        // add WebDriver overrides
-        var enableClickWithActions = _.get(runtime.capabilities.remoteWebDriverOptions, 'enableClickWithActions');
-        if (enableClickWithActions) {
-          logger.debug('Activating WebElement.click() override with actions');
-          protractorModule.parent.parent.exports.WebElement.prototype.click = function () {
-            logger.trace('Taking over WebElement.click()');
-            var driverActions = this.driver_.actions().mouseMove(this).click();
-            return _moveMouseOutsideBody(driverActions);
-          };
-        }
-
+        browser.setInitialWindowSize();
       });
-
-      // used in protractor for many scripts and notably for waitForAngular
-      // override with added logging
-      var origExecuteAsyncScript_= browser.executeAsyncScript_;
-      browser.executeAsyncScript_ = function() {
-        var code = arguments[0];
-        var scriptName = arguments[1];
-        var params = arguments[2];
-        // log script execution
-        logger.trace('Execute protractor async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-        logger.dump('Execute protractor async script code: \n' + JSON.stringify(code));
-        //call original function in its context
-        return origExecuteAsyncScript_.apply(browser, arguments)
-          .then(function(res) {
-            logger.trace('Protractor async script: ' + scriptName + ' result: ' + JSON.stringify(res));
-            return res;
-          },function(error) {
-            logger.trace('Protractor async script: ' + scriptName + ' error: ' + JSON.stringify(error));
-            throw error;
-          });
-      };
-
-      browser.executeAsyncScriptHandleErrors = function executeAsyncScriptLogErrors(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.trace('Execute async script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.dump('Execute async script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeAsyncScript(code,params)
-          .then(function (res) {
-            if (res.log) {
-              logger.trace('Async script: ' + scriptName + ' logs: \n' + res.log);
-            }
-            if (res.error) {
-              logger.trace('Async script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
-              throw new Error(scriptName + ': ' + res.error);
-            }
-            logger.trace('Async script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
-            return res.value;
-          });
-      };
-
-      browser.executeScriptHandleErrors = function executeScriptHandleErrors(scriptName,params) {
-        var code = clientsidescripts[scriptName];
-        params = params || {};
-        browser.controlFlow().execute(function () {
-          logger.trace('Execute script: ' + scriptName + ' with params: ' + JSON.stringify(params));
-          logger.dump('Execute script code: \n' + JSON.stringify(code));
-        });
-        return browser.executeScript(code,params)
-          .then(function (res) {
-            if (res.log) {
-              logger.trace('Script: ' + scriptName + ' logs: \n' + res.log);
-            }
-            if (res.error) {
-              logger.trace('Script: ' + scriptName + ' error: ' + JSON.stringify(res.error));
-              throw new Error(scriptName + ': ' + res.error);
-            }
-            logger.trace('Script: ' + scriptName + ' result: ' + JSON.stringify(res.value));
-            return res.value;
-          });
-      };
-
-      browser.loadUI5Dependencies = function () {
-        return browser._loadUI5Dependencies().then(function () {
-          return browser.waitForAngular();
-        });
-      };
-
-      browser._loadUI5Dependencies = function () {
-        return browser.executeAsyncScriptHandleErrors('loadUI5Dependencies', {
-          autoWait: _.extend({
-            timeout: waitForUI5Timeout,
-            interval: config.timeouts.waitForUI5PollingInterval
-          }, config.autoWait),
-          ClassicalWaitForUI5: ClassicalWaitForUI5,
-          useClassicalWaitForUI5: config.useClassicalWaitForUI5
-        });
-      };
-
-      browser.get = function (sUrl, vOptions) {
-        return browser.testrunner.navigation.to(sUrl, vOptions);
-      };
-
-      browser.setViewportSize = function (viewportSize) {
-        return browser.executeScriptHandleErrors('getWindowToolbarSize')
-          .then(function (toolbarSize) {
-            browser.driver.manage().window().setSize(
-              viewportSize.width * 1 + toolbarSize.width,
-              viewportSize.height * 1 + toolbarSize.height); // convert to integer implicitly
-          });
-      };
 
       // add global matchers
       beforeEach(function() {
@@ -428,9 +264,6 @@ function run(config) {
               // call storage provider beforeEach hook
               if (storageProvider && storageProvider.onBeforeEachSpec) {
                 storageProvider.onBeforeEachSpec(spec);
-              }
-              if (_.get(browser.testrunner.runtime,'capabilities.remoteWebDriverOptions.enableClickWithActions')) {
-                _moveMouseOutsideBody(browser.driver.actions());
               }
             });
           }).catch(function(error){
@@ -497,144 +330,27 @@ function run(config) {
 
       var authConfigModule;
       // expose navigation helpers to tests
-      browser.testrunner.navigation = {
-        to: function(url, authConfig) {
-          var authenticator;
-          if (authConfig) {
-            // programatically invoked authentication - load auth module every time
-            authenticator =  moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
+      browser.testrunner.navigation._getAuthenticator = function (authConfig) {
+        var authenticator;
+        if (authConfig) {
+          // programatically invoked authentication - load auth module every time
+          authenticator = moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
+        } else {
+          // auth is declared in config - load the (global) auth module only once.
+          // when authOnce is enabled, auth should be done only once - before the first spec file.
+          if (authConfigModule) {
+            authenticator = config.authOnce ? null : authConfigModule;
           } else {
-            // auth is declared in config - load the (global) auth module only once.
-            // when authOnce is enabled, auth should be done only once - before the first spec file.
-            if (authConfigModule) {
-              authenticator = config.authOnce ? null : authConfigModule;
-            } else {
-              authenticator = authConfigModule = moduleLoader.loadNamedModule(AUTH_CONFIG_NAME, [statisticCollector]);
-            }
+            authenticator = authConfigModule = moduleLoader.loadNamedModule(AUTH_CONFIG_NAME, [statisticCollector]);
           }
-
-          if (authenticator) {
-            // open page and login
-            browser.controlFlow().execute(function () {
-              logger.info('Opening: ' + url);
-            });
-            authenticator.get(url);
-          }
-
-          // handle pageLoading options
-          if (config.pageLoading) {
-
-            // reload the page immediately if required
-            if (config.pageLoading.initialReload) {
-              browser.controlFlow().execute(function () {
-                logger.debug('Initial page reload requested');
-              });
-              browser.driver.navigate().refresh();
-            }
-
-            // wait some time after page is loaded
-            if (config.pageLoading.wait) {
-              var wait = config.pageLoading.wait;
-              if (_.isString(wait)) {
-                wait = parseInt(wait, 10);
-              }
-
-              browser.controlFlow().execute(function () {
-                logger.debug('Initial page load wait: ' + wait + 'ms');
-              });
-              browser.sleep(wait);
-            }
-          }
-
-          // load waitForUI5 logic on client and
-          // ensure app is fully loaded before starting the interactions
-          browser.loadUI5Dependencies();
-
-          // log UI5 version
-          return browser.executeScriptHandleErrors('getUI5Version')
-            .then(function (versionInfo) {
-              logger.info('UI5 Version: ' + versionInfo.version);
-              logger.info('UI5 Timestamp: ' + versionInfo.buildTimestamp);
-            });
-        },
-
-        waitForRedirect: function(targetUrl){
-          // ensure page is fully loaded - wait for window.url to become the same as requested
-          return browser.driver.wait(function () {
-            return browser.driver.executeScript(function () {
-              return window.location.href;
-            }).then(function (currentUrl) {
-              logger.debug('Waiting for redirect to complete, current url: ' + currentUrl);
-
-              // match only host/port/path as app could manipulate request args and fragment
-              var currentUrlMathes = currentUrl.match(/([^\?\#]+)/);
-              if (currentUrlMathes == null || !currentUrlMathes[1] || currentUrlMathes[1] == '') {
-                throw new Error('Could not parse current url: ' + currentUrl);
-              }
-              var currentUrlHost = currentUrlMathes[1];
-              // strip trailing slashe
-              if(currentUrlHost.charAt(currentUrlHost.length - 1) == '/') {
-                currentUrlHost = currentUrlHost.slice(0, -1);
-              }
-              // handle string and regexps
-              if (_.isString(targetUrl)) {
-                var targetUrlMatches = targetUrl.match(/([^\?\#]+)/);
-                if (targetUrlMatches == null || !targetUrlMatches[1] || targetUrlMatches[1] == '') {
-                  throw new Error('Could not parse target url: ' + targetUrl);
-                }
-                var targetUrlHost = targetUrlMatches[1];
-                // strip trailing slash
-                if(targetUrlHost.charAt(targetUrlHost.length - 1) == '/') {
-                  targetUrlHost = targetUrlHost.slice(0, -1);
-                }
-                // strip basic auth information
-                targetUrlHost = targetUrlHost.replace(/\/\/\S+:\S+@/, '//');
-
-                return  currentUrlHost === targetUrlHost;
-              } else if (_.isRegExp(targetUrl)) {
-                return targetUrl.test(currentUrlHost);
-              } else {
-                throw new Error('Could not match target url that is neither string nor regexp');
-              }
-            });
-          }, browser.getPageTimeout - 100,'Waiting for redirection to complete, target url: ' + targetUrl); 
-          // 10ms delta is necessary or webdriver crashes and the process stops without exit status
         }
+        return authenticator;
       };
 
-      // set meta data
-      browser.testrunner.currentSuite = {
-        set meta(value) {
-          beforeAll(function(){
-            browser.controlFlow().execute(function () {
-              browser.testrunner.currentSuite._meta = value;
-            });
-          });
-        },
-        get meta() {
-          return  {
-            set controlName(value){
-              browser.testrunner.currentSuite.meta = {controlName: value};
-            }
-          };
-        }
-      };
-      browser.testrunner.currentSpec = {
-        set meta(value) {
-          browser.controlFlow().execute(function () {
-            browser.testrunner.currentSpec._meta = value;
-          });
-        },
-        get meta() {
-          return  browser.testrunner.currentSpec._meta;
-        }
-      };
-
-      var actionInterceptor = require('./reporter/actionInterceptor');
       var expectationInterceptor = require('./reporter/expectationInterceptor');
       // register reporters
       var jasmineEnv = jasmine.getEnv();
-      moduleLoader.loadModule('reporters',[statisticCollector, actionInterceptor, expectationInterceptor]).forEach(function(reporter){
+      moduleLoader.loadModule('reporters',[statisticCollector, expectationInterceptor]).forEach(function(reporter){
         reporter.register(jasmineEnv);
       });
 
@@ -645,7 +361,7 @@ function run(config) {
 
     };
 
-    protractorArgv.afterLaunch = function(){
+    launcherArgv.afterLaunch = function(){
       // teardown connection provider env
       logger.debug('Tearing down connection provider environment');
       return connectionProvider.teardownEnv();
@@ -659,16 +375,6 @@ function run(config) {
       })[0];
     }
 
-    /**
-     * Moving mouse to body (-1, -1)
-     */
-    function _moveMouseOutsideBody(driverActions) {
-      logger.trace('Moving mouse to body (-1, -1).');
-      // the implicit synchronization that element() does is important to ensure app is settled before clicking
-      var bodyElement = element(by.css('body'));
-      return driverActions.mouseMove(bodyElement, {x:-1, y:-1}).perform();
-    }
-
     // register page object factory on global scope
     logger.debug('Loading BDD-style page object factory');
     pageObjectFactory.register(global);
@@ -676,10 +382,10 @@ function run(config) {
     // setup connection provider env
     logger.debug('Setting up connection provider environment');
     return connectionProvider.setupEnv().then(function(){
-      // call protractor
       logger.info('Executing ' + specs.length + ' specs');
-      var protractorLauncher = require('protractor/built/launcher');
-      protractorLauncher.init(null,protractorArgv);
+
+      var launcher = require('./ptor/launcher');
+      launcher.init(launcherArgv, connectionProvider, plugins);
     });
   });
 }

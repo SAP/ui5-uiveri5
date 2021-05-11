@@ -1,6 +1,6 @@
 
 var DEFAULT_TAKE = true;
-var webdriver = protractorModule.require('selenium-webdriver');
+var webdriver = require('selenium-webdriver');
 var pngCrop = require('png-crop');
 var _ = require('lodash');
 var PNG = require('pngjs').PNG;
@@ -48,7 +48,7 @@ LocalScreenshotProvider.prototype.register = function() {
   global.takeScreenshot = function (element) {
     if (that.take) {
       // take screenshot once UI5 has settled down
-      return browser.waitForAngular().then(function(){
+      return browser.waitForUI5().then(function(){
         // uses browser object and call webdriverjs function takeScreenshot
         that.logger.debug('Taking actual screenshot');
         return that.screenshotSetup.beforeScreenshot()

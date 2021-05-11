@@ -23,7 +23,6 @@
     },
     "globals": {
         "sap": true,
-        "protractorModule": true,
         "Reporter": true
     }
 }

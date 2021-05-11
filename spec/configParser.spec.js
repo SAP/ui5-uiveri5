@@ -1,9 +1,10 @@
 
 var _ = require('lodash');
+var logger = require('../src/logger');
+var configParser = require('../src/configParser')(logger);
+var cliParser = new require('../src/cliParser')();
 
 describe("configParser", function() {
-  var logger = require('../src/logger')(3);
-  var configParser = require('../src/configParser')(logger);
 
   beforeEach(function () {
     configParser.config = {};
@@ -65,9 +66,6 @@ describe("configParser", function() {
 });
 
 describe("Should parse confkey from command-line", function () {
-  var logger = require('../src/logger')(3);
-  var configParser = require('../src/configParser')(logger);
-  var cliParser = new require('../src/cliParser')();
   var ArgvStub = function () {
     this._ = [];
   };

@@ -1,7 +1,7 @@
 
 describe("LocalSpecResolver", function () {
   var LocalSpecResolver = require('../src/resolver/localSpecResolver');
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
 
   it("Should resolve specs", function(done) {
     var specResolver = new LocalSpecResolver(

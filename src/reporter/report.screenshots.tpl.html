@@ -196,7 +196,11 @@
         <p class="strong"><%- stepIndex + 1 %>.</p>
         <div class="content <%- stepType === 'actions' ? 'reverse' : ''%>">
           <% if (stepType === "expectations") { %>
-          <div>Expectation <%- _.upperCase(step.status) %>: <%- step.shortMessage %></div>
+            <% if (step.matcher === 'toLookAs') { %>
+            <div>Expectation <%- _.upperCase(step.status) %>: <%- step.message %></div>
+            <% } else { %>
+            <div>Expectation <%- _.upperCase(step.status) %>: <%- step.shortMessage %></div>
+            <% } %>
           <% } %>
           <% if (stepType === "actions") { %>
           <div>Execute '<%- step.name %>' on element with

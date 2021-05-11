@@ -1,7 +1,7 @@
 
 describe("PageObjectFactory", function () {
   var pageObjectFactory = require('../src/pageObjectFactory');
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
 
   it("Should create Page objects in provided context with standard name pattern 'onThe<Name>Page'", function () {
     const context = {};

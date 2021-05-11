@@ -13,7 +13,6 @@ exports.config = {
         '*': {
           /*
           remoteWebDriverOptions: {
-            enableClickWithActions: true
             contextSwitch: true, // {native: 'NATIVE_APP', webview: 'WEBVIEW_1'}
             crops: {
               size: {

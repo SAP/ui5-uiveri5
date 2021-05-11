@@ -1,15 +1,14 @@
 
 var _ = require('lodash');
+var logger = require('./logger');
 
 /**
  * Module loader
  * @param {Config} config
- * @param {Logger} logger
  * @constructor
  */
-function ModuleLoader(config,logger) {
+function ModuleLoader(config) {
   this.config = config;
-  this.logger = logger;
 }
 
 ModuleLoader.prototype._loadModuleArray = function(moduleDef,args){
@@ -48,9 +47,9 @@ ModuleLoader.prototype._loadModule = function(moduleDef,args,instanceConfig){
   }
 
   // prepend default args
-  var argsClone = [this.config,instanceConfig,this.logger].concat(args);
+  var argsClone = [this.config, instanceConfig, logger].concat(args);
 
-  this.logger.debug('Loading module: ${moduleName} with instance config: ${JSON.stringify(instanceConfig)}',
+  logger.debug('Loading module: ${moduleName} with instance config: ${JSON.stringify(instanceConfig)}',
     {moduleName:moduleName,instanceConfig:instanceConfig});
   return require(moduleName).apply(this,argsClone);
 };

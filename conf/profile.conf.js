@@ -7,7 +7,6 @@ exports.config = {
     defaultTimeoutInterval: 30000,
     waitForUI5PollingInterval: 400
   },
-  useClassicalWaitForUI5: false,
   connection: 'direct',
   connectionConfigs: {
     'direct': {

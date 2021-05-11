@@ -1,0 +1,7 @@
+{
+  "webElementFunctions": [
+    "click", "sendKeys", "getTagName", "getCssValue", "getAttribute", "getText", "getSize",
+    "getLocation", "isEnabled", "isSelected", "submit", "clear", "isDisplayed", "getId",
+    "takeScreenshot"
+  ]
+}

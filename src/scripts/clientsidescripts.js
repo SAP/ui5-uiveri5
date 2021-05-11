@@ -25,16 +25,8 @@ var mFunctions = {
 
           loadControlFinder()
             .then(function () {
-              if (mScriptParams.useClassicalWaitForUI5) {
-                sDebugLog += '\nLoading classical waitForUI5 implementation.';
-                return loadClassicalWaitForUI5();
-              } else {
-                sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
-                return loadOPAWaitForUI5().catch(function (sError) {
-                  sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
-                  return loadClassicalWaitForUI5();
-                });
-              }
+              sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
+              return loadOPAWaitForUI5();
             }).then(function (sLog) {
               fnCallback({log: sDebugLog + (sLog || '')});
             }).catch(function (sError, sLog) {
@@ -50,25 +42,6 @@ var mFunctions = {
     })();
 
     // --- helper function declarations below ---
-    function loadClassicalWaitForUI5() {
-      return new Promise(function (resolve) {
-        if (window.uiveri5.ClassicalWaitForUI5) {
-          resolve();
-        } else {
-          var ClassicalWaitForUI5 = new Function('return (' + mScriptParams.ClassicalWaitForUI5 + ').apply(this, arguments)');
-          window.sap.ui.getCore().registerPlugin({
-            startPlugin: function (oCore) {
-              window.uiveri5.ClassicalWaitForUI5 = new ClassicalWaitForUI5(mScriptParams.autoWait.timeout, {
-                getUIDirty: oCore.getUIDirty.bind(oCore),
-                attachUIUpdated: oCore.attachUIUpdated.bind(oCore)
-              });
-              resolve();
-            }
-          });
-        }
-      });
-    }
-
     function loadOPAWaitForUI5() {
       return new Promise(function (resolve, reject) {
         if (window.uiveri5.autoWaiterAsync) {
@@ -118,14 +91,12 @@ var mFunctions = {
     }
   },
 
-  waitForAngular: function waitForAngular (mScriptParams, fnCallback) {
+  waitForUI5: function waitForUI5 (fnCallback) {
     if (!window.sap || !window.sap.ui) {
       fnCallback('waitForUI5: no UI5 on this page.');
     } else {
       if (window.uiveri5.autoWaiterAsync) {
         window.uiveri5.autoWaiterAsync.waitAsync(fnCallback);
-      } else if (window.uiveri5.ClassicalWaitForUI5) {
-        window.uiveri5.ClassicalWaitForUI5.notifyWhenStable(fnCallback);
       } else {
         fnCallback('waitForUI5: no waitForUI5 implementation is currently loaded.');
       }
@@ -269,7 +240,98 @@ var mFunctions = {
         fnCallback({error: 'Error while processing dom, details: ' + error});
       }
     }
+  },
+
+  /**
+   * Find buttons by textual content.
+   *
+   * @param {string} searchText The exact text to match.
+   * @param {Element} using The scope of the search.
+   *
+   * @return {Array.<Element>} The matching elements.
+   */
+  findByButtonText: function findByButtonText(searchText, using) {
+    using = using || document;
+
+    var elements = using.querySelectorAll('button, input[type="button"], input[type="submit"]');
+    var matches = [];
+    for (var i = 0; i < elements.length; ++i) {
+      var element = elements[i];
+      var elementText;
+      if (element.tagName.toLowerCase() == 'button') {
+        elementText = element.textContent || element.innerText || '';
+      } else {
+        elementText = element.value;
+      }
+      if (elementText.trim() === searchText) {
+        matches.push(element);
+      }
+    }
+
+    return matches;
+  },
+
+  /**
+   * Find buttons by textual content.
+   *
+   * @param {string} searchText The exact text to match.
+   * @param {Element} using The scope of the search.
+   *
+   * @return {Array.<Element>} The matching elements.
+   */
+  findByPartialButtonText: function findByPartialButtonText(searchText, using) {
+    using = using || document;
+
+    var elements = using.querySelectorAll('button, input[type="button"], input[type="submit"]');
+    var matches = [];
+    for (var i = 0; i < elements.length; ++i) {
+      var element = elements[i];
+      var elementText;
+      if (element.tagName.toLowerCase() == 'button') {
+        elementText = element.textContent || element.innerText || '';
+      } else {
+        elementText = element.value;
+      }
+      if (elementText.indexOf(searchText) > -1) {
+        matches.push(element);
+      }
+    }
+
+    return matches;
+  },
+
+  /**
+   * Find elements by css selector and textual content.
+   *
+   * @param {string} cssSelector The css selector to match.
+   * @param {string} searchText The exact text to match or a serialized regex.
+   * @param {Element} using The scope of the search.
+   *
+   * @return {Array.<Element>} An array of matching elements.
+   */
+  findByCssContainingText: function findByCssContainingText(cssSelector, searchText, using) {
+    using = using || document;
+
+    if (searchText.indexOf('__REGEXP__') === 0) {
+      var match = searchText.split('__REGEXP__')[1].match(/\/(.*)\/(.*)?/);
+      searchText = new RegExp(match[1], match[2] || '');
+    }
+    var elements = using.querySelectorAll(cssSelector);
+    var matches = [];
+    for (var i = 0; i < elements.length; ++i) {
+      var element = elements[i];
+      var elementText = element.textContent || element.innerText || '';
+      var elementMatches = searchText instanceof RegExp ?
+        searchText.test(elementText) :
+        elementText.indexOf(searchText) > -1;
+
+      if (elementMatches) {
+        matches.push(element);
+      }
+    }
+    return matches;
   }
+
 };
 
 /* Publish the functions as strings to pass to WebDriver's exec[Async]Script.

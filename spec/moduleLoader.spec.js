@@ -1,7 +1,7 @@
 
 describe("RuntimeResolver", function() {
   var ModuleLoader = require('../src/moduleLoader');
-  var logger = require('../src/logger')(3);
+  var logger = require('../src/logger');
 
   it("Should load module defined with name", function() {
     var config = {test: __dirname + '/moduleLoader/testModule'};

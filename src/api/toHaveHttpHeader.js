@@ -7,8 +7,8 @@ function ToHaveHttpHeader(){
 
 }
 
-ToHaveHttpHeader.prototype.register = function(matchers) {
-  var toHaveHTTPHeader = function() {
+ToHaveHttpHeader.prototype.getMatchers = function () {
+  var toHaveHTTPHeader = function () {
     return {
       compare: function(actualResponse, expectedResponse) {
         var result = {};
@@ -31,7 +31,9 @@ ToHaveHttpHeader.prototype.register = function(matchers) {
     };
   };
 
-  matchers.toHaveHTTPHeader = toHaveHTTPHeader;
+  return {
+    toHaveHTTPHeader: toHaveHTTPHeader
+  };
 };
 
 module.exports = function(){

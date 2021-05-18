@@ -11,7 +11,7 @@ var exitCodes = require('./exitCodes');
 var TaskScheduler = require('./taskScheduler').TaskScheduler;
 
 var logger = require('../logger');
-var helper = require('./util');
+var helper = require('./helper');
 var TaskRunner = require('./taskRunner').TaskRunner;
 
 var RUNNERS_FAILED_EXIT_CODE = 100;
@@ -91,7 +91,7 @@ var taskResults_ = new TaskResults();
  *
  * @param {Object=} config
  */
-var init = function (config, connectionProvider, plugins) {
+var init = function (config) {
   var configParser = new ConfigParser();
   configParser.addConfig(config);
   config = configParser.getConfig();
@@ -102,13 +102,10 @@ var init = function (config, connectionProvider, plugins) {
     .then(() => {
       return q
         .Promise((resolve, reject) => {
-          // 1) If getMultiCapabilities is set, resolve that as
-          // `multiCapabilities`.
-          if (config.getMultiCapabilities &&
-            typeof config.getMultiCapabilities === 'function') {
+          // 1) If getMultiCapabilities is set, resolve that as `multiCapabilities`.
+          if (config.getMultiCapabilities && typeof config.getMultiCapabilities === 'function') {
             if (config.multiCapabilities.length || config.capabilities) {
-              logger.info('getMultiCapabilities() will override both capabilities ' +
-                'and multiCapabilities');
+              logger.info('getMultiCapabilities() will override both capabilities and multiCapabilities');
             }
             // If getMultiCapabilities is defined and a function, use this.
             q(config.getMultiCapabilities())
@@ -128,23 +125,19 @@ var init = function (config, connectionProvider, plugins) {
           }
         })
         .then(() => {
-          // 2) Set `multicapabilities` using `capabilities`,
-          // `multicapabilities`,
-          // or default
+          // 2) Set `multicapabilities` using `capabilities`, `multicapabilities`, or default
           if (config.capabilities) {
             if (config.multiCapabilities.length) {
-              logger.info('You have specified both capabilities and ' +
-                'multiCapabilities. This will result in capabilities being ' +
-                'ignored');
-            }
-            else {
+              logger.info('You have specified both capabilities and multiCapabilities. This will result in capabilities being ignored');
+            } else {
               // Use capabilities if multiCapabilities is empty.
               config.multiCapabilities = [config.capabilities];
             }
-          }
-          else if (!config.multiCapabilities.length) {
+          } else if (!config.multiCapabilities.length) {
             // Default to chrome if no capabilities given
-            config.multiCapabilities = [{ browserName: 'chrome' }];
+            config.multiCapabilities = [{
+              browserName: 'chrome'
+            }];
           }
         });
     })
@@ -209,7 +202,7 @@ var init = function (config, connectionProvider, plugins) {
       var createNextTaskRunner = () => {
         var task = scheduler.nextTask();
         if (task) {
-          var taskRunner = new TaskRunner(config, task, forkProcess, connectionProvider, plugins);
+          var taskRunner = new TaskRunner(config, task, forkProcess);
           taskRunner.run()
             .then((result) => {
               if (result.exitCode && !result.failedCount) {
@@ -232,8 +225,7 @@ var init = function (config, connectionProvider, plugins) {
       };
       // Start `scheduler.maxConcurrentTasks()` workers for handling tasks in
       // the beginning. As a worker finishes a task, it will pick up the next
-      // task
-      // from the scheduler's queue until all tasks are gone.
+      // task from the scheduler's queue until all tasks are gone.
       for (var i = 0; i < scheduler.maxConcurrentTasks(); ++i) {
         createNextTaskRunner();
       }

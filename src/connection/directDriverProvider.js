@@ -1,16 +1,15 @@
 var path = require('path');
 var _ = require('lodash');
 var q = require('q');
+var plugins = require('../plugins/plugins');
 
 // replaces ptor driverProviders
-var DirectDriverProvider = function (protConfig, logger, seleniumConfig, plugins) {
+var DirectDriverProvider = function (protConfig, logger, seleniumConfig) {
   this.protConfig = protConfig;
   this.logger = logger;
   this.seleniumConfig = seleniumConfig;
-  this.plugins = plugins;
   this.drivers = [];
 
-  // use selenium-webdriver from protractor dependecies
   this.deps = {};
   this.deps.webdriver = require('selenium-webdriver');
   this.deps.http = require('selenium-webdriver/http');
@@ -40,7 +39,7 @@ DirectDriverProvider.prototype.getNewDriver = function() {
   delete requiredCapabilities.runtime;
   delete requiredCapabilities.remoteWebDriverOptions;
 
-  this.plugins.onConnectionSetup(requiredCapabilities);
+  plugins.onConnectionSetup(requiredCapabilities);
 
   that.logger.info('Opening webdriver connection with capabilities: ' +
     JSON.stringify(requiredCapabilities));

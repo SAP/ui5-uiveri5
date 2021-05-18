@@ -1,5 +1,3 @@
-
-var _ = require('lodash');
 var q = require('q');
 
 /**
@@ -35,26 +33,6 @@ ConnectionProvider.prototype.setupEnv = function() {
  */
 ConnectionProvider.prototype.teardownEnv = function() {
   return q();
-};
-
-/**
- * Prepare capabilities object for this session
- * @param {Runtime} runtime - required runtime for this session
- * @return {Object} capabilities of this session
- */
-ConnectionProvider.prototype.resolveCapabilitiesFromRuntime = function(runtime) {
-
-  return this._mergeRuntimeCapabilities({},runtime);
-};
-
-ConnectionProvider.prototype._mergeRuntimeCapabilities = function(capabilities,runtime) {
-  // merge capabilities on root level
-  _.merge(capabilities,runtime.capabilities);
-
-  // provide runtime in browser capabilities
-  capabilities.runtime = runtime;
-
-  return capabilities;
 };
 
 /**

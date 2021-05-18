@@ -3,6 +3,7 @@
 var child_process = require('child_process');
 var events = require('events');
 var q = require('q');
+var logger = require('../logger');
 
 var ConfigParser = require('./configParser').ConfigParser;
 var TaskLogger = require('./taskLogger').TaskLogger;
@@ -10,8 +11,8 @@ var Runner = require('./runner').Runner;
 
 /**
  * A runner for running a specified task (capabilities + specs).
- * The TaskRunner can either run the task from the current process (via
- * './runner.js') or from a new process (via './runnerCli.js').
+ * The TaskRunner can either run the task from the current process (via './runner.js')
+ * or from a new process (via './runnerCli.js').
  *
  * @constructor
  * @param {object} additionalConfig Additional configuration.
@@ -19,13 +20,11 @@ var Runner = require('./runner').Runner;
  * @param {boolean} runInFork Whether to run test in a forked process.
  * @constructor
  */
-function TaskRunner (additionalConfig, task, runInFork, connectionProvider, plugins) {
+function TaskRunner (additionalConfig, task, runInFork) {
   events.EventEmitter.apply(this, arguments);
   this.additionalConfig = additionalConfig;
   this.task = task;
   this.runInFork = runInFork;
-  this.connectionProvider = connectionProvider;
-  this.plugins = plugins;
 }
 
 TaskRunner.prototype = Object.assign({}, events.EventEmitter.prototype);
@@ -39,7 +38,7 @@ TaskRunner.prototype.constructor = TaskRunner;
  *       taskId, specs, capabilities, failedCount, exitCode, specResults
  */
 TaskRunner.prototype.run = function () {
-  var that = this;
+
   var runResults = {
     taskId: this.task.taskId,
     specs: this.task.specs,
@@ -57,9 +56,14 @@ TaskRunner.prototype.run = function () {
   var config = configParser.getConfig();
   config.capabilities = this.task.capabilities;
   config.specs = this.task.specs;
+
   if (this.runInFork) {
+    logger.debug('Running multiple browsers in child processes');
     var deferred = q.defer();
-    var childProcess = child_process.fork(__dirname + '/runnerCli.js', process.argv.slice(2), { cwd: process.cwd(), silent: true });
+    var childProcess = child_process.fork(__dirname + '/runnerCli.js', process.argv.slice(2), {
+      cwd: process.cwd(),
+      silent: true
+    });
     var taskLogger = new TaskLogger(this.task, childProcess.pid);
     // stdout pipe
     childProcess.stdout.on('data', (data) => {
@@ -70,11 +74,11 @@ TaskRunner.prototype.run = function () {
       taskLogger.log(data);
     });
     childProcess
-      .on('message', (m) => {
+      .on('message', (message) => {
         if (config.verboseMultiSessions) {
           taskLogger.peek();
         }
-        switch (m.event) {
+        switch (message.event) {
         case 'testPass':
           process.stdout.write('.');
           break;
@@ -82,8 +86,8 @@ TaskRunner.prototype.run = function () {
           process.stdout.write('F');
           break;
         case 'testsDone':
-          runResults.failedCount = m.results.failedCount;
-          runResults.specResults = m.results.specResults;
+          runResults.failedCount = message.results.failedCount;
+          runResults.specResults = message.results.specResults;
           break;
         }
       })
@@ -96,16 +100,18 @@ TaskRunner.prototype.run = function () {
         runResults.exitCode = code;
         deferred.resolve(runResults);
       });
+
     childProcess.send({
       command: 'run',
       additionalConfig: this.additionalConfig,
       capabilities: this.task.capabilities,
       specs: this.task.specs
     });
+
     return deferred.promise;
-  }
-  else {
-    var runner = new Runner(config, that.connectionProvider, that.plugins);
+  } else {
+    logger.debug('Running one browser in the current process');
+    var runner = new Runner(config);
     runner.on('testsDone', (results) => {
       runResults.failedCount = results.failedCount;
       runResults.specResults = results.specResults;

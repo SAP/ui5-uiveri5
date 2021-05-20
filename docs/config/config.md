@@ -127,23 +127,46 @@ Execute the visual test:
 $ uiveri5 --browsers=browser:*:android --seleniumAddress=http://127.0.0.1:4723/wd/hub --baseUrl=http://10.0.2.2:8080
 ```
 
-## Run test files in parallel
-Use the following capabilities to run every spec file in a separate browser parallelly
+## Browser instances
+Use the following capabilities to run every spec file in a separate browser parallely:
 ```javascript
  browsers: [{
     browserName: "chrome",
       capabilities: {
-        shardTestFiles: true
+        runSpecFilesInParallelBrowsers: true
       }
   }]
 ```
 
-## Restart browser between suites
-Disabled by default.
-Note the current limitation that each spec file should contain exactly one suite.
+Use the following capabilities to run every spec file in a separate browser consequetively:
+```javascript
+ browsers: [{
+    browserName: "chrome",
+      capabilities: {
+        restartBrowserBetweenSpecFiles: true
+      }
+  }]
+```
+
+Use the following capabilities to configure browser startup:
+```javascript
+ browsers: [{
+    browserName: "chrome",
+      capabilities: {
+        shardTestFiles: true, // execute each spec file in a separate browser; default = false
+        maxInstances: 5, // max number of browsers (with current capabilities) to run in parallel; default = 1
+        maxSessions: 5, // max number of browsers (total) to run in parallel; default = unlimited
+        count: 1 // execute full set of specs multiple times with this browser config; default = 1
+      }
+  }]
+```
+
+Restart between every `describe` block:
 ```javascript
 exports.config = {
   restartBrowserBetweenSuites: true
 }
 ```
-Protractor's `restartBrowserBetweenTests` is also available and false by default.
+
+Protractor's `restartBrowserBetweenTests` is also available.
+All of the above options are disabled by default.

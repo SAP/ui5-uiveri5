@@ -9,7 +9,7 @@ var ConfigParser = require('./configParser').ConfigParser;
  * - shardTestFiles - If this is set to be true, specs will be sharded by file
  *   (i.e. all files to be run by this set of capabilities will run in parallel). Default is false.
  * - maxInstances - Maximum number of browser instances that can run in parallel for this set of capabilities.
- *   This is only needed if shardTestFiles is true. Default is <total-number-of-spec-files> in UIVeri5 (and 1 in protractor).
+ *   This is only needed if shardTestFiles is true. Default is 1.
  * - maxSessions - Maximum number of total browser sessions to run.
  *   Tests are queued in sequence if number of browser sessions is limited by this parameter.
  *   Use a number less than 1 to denote unlimited. Default is unlimited.
@@ -60,18 +60,27 @@ function TaskScheduler(config) {
         return capabilitiesSpecExcludes.indexOf(path) < 0;
       });
     }
+
+    if (capabilities.restartBrowserBetweenSpecFiles) {
+      // run every spec file in a separate browser - consequetively
+      capabilities.shardTestFiles = true;
+      capabilities.maxInstances = 1;
+    }
+    if (capabilities.runSpecFilesInParallelBrowsers) {
+      // run every spec file in a separate browser - parallely
+      capabilities.shardTestFiles = true;
+      // run the maximum number of browsers in parallel
+      capabilities.maxInstances = allSpecs.length;
+    }
+
     var specLists = [];
     // If we shard, we return an array of one element arrays, each containing
     // the spec file. If we don't shard, we return an one element array
     // containing an array of all the spec files
-
     if (capabilities.shardTestFiles) {
       capabilitiesSpecs.forEach((spec) => {
         specLists.push([spec]);
       });
-
-      // always allow to run the maximum number of browsers in parallel
-      capabilities.maxInstances = capabilities.maxInstances || config.specs.length;
     } else {
       specLists.push(capabilitiesSpecs);
     }

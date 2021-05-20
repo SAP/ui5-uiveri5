@@ -191,13 +191,18 @@ var init = function (config) {
           });
       };
       var totalTasks = scheduler.numTasksOutstanding();
-      var forkProcess = false;
+      var forkProcess;
       if (totalTasks > 1) {
         forkProcess = true;
+        logger.debug('Running multiple browsers in child processes');
         if (config.debug) {
           throw new exitCodes.ConfigError(logger, 'Cannot run in debug mode with multiCapabilities, count > 1, or sharding');
         }
+      } else {
+        forkProcess = false;
+        logger.debug('Running one browser in the current process');
       }
+
       var deferred = q.defer(); // Resolved when all tasks are completed
       var createNextTaskRunner = () => {
         var task = scheduler.nextTask();

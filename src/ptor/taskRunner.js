@@ -58,7 +58,6 @@ TaskRunner.prototype.run = function () {
   config.specs = this.task.specs;
 
   if (this.runInFork) {
-    logger.debug('Running multiple browsers in child processes');
     var deferred = q.defer();
     var childProcess = child_process.fork(__dirname + '/runnerCli.js', process.argv.slice(2), {
       cwd: process.cwd(),
@@ -110,7 +109,6 @@ TaskRunner.prototype.run = function () {
 
     return deferred.promise;
   } else {
-    logger.debug('Running one browser in the current process');
     var runner = new Runner(config);
     runner.on('testsDone', (results) => {
       runResults.failedCount = results.failedCount;

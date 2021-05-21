@@ -37,7 +37,7 @@ module.exports = function (config) {
 
     // initialize statistic collector
     var statisticCollector = require('./statisticCollector');
-    require('./coreReporters/statisticReporter').register();
+    require('./coreReporters/statisticReporter')(config).register();
 
     require('./coreReporters/paramsReporter')(config).register();
     require('./coreReporters/specLifecycleReporter')(config, storageProvider).register();

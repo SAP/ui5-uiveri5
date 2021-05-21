@@ -9,6 +9,7 @@ var ptor = require('./ptor');
 var helper = require('./helper');
 var uiveri5Plugins = require('../plugins/plugins');
 var connectionProvider = require('../connection/connectionProvider');
+var statisticCollector = require('../statisticCollector');
 
 /*
  * Runner is responsible for starting the execution of a test run and triggering
@@ -290,14 +291,14 @@ Runner.prototype.run = function () {
     .then(() => {
       this.emit('testsDone', results);
       testPassed = results.failedCount === 0;
-      if (this.driverprovider_.updateJob) {
-        return this.driverprovider_.updateJob({ 'passed': testPassed }).then(() => {
-          return this.driverprovider_.teardownEnv();
-        });
+
+      if (this.config.tempJsonReport) {
+        var overview = JSON.stringify(statisticCollector.getOverview(), null, 2);
+        return helper.writeWhenFree(this.config.tempJsonReport, overview);
       }
-      else {
-        return this.driverprovider_.teardownEnv();
-      }
+    })
+    .then(() => {
+      return this.driverprovider_.teardownEnv();
     })
     .then(() => {
       var exitCode = testPassed ? 0 : 1;

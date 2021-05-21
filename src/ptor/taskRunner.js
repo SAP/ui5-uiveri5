@@ -3,7 +3,6 @@
 var child_process = require('child_process');
 var events = require('events');
 var q = require('q');
-var logger = require('../logger');
 
 var ConfigParser = require('./configParser').ConfigParser;
 var TaskLogger = require('./taskLogger').TaskLogger;

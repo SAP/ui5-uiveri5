@@ -21,8 +21,9 @@ var RUNNERS_FAILED_EXIT_CODE = 100;
  * result, aggregate the results into a summary, count failures,
  * and save results into a JSON file.
  */
-function TaskResults() {
+function TaskResults(config) {
   this.results_ = [];
+  this.config = config;
 }
  
 TaskResults.prototype.add = function (result) {
@@ -41,12 +42,15 @@ TaskResults.prototype.totalProcessFailures = function () {
   }, 0);
 };
 
-TaskResults.prototype.saveResults = function (filepath) {
-  var jsonOutput = this.results_.reduce((jsonOutput, result) => {
-    return jsonOutput.concat(result.specResults);
-  }, []);
-  var json = JSON.stringify(jsonOutput, null, '  ');
-  fs.writeFileSync(filepath, json);
+TaskResults.prototype.removeTempReport = function () {
+  try {
+    fs.unlinkSync(this.config.tempJsonReport);
+    logger.trace('temp JSON report is successfully deleted');
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      logger.trace('Error while trying to delete temp JSON report. Error: ' + err);
+    }
+  }
 };
 
 TaskResults.prototype.reportSummary = function () {
@@ -59,30 +63,25 @@ TaskResults.prototype.reportSummary = function () {
       capabilities.logName :
       (capabilities.browserName) ? capabilities.browserName : '';
     shortName += (capabilities.version) ? capabilities.version : '';
-    shortName += (capabilities.logName && capabilities.count < 2) ? '' : ' #' + result.taskId;
+
     if (result.failedCount) {
       logger.info(shortName + ' failed ' + result.failedCount + ' test(s)');
-    }
-    else if (result.exitCode !== 0) {
+    } else if (result.exitCode !== 0) {
       logger.info(shortName + ' failed with exit code: ' + result.exitCode);
-    }
-    else {
+    } else {
       logger.info(shortName + ' passed');
     }
   });
+
   if (specFailures && processFailures) {
     logger.info('overall: ' + specFailures + ' failed spec(s) and ' + processFailures +
       ' process(es) failed to complete');
-  }
-  else if (specFailures) {
+  } else if (specFailures) {
     logger.info('overall: ' + specFailures + ' failed spec(s)');
-  }
-  else if (processFailures) {
+  } else if (processFailures) {
     logger.info('overall: ' + processFailures + ' process(es) failed to complete');
   }
 };
-
-var taskResults_ = new TaskResults();
 
 /**
  * Initialize and run the tests.
@@ -95,6 +94,8 @@ var init = function (config) {
   var configParser = new ConfigParser();
   configParser.addConfig(config);
   config = configParser.getConfig();
+
+  var taskResults_ = new TaskResults(config);
  
   logger.debug('Your base url for tests is ' + config.baseUrl);
   // Run beforeLaunch
@@ -119,8 +120,7 @@ var init = function (config) {
               .catch(err => {
                 reject(err);
               });
-          }
-          else {
+          } else {
             resolve();
           }
         })
@@ -158,8 +158,7 @@ var init = function (config) {
           var protractorError = e;
           exitCodes.ProtractorError.log(logger, errorCode, protractorError.message, protractorError.stack);
           process.exit(errorCode);
-        }
-        else {
+        } else {
           logger.error(e.message);
           logger.error(e.stack);
           process.exit(exitCodes.ProtractorError.CODE);
@@ -168,8 +167,7 @@ var init = function (config) {
       process.on('exit', (code) => {
         if (code) {
           logger.error('Process exited with error code ' + code);
-        }
-        else if (scheduler.numTasksOutstanding() > 0) {
+        } else if (scheduler.numTasksOutstanding() > 0) {
           logger.error('BUG: launcher exited with ' + scheduler.numTasksOutstanding() +
             ' tasks remaining');
           process.exit(RUNNERS_FAILED_EXIT_CODE);
@@ -181,8 +179,7 @@ var init = function (config) {
           .then((returned) => {
             if (typeof returned === 'number') {
               process.exit(returned);
-            }
-            else {
+            } else {
               process.exit(exitCode);
             }
           }, (err) => {
@@ -222,32 +219,29 @@ var init = function (config) {
               }
               logger.info(scheduler.countActiveTasks() + ' instance(s) of WebDriver still running');
             })
-            .catch((err) => {
-              logger.error('Error:', err.stack || err.message || err);
+            .catch((error) => {
+              logger.error('Error: ' + error);
               cleanUpAndExit(RUNNERS_FAILED_EXIT_CODE);
             });
         }
       };
-      // Start `scheduler.maxConcurrentTasks()` workers for handling tasks in
-      // the beginning. As a worker finishes a task, it will pick up the next
-      // task from the scheduler's queue until all tasks are gone.
-      for (var i = 0; i < scheduler.maxConcurrentTasks(); ++i) {
+      // Start `maxInstances` workers for handling tasks in the beginning.
+      // As a worker finishes a task, it will pick up the next task from the scheduler's queue until all tasks are gone.
+      for (var i = 0; i < config.maxInstances; ++i) {
         createNextTaskRunner();
       }
       logger.info('Running ' + scheduler.countActiveTasks() + ' instances of WebDriver');
       // By now all runners have completed.
       deferred.promise
         .then(function () {
-          // Save results if desired
-          if (config.resultJsonOutputFile) {
-            taskResults_.saveResults(config.resultJsonOutputFile);
+          if (config.tempJsonReport) {
+            taskResults_.removeTempReport();
           }
           taskResults_.reportSummary();
           var exitCode = 0;
           if (taskResults_.totalProcessFailures() > 0) {
             exitCode = RUNNERS_FAILED_EXIT_CODE;
-          }
-          else if (taskResults_.totalSpecFailures() > 0) {
+          } else if (taskResults_.totalSpecFailures() > 0) {
             exitCode = 1;
           }
           return cleanUpAndExit(exitCode);

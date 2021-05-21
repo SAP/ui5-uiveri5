@@ -128,45 +128,24 @@ $ uiveri5 --browsers=browser:*:android --seleniumAddress=http://127.0.0.1:4723/w
 ```
 
 ## Browser instances
-Use the following capabilities to run every spec file in a separate browser parallely:
-```javascript
- browsers: [{
-    browserName: "chrome",
-      capabilities: {
-        runSpecFilesInParallelBrowsers: true
-      }
-  }]
-```
-
-Use the following capabilities to run every spec file in a separate browser consequetively:
-```javascript
- browsers: [{
-    browserName: "chrome",
-      capabilities: {
-        restartBrowserBetweenSpecFiles: true
-      }
-  }]
-```
-
-Use the following capabilities to configure browser startup:
-```javascript
- browsers: [{
-    browserName: "chrome",
-      capabilities: {
-        shardTestFiles: true, // execute each spec file in a separate browser; default = false
-        maxInstances: 5, // max number of browsers (with current capabilities) to run in parallel; default = 1
-        maxSessions: 5, // max number of browsers (total) to run in parallel; default = unlimited
-        count: 1 // execute full set of specs multiple times with this browser config; default = 1
-      }
-  }]
-```
-
-Restart between every `describe` block:
+Use `restartBrowserBetweenSpecs` to restart the browser between every spec file. Defaults to false:
 ```javascript
 exports.config = {
-  restartBrowserBetweenSuites: true
+  restartBrowserBetweenSpecs: true,
+  browsers: [{
+    browserName: "chrome"
+  }]
 }
 ```
 
-Protractor's `restartBrowserBetweenTests` is also available.
-All of the above options are disabled by default.
+Use `maxInstances` to run every spec file in a separate browser parallely. Up to `maxInstances` browsers will be running at any given moment.
+When a spec is done, the browser instance is destroyed and a new browser is started.
+Defaults to 1 - run one browser at a time.
+```javascript
+exports.config = {
+  maxInstances: 5,
+  browsers: [{
+    browserName: "chrome"
+  }]
+}
+```

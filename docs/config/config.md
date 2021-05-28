@@ -127,3 +127,25 @@ Execute the visual test:
 $ uiveri5 --browsers=browser:*:android --seleniumAddress=http://127.0.0.1:4723/wd/hub --baseUrl=http://10.0.2.2:8080
 ```
 
+## Browser instances
+Use `restartBrowserBetweenSpecs` to restart the browser between every spec file. Defaults to false:
+```javascript
+exports.config = {
+  restartBrowserBetweenSpecs: true,
+  browsers: [{
+    browserName: "chrome"
+  }]
+}
+```
+
+Use `maxInstances` to run every spec file in a separate browser parallely. Up to `maxInstances` browsers will be running at any given moment.
+When a spec is done, the browser instance is destroyed and a new browser is started.
+Defaults to 1 - run one browser at a time.
+```javascript
+exports.config = {
+  maxInstances: 5,
+  browsers: [{
+    browserName: "chrome"
+  }]
+}
+```

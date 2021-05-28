@@ -1,4 +1,4 @@
-
+var fs = require('fs');
 /**
  * @typedef Overview
  * @type {Object}
@@ -92,11 +92,7 @@
  */
 function StatisticCollector(){
 
-  // @type Overview
-  this.overview = {
-    suites: [],
-    statistic: {}
-  };
+  this.reset();
 
   this.currentSuite = null;
   this.currentSpec = null;
@@ -106,7 +102,7 @@ function StatisticCollector(){
 }
 
 StatisticCollector.prototype.jasmineStarted = function(){
-  this.overview.statistic.duration = new Date();  // save start time in duration during the run
+  this.startTime = new Date();  // save start time in duration during the run
 };
 
 StatisticCollector.prototype.suiteStarted = function(jasmineSuite){
@@ -296,9 +292,15 @@ StatisticCollector.prototype.suiteDone = function(jasmineSuite, suiteMeta){
   this.overview.suites.push(this.currentSuite);
 };
 
-StatisticCollector.prototype.jasmineDone = function(runMeta){
+StatisticCollector.prototype.jasmineDone = function (runMeta) {
+  // TODO another way to save progress would be to return the statistics as part of one runner's result, save them in launcher and pass them as args to the next (+ guard against simultaneous write)
+  if (runMeta && runMeta.tempJsonReport &&  fs.existsSync(runMeta.tempJsonReport)) {
+    var intermediateResults = require(runMeta.tempJsonReport);
+    this.overview.statistic.duration = intermediateResults.statistic.duration;
+    this.overview.suites = intermediateResults.suites.concat(this.overview.suites);
+  }
   // compute duration
-  this.overview.statistic.duration = new Date() - this.overview.statistic.duration;
+  this.overview.statistic.duration += new Date() - this.startTime;
 
   // compute statistic
   var failedSuitesCount = 0;
@@ -330,9 +332,7 @@ StatisticCollector.prototype.jasmineDone = function(runMeta){
     this.overview.status = 'passed';
   }
 
-  if (runMeta) {
-    this.overview.meta = runMeta;
-  }
+  this.overview.meta = runMeta;
 
   // prepare suites statistic
   this.overview.statistic.suites = {
@@ -462,6 +462,17 @@ StatisticCollector.prototype.getCurrentSuite = function(){
   return this.currentSuite;
 };
 
-module.exports = function(){
-  return new StatisticCollector();
+/**
+ * reset overview to default
+ */
+StatisticCollector.prototype.reset = function(){
+  // @type Overview
+  this.overview = {
+    suites: [],
+    statistic: {
+      duration: 0
+    }
+  };
 };
+
+module.exports = new StatisticCollector();

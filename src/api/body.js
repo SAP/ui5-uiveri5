@@ -2,7 +2,7 @@ var should = require('should').noConflict();
 
 module.exports = function(){
   return {
-    register: function(matchers) {
+    getMatchers: function() {
       var body = function() {
         return {
           compare: function(actualResponse, expectedFn) {
@@ -22,7 +22,9 @@ module.exports = function(){
           }
         };
       };
-      matchers.body = body;
+      return {
+        body: body
+      };
     }
   };
 };

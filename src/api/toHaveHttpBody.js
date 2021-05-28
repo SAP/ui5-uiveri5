@@ -7,7 +7,7 @@ function ToHaveHttpBody(){
 
 }
 
-ToHaveHttpBody.prototype.register = function(matchers) {
+ToHaveHttpBody.prototype.getMatchers = function () {
   var toHaveHTTPBody = function() {
     return {
       compare: function(actualResponse, expectedResponse) {
@@ -24,7 +24,9 @@ ToHaveHttpBody.prototype.register = function(matchers) {
     };
   };
 
-  matchers.toHaveHTTPBody = toHaveHTTPBody;
+  return {
+    toHaveHTTPBody: toHaveHTTPBody
+  };
 };
 
 module.exports = function(){

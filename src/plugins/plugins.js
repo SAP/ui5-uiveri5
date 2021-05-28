@@ -1,7 +1,9 @@
 var pluginModules = [];
 var currentSpecDescription;
 
-var Plugins = function (aPluginModules) {
+var Plugins = function () {};
+
+Plugins.prototype.loadModules = function (aPluginModules) {
   pluginModules = aPluginModules;
 };
 
@@ -27,6 +29,10 @@ Plugins.prototype.loadJasminePlugins = function () {
 
 Plugins.prototype.addPlugin = function (plugin) {
   pluginModules.push(plugin);
+};
+
+Plugins.prototype.getPlugins = function () {
+  return pluginModules;
 };
 
 ['setup', 'onPrepare', 'teardown', 'onConnectionSetup', 'onUI5Sync', 'onElementAction'].forEach(function (sEvent) {
@@ -80,4 +86,4 @@ function _callJasmineSpecPlugins(method) {
   };
 }
 
-module.exports = Plugins;
+module.exports = new Plugins();

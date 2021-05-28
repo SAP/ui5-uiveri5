@@ -1,6 +1,7 @@
 'use strict';
 
 var path = require('path');
+var fs = require('fs');
 var q = require('q');
 var selenium_webdriver = require('selenium-webdriver');
 
@@ -41,7 +42,7 @@ function runFilenameOrFn_(configDir, filenameOrFn, args) {
       throw new Error('filenameOrFn must be a string or function');
     }
     if (typeof filenameOrFn === 'string') {
-      filenameOrFn = require(path.resolve(configDir, filenameOrFn));
+      filenameOrFn = require(path.resolve(configDir, filenameOrFn))(args);
     }
     if (typeof filenameOrFn === 'function') {
       var results = q.when(filenameOrFn.apply(null, args), null, (err) => {
@@ -83,6 +84,24 @@ function falseIfMissing(error) {
   }
 }
 
+function writeWhenFree(fileName, content) {
+  var deferred = q.defer();
+  fs.open(fileName, 'w', function (err) {
+    if (!err) {
+      fs.writeFile(fileName, content, function () {
+        deferred.resolve();
+      });
+    } else if (err.code === 'EBUSY') {
+      setTimeout(function () {
+        writeWhenFree(fileName, content);
+      }, 50);
+    } else {
+      deferred.reject(err);
+    }
+  });
+  return deferred.promise;
+}
+
 /**
  * Return a boolean given boolean value.
  *
@@ -97,5 +116,6 @@ module.exports = {
   filterStackTrace: filterStackTrace,
   runFilenameOrFn_: runFilenameOrFn_,
   falseIfMissing: falseIfMissing,
-  passBoolean: passBoolean
+  passBoolean: passBoolean,
+  writeWhenFree: writeWhenFree
 };

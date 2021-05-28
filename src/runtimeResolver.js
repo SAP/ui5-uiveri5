@@ -1,5 +1,6 @@
 
 var _ = require('lodash');
+var logger = require('./logger');
 
 var DEFAULT_BROWSER_NAME = 'chrome';
 var DEFAULT_VERSION = '*';
@@ -63,11 +64,9 @@ var supportedUI5Modes = [
  * Resolves runtime
  * @constructor
  * @param {RuntimeResolverConfig} config
- * @param {Logger} logger
  */
-function RuntimeResolver(config, logger) {
+function RuntimeResolver(config) {
   this.config = config;
-  this.logger = logger;
 }
 
 /**
@@ -153,7 +152,7 @@ RuntimeResolver.prototype.resolveRuntimes = function(){
       that._mergeMatchingCapabilities(runtime,that.config.browserCapabilities);
     }
 
-    that.logger.debug('Resolved runtime: ' + JSON.stringify(runtime));
+    logger.debug('Resolved runtime: ' + JSON.stringify(runtime));
   });
 
   return runtimes;
@@ -215,6 +214,6 @@ RuntimeResolver.prototype._isMatching = function(name,pattern){
   return matchingFlag;
 };
 
-module.exports = function (config, logger) {
-  return new RuntimeResolver(config, logger);
+module.exports = function (config) {
+  return new RuntimeResolver(config);
 };

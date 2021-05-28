@@ -10,9 +10,11 @@ var expectedConditions = require('../element/expectedConditions');
 var logger = require('../logger');
 var elementUtil = require('./elementUtil');
 var clientsideScripts = require('../scripts/clientsidescripts');
+var statisticCollector = require('../statisticCollector');
 
 var DEFAULT_RESET_URL = 'data:text/html,<html></html>';
 var DEFAULT_GET_PAGE_TIMEOUT = 10000;
+var AUTH_CONFIG_NAME = 'auth';
 
 /**
  * @alias browser
@@ -88,11 +90,25 @@ var Browser = function (webdriverInstance, opt_baseUrl) {
     },
     navigation: {
       waitForRedirect: browser._waitForRedirect.bind(browser),
+      // expose navigation helpers to tests
       to: browser._navigateTo.bind(browser),
-      _getAuthenticator: function () {
-        // override in uiveri5.js - needs moduleLoader and statisticCollector
-        return null;
-      }
+      _getAuthenticator: function (authConfig) {
+        var moduleLoader = require('../moduleLoader')(this.testrunner.config);
+        var authenticator;
+        if (authConfig) {
+          // programatically invoked authentication - load auth module every time
+          authenticator = moduleLoader.loadNamedModule(authConfig, [statisticCollector]);
+        } else {
+          // if auth is declared in config, load the (global) auth module only once.
+          // when authOnce is enabled, auth should be done only once - before the first spec file.
+          if (this.authenticator) {
+            authenticator = this.testrunner.config.authOnce ? null : this.authenticator;
+          } else {
+            authenticator = this.authenticator = moduleLoader.loadNamedModule(AUTH_CONFIG_NAME, [statisticCollector]);
+          }
+        }
+        return authenticator;
+      }.bind(this)
     }
   };
 

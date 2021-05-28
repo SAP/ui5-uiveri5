@@ -11,7 +11,7 @@ var exitCodes = require('./exitCodes');
 var TaskScheduler = require('./taskScheduler').TaskScheduler;
 
 var logger = require('../logger');
-var helper = require('./util');
+var helper = require('./helper');
 var TaskRunner = require('./taskRunner').TaskRunner;
 
 var RUNNERS_FAILED_EXIT_CODE = 100;
@@ -21,8 +21,9 @@ var RUNNERS_FAILED_EXIT_CODE = 100;
  * result, aggregate the results into a summary, count failures,
  * and save results into a JSON file.
  */
-function TaskResults() {
+function TaskResults(config) {
   this.results_ = [];
+  this.config = config;
 }
  
 TaskResults.prototype.add = function (result) {
@@ -41,12 +42,15 @@ TaskResults.prototype.totalProcessFailures = function () {
   }, 0);
 };
 
-TaskResults.prototype.saveResults = function (filepath) {
-  var jsonOutput = this.results_.reduce((jsonOutput, result) => {
-    return jsonOutput.concat(result.specResults);
-  }, []);
-  var json = JSON.stringify(jsonOutput, null, '  ');
-  fs.writeFileSync(filepath, json);
+TaskResults.prototype.removeTempReport = function () {
+  try {
+    fs.unlinkSync(this.config.tempJsonReport);
+    logger.trace('temp JSON report is successfully deleted');
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      logger.trace('Error while trying to delete temp JSON report. Error: ' + err);
+    }
+  }
 };
 
 TaskResults.prototype.reportSummary = function () {
@@ -59,30 +63,25 @@ TaskResults.prototype.reportSummary = function () {
       capabilities.logName :
       (capabilities.browserName) ? capabilities.browserName : '';
     shortName += (capabilities.version) ? capabilities.version : '';
-    shortName += (capabilities.logName && capabilities.count < 2) ? '' : ' #' + result.taskId;
+
     if (result.failedCount) {
       logger.info(shortName + ' failed ' + result.failedCount + ' test(s)');
-    }
-    else if (result.exitCode !== 0) {
+    } else if (result.exitCode !== 0) {
       logger.info(shortName + ' failed with exit code: ' + result.exitCode);
-    }
-    else {
+    } else {
       logger.info(shortName + ' passed');
     }
   });
+
   if (specFailures && processFailures) {
     logger.info('overall: ' + specFailures + ' failed spec(s) and ' + processFailures +
       ' process(es) failed to complete');
-  }
-  else if (specFailures) {
+  } else if (specFailures) {
     logger.info('overall: ' + specFailures + ' failed spec(s)');
-  }
-  else if (processFailures) {
+  } else if (processFailures) {
     logger.info('overall: ' + processFailures + ' process(es) failed to complete');
   }
 };
-
-var taskResults_ = new TaskResults();
 
 /**
  * Initialize and run the tests.
@@ -91,10 +90,12 @@ var taskResults_ = new TaskResults();
  *
  * @param {Object=} config
  */
-var init = function (config, connectionProvider, plugins) {
+var init = function (config) {
   var configParser = new ConfigParser();
   configParser.addConfig(config);
   config = configParser.getConfig();
+
+  var taskResults_ = new TaskResults(config);
  
   logger.debug('Your base url for tests is ' + config.baseUrl);
   // Run beforeLaunch
@@ -102,13 +103,10 @@ var init = function (config, connectionProvider, plugins) {
     .then(() => {
       return q
         .Promise((resolve, reject) => {
-          // 1) If getMultiCapabilities is set, resolve that as
-          // `multiCapabilities`.
-          if (config.getMultiCapabilities &&
-            typeof config.getMultiCapabilities === 'function') {
+          // 1) If getMultiCapabilities is set, resolve that as `multiCapabilities`.
+          if (config.getMultiCapabilities && typeof config.getMultiCapabilities === 'function') {
             if (config.multiCapabilities.length || config.capabilities) {
-              logger.info('getMultiCapabilities() will override both capabilities ' +
-                'and multiCapabilities');
+              logger.info('getMultiCapabilities() will override both capabilities and multiCapabilities');
             }
             // If getMultiCapabilities is defined and a function, use this.
             q(config.getMultiCapabilities())
@@ -122,29 +120,24 @@ var init = function (config, connectionProvider, plugins) {
               .catch(err => {
                 reject(err);
               });
-          }
-          else {
+          } else {
             resolve();
           }
         })
         .then(() => {
-          // 2) Set `multicapabilities` using `capabilities`,
-          // `multicapabilities`,
-          // or default
+          // 2) Set `multicapabilities` using `capabilities`, `multicapabilities`, or default
           if (config.capabilities) {
             if (config.multiCapabilities.length) {
-              logger.info('You have specified both capabilities and ' +
-                'multiCapabilities. This will result in capabilities being ' +
-                'ignored');
-            }
-            else {
+              logger.info('You have specified both capabilities and multiCapabilities. This will result in capabilities being ignored');
+            } else {
               // Use capabilities if multiCapabilities is empty.
               config.multiCapabilities = [config.capabilities];
             }
-          }
-          else if (!config.multiCapabilities.length) {
+          } else if (!config.multiCapabilities.length) {
             // Default to chrome if no capabilities given
-            config.multiCapabilities = [{ browserName: 'chrome' }];
+            config.multiCapabilities = [{
+              browserName: 'chrome'
+            }];
           }
         });
     })
@@ -165,8 +158,7 @@ var init = function (config, connectionProvider, plugins) {
           var protractorError = e;
           exitCodes.ProtractorError.log(logger, errorCode, protractorError.message, protractorError.stack);
           process.exit(errorCode);
-        }
-        else {
+        } else {
           logger.error(e.message);
           logger.error(e.stack);
           process.exit(exitCodes.ProtractorError.CODE);
@@ -175,8 +167,7 @@ var init = function (config, connectionProvider, plugins) {
       process.on('exit', (code) => {
         if (code) {
           logger.error('Process exited with error code ' + code);
-        }
-        else if (scheduler.numTasksOutstanding() > 0) {
+        } else if (scheduler.numTasksOutstanding() > 0) {
           logger.error('BUG: launcher exited with ' + scheduler.numTasksOutstanding() +
             ' tasks remaining');
           process.exit(RUNNERS_FAILED_EXIT_CODE);
@@ -188,8 +179,7 @@ var init = function (config, connectionProvider, plugins) {
           .then((returned) => {
             if (typeof returned === 'number') {
               process.exit(returned);
-            }
-            else {
+            } else {
               process.exit(exitCode);
             }
           }, (err) => {
@@ -198,18 +188,23 @@ var init = function (config, connectionProvider, plugins) {
           });
       };
       var totalTasks = scheduler.numTasksOutstanding();
-      var forkProcess = false;
+      var forkProcess;
       if (totalTasks > 1) {
         forkProcess = true;
+        logger.debug('Running multiple browsers in child processes');
         if (config.debug) {
           throw new exitCodes.ConfigError(logger, 'Cannot run in debug mode with multiCapabilities, count > 1, or sharding');
         }
+      } else {
+        forkProcess = false;
+        logger.debug('Running one browser in the current process');
       }
+
       var deferred = q.defer(); // Resolved when all tasks are completed
       var createNextTaskRunner = () => {
         var task = scheduler.nextTask();
         if (task) {
-          var taskRunner = new TaskRunner(config, task, forkProcess, connectionProvider, plugins);
+          var taskRunner = new TaskRunner(config, task, forkProcess);
           taskRunner.run()
             .then((result) => {
               if (result.exitCode && !result.failedCount) {
@@ -224,33 +219,29 @@ var init = function (config, connectionProvider, plugins) {
               }
               logger.info(scheduler.countActiveTasks() + ' instance(s) of WebDriver still running');
             })
-            .catch((err) => {
-              logger.error('Error:', err.stack || err.message || err);
+            .catch((error) => {
+              logger.error('Error: ' + error);
               cleanUpAndExit(RUNNERS_FAILED_EXIT_CODE);
             });
         }
       };
-      // Start `scheduler.maxConcurrentTasks()` workers for handling tasks in
-      // the beginning. As a worker finishes a task, it will pick up the next
-      // task
-      // from the scheduler's queue until all tasks are gone.
-      for (var i = 0; i < scheduler.maxConcurrentTasks(); ++i) {
+      // Start `maxInstances` workers for handling tasks in the beginning.
+      // As a worker finishes a task, it will pick up the next task from the scheduler's queue until all tasks are gone.
+      for (var i = 0; i < config.maxInstances; ++i) {
         createNextTaskRunner();
       }
       logger.info('Running ' + scheduler.countActiveTasks() + ' instances of WebDriver');
       // By now all runners have completed.
       deferred.promise
         .then(function () {
-          // Save results if desired
-          if (config.resultJsonOutputFile) {
-            taskResults_.saveResults(config.resultJsonOutputFile);
+          if (config.tempJsonReport) {
+            taskResults_.removeTempReport();
           }
           taskResults_.reportSummary();
           var exitCode = 0;
           if (taskResults_.totalProcessFailures() > 0) {
             exitCode = RUNNERS_FAILED_EXIT_CODE;
-          }
-          else if (taskResults_.totalSpecFailures() > 0) {
+          } else if (taskResults_.totalSpecFailures() > 0) {
             exitCode = 1;
           }
           return cleanUpAndExit(exitCode);

@@ -1,10 +1,13 @@
-'use strict';
-
+var path = require('path');
 var ConfigParser = require('./configParser').ConfigParser;
 
+var TEMP_JSON_REPORT_NAME = path.join(process.cwd(), 'temp.json');
+
 /**
- * The taskScheduler keeps track of the spec files that needs to run next
- * and which task is running what.
+ * The taskScheduler keeps track of the spec files that needs to run next and which task is running what.
+ * Supports only 1 browser in config.multiCapabilities - config.multiCapabilities[0]. Others are ignored.
+ * TODO: refactor runtime resolver to use capabilities instead of multiCapabilities
+ *
  */
 function TaskQueue(capabilities, specLists) {
   // A queue of specs for a particular capacity
@@ -12,14 +15,12 @@ function TaskQueue(capabilities, specLists) {
   this.specLists = specLists;
   this.numRunningInstances = 0;
   this.specsIndex = 0;
-  this.maxInstance = capabilities.maxInstances || 1;
 }
 
 /**
  * A scheduler to keep track of specs that need running and their associated
  * capabilities. It will suggest a task (combination of capabilities and spec)
- * to run while observing the following config rules:
- * multiCapabilities, shardTestFiles, and maxInstance.
+ * to run while observing the multiCapabilities and global config.
  * Precondition: multiCapabilities is a non-empty array
  * (capabilities and getCapabilities will both be ignored)
  *
@@ -33,69 +34,54 @@ function TaskScheduler(config) {
     .filter((path) => {
       return excludes.indexOf(path) < 0;
     });
-  var taskQueues = [];
-  config.multiCapabilities.forEach((capabilities) => {
-    var capabilitiesSpecs = allSpecs;
-    if (capabilities.specs) {
-      var capabilitiesSpecificSpecs = ConfigParser.resolveFilePatterns(capabilities.specs, false, config.configDir);
-      capabilitiesSpecs = capabilitiesSpecs.concat(capabilitiesSpecificSpecs);
-    }
-    if (capabilities.exclude) {
-      var capabilitiesSpecExcludes = ConfigParser.resolveFilePatterns(capabilities.exclude, true, config.configDir);
-      capabilitiesSpecs = capabilitiesSpecs.filter((path) => {
-        return capabilitiesSpecExcludes.indexOf(path) < 0;
-      });
-    }
-    var specLists = [];
-    // If we shard, we return an array of one element arrays, each containing
-    // the spec file. If we don't shard, we return an one element array
-    // containing an array of all the spec files
-    if (capabilities.shardTestFiles) {
-      capabilitiesSpecs.forEach((spec) => {
-        specLists.push([spec]);
-      });
-    }
-    else {
-      specLists.push(capabilitiesSpecs);
-    }
-    capabilities.count = capabilities.count || 1;
-    for (var i = 0; i < capabilities.count; ++i) {
-      taskQueues.push(new TaskQueue(capabilities, specLists));
-    }
-  });
-  this.taskQueues = taskQueues;
-  this.rotationIndex = 0; // Helps suggestions to rotate amongst capabilities
+
+  var capabilities = config.multiCapabilities[0]; // ignore other browsers
+
+  // Maximum number of browser instances that can run in parallel. Each instance will run a single spec file.
+  // If number of tests > maxInstances, new instances will be created when another one completes. Default is 1.
+  config.maxInstances = config.maxInstances || 1;
+
+  var runOneSpecFilePerBrowserInstance = config.restartBrowserBetweenSpecs || config.maxInstances > 1;
+
+  var specLists = [];
+  // when running multiple instances, run one spec file per instance
+  // If we shard, we return an array of one element arrays, each containing the spec file.
+  // If we don't shard, we return an one element array containing an array of all the spec files
+  if (runOneSpecFilePerBrowserInstance) {
+    config.tempJsonReport = TEMP_JSON_REPORT_NAME;
+    allSpecs.forEach((spec) => {
+      specLists.push([spec]);
+    });
+  } else {
+    specLists.push(allSpecs);
+  }
+
+  this.taskQueue = new TaskQueue(capabilities, specLists);
 }
 
 /**
- * Get the next task that is allowed to run without going over maxInstance.
+ * Get the next task that is allowed to run without going over maxInstances
  *
  * @return {{capabilities: Object, specs: Array.<string>, taskId: string,
  * done: function()}}
  */
 TaskScheduler.prototype.nextTask = function () {
-  for (var i = 0; i < this.taskQueues.length; ++i) {
-    var rotatedIndex = ((i + this.rotationIndex) % this.taskQueues.length);
-    var queue = this.taskQueues[rotatedIndex];
-    if (queue.numRunningInstances < queue.maxInstance &&
-      queue.specsIndex < queue.specLists.length) {
-      this.rotationIndex = rotatedIndex + 1;
-      ++queue.numRunningInstances;
-      var taskId = '' + rotatedIndex + 1;
-      if (queue.specLists.length > 1) {
-        taskId += '-' + queue.specsIndex;
-      }
-      var specs = queue.specLists[queue.specsIndex];
-      ++queue.specsIndex;
-      return {
-        capabilities: queue.capabilities,
-        specs: specs,
-        taskId: taskId,
-        done: function () {
-          --queue.numRunningInstances;
-        }
-      };
+  if (this.taskQueue.numRunningInstances < this.config.maxInstances && this.taskQueue.specsIndex < this.taskQueue.specLists.length) {
+    ++this.taskQueue.numRunningInstances;
+    var taskId = '1';
+    if (this.taskQueue.specLists.length > 1) {
+      taskId += '-' + this.taskQueue.specsIndex;
     }
+    var specs = this.taskQueue.specLists[this.taskQueue.specsIndex];
+    ++this.taskQueue.specsIndex;
+    return {
+      capabilities: this.taskQueue.capabilities,
+      specs: specs,
+      taskId: taskId,
+      done: function () {
+        --this.taskQueue.numRunningInstances;
+      }.bind(this)
+    };
   }
   return null;
 };
@@ -106,29 +92,7 @@ TaskScheduler.prototype.nextTask = function () {
  * @return {number}
  */
 TaskScheduler.prototype.numTasksOutstanding = function () {
-  var count = 0;
-  this.taskQueues.forEach((queue) => {
-    count += queue.numRunningInstances + (queue.specLists.length - queue.specsIndex);
-  });
-  return count;
-};
-
-/**
- * Get maximum number of concurrent tasks required/permitted.
- *
- * @return {number}
- */
-TaskScheduler.prototype.maxConcurrentTasks = function () {
-  if (this.config.maxSessions && this.config.maxSessions > 0) {
-    return this.config.maxSessions;
-  }
-  else {
-    var count = 0;
-    this.taskQueues.forEach((queue) => {
-      count += Math.min(queue.maxInstance, queue.specLists.length);
-    });
-    return count;
-  }
+  return this.taskQueue.numRunningInstances + (this.taskQueue.specLists.length - this.taskQueue.specsIndex);
 };
 
 /**
@@ -137,11 +101,7 @@ TaskScheduler.prototype.maxConcurrentTasks = function () {
  * @return {number}
  */
 TaskScheduler.prototype.countActiveTasks = function () {
-  var count = 0;
-  this.taskQueues.forEach((queue) => {
-    count += queue.numRunningInstances;
-  });
-  return count;
+  return this.taskQueue.numRunningInstances;
 };
 
 module.exports = {

@@ -1,60 +1,11 @@
 var q = require('q');
 var webdriver = require('selenium-webdriver');
-
-var RunnerReporter = function(emitter) {
-  this.emitter = emitter;
-  this.testResult = [],
-  this.failedCount = 0;
-};
-
-RunnerReporter.prototype.jasmineStarted = function() {
-  // Need to initiate startTime here, in case reportSpecStarting is not
-  // called (e.g. when fit is used)
-  this.startTime = new Date();
-};
-
-RunnerReporter.prototype.specStarted = function() {
-  this.startTime = new Date();
-};
-
-RunnerReporter.prototype.specDone = function(result) {
-  var specInfo = {
-    name: result.description,
-    category: result.fullName.slice(0, -result.description.length).trim()
-  };
-  if (result.status == 'passed') {
-    this.emitter.emit('testPass', specInfo);
-  } else if (result.status == 'failed') {
-    this.emitter.emit('testFail', specInfo);
-    this.failedCount++;
-  }
-
-  var entry = {
-    description: result.fullName,
-    assertions: [],
-    duration: new Date().getTime() - this.startTime.getTime()
-  };
-
-  if (result.failedExpectations.length === 0) {
-    entry.assertions.push({
-      passed: true
-    });
-  }
-
-  result.failedExpectations.forEach(function(item) {
-    entry.assertions.push({
-      passed: item.passed,
-      errorMsg: item.passed ? undefined : item.message,
-      stackTrace: item.passed ? undefined : item.stack
-    });
-  });
-  this.testResult.push(entry);
-};
+var RunnerReporter = require('../../coreReporters/runnerReporter');
 
 /**
  * Execute the Runner's test cases through Jasmine.
  *
- * @param {Runner} runner The current Protractor Runner.
+ * @param {Runner} runner The current test Runner.
  * @param {Array} specs Array of Directory Path Strings.
  * @return {q.Promise} Promise resolved with the test results
  */
@@ -73,10 +24,7 @@ module.exports.run = function(runner, specs) {
   // to ensure that it runs after any afterEach() blocks with webdriver tasks
   // get to complete first.
   var reporter = new RunnerReporter(runner);
-  jasmine.getEnv().addReporter(reporter);
-
-  // Add hooks for afterEach
-  require('./setupAfterEach').setup(runner, specs);
+  reporter.register();
 
   // Filter specs to run based on jasmineNodeOpts.grep and jasmineNodeOpts.invert.
   jasmine.getEnv().specFilter = function(spec) {
@@ -89,16 +37,6 @@ module.exports.run = function(runner, specs) {
     }
     return true;
   };
-
-  // Run specs in semi-random order
-  if (jasmineNodeOpts.random) {
-    jasmine.getEnv().randomizeTests(true);
-
-    // Sets the randomization seed if randomization is turned on
-    if (jasmineNodeOpts.seed) {
-      jasmine.getEnv().seed(jasmineNodeOpts.seed);
-    }
-  }
 
   return runner.runTestPreparer().then(function() {
     return q.promise(function(resolve, reject) {

@@ -19,6 +19,14 @@
       padding: 10px;
     }
 
+    .suites-menu .name.failure {
+      background-color: #ff6347;
+    }
+
+    .suites-menu .name.failure.selected {
+      background-color: #ee482a;
+    }
+
     .suites-menu .name.selected {
       background-color: #90c9dc;
       font-weight: 600;
@@ -156,7 +164,11 @@
 <body>
 <div class="suites-menu">
   <% _.forEach(suites, function (suite, suiteIndex) { %>
-  <div class="name" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>
+    <% if (suite.statistic.specs.failed > 0) { %>
+    <div class="name failure" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>
+    <% } else { %>
+    <div class="name" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>
+    <% } %>
   <% }); %>
 </div>
 <% _.forEach(suites, function (suite, suiteIndex) { %>

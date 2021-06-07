@@ -164,7 +164,7 @@
 <body>
 <div class="suites-menu">
   <% _.forEach(suites, function (suite, suiteIndex) { %>
-    <div class="name <%- (suite.statistic.specs.failed > 0) == 'failure' ? '' %>" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>
+    <div class="name <%- suite.statistic.specs.failed > 0 ? 'failure' : '' %>" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>
   <% }); %>
 </div>
 <% _.forEach(suites, function (suite, suiteIndex) { %>

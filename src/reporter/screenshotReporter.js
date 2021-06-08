@@ -2,6 +2,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var utils = require('./reporterUtils');
+var crypto = require('crypto');
 
 var DEFAULT_SCREENSHOTS_ROOT = 'target/report/screenshots/';
 var DEFAULT_TEMPLATE_NAME = __dirname + '/report.screenshots.tpl.html';
@@ -115,7 +116,7 @@ JasmineScreenshotReporter.prototype._generateExpectationScreenshotName = functio
 JasmineScreenshotReporter.prototype._generateActionScreenshotName = function (action, elementId) {
   var fileName = [
     action,
-    elementId.substring(0, 190),
+    elementId ? elementId.substring(0, 190) : crypto.randomBytes(16).toString("hex"),
     this.collector.stepIndex,
     new Date().toISOString().substring(0, 19)
   ].join('_').replace(/[\/\?<>\\:\*\|":\s]/g, '-');

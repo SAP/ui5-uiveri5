@@ -205,6 +205,20 @@ describe("Should parse confkey from command-line", function () {
     expect(mergedConfig.disableKey).toEqual([{name: 'optionToRemain'}]);
   });
 
+  it('Should enable and disable modules in single config', function () {
+    var config = {
+      conf: __dirname + '/configParser/modulecrud.conf.js',
+      disableArr: {
+        disabled: [{name: 'optionToDisable'}],
+        enabled: [{name: 'optionToAdd'}]
+      }
+    };
+
+    var mergedConfig = configParser.mergeConfigs(config);
+
+    expect(mergedConfig.disableArr).toEqual([{name: 'optionToAdd'},{name: 'optionToRemain'}]);
+  });
+
   it('Should update existing modules', function () {
     var config = {
       conf: __dirname + '/configParser/modulecrud.conf.js',

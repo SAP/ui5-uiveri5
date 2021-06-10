@@ -39,8 +39,8 @@ ConfigParser.prototype._mergeConfigFile = function (path, type) {
 ConfigParser.prototype._mergeConfig = function (newConfig) {
   var logger = this.logger;
   // this.config has higher priority than newConfig (we merge new low prio into exisiting high prio config)
+  var modulesToDisable = _extractModulesToDisable(this.config);
   var priorityConfig = _flattenEnabledModules(this.config);
-  var modulesToDisable = _extractModulesToDisable(priorityConfig);
   _.compact(priorityConfig);
 
   ['browsers', 'specs'].forEach(function (key) {
@@ -83,7 +83,7 @@ ConfigParser.prototype._mergeConfig = function (newConfig) {
 
       // if the new (low prio) config enables a module, but the existing (high prio) config disables it ->
       // delete the module from the new config
-      this._disableModules(modulesToDisable, modulesToEnable, key);
+      this._disableModules(modulesToDisable, priorityConfig, key);
     }
   }
 
@@ -170,7 +170,7 @@ ConfigParser.prototype._updateExistingKey = function (config, key) {
 
 ConfigParser.prototype._disableModules = function (modulesToDisable, modules, key) {
   if (!_.isEmpty(modulesToDisable[key])) {
-    _.remove(modules, function (moduleDef) {
+    _.remove(modules[key], function (moduleDef) {
       var existingModuleIndex = _findIndexOfModule(modulesToDisable, key, moduleDef);
       if (existingModuleIndex > -1) {
         this.logger.debug('Removing module with ID "' + moduleDef.id + '" and name "' + moduleDef.name + '" under key "' + key + '"');

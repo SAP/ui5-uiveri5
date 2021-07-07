@@ -172,7 +172,7 @@
 </head>
 <body>
 <div class="total-summary">
-  <span class="strong">Total statistics</span>
+  <span class="strong">Total Statistics</span>
   <span id="specsTotal">Specs Total: <%- _.reduce(_.map(suites, function(suite) {return suite.statistic.specs.total}), (a,b) => a+b) %></span>
   <span id="specsPassed">Passed: <%- _.reduce(_.map(suites, function(suite) {return suite.statistic.specs.passed}), (a,b) => a+b) %></span>
   <span id="specsFailed">Failed: <%- _.reduce(_.map(suites, function(suite) {return suite.statistic.specs.failed}), (a,b) => a+b) %></span>

@@ -10,7 +10,7 @@ describe('API tests', function() {
             appMock = app;
         })
     });
-    
+
     afterAll(() => {
         appMock.server.close();
     });

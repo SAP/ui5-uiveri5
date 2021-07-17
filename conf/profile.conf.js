@@ -250,7 +250,8 @@ exports.config = {
   ],
   locators: [
     {name: './locators/jqueryLocator'},
-    {name: './locators/controlLocator'}
+    {name: './locators/controlLocator'},
+    {name: './locators/vyperLocator'}
   ],
 
   plugins: [

@@ -9,6 +9,15 @@
       font-family: sans-serif;
     }
 
+    .total-summary {
+      background-color: #d9ade6;
+      padding: 10px 20px;
+    }
+
+    .total-summary span {
+      padding-right: 20px;
+    }
+
     .suites-menu {
       width: 100%;
       background-color: #add8e6;
@@ -162,6 +171,12 @@
   </style>
 </head>
 <body>
+<div class="total-summary">
+  <span class="strong">Total Statistics</span>
+  <span id="specsTotal">Specs Total: <%- _.reduce(_.map(suites, function(suite) {return suite.statistic.specs.total}), (a,b) => a+b) %></span>
+  <span id="specsPassed">Passed: <%- _.reduce(_.map(suites, function(suite) {return suite.statistic.specs.passed}), (a,b) => a+b) %></span>
+  <span id="specsFailed">Failed: <%- _.reduce(_.map(suites, function(suite) {return suite.statistic.specs.failed}), (a,b) => a+b) %></span>
+</div>
 <div class="suites-menu">
   <% _.forEach(suites, function (suite, suiteIndex) { %>
     <div class="name <%- suite.statistic.specs.failed > 0 ? 'failure' : '' %>" onClick="selectSuite(<%- suiteIndex %>)"><%- suite.name %></div>

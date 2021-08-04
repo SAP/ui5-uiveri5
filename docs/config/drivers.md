@@ -41,10 +41,10 @@ connectionConfigs: {
 
 ## Generic WebDriver Options
 Browser size and location can be specified in `browsers.capabilities.remoteWebDriverOptions`. The following options are listed in descending priority:
-* maximized - maximizes the browser window
 * position - sets offset of the browser relative to the upper-left screen corner
 * viewportSize - sets inner size of the browser window (actual page display area)
 * browserSize - sets outer size of the browser window (including window toolbars)
+* maximized - maximizes the browser window
 
 ```javascript
 browsers: [{

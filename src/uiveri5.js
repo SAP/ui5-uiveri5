@@ -236,31 +236,29 @@ function run(config) {
         var remoteViewportSize = _.get(runtime,'capabilities.remoteWebDriverOptions.viewportSize');
         var remoteBrowserSize = _.get(runtime,'capabilities.remoteWebDriverOptions.browserSize');
 
-        if (isMaximized) {
+        if (remoteWindowPosition) {
+          if (_.some(remoteWindowPosition, _.isUndefined)) {
+            throw Error('Setting browser window position: X and Y coordinates required but not specified');
+          }
+          logger.debug('Setting browser window position: x: ' + remoteWindowPosition.x + ', y: ' + remoteWindowPosition.y);
+          browser.driver.manage().window().setPosition(remoteWindowPosition.x * 1, remoteWindowPosition.y * 1); // convert to integer implicitly
+        }
+
+        if (remoteViewportSize) {
+          if (_.some(remoteViewportSize, _.isUndefined)) {
+            throw Error('Setting browser viewport size: width and height required but not specified');
+          }
+          logger.debug('Setting browser viewport size: width: ' + remoteViewportSize.width + ', height: ' + remoteViewportSize.height);
+          browser.setViewportSize(remoteViewportSize);
+        } else if (remoteBrowserSize) {
+          if (_.some(remoteBrowserSize, _.isUndefined)) {
+            throw Error('Setting browser window size: width and height required but not specified');
+          }
+          logger.debug('Setting browser window size: width: ' + remoteBrowserSize.width + ', height: ' + remoteBrowserSize.height);
+          browser.driver.manage().window().setSize(remoteBrowserSize.width * 1, remoteBrowserSize.height * 1); // convert to integer implicitly
+        } else if (isMaximized) {
           logger.debug('Maximizing browser window');
           browser.driver.manage().window().maximize();
-        } else {
-          if (remoteWindowPosition) {
-            if (_.some(remoteWindowPosition, _.isUndefined)) {
-              throw Error('Setting browser window position: X and Y coordinates required but not specified');
-            }
-            logger.debug('Setting browser window position: x: ' + remoteWindowPosition.x + ', y: ' + remoteWindowPosition.y);
-            browser.driver.manage().window().setPosition(remoteWindowPosition.x * 1, remoteWindowPosition.y * 1); // convert to integer implicitly
-          }
-
-          if (remoteViewportSize) {
-            if (_.some(remoteViewportSize, _.isUndefined)) {
-              throw Error('Setting browser viewport size: width and height required but not specified');
-            }
-            logger.debug('Setting browser viewport size: width: ' + remoteViewportSize.width + ', height: ' + remoteViewportSize.height);
-            browser.setViewportSize(remoteViewportSize);
-          } else if (remoteBrowserSize) {
-            if (_.some(remoteBrowserSize, _.isUndefined)) {
-              throw Error('Setting browser window size: width and height required but not specified');
-            }
-            logger.debug('Setting browser window size: width: ' + remoteBrowserSize.width + ', height: ' + remoteBrowserSize.height);
-            browser.driver.manage().window().setSize(remoteBrowserSize.width * 1, remoteBrowserSize.height * 1); // convert to integer implicitly
-          }
         }
 
         protractorModule.parent.exports.ElementFinder.prototype.asControl = function () {

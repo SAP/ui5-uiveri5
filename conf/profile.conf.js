@@ -171,6 +171,12 @@ exports.config = {
       '*': {
         '*': {
           browserName: 'chrome',
+          remoteWebDriverOptions: {
+            browserSize: {
+              width: 1600,
+              height: 1200
+            }
+          },
           chromeOptions: {
             args: [
               '--headless',

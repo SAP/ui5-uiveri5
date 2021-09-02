@@ -39,13 +39,13 @@ let res = request.get('http://myapi.dev.hana.ondemand.com/contacts/1').do()
 ## Save a Result from a Call and Use It in Another Call
 ```javascript
 let contacts;
-request.get('http://myapi.dev.hana.ondemand.com/contacts/1').do()
+request.get('http://myapi.dev.hana.ondemand.com/contacts').do()
     .then((res) => {
         contacts = res.body;
     });
 
 // the arrow function is necessary to postpone the URL building till the actual execution time
-request.delete('http://myapi.dev.hana.ondemand.com/contacts/1').do() => `/contacts/{contacts[0].id}`);
+request.delete(`http://myapi.dev.hana.ondemand.com/contacts/${contacts[0].id}`).do();
 ```
 
 # Authentication

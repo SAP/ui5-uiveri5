@@ -42,10 +42,9 @@ let contacts;
 request.get('http://myapi.dev.hana.ondemand.com/contacts').do()
     .then((res) => {
         contacts = res.body;
+        // having this call in the resolve handler is necessary to postpone the URL building till the actual execution time
+        request.delete(`http://myapi.dev.hana.ondemand.com/contacts/${contacts[0].id}`).do();
     });
-
-// the arrow function is necessary to postpone the URL building till the actual execution time
-request.delete(`http://myapi.dev.hana.ondemand.com/contacts/${contacts[0].id}`).do();
 ```
 
 # Authentication

@@ -101,7 +101,6 @@ DwcReporter.prototype.patchMetadata = function(url, credentials, vectorId, value
 };
 
 // retry upload data due to locking mechanism
-// TODO: limit retries?
 DwcReporter.prototype.retryRequest = function(requestFn, body, nTimes) {
   return new Promise((resolve, reject) => {
     const vectorId = this.options.vector;
@@ -136,8 +135,9 @@ DwcReporter.prototype.sync = async function(instance) {
     vector = await this.getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
   } catch (e) {
     err = e;
-    console.log(`Could not report test results for test ${instance.baseInformation.name}. Could not get Vector. Error occurred: ${JSON.stringify(err)}\n`);
+    console.log(`Could not report test results for test: ${instance.baseInformation.name}. Could not get Vector. Error occurred: ${JSON.stringify(err)}\n`);
     instance.error = true;
+
     return err;
   }
 
@@ -195,7 +195,8 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo, sessionId, 
   this.instance[sessionId].stateCounts = {
     passed: 0,
     failed: 0,
-    skipped: 0
+    disabled: 0,
+    pending: 0
   };
 
   this.instance[sessionId].index = -1;
@@ -206,36 +207,47 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo, sessionId, 
   if (!this.options.themistoUrl || typeof this.options.themistoUrl !== "string" || !this.options.themistoCredentials || !this.options.vector) {
     console.log("DwC reporter is missing required environment variables. Results will not be reported.\n");
     this.instance[sessionId].error = true;
-  } else {
-    console.log(`Starting test run ${suiteInfo.fullName}.\n`);
   }
 
-  let config = await browser.getProcessedConfig();
+  // let config = await browser.getProcessedConfig();
 
   this.instance[sessionId].baseInformation = {
     id: uuid.v4(),
     name: suiteInfo.fullName,
     type: "UiVeri5",
-    link: "saucelabs_link",//TODO: optional saucelabs link? getSauceLink(config, sessionId),
+    link: "saucelabs_link",//TODO: optional saucelabs link? 
     timestamp: new Date().toISOString(),
-    reporter: "DwC Reporter"
+    reporter: "UiVeri5 DwC Reporter"
   };
   
-  if (config && config.capabilities) {
+  if (this.collector && this.collector.overview && this.collector.overview.meta && this.collector.overview.meta.runtime) {
     this.instance[sessionId].baseInformation.desiredCapabilities = {};
-    if (config.capabilities.browserName) this.instance[sessionId].baseInformation.desiredCapabilities.browserName = config.capabilities.browserName;
-    if (config.capabilities.version) this.instance[sessionId].baseInformation.desiredCapabilities.browserVersion = config.capabilities.version;
-    if (config.capabilities.platform) this.instance[sessionId].baseInformation.desiredCapabilities.platform = config.capabilities.platform;
-    if (config.capabilities.screenResolution) this.instance[sessionId].baseInformation.desiredCapabilities.screenResolution = config.capabilities.screenResolution;
+
+    this.instance[sessionId].baseInformation.desiredCapabilities.browserName = this.collector.overview.meta.runtime.browserName;
+    this.instance[sessionId].baseInformation.desiredCapabilities.browserVersion = this.collector.overview.meta.runtime.browserVersion;
+    this.instance[sessionId].baseInformation.desiredCapabilities.platform = this.collector.overview.meta.runtime.platformName;
+    this.instance[sessionId].baseInformation.desiredCapabilities.screenResolution = this.collector.overview.meta.runtime.platformResolution;
   }
 
-  if (process.env.STAGE) this.instance[sessionId].baseInformation.executedOnStage = process.env.STAGE;
-  if (process.env.GITHUB_REPO_NAME) this.instance[sessionId].baseInformation.githubRepo = process.env.GITHUB_REPO_NAME;
-  if (process.env.GITHUB_REPO_URL) this.instance[sessionId].baseInformation.githubRepoUrl = process.env.GITHUB_REPO_URL;
-  if (process.env.BUILD_URL) this.instance[sessionId].baseInformation.buildLink = process.env.BUILD_URL;
+  if (process.env.STAGE) {
+    this.instance[sessionId].baseInformation.executedOnStage = process.env.STAGE;
+  }
+
+  if (process.env.GITHUB_REPO_NAME) {
+    this.instance[sessionId].baseInformation.githubRepo = process.env.GITHUB_REPO_NAME;
+  }
+
+  if (process.env.GITHUB_REPO_URL) {
+    this.instance[sessionId].baseInformation.githubRepoUrl = process.env.GITHUB_REPO_URL;
+  }
+
+  if (process.env.BUILD_URL) {
+    this.instance[sessionId].baseInformation.buildLink = process.env.BUILD_URL;
+  }
 
   this.instance[sessionId].reportTestRun = this.instance[sessionId].baseInformation;
   this.instance[sessionId].reportTestRun.status = status.running;
+  
   await this.sync(this.instance[sessionId]);
 };
 
@@ -282,7 +294,7 @@ DwcReporter.prototype.jasmineStarted = function() {
   });
 
   jasmine.getEnv().addReporter(new function () {
-    this.suiteStarted =async function(result){
+    this.suiteStarted = async function(result){
       var session = await browser.driver.getSession();
       const sessionId = session.getId();
       that.suiteInfo = result;
@@ -295,17 +307,20 @@ DwcReporter.prototype.jasmineStarted = function() {
 
       switch (result.status) {
         case "disabled":
-          that.instance[sessionId].stateCounts.skipped++;    
+          that.instance[sessionId].stateCounts.disabled++;    
           break;
         case "passed":
           that.instance[sessionId].stateCounts.passed++;    
           break;
+        case "pending":
+            that.instance[sessionId].stateCounts.pending++;    
+            break;
         case "failed":
           that.instance[sessionId].passed = false;
           that.instance[sessionId].stateCounts.failed++;   
           break;
         default:
-          throw new Error("Status could not be specified, something is very wrong with your installation or the plugin");
+          throw new Error("Status could not be specified: " + result.status);
       }
 
       var failedLength = result.failedExpectations;

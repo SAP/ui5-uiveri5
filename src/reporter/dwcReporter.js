@@ -17,9 +17,9 @@ function DwcReporter(config,instanceConfig,logger,collector) {
     stdout: true,
     syncInterval: 100,
     retries: 5,
-    themistoUrl: process.env.THEMISTO_URL,
-    themistoCredentials: `Basic ${Buffer.from(`${process.env.THEMISTO_USER}:${process.env.THEMISTO_PASS}`).toString("base64")}`,
-    vector: process.env.VECTOR
+    themistoUrl: instanceConfig.themistoUrl,
+    themistoCredentials: `Basic ${Buffer.from(`${instanceConfig.themistoUser}:${instanceConfig.themistoPass}`).toString("base64")}`,
+    vector: instanceConfig.vector
   };
 }
 
@@ -129,26 +129,26 @@ DwcReporter.prototype.retryRequest = function(requestFn, body, nTimes) {
   });
 };
 
-DwcReporter.prototype.sync = async function(instance) {
+DwcReporter.prototype.sync = async function(results) {
   let vector, err;
   try {
     vector = await this.getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
   } catch (e) {
     err = e;
-    console.log(`Could not report test results for test: ${instance.baseInformation.name}. Could not get Vector. Error occurred: ${JSON.stringify(err)}\n`);
-    instance.error = true;
+    this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Could not get Vector. Error occurred: " + JSON.stringify(err));
+    results.error = true;
 
     return err;
   }
 
   const isMetadataAvailable = vector && vector.metadata && vector.metadata.tests;
-  const report = instance.reportTestRun;
+  const report = results.reportTestRun;
   let patchBody, result;
 
-  if (instance.index < 0) {
+  if (results.index < 0) {
     patchBody = [{op: "add", path: "/-", value: report}];
   } else {
-    patchBody = [{op: "replace", path: `/${instance.index}`, value: report}];
+    patchBody = [{op: "replace", path: `/${results.index}`, value: report}];
   }
 
   if (!isMetadataAvailable) {
@@ -162,12 +162,12 @@ DwcReporter.prototype.sync = async function(instance) {
           result = await this.retryRequest(this.patchMetadata, patchBody, this.options.retries);
         } catch (e) {
           err = e;
-          instance.error = true;
-          console.log(`Could not report test results for test ${instance.baseInformation.name}. Patch Metadata failed. Error occurred: ${JSON.stringify(err)}\n`);
+          results.error = true;
+          this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Patch Metadata failed. Error occurred: " + JSON.stringify(err));
         }
       } else {
-        console.log(`Could not report test results for test ${instance.baseInformation.name}. Post Metadata failed. Error occurred: ${JSON.stringify(err)}\n`);
-        instance.error = true;
+        this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Post Metadata failed. Error occurred: " + JSON.stringify(err));
+        results.error = true;
       }
     }
   } else {
@@ -175,43 +175,35 @@ DwcReporter.prototype.sync = async function(instance) {
       result = await this.retryRequest(this.patchMetadata, patchBody, this.options.retries);
     } catch (e) {
       err = e;
-      console.log(`Could not report test results for test ${instance.baseInformation.name}. Patch Metadata failed. Error occurred: ${JSON.stringify(err)}\n`);
-      instance.error = true;
+      this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Patch Metadata failed. Error occurred: " + JSON.stringify(err));
+      results.error = true;
     }
   }
 
-  if (!instance.error && instance.index < 0) {
-    instance.index = result && Array.isArray(result) ? result.findIndex(test => { return test.id === instance.baseInformation.id; }) : 0;
+  if (!results.error && results.index < 0) {
+    results.index = result && Array.isArray(result) ? result.findIndex(test => { return test.id === results.baseInformation.id; }) : 0;
   }
 
-  instance.reportTestRun = {};
+  results.reportTestRun = {};
   return err || null;
 };
 
-DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo, sessionId, browser){
+DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
     
-  this.instance[sessionId] = {};
-  this.instance[sessionId].passed = true;
-  this.instance[sessionId].stateCounts = {
-    passed: 0,
-    failed: 0,
-    disabled: 0,
-    pending: 0
-  };
+  this.results = {};
+  this.results.passed = true;
 
-  this.instance[sessionId].index = -1;
-  this.instance[sessionId].error = false;
-  this.instance[sessionId].baseInformation = {};
-  this.instance[sessionId].reportTestRun = {};
+  this.results.index = -1;
+  this.results.error = false;
+  this.results.baseInformation = {};
+  this.results.reportTestRun = {};
 
   if (!this.options.themistoUrl || typeof this.options.themistoUrl !== "string" || !this.options.themistoCredentials || !this.options.vector) {
-    console.log("DwC reporter is missing required environment variables. Results will not be reported.\n");
-    this.instance[sessionId].error = true;
+    this.logger.error("DwC reporter is missing required environment variables. Results will not be reported.\n");
+    this.results.error = true;
   }
 
-  // let config = await browser.getProcessedConfig();
-
-  this.instance[sessionId].baseInformation = {
+  this.results.baseInformation = {
     id: uuid.v4(),
     name: suiteInfo.fullName,
     type: "UiVeri5",
@@ -221,126 +213,59 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo, sessionId, 
   };
   
   if (this.collector && this.collector.overview && this.collector.overview.meta && this.collector.overview.meta.runtime) {
-    this.instance[sessionId].baseInformation.desiredCapabilities = {};
+    this.results.baseInformation.desiredCapabilities = {};
 
-    this.instance[sessionId].baseInformation.desiredCapabilities.browserName = this.collector.overview.meta.runtime.browserName;
-    this.instance[sessionId].baseInformation.desiredCapabilities.browserVersion = this.collector.overview.meta.runtime.browserVersion;
-    this.instance[sessionId].baseInformation.desiredCapabilities.platform = this.collector.overview.meta.runtime.platformName;
-    this.instance[sessionId].baseInformation.desiredCapabilities.screenResolution = this.collector.overview.meta.runtime.platformResolution;
+    this.results.baseInformation.desiredCapabilities.browserName = this.collector.overview.meta.runtime.browserName;
+    this.results.baseInformation.desiredCapabilities.browserVersion = this.collector.overview.meta.runtime.browserVersion;
+    this.results.baseInformation.desiredCapabilities.platform = this.collector.overview.meta.runtime.platformName;
+    this.results.baseInformation.desiredCapabilities.screenResolution = this.collector.overview.meta.runtime.platformResolution;
   }
 
-  if (process.env.STAGE) {
-    this.instance[sessionId].baseInformation.executedOnStage = process.env.STAGE;
+  if (this.instanceConfig.stage) {
+    this.results.baseInformation.executedOnStage = this.instanceConfig.stage;
   }
 
-  if (process.env.GITHUB_REPO_NAME) {
-    this.instance[sessionId].baseInformation.githubRepo = process.env.GITHUB_REPO_NAME;
+  if (this.instanceConfig.gitHubRepoName) {
+    this.results.baseInformation.githubRepo = this.instanceConfig.gitHubRepoName;
   }
 
-  if (process.env.GITHUB_REPO_URL) {
-    this.instance[sessionId].baseInformation.githubRepoUrl = process.env.GITHUB_REPO_URL;
+  if (this.instanceConfig.gitHubRepoUrl) {
+    this.results.baseInformation.githubRepoUrl = this.instanceConfig.gitHubRepoUrl;
   }
 
+  // jenkins, azure or other build url
   if (process.env.BUILD_URL) {
-    this.instance[sessionId].baseInformation.buildLink = process.env.BUILD_URL;
+    this.results.baseInformation.buildLink = process.env.BUILD_URL;
   }
 
-  this.instance[sessionId].reportTestRun = this.instance[sessionId].baseInformation;
-  this.instance[sessionId].reportTestRun.status = status.running;
+  this.results.reportTestRun = this.results.baseInformation;
+  this.results.reportTestRun.status = status.running;
   
-  await this.sync(this.instance[sessionId]);
-};
-
-DwcReporter.prototype._asyncSuiteFinished = async function(instance){
-  if (instance.stateCounts.failed > 0) instance.passed = false;
-  const report = instance.baseInformation;
-
-  if (instance.passed) {
-    report.status = status.success;
-  } else {
-    report.status = status.failed;
-  }
-
-  instance.reportTestRun = report;
-  await this.sync(instance);
+  await this.sync(this.results);
 };
 
 DwcReporter.prototype.jasmineStarted = function() {
   var that = this;
-  this.instance = {};
+  this.results = {};
   this.suiteInfo = {};
-  this.suiteInfOneTime = {};
-  this.suitePrevSession={};
 
-  beforeEach(async function() { 
-    var session = await browser.driver.getSession();
-    const sessionId = session.getId();
-    if (that.suitePrevSession && that.suitePrevSession.sessionId) {
-      await that._asyncSuiteFinished(that.suitePrevSession.instance);
-      that.suitePrevSession.sessionId = null;
-    }
-    if (!that.suiteInfOneTime[sessionId]) {
-      await that._asyncSuiteStarted(that.suiteInfo, sessionId, browser);
-      that.suiteInfOneTime[sessionId] = true;
-      that.suitePrevSession.sessionId = null; 
-    }
-  });
+  this.suiteStarted = async function(result){
+    that.suiteInfo = result;
+    await that._asyncSuiteStarted(that.suiteInfo);
+  };
 
   afterAll(async function() {
-    var session = await browser.driver.getSession();
-    const sessionId = session.getId();
-    await that._asyncSuiteFinished(that.instance[sessionId]);
-    that.suiteInfOneTime[sessionId] = true;       
-  });
+    that.results.passed = that.collector.currentSuite.status == "passed"
+    const report = that.results.baseInformation;
 
-  jasmine.getEnv().addReporter(new function () {
-    this.suiteStarted = async function(result){
-      var session = await browser.driver.getSession();
-      const sessionId = session.getId();
-      that.suiteInfo = result;
-      that.suiteInfOneTime[sessionId] = false; 
-    };
+    if (that.results.passed) {
+      report.status = status.success;
+    } else {
+      report.status = status.failed;
+    }
 
-    this.specDone = async function (result) {
-      var session = await browser.driver.getSession();
-      const sessionId = session.getId();
-
-      switch (result.status) {
-        case "disabled":
-          that.instance[sessionId].stateCounts.disabled++;    
-          break;
-        case "passed":
-          that.instance[sessionId].stateCounts.passed++;    
-          break;
-        case "pending":
-            that.instance[sessionId].stateCounts.pending++;    
-            break;
-        case "failed":
-          that.instance[sessionId].passed = false;
-          that.instance[sessionId].stateCounts.failed++;   
-          break;
-        default:
-          throw new Error("Status could not be specified: " + result.status);
-      }
-
-      var failedLength = result.failedExpectations;
-
-      if (failedLength && failedLength.length > 0) {
-        for (var i = 0; i < failedLength.length; i++) {
-          console.log("Failure: " + result.failedExpectations[i].message);
-          console.log(result.failedExpectations[i].stack);
-        }
-          
-      }
-    };
-
-    this.suiteDone =async function(){
-      var session = await browser.driver.getSession();
-      const sessionId = session.getId();
-      that.suitePrevSession = {};
-      that.suitePrevSession.sessionId = sessionId;
-      that.suitePrevSession.instance = that.instance[sessionId];
-    };
+    that.results.reportTestRun = report;
+    await that.sync(that.results);    
   });
 };
 

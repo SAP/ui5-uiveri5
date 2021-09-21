@@ -24,7 +24,7 @@ function DwcReporter(config,instanceConfig,logger,collector) {
 }
 
 // upload to Themisto
-DwcReporter.prototype.postMetadata = function(url, credentials, vectorId, value) {
+DwcReporter.prototype._postMetadata = function(url, credentials, vectorId, value) {
   return new Promise((resolve,reject) => {
     request({
       url: url + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata?key=tests",
@@ -49,7 +49,7 @@ DwcReporter.prototype.postMetadata = function(url, credentials, vectorId, value)
 };
 
 // get vector details
-DwcReporter.prototype.getVector = function(url, credentials, vectorId) {
+DwcReporter.prototype._getVector = function(url, credentials, vectorId) {
   return new Promise((resolve,reject) => {
     request({
       url: url + "/v1/vector/" + encodeURIComponent(vectorId),
@@ -76,7 +76,7 @@ DwcReporter.prototype.getVector = function(url, credentials, vectorId) {
 };
 
 // update data in Themisto
-DwcReporter.prototype.patchMetadata = function(url, credentials, vectorId, value) {
+DwcReporter.prototype._patchMetadata = function(url, credentials, vectorId, value) {
   return new Promise((resolve,reject) => {
     request({
       url: url + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata/tests",
@@ -101,7 +101,7 @@ DwcReporter.prototype.patchMetadata = function(url, credentials, vectorId, value
 };
 
 // retry upload data due to locking mechanism
-DwcReporter.prototype.retryRequest = function(requestFn, body, nTimes) {
+DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
   return new Promise((resolve, reject) => {
     const vectorId = this.options.vector;
     const creds = this.options.themistoCredentials;
@@ -114,7 +114,10 @@ DwcReporter.prototype.retryRequest = function(requestFn, body, nTimes) {
         return resolve(result);
       } catch (e) {
         if (nTimes === 1) {
-          if (this.retryTimer) clearTimeout(this.retryTimer);
+          if (this.retryTimer) {
+            clearTimeout(this.retryTimer);
+          }
+
           return reject(e);
         } else {
           this.retryTimer = setTimeout(() => {
@@ -129,10 +132,10 @@ DwcReporter.prototype.retryRequest = function(requestFn, body, nTimes) {
   });
 };
 
-DwcReporter.prototype.sync = async function(results) {
+DwcReporter.prototype._sync = async function(results) {
   let vector, err;
   try {
-    vector = await this.getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
+    vector = await this._getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
   } catch (e) {
     err = e;
     this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Could not get Vector. Error occurred: " + JSON.stringify(err));
@@ -153,13 +156,13 @@ DwcReporter.prototype.sync = async function(results) {
 
   if (!isMetadataAvailable) {
     try {
-      result = await this.retryRequest(this.postMetadata, [report], 1);
+      result = await this._retryRequest(this._postMetadata, [report], 1);
     } catch (e) {
       err = e;
 
       if (err.status === 400 || err.status === 500) {
         try {
-          result = await this.retryRequest(this.patchMetadata, patchBody, this.options.retries);
+          result = await this._retryRequest(this._patchMetadata, patchBody, this.options.retries);
         } catch (e) {
           err = e;
           results.error = true;
@@ -172,7 +175,7 @@ DwcReporter.prototype.sync = async function(results) {
     }
   } else {
     try {
-      result = await this.retryRequest(this.patchMetadata, patchBody, this.options.retries);
+      result = await this._retryRequest(this._patchMetadata, patchBody, this.options.retries);
     } catch (e) {
       err = e;
       this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Patch Metadata failed. Error occurred: " + JSON.stringify(err));
@@ -241,18 +244,13 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
   this.results.reportTestRun = this.results.baseInformation;
   this.results.reportTestRun.status = status.running;
   
-  await this.sync(this.results);
+  await this._sync(this.results);
 };
 
 DwcReporter.prototype.jasmineStarted = function() {
   var that = this;
   this.results = {};
   this.suiteInfo = {};
-
-  this.suiteStarted = async function(result){
-    that.suiteInfo = result;
-    await that._asyncSuiteStarted(that.suiteInfo);
-  };
 
   afterAll(async function() {
     that.results.passed = that.collector.currentSuite.status == "passed"
@@ -265,8 +263,30 @@ DwcReporter.prototype.jasmineStarted = function() {
     }
 
     that.results.reportTestRun = report;
-    await that.sync(that.results);    
+    await that._sync(that.results); 
   });
+}
+// DwcReporter.prototype.jasmineDone = async function() {
+//     this.results.passed = this.collector.currentSuite.status == "passed"
+//     const report = this.results.baseInformation;
+
+//     if (this.results.passed) {
+//       report.status = status.success;
+//     } else {
+//       report.status = status.failed;
+//     }
+
+//     this.results.reportTestRun = report;
+//     await this._sync(this.results);    
+//   };
+// }  
+
+DwcReporter.prototype.suiteStarted = async function(result){
+  // var that = this;
+  this.suiteInfo = {};
+
+  this.suiteInfo = result;
+  await this._asyncSuiteStarted(this.suiteInfo);
 };
 
 DwcReporter.prototype.register = function(jasmineEnv) {

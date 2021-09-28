@@ -266,20 +266,6 @@ DwcReporter.prototype.jasmineStarted = function() {
     await that._sync(that.results); 
   });
 }
-// DwcReporter.prototype.jasmineDone = async function() {
-//     this.results.passed = this.collector.currentSuite.status == "passed"
-//     const report = this.results.baseInformation;
-
-//     if (this.results.passed) {
-//       report.status = status.success;
-//     } else {
-//       report.status = status.failed;
-//     }
-
-//     this.results.reportTestRun = report;
-//     await this._sync(this.results);    
-//   };
-// }  
 
 DwcReporter.prototype.suiteStarted = async function(result){
   // var that = this;

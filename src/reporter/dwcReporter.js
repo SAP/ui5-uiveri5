@@ -7,7 +7,26 @@ const status = {
   failed: "failed"
 };
 
-// constructor
+
+/**
+ * @typedef DwCReporterConfig
+ * @type {Object}
+ * @extends {Config}
+ */
+
+/**
+ * @typedef DwCReporterInstanceConfig
+ * @type {Object}
+ */
+
+/**
+ * Report test execution
+ * @constructor
+ * @param {DwCReporterConfig} config
+ * @param {DwCReporterInstanceConfig} instanceConfig
+ * @param {Logger} logger
+ * @param {StatisticCollector} collector
+ */
 function DwcReporter(config,instanceConfig,logger,collector) {
   this.config = config || {};
   this.instanceConfig  = instanceConfig || {};
@@ -23,7 +42,7 @@ function DwcReporter(config,instanceConfig,logger,collector) {
   };
 }
 
-// upload to Themisto
+// upload data in Themisto
 DwcReporter.prototype._postMetadata = function(url, credentials, vectorId, value) {
   return new Promise((resolve,reject) => {
     request({
@@ -154,6 +173,7 @@ DwcReporter.prototype._sync = async function(results) {
     patchBody = [{op: "replace", path: `/${results.index}`, value: report}];
   }
 
+  // metadata for the test execution from the vector
   if (!isMetadataAvailable) {
     try {
       result = await this._retryRequest(this._postMetadata, [report], 1);
@@ -191,6 +211,7 @@ DwcReporter.prototype._sync = async function(results) {
   return err || null;
 };
 
+// prepare basic information about execution
 DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
     
   this.results = {};
@@ -268,13 +289,16 @@ DwcReporter.prototype.jasmineStarted = function() {
 }
 
 DwcReporter.prototype.suiteStarted = async function(result){
-  // var that = this;
   this.suiteInfo = {};
 
   this.suiteInfo = result;
   await this._asyncSuiteStarted(this.suiteInfo);
 };
 
+/**
+ * Register jasmine reporter
+ * @param {Env} jasmineEnv - jasmine environment on which to add the new reporter
+ */
 DwcReporter.prototype.register = function(jasmineEnv) {
   // create and attach the JUnit reporter
   jasmineEnv.addReporter(new DwcReporter(this.config,this.instanceConfig,this.logger,this.collector));

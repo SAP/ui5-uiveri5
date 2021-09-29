@@ -231,7 +231,6 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
     id: uuid.v4(),
     name: suiteInfo.fullName,
     type: "UiVeri5",
-    link: "saucelabs_link",//TODO: optional saucelabs link? 
     timestamp: new Date().toISOString(),
     reporter: "UiVeri5 DwC Reporter"
   };

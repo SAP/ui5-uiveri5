@@ -33,8 +33,6 @@ function DwcReporter(config,instanceConfig,logger,collector) {
   this.logger = logger;
   this.collector = collector;
   this.options = {
-    stdout: true,
-    syncInterval: 100,
     retries: 5,
     themistoUrl: instanceConfig.themistoUrl,
     themistoCredentials: `Basic ${Buffer.from(`${instanceConfig.themistoUser}:${instanceConfig.themistoPass}`).toString("base64")}`,
@@ -43,10 +41,11 @@ function DwcReporter(config,instanceConfig,logger,collector) {
 }
 
 // upload data in Themisto
-DwcReporter.prototype._postMetadata = function(url, credentials, vectorId, value) {
+DwcReporter.prototype._postMetadata = function(credentials, vectorId, value) {
+  var that = this;
   return new Promise((resolve,reject) => {
     request({
-      url: url + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata?key=tests",
+      url: that.options.themistoUrl + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata?key=tests",
       method: "POST",
       headers: {
         "Authorization": credentials
@@ -68,10 +67,11 @@ DwcReporter.prototype._postMetadata = function(url, credentials, vectorId, value
 };
 
 // get vector details
-DwcReporter.prototype._getVector = function(url, credentials, vectorId) {
+DwcReporter.prototype._getVector = function(credentials, vectorId) {
+  var that = this;
   return new Promise((resolve,reject) => {
     request({
-      url: url + "/v1/vector/" + encodeURIComponent(vectorId),
+      url: that.options.themistoUrl + "/v1/vector/" + encodeURIComponent(vectorId),
       method: "GET",
       headers: {
         "Authorization": credentials
@@ -95,10 +95,11 @@ DwcReporter.prototype._getVector = function(url, credentials, vectorId) {
 };
 
 // update data in Themisto
-DwcReporter.prototype._patchMetadata = function(url, credentials, vectorId, value) {
+DwcReporter.prototype._patchMetadata = function(credentials, vectorId, value) {
+  var that = this;
   return new Promise((resolve,reject) => {
     request({
-      url: url + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata/tests",
+      url: that.options.themistoUrl + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata/tests",
       method: "PATCH",
       headers: {
         "Authorization": credentials
@@ -124,12 +125,11 @@ DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
   return new Promise((resolve, reject) => {
     const vectorId = this.options.vector;
     const creds = this.options.themistoCredentials;
-    const url = this.options.themistoUrl;
     let attempts = 1, result;
 
     const retry = async (requestFn, body, nTimes) => {
       try {
-        result = await requestFn(url, creds, vectorId, body);
+        result = await requestFn(creds, vectorId, body);
         return resolve(result);
       } catch (e) {
         if (nTimes === 1) {
@@ -223,7 +223,7 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
   this.results.reportTestRun = {};
 
   if (!this.options.themistoUrl || typeof this.options.themistoUrl !== "string" || !this.options.themistoCredentials || !this.options.vector) {
-    this.logger.error("DwC reporter is missing required environment variables. Results will not be reported.\n");
+    this.logger.error("DwC reporter is missing required configurations. Results will not be reported.\n");
     this.results.error = true;
   }
 

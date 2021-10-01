@@ -99,25 +99,20 @@ Optional configuration parameters:
 * gitHubRepoName - the name of the GitHub repo where the tests are located
 * gitHubRepoUrl - the URL of the GitHub repo
 
+To avoid saving credentials in the code, one possible way for providing user and pass is to read them from environment variables.
 
 Example configuration:
 ```javascript
 reporters: [{
   name: './reporter/dwcReporter',
   themistoUrl: "https://<themisto-instance>.hana.ondemand.com",
-  themistoUser: "<themisto-username>",
-  themistoPass: "<themisto-password>",
+  themistoUser: process.env.THEMISTO_USER,
+  themistoPass: process.env.THEMISTO_PASS,
   vector: "<vector-id>",
   stage: "<stage-name>",
   gitHubRepoName: "Ui5-UiVeri5",
   gitHubRepoUrl: "https://github.com/SAP/ui5-uiveri5",
 }]
-```
-
-All configuration parameters can be passed by cli arguments, so not to save credentials in your code. 
-Example to passing credentials from command line:
-```
---confKeys=reporters[1].name:"./reporter/dwcReporter";reporters[1].themistoUser:"<themisto-username>";reporters[1].themistoPass:"<themisto-password>"
 ```
 ## Reporter from Command Line:
 * add reporter:

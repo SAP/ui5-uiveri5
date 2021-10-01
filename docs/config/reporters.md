@@ -83,6 +83,38 @@ takeScreenshot: {
 }
 ```
 
+## DwC Reporter
+The DwC reporter is activated by including the name `./reporter/dwcReporter` in the `reporters` config file option.
+
+It is intended to upload execution results to DwC (Deliver With Confidence) infrastructure. Results are uploaded to Themisto with specified Vector and then displayed in Amalthea dashboard. It creates JSON with the results data, containing the name of the suite, status, capabilities and metadata. This reporter doesn't save any files, just uploads to DwC.
+
+To configure the reporter, several configuration parameteres should be provided:
+* themistoUrl - the URL to the Themisto instance
+* themistoUser - username for Themisto authentication
+* themistoPass - password for Themisto authentication
+* vector - vector is the specific software version in DwC that the test is running on
+
+Optional configuration parameters:
+* stage - the DwC stage the test is running on
+* gitHubRepoName - the name of the GitHub repo where the tests are located
+* gitHubRepoUrl - the URL of the GitHub repo
+
+
+Example configuration:
+```javascript
+reporters: [{
+  name: './reporter/dwcReporter',
+  themistoUrl: "https://<themisto-instance>.hana.ondemand.com",
+  themistoUser: "<themisto-username>",
+  themistoPass: "<themisto-password>",
+  vector: "<vector-id>",
+  stage: "<stage-name>",
+  gitHubRepoName: "Ui5-UiVeri5",
+  gitHubRepoUrl: "https://github.com/SAP/ui5-uiveri5",
+}]
+```
+
+All configuration parameters can be passed by cli arguments, so not to save credentials in your code.
 ## Reporter from Command Line:
 * add reporter:
 ```

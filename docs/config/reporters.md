@@ -114,7 +114,11 @@ reporters: [{
 }]
 ```
 
-All configuration parameters can be passed by cli arguments, so not to save credentials in your code.
+All configuration parameters can be passed by cli arguments, so not to save credentials in your code. 
+Example to passing credentials from command line:
+```
+--confKeys=reporters[1].name:"./reporter/dwcReporter";reporters[1].themistoUser:"<themisto-username>";reporters[1].themistoPass:"<themisto-password>"
+```
 ## Reporter from Command Line:
 * add reporter:
 ```

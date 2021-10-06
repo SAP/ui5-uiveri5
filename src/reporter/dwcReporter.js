@@ -1,10 +1,10 @@
-const request = require("request");
-const uuid = require("uuid");
+const request = require('request');
+const uuid = require('uuid');
 
 const status = {
-  running: "running",
-  success: "successful",
-  failed: "failed"
+  running: 'running',
+  success: 'successful',
+  failed: 'failed'
 };
 
 
@@ -35,7 +35,7 @@ function DwcReporter(config,instanceConfig,logger,collector) {
   this.options = {
     retries: 5,
     themistoUrl: instanceConfig.themistoUrl,
-    themistoCredentials: `Basic ${Buffer.from(`${instanceConfig.themistoUser}:${instanceConfig.themistoPass}`).toString("base64")}`,
+    themistoCredentials: `Basic ${Buffer.from(`${instanceConfig.themistoUser}:${instanceConfig.themistoPass}`).toString('base64')}`,
     vector: instanceConfig.vector
   };
 }
@@ -43,12 +43,12 @@ function DwcReporter(config,instanceConfig,logger,collector) {
 // upload data in Themisto
 DwcReporter.prototype._postMetadata = function(credentials, vectorId, value) {
   var that = this;
-  return new Promise((resolve,reject) => {
+  return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata?key=tests",
-      method: "POST",
+      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId) + '/metadata?key=tests',
+      method: 'POST',
       headers: {
-        "Authorization": credentials
+        'Authorization': credentials
       },
       json: true,
       body: value
@@ -69,12 +69,12 @@ DwcReporter.prototype._postMetadata = function(credentials, vectorId, value) {
 // get vector details
 DwcReporter.prototype._getVector = function(credentials, vectorId) {
   var that = this;
-  return new Promise((resolve,reject) => {
+  return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + "/v1/vector/" + encodeURIComponent(vectorId),
-      method: "GET",
+      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId),
+      method: 'GET',
       headers: {
-        "Authorization": credentials
+        'Authorization': credentials
       },
     }, function (err, response, body) {
       if (!err) {
@@ -97,12 +97,12 @@ DwcReporter.prototype._getVector = function(credentials, vectorId) {
 // update data in Themisto
 DwcReporter.prototype._patchMetadata = function(credentials, vectorId, value) {
   var that = this;
-  return new Promise((resolve,reject) => {
+  return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + "/v1/vector/" + encodeURIComponent(vectorId) + "/metadata/tests",
-      method: "PATCH",
+      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId) + '/metadata/tests',
+      method: 'PATCH',
       headers: {
-        "Authorization": credentials
+        'Authorization': credentials
       },
       json: true,
       body: value
@@ -122,12 +122,12 @@ DwcReporter.prototype._patchMetadata = function(credentials, vectorId, value) {
 
 // retry upload data due to locking mechanism
 DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
-  return new Promise((resolve, reject) => {
+  return new Promise(function(resolve, reject) {
     const vectorId = this.options.vector;
     const creds = this.options.themistoCredentials;
     let attempts = 1, result;
 
-    const retry = async (requestFn, body, nTimes) => {
+    const retry = async function(requestFn, body, nTimes) {
       try {
         result = await requestFn(creds, vectorId, body);
         return resolve(result);
@@ -157,7 +157,7 @@ DwcReporter.prototype._sync = async function(results) {
     vector = await this._getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
   } catch (e) {
     err = e;
-    this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Could not get Vector. Error occurred: " + JSON.stringify(err));
+    this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Could not get Vector. Error occurred: ' + JSON.stringify(err));
     results.error = true;
 
     return err;
@@ -168,9 +168,9 @@ DwcReporter.prototype._sync = async function(results) {
   let patchBody, result;
 
   if (results.index < 0) {
-    patchBody = [{op: "add", path: "/-", value: report}];
+    patchBody = [{op: 'add', path: '/-', value: report}];
   } else {
-    patchBody = [{op: "replace", path: `/${results.index}`, value: report}];
+    patchBody = [{op: 'replace', path: `/${results.index}`, value: report}];
   }
 
   // metadata for the test execution from the vector
@@ -186,10 +186,10 @@ DwcReporter.prototype._sync = async function(results) {
         } catch (e) {
           err = e;
           results.error = true;
-          this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Patch Metadata failed. Error occurred: " + JSON.stringify(err));
+          this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Patch Metadata failed. Error occurred: ' + JSON.stringify(err));
         }
       } else {
-        this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Post Metadata failed. Error occurred: " + JSON.stringify(err));
+        this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Post Metadata failed. Error occurred: ' + JSON.stringify(err));
         results.error = true;
       }
     }
@@ -198,7 +198,7 @@ DwcReporter.prototype._sync = async function(results) {
       result = await this._retryRequest(this._patchMetadata, patchBody, this.options.retries);
     } catch (e) {
       err = e;
-      this.logger.error("Could not report test results for test: " + results.baseInformation.name + ". Patch Metadata failed. Error occurred: " + JSON.stringify(err));
+      this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Patch Metadata failed. Error occurred: ' + JSON.stringify(err));
       results.error = true;
     }
   }
@@ -222,17 +222,17 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
   this.results.baseInformation = {};
   this.results.reportTestRun = {};
 
-  if (!this.options.themistoUrl || typeof this.options.themistoUrl !== "string" || !this.options.themistoCredentials || !this.options.vector) {
-    this.logger.error("DwC reporter is missing required configurations. Results will not be reported.\n");
+  if (!this.options.themistoUrl || typeof this.options.themistoUrl !== 'string' || !this.options.themistoCredentials || !this.options.vector) {
+    this.logger.error('DwC reporter is missing required configurations. Results will not be reported.\n');
     this.results.error = true;
   }
 
   this.results.baseInformation = {
     id: uuid.v4(),
     name: suiteInfo.fullName,
-    type: "UiVeri5",
+    type: 'UiVeri5',
     timestamp: new Date().toISOString(),
-    reporter: "UiVeri5 DwC Reporter"
+    reporter: 'UiVeri5 DwC Reporter'
   };
   
   if (this.collector && this.collector.overview && this.collector.overview.meta && this.collector.overview.meta.runtime) {
@@ -273,7 +273,7 @@ DwcReporter.prototype.jasmineStarted = function() {
   this.suiteInfo = {};
 
   afterAll(async function() {
-    that.results.passed = that.collector.currentSuite.status == "passed"
+    that.results.passed = that.collector.currentSuite.status == 'passed';
     const report = that.results.baseInformation;
 
     if (that.results.passed) {
@@ -285,7 +285,7 @@ DwcReporter.prototype.jasmineStarted = function() {
     that.results.reportTestRun = report;
     await that._sync(that.results); 
   });
-}
+};
 
 DwcReporter.prototype.suiteStarted = async function(result){
   this.suiteInfo = {};

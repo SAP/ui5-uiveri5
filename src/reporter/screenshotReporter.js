@@ -116,7 +116,7 @@ JasmineScreenshotReporter.prototype._generateExpectationScreenshotName = functio
 JasmineScreenshotReporter.prototype._generateActionScreenshotName = function (action, elementId) {
   var fileName = [
     action,
-    elementId ? elementId.substring(0, 190) : crypto.randomBytes(16).toString("hex"),
+    elementId ? elementId.substring(0, 190) : crypto.randomBytes(16).toString('hex'),
     this.collector.stepIndex,
     new Date().toISOString().substring(0, 19)
   ].join('_').replace(/[\/\?<>\\:\*\|":\s]/g, '-');

@@ -113,7 +113,7 @@ reporters: [{
   themistoUser: THEMISTO_USER,
   themistoPass: THEMISTO_PASS,
   vector: "<vector>",
-  stage: "stage name",
+  stage: "<stage name>",
   gitHubRepoName: "<github repo name>",
   gitHubRepoUrl: "<github repo url>",
 }]

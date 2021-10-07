@@ -86,7 +86,7 @@ takeScreenshot: {
 ## DwC Reporter
 The DwC reporter is activated by including the name `./reporter/dwcReporter` in the `reporters` config file option.
 
-It is intended to upload execution results to DwC (Deliver With Confidence) infrastructure. Results are uploaded to Themisto with specified Vector and then displayed in Amalthea dashboard. It creates JSON with the results data, containing the name of the suite, status, capabilities and metadata. This reporter doesn't save any files, just uploads to DwC.
+It is intended to upload execution results to DwC (Deliver With Confidence) monitoring dashboard. Results are uploaded to Themisto with specified Vector and then displayed in Amalthea dashboard. It creates JSON with the results data, containing the name of the suite, status, capabilities and metadata. This reporter doesn't save any files, just uploads to DwC.
 
 To configure the reporter, several configuration parameteres should be provided:
 * themistoUrl - the URL to the Themisto instance
@@ -103,25 +103,22 @@ To avoid saving credentials in the code, one possible way for providing user and
 
 Example configuration:
 ```javascript
+const THEMISTO_URL = process.env.THEMISTO_URL;
 const THEMISTO_USER = process.env.THEMISTO_USER;
 const THEMISTO_PASS = process.env.THEMISTO_PASS;
 
-exports.config = {
-    profile: "integration",
-    baseUrl: "https://sapui5.hana.ondemand.com/test-resources/sap/m/demokit/cart/webapp/index.html",
-      
-    reporters: [{
-      name: './reporter/dwcReporter',
-      themistoUrl: "https://themisto-pm.cfapps.eu10.hana.ondemand.com",
-      themistoUser: THEMISTO_USER,
-      themistoPass: THEMISTO_PASS,
-      vector: "017a3ef1-2e41-6fe6-40b7-4ad7277ca0de",
-      stage: "stage name",
-      gitHubRepoName: "gitthub repo name",
-      gitHubRepoUrl: "github repo url",
-    }]
-}
+reporters: [{
+  name: './reporter/dwcReporter',
+  themistoUrl: THERMISTO_URL,
+  themistoUser: THEMISTO_USER,
+  themistoPass: THEMISTO_PASS,
+  vector: "<vector>",
+  stage: "stage name",
+  gitHubRepoName: "<github repo name>",
+  gitHubRepoUrl: "<github repo url>",
+}]
 ```
+
 ## Reporter from Command Line:
 * add reporter:
 ```

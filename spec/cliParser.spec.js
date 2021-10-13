@@ -105,5 +105,17 @@ describe("cliParser", function() {
 
       expect(config).toEqual({key1: {key2: 'value'}, conf: undefined});
     });
+
+    it('Should parse multiple value JSON-formatted objects in config key', function () {
+      var argvStub = new ArgvStub();
+      // add several config entries so to simulate different types of cli config passing
+      // they are added as elements of array and then should be parsed one by another 
+      argvStub.config = [{key1: {key9: "value1"}}];
+      argvStub.config.push({key1: {key2: 'value'}});
+      argvStub.config.push({key3: {key4: 'value5'}});
+
+      var config = cliParser.parse(argvStub);
+      expect(config).toEqual({key1:{key9:"value1",key2:"value"},key3:{key4:"value5"}, conf: undefined});
+    });
   });
 });

@@ -54,21 +54,33 @@ CliParser.prototype.parse = function(argv){
   // parse generic configuration from JSON
   var confDef = config.config;
   if (confDef){
-    if(_.isString(confDef) && confDef.indexOf('{') !== -1 && confDef.indexOf('}') !== -1) {
-      // JSON formatting found => parse it
-      confDef = JSON.parse(confDef);
-      // merge json config over
-      _mergeConfig(config,confDef);
-    } else if (_.isObject(confDef)){
-      _mergeConfig(config,confDef);
-      delete config.config;
+    // in case of multiple config cli entries - with object notation or as JSON object
+    // for example: --config.connectionConfigs.direct.binaries.chromedriver.localPath="path/to/driver" --config={"reporters: {...}"}
+    if(_.isArray(confDef)) {
+      confDef.forEach(function(conf) {
+        _parseGenericConfigFromJson(config, conf);
+      })
+    } else {
+      _parseGenericConfigFromJson(config, confDef);
     }
-
-    // silently skipp any invalid config statements
   }
 
   return config;
 };
+
+function _parseGenericConfigFromJson(config, confDef) {
+  if(_.isString(confDef) && confDef.indexOf('{') !== -1 && confDef.indexOf('}') !== -1) {
+    // JSON formatting found => parse it
+    confDef = JSON.parse(confDef);
+    // merge json config over
+    _mergeConfig(config,confDef);
+  } else if (_.isObject(confDef)){
+    _mergeConfig(config,confDef);
+    delete config.config;
+  }
+
+  // silently skipp any invalid config statements
+}
 
 function _parseBrowsersString(browsersString){
   var browsers = [];

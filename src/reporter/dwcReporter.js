@@ -41,11 +41,10 @@ function DwcReporter(config,instanceConfig,logger,collector) {
 }
 
 // upload data in Themisto
-DwcReporter.prototype._postMetadata = function(credentials, vectorId, value) {
-  var that = this;
+DwcReporter.prototype._postMetadata = function(url, credentials, vectorId, value) {
   return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId) + '/metadata?key=tests',
+      url: url + '/v1/vector/' + encodeURIComponent(vectorId) + '/metadata?key=tests',
       method: 'POST',
       headers: {
         'Authorization': credentials
@@ -67,14 +66,14 @@ DwcReporter.prototype._postMetadata = function(credentials, vectorId, value) {
 };
 
 // get vector details
-DwcReporter.prototype._getVector = function(credentials, vectorId) {
+DwcReporter.prototype._getVector = function() {
   var that = this;
   return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId),
+      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(that.options.vector),
       method: 'GET',
       headers: {
-        'Authorization': credentials
+        'Authorization': that.options.themistoCredentials
       },
     }, function (err, response, body) {
       if (!err) {
@@ -95,11 +94,10 @@ DwcReporter.prototype._getVector = function(credentials, vectorId) {
 };
 
 // update data in Themisto
-DwcReporter.prototype._patchMetadata = function(credentials, vectorId, value) {
-  var that = this;
+DwcReporter.prototype._patchMetadata = function(url, credentials, vectorId, value) {
   return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId) + '/metadata/tests',
+      url: url + '/v1/vector/' + encodeURIComponent(vectorId) + '/metadata/tests',
       method: 'PATCH',
       headers: {
         'Authorization': credentials
@@ -122,14 +120,16 @@ DwcReporter.prototype._patchMetadata = function(credentials, vectorId, value) {
 
 // retry upload data due to locking mechanism
 DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
+  var that = this;
   return new Promise(function(resolve, reject) {
-    const vectorId = this.options.vector;
-    const creds = this.options.themistoCredentials;
+    const vectorId = that.options.vector;
+    const creds = that.options.themistoCredentials;
+    const url = that.options.themistoUrl;
     let attempts = 1, result;
 
     const retry = async function(requestFn, body, nTimes) {
       try {
-        result = await requestFn(creds, vectorId, body);
+        result = await requestFn(url, creds, vectorId, body);
         return resolve(result);
       } catch (e) {
         if (nTimes === 1) {
@@ -154,7 +154,7 @@ DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
 DwcReporter.prototype._sync = async function(results) {
   let vector, err;
   try {
-    vector = await this._getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
+    vector = await this._getVector();
   } catch (e) {
     err = e;
     this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Could not get Vector. Error occurred: ' + JSON.stringify(err));

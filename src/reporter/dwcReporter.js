@@ -66,14 +66,14 @@ DwcReporter.prototype._postMetadata = function(url, credentials, vectorId, value
 };
 
 // get vector details
-DwcReporter.prototype._getVector = function(credentials, vectorId) {
+DwcReporter.prototype._getVector = function() {
   var that = this;
   return new Promise(function(resolve,reject) {
     request({
-      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(vectorId),
+      url: that.options.themistoUrl + '/v1/vector/' + encodeURIComponent(that.options.vector),
       method: 'GET',
       headers: {
-        'Authorization': credentials
+        'Authorization': that.options.themistoCredentials
       },
     }, function (err, response, body) {
       if (!err) {
@@ -154,7 +154,7 @@ DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
 DwcReporter.prototype._sync = async function(results) {
   let vector, err;
   try {
-    vector = await this._getVector(this.options.themistoCredentials, this.options.vector);
+    vector = await this._getVector();
   } catch (e) {
     err = e;
     this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Could not get Vector. Error occurred: ' + JSON.stringify(err));

@@ -154,7 +154,7 @@ DwcReporter.prototype._retryRequest = function(requestFn, body, nTimes) {
 DwcReporter.prototype._sync = async function(results) {
   let vector, err;
   try {
-    vector = await this._getVector(this.options.themistoUrl, this.options.themistoCredentials, this.options.vector);
+    vector = await this._getVector(this.options.themistoCredentials, this.options.vector);
   } catch (e) {
     err = e;
     this.logger.error('Could not report test results for test: ' + results.baseInformation.name + '. Could not get Vector. Error occurred: ' + JSON.stringify(err));

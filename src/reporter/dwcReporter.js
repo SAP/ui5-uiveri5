@@ -268,22 +268,22 @@ DwcReporter.prototype._asyncSuiteStarted = async function(suiteInfo){
   await this._sync(this.results);
 };
 
-DwcReporter.prototype.jasmineStarted = async function() {
+DwcReporter.prototype.jasmineStarted = function() {
   var that = this;
   this.results = {};
   this.suiteInfo = {};
 
-  await afterAll(async function() {
+  afterAll(async function() {
     // resolve all send result requests after all suites are done
     await Promise.all(that.resultUploads);
   });
 };
 
-DwcReporter.prototype.suiteStarted = async function(result){
+DwcReporter.prototype.suiteStarted = function(result){
   this.suiteInfo = {};
 
   this.suiteInfo = result;
-  await this._asyncSuiteStarted(this.suiteInfo);
+  this._asyncSuiteStarted(this.suiteInfo);
 };
 
 DwcReporter.prototype.suiteDone = function(){

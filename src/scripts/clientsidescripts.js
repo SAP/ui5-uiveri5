@@ -187,10 +187,10 @@ var mFunctions = {
         } else if (typeof matchers[name] === 'object') {
 
           for (var key in matchers[name]) {
-            var mRegexp = matchers[name][key].regex;
+            var mRegexp = matchers[name][key] ? matchers[name][key].regex : null;
             if (mRegexp) {
               matchers[name][key] = new window.RegExp(mRegexp.source, mRegexp.flags);
-            } else if (typeof matchers[name] === 'object') {
+            } else if (typeof matchers[name] === 'object' && matchers[name] != null) {
               _convertPlainObjectToRegex(matchers[name][key]);
             }
           }

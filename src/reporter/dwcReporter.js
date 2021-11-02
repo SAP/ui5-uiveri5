@@ -32,6 +32,7 @@ function DwcReporter(config,instanceConfig,logger,collector) {
   this.instanceConfig  = instanceConfig || {};
   this.logger = logger;
   this.collector = collector;
+  this.resultUploads = [];
   this.options = {
     retries: 5,
     themistoUrl: instanceConfig.themistoUrl,
@@ -273,6 +274,23 @@ DwcReporter.prototype.jasmineStarted = function() {
   this.suiteInfo = {};
 
   afterAll(async function() {
+    // resolve all send result requests after all suites are done
+    await Promise.all(that.resultUploads);
+  });
+};
+
+DwcReporter.prototype.suiteStarted = function(result){
+  this.suiteInfo = {};
+
+  this.suiteInfo = result;
+  this._asyncSuiteStarted(this.suiteInfo);
+};
+
+DwcReporter.prototype.suiteDone = function(){
+  var that = this;
+
+  // collect send result requests per spec
+  function resUpload() {
     that.results.passed = that.collector.currentSuite.status == 'passed';
     const report = that.results.baseInformation;
 
@@ -283,15 +301,10 @@ DwcReporter.prototype.jasmineStarted = function() {
     }
 
     that.results.reportTestRun = report;
-    await that._sync(that.results); 
-  });
-};
+    return that._sync(that.results); 
+  }
 
-DwcReporter.prototype.suiteStarted = async function(result){
-  this.suiteInfo = {};
-
-  this.suiteInfo = result;
-  await this._asyncSuiteStarted(this.suiteInfo);
+  this.resultUploads.push(resUpload());
 };
 
 /**

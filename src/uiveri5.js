@@ -1,5 +1,6 @@
 
 var fs = require('fs');
+var process = require('process');
 var _ = require('lodash');
 var proxyquire =  require('proxyquire');
 var url = require('url');
@@ -45,6 +46,8 @@ function run(config) {
   logger.info(pjson.name + ' v' + pjson.version);
 
   // log config object so far
+  logger.debug('Current working directory: ' + process.cwd());
+  logger.debug('Command-line: ${JSON.stringify(argv)}',{argv:process.argv});
   logger.debug('Config from command-line: ${JSON.stringify(config)}',{config:config});
 
   // merge in config files
@@ -89,9 +92,6 @@ function run(config) {
 
   // log config object so far
   logger.debug('Config after resolving config file and profile: ${JSON.stringify(config)}',{config:config});
-
-  // log cwd
-  logger.debug('Current working directory: ' + process.cwd());
 
   // load spec resolver
   var specResolver = moduleLoader.loadModule('specResolver');

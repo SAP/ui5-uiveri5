@@ -1,3 +1,10 @@
+
+--------------------
+
+**UIVeri5 is deprecated and won’t be developed any further. Tests using UIVeri5 will continue to work in the foreseeable future. If you need some extended functionality like parallel execution, you may consider [WDIO + WDI5](https://blogs.sap.com/2021/11/29/use-wdio-and-wdi5-for-testing-ui5-apps/)**
+
+--------------------
+
 ![openui5](http://openui5.org/images/OpenUI5_new_big_side.png)
 
 ## What is it

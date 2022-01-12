@@ -120,7 +120,7 @@
           <td class="<%- suite.status %>">
             <%- suite.status %>
           </td>
-          <td class="name" onClick="expand('<%- suite.name %>', '_specs')">
+          <td class="name" onClick='expand("<%- suite.name %>", "_specs")'>
             <%- suite.name %>
           </td>
           <td>
@@ -162,8 +162,8 @@
             <td class="<%- spec.status %>">
               <%- spec.status %>
             </td>
-            <td class="name-spec" onclick="expand('<%- escape(suite.name) + spec.name %>', '_expectations');
-        showImages('<%- suite.name + spec.name %>')">
+            <td class="name-spec" onclick='expand("<%- suite.name + spec.name %>", "_expectations");
+        showImages("<%- suite.name + spec.name %>")'>
               <%- spec.name %>
             </td>
             <td></td>

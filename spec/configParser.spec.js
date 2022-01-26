@@ -60,7 +60,7 @@ describe("configParser", function() {
 
     var mergedConfig = configParser.mergeConfigs(cliConfig);
 
-    expect(mergedConfig.params).toEqual({param1: 'value1', param2: 'newValue'});
+    expect(mergedConfig.params).toEqual({param1: 'value1', param2: 'newValue', param3: "test3"});
   });
 });
 

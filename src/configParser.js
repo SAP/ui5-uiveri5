@@ -14,8 +14,11 @@ function ConfigParser(logger) {
 ConfigParser.prototype.mergeConfigs = function (cliConfig) {
   this.config = cliConfig;
 
-  // load config file
-  this._mergeConfigFile(this.config.conf || DEFAULT_CONF, 'default');
+  // Load Config File
+  // Merge paramFile with params from cliConfig
+  this._mergeParams();
+  
+  this._mergeConfigFile(this.conf);
 
   // resolve profiles
   this._resolveProfile(this.config.profile).forEach(this._mergeConfig.bind(this));
@@ -26,14 +29,17 @@ ConfigParser.prototype.mergeConfigs = function (cliConfig) {
   // Changing config via confKeys
   this._setConfKeys();
 
-  this._mergeParams();
-
   // return new fully merged config
   return this.config;
 };
 
 ConfigParser.prototype._mergeConfigFile = function (path, type) {
-  this._mergeConfig(this._readConfig(path, type));
+  if (path && type) {
+    this._mergeConfig(this._readConfig(path, type));
+  }
+  else {
+    this._mergeConfig(this.conf);
+  }
 };
 
 ConfigParser.prototype._mergeConfig = function (newConfig) {
@@ -187,14 +193,21 @@ ConfigParser.prototype._readConfig = function (configPath, type) {
 };
 
 ConfigParser.prototype._mergeParams = function () {
-  if (this.config.paramsFile) {
-    this.config.paramsFile = path.resolve(this.config.paramsFile);
-    this.logger.debug('Loading test params from file ' + this.config.paramsFile);
-    var importParams = _.cloneDeep(require(this.config.paramsFile));
+  // load config file
+  this.conf = this._readConfig(this.config.conf || DEFAULT_CONF, 'default');
+
+  var paramsFile = this.config.paramsFile || this.conf.paramsFile; 
+  var exportParamsFile = this.config.exportParamsFile || this.conf.exportParamsFile;
+
+  if (paramsFile) {
+    this.conf.paramsFile = path.resolve(paramsFile);
+    this.logger.debug('Loading test params from file ' + this.conf.paramsFile);
+    var importParams = _.cloneDeep(require(this.conf.paramsFile));
     // cli params should have higher prio
     this.config.params = _mergeWithArrays(importParams, this.config.params);
   }
-  if (this.config.exportParamsFile) {
+
+  if (exportParamsFile) {
     this.config.exportParamsFile = path.resolve(this.config.exportParamsFile);
     this.config.exportParams = {};
   }

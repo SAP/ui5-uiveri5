@@ -14,5 +14,10 @@ exports.config = {
   },
   browsers: [{
     browserName: 'chromeHeadless'
-  }]
+  }],
+  params: {
+    param1: "test",
+    param2: "test2",
+    param3: "test3"
+  }
 };

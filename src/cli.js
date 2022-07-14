@@ -5,6 +5,8 @@ var argv = require('yargs').
         'confFile defaults to conf.js if presented in current working directory.').
   string('libFilter').
   describe('libFilter', 'Comma separated list of lib suites to execute, defaults to all').
+  string('libExclude').
+  describe('libExclude', 'Comma separated list of lib suites to exclude, defaults to nothing').
   string('specFilter').
   describe('specFilter', 'Comma separated list of specs to execute, defaults to all').
   string('specExclude').

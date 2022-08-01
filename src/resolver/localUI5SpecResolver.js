@@ -19,6 +19,7 @@ var CONTENT_ROOT_URI = 'test-resources';
  * @type {Object}
  * @property {string} baseUrl - base url to reference, falsy disables page loading, defaults to: 'http://localhost:8080'
  * @property {string} libFilter - comma separated list of libraries, '*' means all, defaults to: '*'
+ * @property {string} libExclude - comma separated list of libraries, '' means nothing to be excluded
  * @property {string} specFilter - comma separated list of spec names, '*' means all, defaults to '*'
  * @property {string} specExclude - comma separated list of spec names, '' means nothing to be excluded
  * @property {string} branch - branch, overwrites automatically derived by git
@@ -47,6 +48,7 @@ function LocalUI5SpecResolver(config,instanceConfig,logger){
 
   this.baseUrl = config.baseUrl || BASE_URL;
   this.libFilter = config.libFilter || '*';
+  this.libExclude = config.libExclude || '';
   this.specFilter = config.specFilter || '*';
   this.specExclude = config.specExclude || '';
   this.suitesGlob = instanceConfig.suitesGlob || DEFAULT_SUITES_GLOB;
@@ -121,6 +123,9 @@ LocalUI5SpecResolver.prototype.resolve = function(){
           //resolve lib filter
           var libFilters = that.libFilter !== '*' ? that.libFilter.split(',') : [];
 
+           //resolve lib exclude
+          var libExclude = that.libExclude !== '' ? that.libExclude.split(',') : [];
+
           // resolve specs from each suite
           suitePaths.forEach(function (suitePath) {
 
@@ -142,6 +147,12 @@ LocalUI5SpecResolver.prototype.resolve = function(){
             // filter out this lib if necessary
             if (libFilters.length > 0 && !that._isInArray(libFilters, libName)) {
               that.logger.debug('Drop lib: ' + libName + ' that does not match lib filter: ' + that.libFilter);
+              return;
+            }
+            
+            // exclude lib filter
+            if(libExclude.length > 0 && that._isInArray(libExclude, libName)) {
+              that.logger.debug('Drop lib: ' + libName + ' that does match lib exclude: ' + that.libExclude);
               return;
             }
 

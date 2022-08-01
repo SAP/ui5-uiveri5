@@ -78,4 +78,16 @@ describe("LocalUI5SpecResolver", function () {
       done();
     });
   });
+
+  it("Should exclude specs only with lib exclude", function(done) {
+    var specResolver = new LocalUI5SpecResolver(
+      {branch: 'overwrite',libExclude: 'sap.m'},{suiteRootPath: __dirname + '/localUI5SpecResolver'},logger);
+    specResolver.resolve().then(function(specs){
+      expect(specs.length).toEqual(1);
+      done();
+    }).catch(function(error){
+      fail(error);
+      done();
+    });
+  });
 });

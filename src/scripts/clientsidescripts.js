@@ -211,13 +211,25 @@ var mFunctions = {
   },
 
   getUI5Version: function() {
-    var versionInfo = window.sap.ui.getVersionInfo();
-    return {
-      value: {
-        version: versionInfo.version,
-        buildTimestamp: versionInfo.buildTimestamp
+    var versionInfo = window.sap.ui.versioninfo;
+    function _getVersionResult(versionInfo) {
+      return {
+        value: {
+          version: versionInfo.version,
+          buildTimestamp: versionInfo.buildTimestamp
+        }
       }
-    };
+    }
+
+    if(!versionInfo) {
+      return window.sap.ui.require("sap/ui/VersionInfo", function(VersionInfo) {
+        return VersionInfo;
+      }).load().then(function(versionInfo) {
+        return _getVersionResult(versionInfo);
+      })
+    } else {
+      return _getVersionResult(versionInfo);
+    }
   },
   
   getWindowToolbarSize: function getWindowToolbarSize () {

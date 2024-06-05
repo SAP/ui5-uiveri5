@@ -9,37 +9,36 @@ var mFunctions = {
   // when fnCallback will is called, the script will be considered completed
   // fnCallback will be called with an object argument
   // which will always have a 'log' and will have 'error' only when loading of dependensies was unsuccessful
-  loadUI5Dependencies: function loadUI5Dependencies (mScriptParams, fnCallback) {
+  loadUI5Dependencies: async function loadUI5Dependencies (mScriptParams, fnCallback) {
     var sDebugLog = 'Loading UI5 dependencies';
 
     // retry checking for UI5
     var waitedTime = 0;
-    (function wait () {
+    (async function wait () {
       if (window.sap && window.sap.ui) {
-
-        // wait for UI5 core to complete initialisation
-        window.sap.ui.getCore().attachInit(function() {
-
-          /* global uiveri5 */
-          window.uiveri5 = window.uiveri5 || {};
-
-          loadControlFinder()
-            .then(function () {
-              if (mScriptParams.useClassicalWaitForUI5) {
-                sDebugLog += '\nLoading classical waitForUI5 implementation.';
-                return loadClassicalWaitForUI5();
-              } else {
-                sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
-                return loadOPAWaitForUI5().catch(function (sError) {
-                  sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+        return window.sap.ui.require(["sap/ui/core/Core"], async function(Core) {
+          // wait for UI5 core to complete initialisation
+          Core.ready().then(function() {
+            /* global uiveri5 */
+            window.uiveri5 = window.uiveri5 || {};
+            loadControlFinder()
+              .then(function () {
+                if (mScriptParams.useClassicalWaitForUI5) {
+                  sDebugLog += '\nLoading classical waitForUI5 implementation.';
                   return loadClassicalWaitForUI5();
-                });
-              }
-            }).then(function (sLog) {
-              fnCallback({log: sDebugLog + (sLog || '')});
-            }).catch(function (sError, sLog) {
-              fnCallback({error: sError, log: sDebugLog + (sLog || '')});
-            });
+                } else {
+                  sDebugLog += '\nLoading OPA5 waitForUI5 implementation.';
+                  return loadOPAWaitForUI5().catch(function (sError) {
+                    sDebugLog += '\nFailed to load OPA5 waitForUI5, Fallback to loading classical waitForUI5 implementation. Details: ' + sError;
+                    return loadClassicalWaitForUI5();
+                  });
+                }
+              }).then(function (sLog) {
+                fnCallback({log: sDebugLog + (sLog || '')});
+              }).catch(function (sError, sLog) {
+                fnCallback({error: sError, log: sDebugLog + (sLog || '')});
+              });
+          });
         });
       } else if (waitedTime < mScriptParams.autoWait.timeout) {
         waitedTime += mScriptParams.autoWait.interval;

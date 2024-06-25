@@ -1,5 +1,5 @@
 var superagent = require('superagent');
-
+var CsrfAuthenticator = require('./csrfAuthenticator');
 function RequestPlugin() {
 
 }
@@ -16,7 +16,20 @@ RequestPlugin.prototype.setup = function() {
     };
   };
 
-  global.request = superagent.agent().use(flow);
+  var request = superagent.agent().use(flow);
+
+  request.authenticate = function (authenticator) {
+    var originalPost = request.post;
+    request.post = function () {
+      authenticator.modifyCall(this);
+      return originalPost.apply(this, arguments);
+    };
+
+    return authenticator.authenticate();
+  };
+
+  global.request = request;
+  global.CsrfAuthenticator = CsrfAuthenticator;
 };
 
 module.exports = function () {

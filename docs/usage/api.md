@@ -57,6 +57,9 @@ request.get(restServiceMockUrl +'/usersWithAuth')
   .auth('<user>','<password>').do();
 ```
 
+## CSRF Tokens
+// ---todo
+
 # OData Helpers
 Full OData ORM is out of scope but the following samples can simplify basic OData scenarios. For better oData support, please use [TBD]().
 

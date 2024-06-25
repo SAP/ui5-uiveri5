@@ -77,5 +77,23 @@ describe('api', function() {
     var res = request.get(restServiceMockUrl +'/usersWithAuth').auth('testUser','testPass');
     expect(res).toHaveHTTPBody({status: 'Authenticated'});
   });
-  
+
+  it('Should set csrf token', function () {
+    request.post(restServiceMockUrl + '/form').send({
+      field: 'value'
+    }).do().catch(function (err) {
+      expect(err.status).toBe(403);
+    });
+
+    request.authenticate(new CsrfAuthenticator({
+      csrfFetchUrl: restServiceMockUrl + '/form'
+    }));
+
+    request.post(restServiceMockUrl + '/form').send({
+      field: 'value'
+    }).do().then(function (res) {
+      expect(res.status).toBe(200);
+    });
+  });
+
 });

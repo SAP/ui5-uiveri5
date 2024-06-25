@@ -207,7 +207,7 @@ ConfigParser.prototype._mergeParams = function () {
   }
 
   if (exportParamsFile) {
-    this.config.exportParamsFile = path.resolve(this.config.exportParamsFile);
+    this.config.exportParamsFile = path.resolve(exportParamsFile);
     this.config.exportParams = {};
   }
 };
